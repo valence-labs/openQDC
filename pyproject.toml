@@ -1,0 +1,60 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openqdc"
+dynamic = ["version"]
+description = "ML ready Quantum Mechanical datasets"
+authors = [{ name = "Nikhil Shenoy", email = "nikhilshenoy98@gmail.com" },
+          { name = "Prudencio Tossou", email = "tossouprudencio@gmail.com" }]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools_scm]
+fallback_version = "dev"
+
+[tool.isort]
+profile = "black"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["openqdc", "openqdc.*"]
+exclude = []
+namespaces = true
+
+[tool.pylint.messages_control]
+disable = [
+  "no-member",
+  "too-many-arguments",
+  "too-few-public-methods",
+  "no-else-return",
+  "duplicate-code",
+  "too-many-branches",
+  "redefined-builtin",
+  "dangerous-default-value",
+]
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.black]
+line-length = 120
+target-version = ['py39', 'py310']
+include = '\.pyi?$'
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-vv"
+testpaths = ["tests"]
+filterwarnings = []
+
+[tool.coverage.run]
+omit = ["setup.py", "tests/*"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F403"]
