@@ -31,7 +31,9 @@ pytest
 6. QM Level of Theory
  -->
 
-| Dataset | # Molecules | # Conformers | Ratio | Labels | QM Level |
+We provide support for the following publicly available QM Datasets.
+
+| Dataset | # Molecules | # Conformers | Average Conformers per Molecule | Labels | QM Level of Theory |
 | --- | --- | --- | --- | --- | --- |
 | [GEOM](https://www.nature.com/articles/s41597-022-01288-4) | 450,000 | 37,000,000 | 82 | energy | GFN2-xTB |
 | [Molecule3D](https://arxiv.org/abs/2110.01717) | 3,899,647 | 3,899,647 | 1 | energy | B3LYP/6-31G* |
