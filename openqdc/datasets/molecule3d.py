@@ -1,54 +1,53 @@
-import os
-import torch
-import pickle as pkl
+
 import numpy as np
 import pandas as pd
-import os.path as osp
 import datamol as dm
 from tqdm import tqdm
 from glob import glob
-from sklearn.utils import Bunch
 from rdkit import Chem
 from os.path import join as p_join
-from openqdc.utils import load_hdf5_file
-from openqdc.utils.molecule import get_atom_data
-from openqdc.utils.paths import get_local_cache
+from openqdc.utils.molecule import get_atomic_numuber_and_charge
 from openqdc.utils.constants import BOHR2ANG, MAX_ATOMIC_NUMBER
 from openqdc.datasets.base import BaseDataset
 
 
-def get_props(df, sdf, idx):
-    id = sdf.GetItemText(idx).split(" ")[1]
-    return df.loc[[id]].to_dict(orient="records")[0]
-
-
-def read_mol(mol, props):
+def read_mol(mol, energy):
     smiles = dm.to_smiles(mol, explicit_hs=False)
-    subset = dm.to_smiles(dm.to_scaffold_murcko(mol, make_generic=True), explicit_hs=False)
-    x = get_atom_data(mol)
+    # subset = dm.to_smiles(dm.to_scaffold_murcko(mol, make_generic=True), explicit_hs=False)
+    x = get_atomic_numuber_and_charge(mol)
     positions= mol.GetConformer().GetPositions() * BOHR2ANG
     
     res = dict(
-        smiles= np.array([smiles]),
-        subset= np.array([subset]),     
-        energies= np.array([props["scf energy"]]).astype(np.float32)[:, None],
-        atom_data_and_positions = np.concatenate((x, positions), axis=-1, dtype=np.float32),
+        name= np.array([smiles]),
+        subset= np.array(["molecule3d"]),     
+        energies= np.array([energy]).astype(np.float32)[:, None],
+        atomic_inputs = np.concatenate((x, positions), axis=-1, dtype=np.float32),
         n_atoms = np.array([x.shape[0]], dtype=np.int32),
     )
-
-    # for key in res:
-    #     print(key, res[key].shape, res[key].dtype)
-    # exit()
 
     return res
 
 
+def _read_sdf(sdf_path, properties_path):
+
+    properties = pd.read_csv(properties_path, dtype={"cid": str})
+    properties.drop_duplicates(subset="cid", inplace=True, keep="first")
+    xys = properties[["cid", "scf energy"]]
+    properties = dict(zip(xys.cid.values, xys["scf energy"].values))
+        
+    get_e = lambda mol: properties[mol.GetProp('_Name').split(" ")[1]]
+    fn = lambda x: read_mol(x, get_e(x))
+
+    suppl = Chem.SDMolSupplier(sdf_path, removeHs=False, sanitize=True)
+    tmp = [fn(suppl[j]) for j in tqdm(range(len(suppl)))]
+
+    return tmp
+
 class Molecule3D(BaseDataset):
     __name__ = 'molecule3d'
-    __qm_methods__ = ["b3lyp/6-31g*"]
+    __energy_methods__ = ["b3lyp_6-31g*"]
 
     energy_target_names = ["b3lyp/6-31g*.energy"]
-    force_target_names = []
 
     # Energy in hartree, all zeros by default
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
@@ -61,33 +60,22 @@ class Molecule3D(BaseDataset):
         sdf_paths = glob(p_join(raw, '*.sdf'))
         properties_path = p_join(raw, 'properties.csv')
 
-        properties = pd.read_csv(properties_path, dtype={"cid": str})
-        properties.drop_duplicates(subset="cid", inplace=True, keep="first")
-        properties.set_index("cid", inplace=True)
-        n = len(sdf_paths)
-        
-        tmp = []
-        for i, path in enumerate(sdf_paths):
-            suppl = Chem.SDMolSupplier(path, removeHs=False, sanitize=True)
-            n = len(suppl)
-            
-            tmp += [
-                read_mol(suppl[j], get_props(properties, suppl, j))
-                for j in tqdm(range(n), desc=f"{i+1}/{n}")
-            ]
-
-        return tmp
+        fn = lambda x: _read_sdf(x, properties_path)
+        res = dm.parallelized(fn, sdf_paths, n_jobs=1) # don't use more than 1 job
+        samples = sum(res, [])
+        return samples
 
 
 if __name__ == '__main__':
-    data = Molecule3D()
-    n = len(data)
+    for data_class in [Molecule3D]:
+        data = data_class()
+        n = len(data)
 
-    for i in np.random.choice(n, 10, replace=False):
-        x = data[i]
-        print(x.smiles, x.subset, end=' ')
-        for k in x:
-            if k != 'smiles' and k != 'subset':
-                print(k, x[k].shape if x[k] is not None else None, end=' ')
-            
-        print()
+        for i in np.random.choice(n, 3, replace=False):
+            x = data[i]
+            print(x.name, x.subset, end=' ')
+            for k in x:
+                if x[k] is not None:
+                    print(k, x[k].shape, end=' ')
+                
+            print()

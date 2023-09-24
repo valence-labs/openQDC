@@ -1,12 +1,50 @@
 """IO utilities for mlip package"""
-import json
 import os
-import pickle
-
-import fsspec
+import json
 import h5py
 import torch
+import fsspec
+import pickle as pkl
+from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
+from rdkit.Chem import MolFromXYZFile
+
+gcp_filesys = fsspec.filesystem("gs")
+local_filesys = LocalFileSystem()
+
+
+def get_local_cache():
+    cache_dir = os.path.expanduser(os.path.expandvars('~/.cache/openqdc'))
+    os.makedirs(cache_dir, exist_ok=True)
+    return cache_dir
+
+
+def get_remote_cache():
+    remote_cache = "gs://opendatasets/openqdc"
+    return remote_cache 
+
+
+def push_remote(local_path, overwrite=True):
+    remote_path = local_path.replace(get_local_cache(), get_remote_cache())
+    gcp_filesys.mkdirs(os.path.dirname(remote_path), exist_ok=False)
+    # print(f"Pushing {local_path} file to {remote_path}, ({gcp_filesys.exists(os.path.dirname(remote_path))})")
+    if not gcp_filesys.exists(remote_path) or overwrite:
+        gcp_filesys.put_file(local_path, remote_path)
+    return remote_path
+
+
+def pull_locally(local_path, overwrite=True):
+    remote_path = local_path.replace(get_local_cache(), get_remote_cache())
+    os.makedirs(os.path.dirname(local_path), exist_ok=True)
+    if not os.path.exists(local_path) or overwrite:
+        # print(f"Pulling {remote_path} file to {local_path}")
+        gcp_filesys.get_file(remote_path, local_path)
+    return local_path
+
+
+def copy_exists(local_path):
+    remote_path = local_path.replace(get_local_cache(), get_remote_cache())
+    return os.path.exists(local_path) or gcp_filesys.exists(remote_path)
 
 
 def load_torch_gcs(path):
@@ -47,15 +85,15 @@ def check_file_gcs(path) -> bool:
 
 
 def save_pkl(file, path):
-    """Saves pickle file"""
+    """Saves pkl file"""
     print(f"Saving file at {path}")
     with fsspec.open(path, "wb") as fp:  # Pickling
-        pickle.dump(file, fp)
+        pkl.dump(file, fp)
     print("Done")
 
 
 def load_pkl_gcs(path, check=True):
-    """Load pickle file from GCS FileSystem"""
+    """Load pkl file from GCS FileSystem"""
     if check:
         if not check_file_gcs(path):
             raise FileNotFoundError(f"File {path} does not exist on GCS and local.")
@@ -64,17 +102,17 @@ def load_pkl_gcs(path, check=True):
     fs: GCSFileSystem = fsspec.filesystem("gs")
 
     with fs.open(path, "rb") as fp:  # Unpickling
-        return pickle.load(fp)
+        return pkl.load(fp)
 
 
 def load_pkl(path, check=True):
-    """Load pickle file"""
+    """Load pkl file"""
     if check:
         if not check_file(path):
             raise FileNotFoundError(f"File {path} does not exist on GCS and local.")
 
     with open(path, "rb") as fp:  # Unpickling
-        return pickle.load(fp)
+        return pkl.load(fp)
 
 
 def load_hdf5_file(hdf5_file_path: str):
@@ -107,3 +145,7 @@ def load_json(path):
     """Loads json file"""
     with fsspec.open(path, "r") as fp:  # Unpickling
         return json.load(fp)
+
+
+def load_xyz(path):
+    return MolFromXYZFile(path)

@@ -1,9 +1,11 @@
 """Script to download the molecule3d dataset from Google Drive."""
 import os
+import gzip
 import tqdm
 import gdown
 import fsspec
 import socket
+import shutil
 import tarfile
 import zipfile
 import requests
@@ -11,8 +13,10 @@ import urllib.error
 import urllib.request
 from loguru import logger
 from sklearn.utils import Bunch
-from openqdc.utils.paths import get_local_cache
+from openqdc.utils.io import get_local_cache
 from openqdc.raws.config_factory import DataConfigFactory
+from office365.runtime.auth.client_credential import ClientCredential
+from office365.sharepoint.client_context import ClientContext
 
 
 # function to download large files with requests
@@ -71,10 +75,21 @@ def fetch_file(url, local_filename, overwrite=False):
                 else:
                     logger.info(f"Archive already extracted: {local_filename}")
 
-        elif local_filename.endswith("xz"):
-            logger.info(f"Excloabout:blanktracting archive: {local_filename}")
+        elif local_filename.endswith("hdf5.gz"):
+            logger.info(f"Verifying archive extraction states: {local_filename}")
+            out_filename = local_filename.replace("hdf5.gz", "h5")
+            all_extracted = os.path.exists(out_filename)
+            if not all_extracted:
+                logger.info(f"Extracting archive: {local_filename}")
+                with gzip.open(local_filename, 'rb') as f_in, open(out_filename, 'wb') as f_out:
+                    shutil.copyfileobj(f_in, f_out)
+            else:
+                logger.info(f"Archive already extracted: {local_filename}")
 
+        elif local_filename.endswith("xz"):
+            logger.info(f"Extracting archive: {local_filename}")
             os.system(f"cd {parent} && xz -d *.xz")
+
         else:
             pass
 
@@ -118,7 +133,9 @@ class DataDownloader:
  
 
 if __name__ == "__main__":
-    for dataset_name in DataConfigFactory.available_datasets:
+    dataset_names = DataConfigFactory.available_datasets
+    dataset_names = ["ani"]
+    for dataset_name in dataset_names:
         dd = DataDownloader()
         dd.from_name(dataset_name)
 

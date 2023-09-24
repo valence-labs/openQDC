@@ -3,7 +3,7 @@ from tqdm import tqdm
 import datamol as dm
 from os.path import join as p_join
 from openqdc.utils import load_hdf5_file
-from openqdc.utils.molecule import get_atom_data
+from openqdc.utils.molecule import get_atomic_numuber_and_charge
 from openqdc.utils.constants import BOHR2ANG, MAX_ATOMIC_NUMBER
 from openqdc.datasets.base import BaseDataset
 
@@ -12,7 +12,7 @@ def read_record(r):
     smiles = r["smiles"].asstr()[0]
     subset = r["subset"][0].decode("utf-8")
     n_confs = r["conformations"].shape[0]
-    x = get_atom_data(dm.to_mol(smiles, add_hs=True))
+    x = get_atomic_numuber_and_charge(dm.to_mol(smiles, add_hs=True))
     positions= r["conformations"][:] * BOHR2ANG
     
     res = dict(
@@ -20,7 +20,7 @@ def read_record(r):
         subset= np.array([Spice.subset_mapping[subset]]*n_confs),     
         energies= r[Spice.energy_target_names[0]][:][:, None].astype(np.float32),
         forces= r[Spice.force_target_names[0]][:].reshape(-1, 3, 1) / BOHR2ANG,
-        atom_data_and_positions = np.concatenate((
+        atomic_inputs = np.concatenate((
             x[None, ...].repeat(n_confs, axis=0), 
             positions), axis=-1, dtype=np.float32).reshape(-1, 5),
         n_atoms = np.array([x.shape[0]]*n_confs, dtype=np.int32),
@@ -31,7 +31,7 @@ def read_record(r):
 
 class Spice(BaseDataset):
     __name__ = 'spice'
-    __qm_methods__ = ["wb97x_tz"]
+    __energy_methods__ = ["wb97x_tz"]
 
     energy_target_names = ["dft_total_energy"]
 

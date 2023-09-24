@@ -4,8 +4,8 @@ class DataConfigFactory:
     ani = dict(
         dataset_name="ani",
         links={
-            "ani1.h5": "https://springernature.figshare.com/ndownloader/files/18112775",
-            "an1x.hdf5.gz": "https://zenodo.org/record/4081694/files/292.hdf5.gz",
+            "ani1.hdf5.gz": "https://zenodo.org/record/3585840/files/214.hdf5.gz",
+            "ani1x.hdf5.gz": "https://zenodo.org/record/4081694/files/292.hdf5.gz",
             "ani1ccx.hdf5.gz": "https://zenodo.org/record/4081692/files/293.hdf5.gz",
         },
     )
@@ -54,7 +54,7 @@ class DataConfigFactory:
     waterclusters3_30 = dict(
         dataset_name="waterclusters3_30",
         links = {
-            "W3-W30_all_geoms_TTM2.1-F.zip": "https://drive.google.com/file/d/18Y7OiZXSCTsHrQ83GCc4fyE_abbL6E_n"
+            "W3-W30_all_geoms_TTM2.1-F.zip": "https://drive.google.com/uc?id=18Y7OiZXSCTsHrQ83GCc4fyE_abbL6E_n"
         },
     )
 
@@ -69,13 +69,6 @@ class DataConfigFactory:
         dataset_name="molecule3d",
         links={
             "molecule3d.zip": "https://drive.google.com/uc?id=1C_KRf8mX-gxny7kL9ACNCEV4ceu_fUGy"
-        },
-    )
-
-    nabladft = dict(
-        dataset_name="nabladft",
-        links={
-            "nabladft.db": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/moses_db/dataset_full.db"
         },
     )
 
@@ -107,14 +100,37 @@ class DataConfigFactory:
             },
     )
 
+    misato = dict(
+        dataset_name="misato",
+        links={
+                "MD.hdf5": "https://zenodo.org/record/7711953/files/MD.hdf5",
+                "QM.hdf5": "https://zenodo.org/record/7711953/files/QM.hdf5"
+            },
+    )
+
+    nabladft = dict(
+        dataset_name="nabladft",
+        links={
+            "nabladft.db": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/moses_db/dataset_full.db"
+        },
+        cmd=[
+            "axel -n 10 --output=dataset_full.db https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/moses_db/dataset_full.db"
+        ]
+    )
+    
     pubchemqc = dict(
         dataset_name="pubchemqc",
         links={
-            "pubchemqc.tar.gz": "https://zenodo.org/record/8222043/files/pubchemqc.tar.gz"
+            "pqcm_b3lyp_2017.tar.gz": "https://chibakoudai.sharepoint.com/:u:/s/stair02/Ed9Z16k0ctJKk9nQLMYFHYUBp_E9zerPApRaWTrOIYN-Eg"
         },
+        cmd=[
+            'wget "https://chibakoudai.sharepoint.com/:u:/s/stair06/EcWMtOpIEqFLrHcR1dzlZiMBLhTFY0RZ0qPaqC4lhRp51A?download=1" -O b3lyp_pm6_ver1.0.1-postgrest-docker-compose.tar.xz.rclone_chunk.001',
+            'wget "https://chibakoudai.sharepoint.com/:u:/s/stair06/EbJe-SlL4oNPhOpOtA8mxLsB1F3eI2l-5RS315hIZUFNwQ?download=1" -O b3lyp_pm6_ver1.0.1-postgrest-docker-compose.tar.xz.rclone_chunk.002',
+            'cat b3lyp_pm6_ver1.0.1-postgrest-docker-compose.tar.xz.rclone_chunk.001 b3lyp_pm6_ver1.0.1-postgrest-docker-compose.tar.xz.rclone_chunk.002 | tar xvfJ - '
+        ]
     )
 
-    available_datasets = [k for k in locals().keys()  if not k.startswith("__")][-1:]
+    available_datasets = [k for k in locals().keys()  if not k.startswith("__")]
 
     def __init__(self):
         pass

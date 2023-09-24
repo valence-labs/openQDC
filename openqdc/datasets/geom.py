@@ -1,14 +1,9 @@
-import os
-import torch
-import pickle as pkl
+
 import numpy as np
-from tqdm import tqdm
 import datamol as dm
-from sklearn.utils import Bunch
 from os.path import join as p_join
 from openqdc.utils import load_pkl, load_json
-from openqdc.utils.molecule import get_atom_data
-from openqdc.utils.paths import get_local_cache
+from openqdc.utils.molecule import get_atomic_numuber_and_charge
 from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 from openqdc.datasets.base import BaseDataset
 
@@ -29,7 +24,7 @@ def read_mol(mol_id, mol_dict, base_path, partition):
     -------
     res: dict
         Dictionary containing the following keys:
-            - atom_data_and_positions: flatten np.ndarray of shape (M, 4) containing the atomic numbers and positions
+            - atomic_inputs: flatten np.ndarray of shape (M, 4) containing the atomic numbers and positions
             - smiles: np.ndarray of shape (N,) containing the smiles of the molecule
             - energies: np.ndarray of shape (N,1) containing the energies of the conformers
             - n_atoms: np.ndarray of shape (N,) containing the number of atoms in each conformer
@@ -38,15 +33,15 @@ def read_mol(mol_id, mol_dict, base_path, partition):
     try:
         d = load_pkl(p_join(base_path, mol_dict['pickle_path']), False)
         confs = d['conformers']
-        x = get_atom_data(confs[0]['rd_mol'])
+        x = get_atomic_numuber_and_charge(confs[0]['rd_mol'])
         positions = np.array([cf['rd_mol'].GetConformer().GetPositions() for cf in confs])
         n_confs = positions.shape[0]
 
         res = dict(
-            atom_data_and_positions = np.concatenate((
+            atomic_inputs = np.concatenate((
                 x[None, ...].repeat(n_confs, axis=0), 
                 positions), axis=-1, dtype=np.float32).reshape(-1, 5),
-            smiles = np.array([d['smiles'] for _ in confs]),
+            name = np.array([d['smiles'] for _ in confs]),
             energies = np.array([cf['totalenergy'] for cf in confs], dtype=np.float32)[:, None],
             n_atoms = np.array([positions.shape[1]] * n_confs, dtype=np.int32),
             subset = np.array([partition] * n_confs),
@@ -59,9 +54,9 @@ def read_mol(mol_id, mol_dict, base_path, partition):
     return res
 
 
-class Geom(BaseDataset):
+class GEOM(BaseDataset):
     __name__ = 'geom'
-    __qm_methods__ = ["gfn2_xtb"]
+    __energy_methods__ = ["gfn2_xtb"]
 
     energy_target_names = ["gfn2_xtb.energy"]
     force_target_names = []
@@ -90,14 +85,15 @@ class Geom(BaseDataset):
 
 
 if __name__ == '__main__':
-    data = Geom()
-    n = len(data)
+    for data_class in [GEOM]:
+        data = data_class()
+        n = len(data)
 
-    for i in np.random.choice(n, 10, replace=False):
-        x = data[i]
-        print(x.smiles, x.subset, end=' ')
-        for k in x:
-            if k != 'smiles' and k != 'subset':
-                print(k, x[k].shape if x[k] is not None else None, end=' ')
-            
-        print()
+        for i in np.random.choice(n, 3, replace=False):
+            x = data[i]
+            print(x.name, x.subset, end=' ')
+            for k in x:
+                if x[k] is not None:
+                    print(k, x[k].shape, end=' ')
+                
+            print()
