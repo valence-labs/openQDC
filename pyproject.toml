@@ -55,6 +55,8 @@ omit = ["setup.py", "tests/*"]
 
 [tool.ruff]
 line-length = 120
+ignore = ["E731"]
 
 [tool.ruff.per-file-ignores]
 "__init__.py" = ["F403"]
+"openqdc/raws/config_factory.py" = ["E501"]

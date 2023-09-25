@@ -1,22 +1,22 @@
 """Script to download the molecule3d dataset from Google Drive."""
-import os
 import gzip
-import tqdm
-import gdown
-import fsspec
-import socket
+import os
 import shutil
+import socket
 import tarfile
-import zipfile
-import requests
 import urllib.error
 import urllib.request
+import zipfile
+
+import fsspec
+import gdown
+import requests
+import tqdm
 from loguru import logger
 from sklearn.utils import Bunch
-from openqdc.utils.io import get_local_cache
+
 from openqdc.raws.config_factory import DataConfigFactory
-from office365.runtime.auth.client_credential import ClientCredential
-from office365.sharepoint.client_context import ClientContext
+from openqdc.utils.io import get_local_cache
 
 
 # function to download large files with requests
@@ -37,7 +37,6 @@ def fetch_file(url, local_filename, overwrite=False):
         Local file.
     """
     try:
-
         if os.path.exists(local_filename) and not overwrite:
             logger.info("File already exists, skipping download")
         else:
@@ -53,7 +52,7 @@ def fetch_file(url, local_filename, overwrite=False):
 
         # decompress archive if necessary
         parent = os.path.dirname(local_filename)
-        if local_filename.endswith("tar.gz"):            
+        if local_filename.endswith("tar.gz"):
             with tarfile.open(local_filename) as tar:
                 logger.info(f"Verifying archive extraction states: {local_filename}")
                 all_names = tar.getnames()
@@ -81,7 +80,7 @@ def fetch_file(url, local_filename, overwrite=False):
             all_extracted = os.path.exists(out_filename)
             if not all_extracted:
                 logger.info(f"Extracting archive: {local_filename}")
-                with gzip.open(local_filename, 'rb') as f_in, open(out_filename, 'wb') as f_out:
+                with gzip.open(local_filename, "rb") as f_in, open(out_filename, "wb") as f_out:
                     shutil.copyfileobj(f_in, f_out)
             else:
                 logger.info(f"Archive already extracted: {local_filename}")
@@ -115,7 +114,7 @@ class DataDownloader:
 
         self.cache_path = cache_path
         self.overwrite = overwrite
-    
+
     def from_config(self, config: dict):
         b_config = Bunch(**config)
         data_path = os.path.join(self.cache_path, b_config.dataset_name)
@@ -123,14 +122,14 @@ class DataDownloader:
 
         logger.info(f"Downloading the {b_config.dataset_name} dataset")
         for local, link in b_config.links.items():
-            outfile = os.path.join(data_path, local) 
+            outfile = os.path.join(data_path, local)
 
             fetch_file(link, outfile)
 
     def from_name(self, name):
         cfg = DataConfigFactory()(name)
         return self.from_config(cfg)
- 
+
 
 if __name__ == "__main__":
     dataset_names = DataConfigFactory.available_datasets
@@ -138,4 +137,3 @@ if __name__ == "__main__":
     for dataset_name in dataset_names:
         dd = DataDownloader()
         dd.from_name(dataset_name)
-

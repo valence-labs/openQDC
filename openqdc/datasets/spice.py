@@ -1,11 +1,13 @@
+from os.path import join as p_join
+
+import datamol as dm
 import numpy as np
 from tqdm import tqdm
-import datamol as dm
-from os.path import join as p_join
-from openqdc.utils import load_hdf5_file
-from openqdc.utils.molecule import get_atomic_numuber_and_charge
-from openqdc.utils.constants import BOHR2ANG, MAX_ATOMIC_NUMBER
+
 from openqdc.datasets.base import BaseDataset
+from openqdc.utils import load_hdf5_file
+from openqdc.utils.constants import BOHR2ANG, MAX_ATOMIC_NUMBER
+from openqdc.utils.molecule import get_atomic_numuber_and_charge
 
 
 def read_record(r):
@@ -13,24 +15,24 @@ def read_record(r):
     subset = r["subset"][0].decode("utf-8")
     n_confs = r["conformations"].shape[0]
     x = get_atomic_numuber_and_charge(dm.to_mol(smiles, add_hs=True))
-    positions= r["conformations"][:] * BOHR2ANG
-    
+    positions = r["conformations"][:] * BOHR2ANG
+
     res = dict(
-        smiles= np.array([smiles]*n_confs),
-        subset= np.array([Spice.subset_mapping[subset]]*n_confs),     
-        energies= r[Spice.energy_target_names[0]][:][:, None].astype(np.float32),
-        forces= r[Spice.force_target_names[0]][:].reshape(-1, 3, 1) / BOHR2ANG,
-        atomic_inputs = np.concatenate((
-            x[None, ...].repeat(n_confs, axis=0), 
-            positions), axis=-1, dtype=np.float32).reshape(-1, 5),
-        n_atoms = np.array([x.shape[0]]*n_confs, dtype=np.int32),
+        smiles=np.array([smiles] * n_confs),
+        subset=np.array([Spice.subset_mapping[subset]] * n_confs),
+        energies=r[Spice.energy_target_names[0]][:][:, None].astype(np.float32),
+        forces=r[Spice.force_target_names[0]][:].reshape(-1, 3, 1) / BOHR2ANG,
+        atomic_inputs=np.concatenate(
+            (x[None, ...].repeat(n_confs, axis=0), positions), axis=-1, dtype=np.float32
+        ).reshape(-1, 5),
+        n_atoms=np.array([x.shape[0]] * n_confs, dtype=np.int32),
     )
 
     return res
 
 
 class Spice(BaseDataset):
-    __name__ = 'spice'
+    __name__ = "spice"
     __energy_methods__ = ["wb97x_tz"]
 
     energy_target_names = ["dft_total_energy"]
@@ -78,23 +80,23 @@ class Spice(BaseDataset):
         super().__init__()
 
     def read_raw_entries(self):
-        raw_path = p_join(self.root, 'SPICE-1.1.4.hdf5')
-        
-        data = load_hdf5_file(raw_path) 
-        tmp = [read_record(data[mol_name]) for mol_name in tqdm(data)] # don't use parallelized here
+        raw_path = p_join(self.root, "SPICE-1.1.4.hdf5")
+
+        data = load_hdf5_file(raw_path)
+        tmp = [read_record(data[mol_name]) for mol_name in tqdm(data)]  # don't use parallelized here
 
         return tmp
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     data = Spice()
     n = len(data)
 
     for i in np.random.choice(n, 10, replace=False):
         x = data[i]
-        print(x.smiles, x.subset, end=' ')
+        print(x.smiles, x.subset, end=" ")
         for k in x:
-            if k != 'smiles' and k != 'subset':
-                print(k, x[k].shape if x[k] is not None else None, end=' ')
-            
+            if k != "smiles" and k != "subset":
+                print(k, x[k].shape if x[k] is not None else None, end=" ")
+
         print()

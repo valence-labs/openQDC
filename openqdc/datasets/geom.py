@@ -1,15 +1,16 @@
-
-import numpy as np
-import datamol as dm
 from os.path import join as p_join
-from openqdc.utils import load_pkl, load_json
-from openqdc.utils.molecule import get_atomic_numuber_and_charge
-from openqdc.utils.constants import MAX_ATOMIC_NUMBER
+
+import datamol as dm
+import numpy as np
+
 from openqdc.datasets.base import BaseDataset
+from openqdc.utils import load_json, load_pkl
+from openqdc.utils.constants import MAX_ATOMIC_NUMBER
+from openqdc.utils.molecule import get_atomic_numuber_and_charge
 
 
 def read_mol(mol_id, mol_dict, base_path, partition):
-    """ Read molecule from pickle file and return dict with conformers and energies
+    """Read molecule from pickle file and return dict with conformers and energies
 
     Parameters
     ----------
@@ -31,31 +32,31 @@ def read_mol(mol_id, mol_dict, base_path, partition):
     """
 
     try:
-        d = load_pkl(p_join(base_path, mol_dict['pickle_path']), False)
-        confs = d['conformers']
-        x = get_atomic_numuber_and_charge(confs[0]['rd_mol'])
-        positions = np.array([cf['rd_mol'].GetConformer().GetPositions() for cf in confs])
+        d = load_pkl(p_join(base_path, mol_dict["pickle_path"]), False)
+        confs = d["conformers"]
+        x = get_atomic_numuber_and_charge(confs[0]["rd_mol"])
+        positions = np.array([cf["rd_mol"].GetConformer().GetPositions() for cf in confs])
         n_confs = positions.shape[0]
 
         res = dict(
-            atomic_inputs = np.concatenate((
-                x[None, ...].repeat(n_confs, axis=0), 
-                positions), axis=-1, dtype=np.float32).reshape(-1, 5),
-            name = np.array([d['smiles'] for _ in confs]),
-            energies = np.array([cf['totalenergy'] for cf in confs], dtype=np.float32)[:, None],
-            n_atoms = np.array([positions.shape[1]] * n_confs, dtype=np.int32),
-            subset = np.array([partition] * n_confs),
+            atomic_inputs=np.concatenate(
+                (x[None, ...].repeat(n_confs, axis=0), positions), axis=-1, dtype=np.float32
+            ).reshape(-1, 5),
+            name=np.array([d["smiles"] for _ in confs]),
+            energies=np.array([cf["totalenergy"] for cf in confs], dtype=np.float32)[:, None],
+            n_atoms=np.array([positions.shape[1]] * n_confs, dtype=np.int32),
+            subset=np.array([partition] * n_confs),
         )
 
     except Exception as e:
-        print (f'Skipping: {mol_id} due to {e}')
+        print(f"Skipping: {mol_id} due to {e}")
         res = None
 
     return res
 
 
 class GEOM(BaseDataset):
-    __name__ = 'geom'
+    __name__ = "geom"
     __energy_methods__ = ["gfn2_xtb"]
 
     energy_target_names = ["gfn2_xtb.energy"]
@@ -64,36 +65,36 @@ class GEOM(BaseDataset):
     # Energy in hartree, all zeros by default
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
-    partitions = ['qm9', 'drugs']
+    partitions = ["qm9", "drugs"]
 
     def __init__(self) -> None:
         super().__init__()
 
     def _read_raw_(self, partition):
-        raw_path = p_join(self.root, 'rdkit_folder')
+        raw_path = p_join(self.root, "rdkit_folder")
 
-        mols = load_json(p_join(raw_path, f'summary_{partition}.json'))
+        mols = load_json(p_join(raw_path, f"summary_{partition}.json"))
         mols = list(mols.items())
 
-        fn = lambda x: read_mol(x[0], x[1], raw_path, partition)
-        samples = dm.parallelized(fn, mols, n_jobs=1, progress=True) # don't use more than 1 job
+        fn = lambda x: read_mol(x[0], x[1], raw_path, partition)  # noqa E731
+        samples = dm.parallelized(fn, mols, n_jobs=1, progress=True)  # don't use more than 1 job
         return samples
-    
+
     def read_raw_entries(self):
         samples = sum([self._read_raw_(partition) for partition in self.partitions], [])
         return samples
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     for data_class in [GEOM]:
         data = data_class()
         n = len(data)
 
         for i in np.random.choice(n, 3, replace=False):
             x = data[i]
-            print(x.name, x.subset, end=' ')
+            print(x.name, x.subset, end=" ")
             for k in x:
                 if x[k] is not None:
-                    print(k, x[k].shape, end=' ')
-                
+                    print(k, x[k].shape, end=" ")
+
             print()
