@@ -1,10 +1,11 @@
 """IO utilities for mlip package"""
-import os
 import json
+import os
+import pickle as pkl
+
+import fsspec
 import h5py
 import torch
-import fsspec
-import pickle as pkl
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from rdkit.Chem import MolFromXYZFile
@@ -14,14 +15,14 @@ local_filesys = LocalFileSystem()
 
 
 def get_local_cache():
-    cache_dir = os.path.expanduser(os.path.expandvars('~/.cache/openqdc'))
+    cache_dir = os.path.expanduser(os.path.expandvars("~/.cache/openqdc"))
     os.makedirs(cache_dir, exist_ok=True)
     return cache_dir
 
 
 def get_remote_cache():
     remote_cache = "gs://opendatasets/openqdc"
-    return remote_cache 
+    return remote_cache
 
 
 def push_remote(local_path, overwrite=True):

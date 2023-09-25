@@ -140,10 +140,9 @@ cache/
 *.hdf5
 nohup.out
 *.out
-*.crt 
+*.crt
 *.key
 *.dat
 *.xyz
 *.csv
 *.txt
-

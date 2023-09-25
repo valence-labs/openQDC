@@ -1,12 +1,13 @@
-import numpy as np
 from os.path import join as p_join
-from openqdc.utils.constants import MAX_ATOMIC_NUMBER
+
+import numpy as np
+
 from openqdc.datasets.base import BaseDataset, read_qc_archive_h5
+from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 
 
 class COMP6(BaseDataset):
-    __name__ = 'comp6'
-
+    __name__ = "comp6"
 
     # Energy in hartree, all zeros by default
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
@@ -40,33 +41,31 @@ class COMP6(BaseDataset):
     ]
 
     force_target_names = [
-        "Gradient",   
+        "Gradient",
     ]
 
     def __init__(self) -> None:
         super().__init__()
-    
+
     def read_raw_entries(self):
         samples = []
         for subset in ["ani_md", "drugbank", "gdb7_9", "gdb10_13", "s66x8", "tripeptides"]:
-            raw_path = p_join(self.root, f'{subset}.h5')
-            samples += read_qc_archive_h5(raw_path, subset, self.energy_target_names, 
-                                      self.force_target_names)
+            raw_path = p_join(self.root, f"{subset}.h5")
+            samples += read_qc_archive_h5(raw_path, subset, self.energy_target_names, self.force_target_names)
 
         return samples
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     for data_class in [COMP6]:
         data = data_class()
         n = len(data)
 
         for i in np.random.choice(n, 3, replace=False):
             x = data[i]
-            print(x.name, x.subset, end=' ')
+            print(x.name, x.subset, end=" ")
             for k in x:
                 if x[k] is not None:
-                    print(k, x[k].shape, end=' ')
-                
+                    print(k, x[k].shape, end=" ")
+
             print()
