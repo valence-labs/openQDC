@@ -3,10 +3,26 @@
 Open Quantum Data Commons
 
 ## Setup Datasets
+To use any dataset, we need to first download raw files. This can be done by running the following command,
 
-Use the scripts in `setup/` to download the datasets. For more information, see the [README](setup/README.md) in the `setup/` directory.
+```bash
+python setup/download.py -d spice
+```
 
-# Install the library in dev mode
+or in a notebook like,
+
+```python
+from openqdc.raws.config_factory import DataConfigFactory
+from openqdc.raws.fetch import DataDownloader
+
+dataset_names = DataConfigFactory.available_datasets
+dataset_names = ["spice"]
+for dataset_name in dataset_names:
+    dd = DataDownloader()
+    dd.from_name(dataset_name)
+```
+
+### Install the library in dev mode
 pip install -e .
 ```
 
@@ -20,7 +36,7 @@ You can run tests locally with:
 pytest
 ```
 
-# Overview of Datasets
+### Overview of Datasets
 
 <!-- Create a table with the following columns
 1. Name of Dataset (with reference of paper) [Dataset Name](paper link)
