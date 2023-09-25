@@ -19,7 +19,7 @@ fallback_version = "dev"
 profile = "black"
 
 [tool.setuptools.packages.find]
-where = ["."]
+where = ["src"]
 include = ["openqdc", "openqdc.*"]
 exclude = []
 namespaces = true
@@ -59,4 +59,4 @@ ignore = ["E731"]
 
 [tool.ruff.per-file-ignores]
 "__init__.py" = ["F403"]
-"openqdc/raws/config_factory.py" = ["E501"]
+"**/config_factory.py" = ["E501"]
