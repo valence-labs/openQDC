@@ -45,3 +45,4 @@ We provide support for the following publicly available QM Datasets.
 | [DES370K](https://www.nature.com/articles/s41597-021-00833-x) | | 3,700 | 370,000 | 100 | No | 20 | CCSD(T) |
 | [DES5M](https://www.nature.com/articles/s41597-021-00833-x) | | 3,700 | 5,000,000 | 1351 | No | 20 | SNS-MP2 |
 | [OrbNet Denali](https://arxiv.org/abs/2107.00299) | | 212,905 | 2,300,000 | 11 | No | 16 | GFN1-xTB
+| [SN2RXN](https://pubs.acs.org/doi/10.1021/acs.jctc.9b00181) | Probes chemical reactions of methyl halides with halide anions of the kind $X^- + H_3C-Y \to X-CH_3 + Y^{-1}$| 39 | 452709 | 11,600 | Yes | 6 | DSD-BLYP-D3(BJ)/def2-TZVP |
