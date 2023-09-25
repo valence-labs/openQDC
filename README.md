@@ -2,7 +2,7 @@
 
 Open Quantum Data Commons
 
-## Setup Datasets
+### Setup Datasets
 To use any dataset, we need to first download raw files. This can be done by running the following command,
 
 ```bash
