@@ -6,7 +6,7 @@ import numpy as np
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils import load_json, load_pkl
 from openqdc.utils.constants import MAX_ATOMIC_NUMBER
-from openqdc.utils.molecule import get_atomic_numuber_and_charge
+from openqdc.utils.molecule import get_atomic_number_and_charge
 
 
 def read_mol(mol_id, mol_dict, base_path, partition):
@@ -34,7 +34,7 @@ def read_mol(mol_id, mol_dict, base_path, partition):
     try:
         d = load_pkl(p_join(base_path, mol_dict["pickle_path"]), False)
         confs = d["conformers"]
-        x = get_atomic_numuber_and_charge(confs[0]["rd_mol"])
+        x = get_atomic_number_and_charge(confs[0]["rd_mol"])
         positions = np.array([cf["rd_mol"].GetConformer().GetPositions() for cf in confs])
         n_confs = positions.shape[0]
 
