@@ -7,14 +7,14 @@ from tqdm import tqdm
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils import load_hdf5_file
 from openqdc.utils.constants import BOHR2ANG, MAX_ATOMIC_NUMBER
-from openqdc.utils.molecule import get_atomic_numuber_and_charge
+from openqdc.utils.molecule import get_atomic_number_and_charge
 
 
 def read_record(r):
     smiles = r["smiles"].asstr()[0]
     subset = r["subset"][0].decode("utf-8")
     n_confs = r["conformations"].shape[0]
-    x = get_atomic_numuber_and_charge(dm.to_mol(smiles, add_hs=True))
+    x = get_atomic_number_and_charge(dm.to_mol(smiles, add_hs=True))
     positions = r["conformations"][:] * BOHR2ANG
 
     res = dict(

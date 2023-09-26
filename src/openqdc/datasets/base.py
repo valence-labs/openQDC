@@ -3,6 +3,7 @@ from os.path import join as p_join
 
 import numpy as np
 import torch
+from loguru import logger
 from sklearn.utils import Bunch
 from tqdm import tqdm
 
@@ -124,6 +125,7 @@ class BaseDataset(torch.utils.data.Dataset):
 
     def save_preprocess(self, data_dict):
         # save memmaps
+        logger.info("Preprocessing data and saving it to cache.")
         for key in self.data_keys:
             local_path = p_join(self.preprocess_path, f"{key}.mmap")
             out = np.memmap(local_path, mode="w+", dtype=data_dict[key].dtype, shape=data_dict[key].shape)
@@ -140,6 +142,7 @@ class BaseDataset(torch.utils.data.Dataset):
             push_remote(local_path)
 
     def read_preprocess(self):
+        logger.info("Reading preprocessed data")
         self.data = {}
         for key in self.data_keys:
             filename = p_join(self.preprocess_path, f"{key}.mmap")
@@ -172,14 +175,17 @@ class BaseDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx: int):
         p_start, p_end = self.data["position_idx_range"][idx]
         input = self.data["atomic_inputs"][p_start:p_end]
-        z, c, positions = input[:, 0], input[:, 1], input[:, -3:]
-        z, c = z.astype(np.int32), c.astype(np.int32)
-        energies = self.data["energies"][idx]
+        z, c, positions, energies = (
+            np.array(input[:, 0], dtype=np.int32),
+            np.array(input[:, 1], dtype=np.int32),
+            np.array(input[:, -3:], dtype=np.float32),
+            np.array(self.data["energies"][idx], dtype=np.float32),
+        )
         name = self.data["name"]["uniques"][self.data["name"]["inv_indices"][idx]]
         subset = self.data["subset"]["uniques"][self.data["subset"]["inv_indices"][idx]]
 
         if "forces" in self.data:
-            forces = self.data["forces"][p_start:p_end]
+            forces = np.array(self.data["forces"][p_start:p_end], dtype=np.float32)
         else:
             forces = None
 

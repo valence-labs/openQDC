@@ -34,7 +34,7 @@ def push_remote(local_path, overwrite=True):
     return remote_path
 
 
-def pull_locally(local_path, overwrite=True):
+def pull_locally(local_path, overwrite=False):
     remote_path = local_path.replace(get_local_cache(), get_remote_cache())
     os.makedirs(os.path.dirname(local_path), exist_ok=True)
     if not os.path.exists(local_path) or overwrite:

@@ -7,7 +7,7 @@ import numpy as np
 
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils.constants import MAX_ATOMIC_NUMBER
-from openqdc.utils.molecule import get_atomic_numuber_and_charge
+from openqdc.utils.molecule import get_atomic_number_and_charge
 
 
 def read_mol(mol_dir):
@@ -19,7 +19,7 @@ def read_mol(mol_dir):
         return None
 
     smiles = dm.to_smiles(mols[0], explicit_hs=False)
-    x = get_atomic_numuber_and_charge(mols[0])[None, ...].repeat(n_confs, axis=0)
+    x = get_atomic_number_and_charge(mols[0])[None, ...].repeat(n_confs, axis=0)
     positions = np.array([mol.GetConformer().GetPositions() for mol in mols])
     props = [mol.GetPropsAsDict() for mol in mols]
     targets = np.array([[p[el] for el in QMugs.energy_target_names] for p in props])

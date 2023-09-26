@@ -9,13 +9,13 @@ from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils.constants import BOHR2ANG, MAX_ATOMIC_NUMBER
-from openqdc.utils.molecule import get_atomic_numuber_and_charge
+from openqdc.utils.molecule import get_atomic_number_and_charge
 
 
 def read_mol(mol, energy):
     smiles = dm.to_smiles(mol, explicit_hs=False)
     # subset = dm.to_smiles(dm.to_scaffold_murcko(mol, make_generic=True), explicit_hs=False)
-    x = get_atomic_numuber_and_charge(mol)
+    x = get_atomic_number_and_charge(mol)
     positions = mol.GetConformer().GetPositions() * BOHR2ANG
 
     res = dict(
