@@ -59,7 +59,8 @@ class ANI1(BaseDataset):
 
 class ANI1CCX(ANI1):
     """
-
+    ANI1-CCX is a dataset of 500k conformers subsampled from the 5.5M conformers of ANI-1X dataset. The selected
+    conformations are then labelled using a high accuracy CCSD(T)*/CBS method.
 
     Usage
     ```python
