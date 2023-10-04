@@ -21,9 +21,7 @@ class ANI1(BaseDataset):
     ```
 
     References:
-    - ANI-1x: https://doi.org/10.1063/1.5023802
-    - ANI-1ccx: https://doi.org/10.1038/s41467-019-10827-4
-    - wB97x/def2-TZVPP data: https://doi.org/10.1126/sciadv.aav6490
+    - ANI-1: https://www.nature.com/articles/sdata2017193
     - Github: https://github.com/aiqm/ANI1x_datasets
     """
 
