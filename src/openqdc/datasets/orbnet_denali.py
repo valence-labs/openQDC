@@ -1,4 +1,5 @@
 from os.path import join as p_join
+from typing import Dict, List
 
 import datamol as dm
 import numpy as np
@@ -9,7 +10,7 @@ from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 from openqdc.utils.molecule import atom_table
 
 
-def read_mol(mol_id, conf_dict, base_path, energy_target_names):
+def read_mol(mol_id, conf_dict, base_path, energy_target_names: List[str]) -> Dict[str, np.ndarray]:
     res = []
     for conf_id, conf_label in conf_dict.items():
         try:
@@ -34,6 +35,23 @@ def read_mol(mol_id, conf_dict, base_path, energy_target_names):
 
 
 class OrbnetDenali(BaseDataset):
+    """
+    Orbnet Denali is a collection of 2.3 million conformers from 212,905 unique molecules. It performs
+    DFT (ωB97X-D3/def2-TZVP) calculations on molecules and geometries consisting of organic molecules
+    and chemistries, with protonation and tautomeric states, non-covalent interactions, common salts,
+    and counterions, spanning the most common elements in bio and organic chemistry.
+
+    Usage:
+    ```python
+    from openqdc.datasets import OrbnetDenali
+    dataset = OrbnetDenali()
+    ```
+
+    References:
+    - https://arxiv.org/pdf/2107.00299.pdf
+    - https://figshare.com/articles/dataset/OrbNet_Denali_Training_Data/14883867
+    """
+
     __name__ = "orbnet_denali"
     __energy_methods__ = ["wb97x-d3_tz", "gfn1_xtb"]
 
@@ -53,13 +71,6 @@ class OrbnetDenali(BaseDataset):
             for mol_id, group in df.groupby("mol_id")
         }
 
-        # print(df.head())
-        # tmp = df.to_dict('index')
-        # for i, k in enumerate(tmp):
-        #     print(k, tmp[k])
-        #     if i > 10:
-        #         break
-        # exit()
         fn = lambda x: read_mol(x[0], x[1], self.root, self.energy_target_names)
         res = dm.parallelized(fn, list(labels.items()), scheduler="threads", n_jobs=-1, progress=True)
         samples = sum(res, [])
