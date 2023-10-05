@@ -32,8 +32,25 @@ def read_record(r):
 
 
 class Spice(BaseDataset):
+    """
+    Spice Dataset consists of 1.1 million conformations for a diverse set of 19k unique molecules consisting of
+    small molecules, dimers, dipeptides, and solvated amino acids. It consists of both forces and energies calculated
+    at {\omega}B97M-D3(BJ)/def2-TZVPPD level of theory.
+
+    Usage:
+    ```python
+    from openqdc.datasets import Spice
+    dataset = Spice()
+    ```
+
+    References:
+    - https://arxiv.org/abs/2209.10702
+    - https://github.com/openmm/spice-dataset
+    """
+
     __name__ = "spice"
     __energy_methods__ = ["wb97x_tz"]
+    __force_methods__ = ["wb97x_tz"]
 
     energy_target_names = ["dft_total_energy"]
 

@@ -1,5 +1,6 @@
 import os
 from os.path import join as p_join
+from typing import Dict
 
 import datamol as dm
 import numpy as np
@@ -10,7 +11,7 @@ from openqdc.datasets.base import BaseDataset
 from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 
 
-def to_mol(entry):
+def to_mol(entry) -> Dict[str, np.ndarray]:
     Z, R, E, F = entry[:4]
     C = np.zeros_like(Z)
 
@@ -37,6 +38,22 @@ def read_chunk_from_db(raw_path, start_idx, stop_idx, step_size=1000):
 
 
 class NablaDFT(BaseDataset):
+    """
+    NablaDFT is a dataset constructed from a subset of the
+    [Molecular Sets (MOSES) dataset](https://github.com/molecularsets/moses) consisting of 1 million molecules
+    with 5,340,152 unique conformations generated using ωB97X-D/def2-SVP level of theory.
+
+    Usage:
+    ```python
+    from openqdc.datasets import NablaDFT
+    dataset = NablaDFT()
+    ```
+
+    References:
+    - https://pubs.rsc.org/en/content/articlelanding/2022/CP/D2CP03966D
+    - https://github.com/AIRI-Institute/nablaDFT
+    """
+
     __name__ = "nabladft"
     __energy_methods__ = ["wb97x-d_svp"]
 
