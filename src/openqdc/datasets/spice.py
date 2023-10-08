@@ -18,10 +18,10 @@ def read_record(r):
     positions = r["conformations"][:] * BOHR2ANG
 
     res = dict(
-        smiles=np.array([smiles] * n_confs),
+        name=np.array([smiles] * n_confs),
         subset=np.array([Spice.subset_mapping[subset]] * n_confs),
         energies=r[Spice.energy_target_names[0]][:][:, None].astype(np.float32),
-        forces=r[Spice.force_target_names[0]][:].reshape(-1, 3, 1) / BOHR2ANG,
+        forces=r[Spice.force_target_names[0]][:].reshape(-1, 3, 1) / BOHR2ANG * (-1.0),  # forces -ve of energy gradient
         atomic_inputs=np.concatenate(
             (x[None, ...].repeat(n_confs, axis=0), positions), axis=-1, dtype=np.float32
         ).reshape(-1, 5),
