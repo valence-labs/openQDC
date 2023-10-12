@@ -1,5 +1,6 @@
 
 import numpy as np
+import pandas as pd
 from tqdm import tqdm
 from os.path import join as p_join
 from openqdc.datasets.base import BaseDataset, read_qc_archive_h5
@@ -9,72 +10,73 @@ from openqdc.utils.io import load_hdf5_file
 from io import StringIO
 
 
-def content_to_xyz(content, n_waters):
-    content = content.strip()
-
+def content_to_xyz(content, e_map):
     try:
-        tmp = content.splitlines()
-        s = StringIO(content)
-        d = np.loadtxt(s, skiprows=2, dtype="str")
-        z, positions = d[:, 0], d[:, 1:].astype(np.float32)
-        z = np.array([atom_table.GetAtomicNumber(s) for s in z])
-        xs = np.stack((z, np.zeros_like(z)), axis=-1)
-        e = float(tmp[1].strip().split(" ")[-1])
-    except: 
-        print("Error in reading xyz file")
-        print(n_waters, content)
+        tmp = content.split("\n")[1].split(" | ")
+        code = tmp[0].split(" ")[-1]
+        name = tmp[3].split(" ")[-1]
+    except:
+        print(content)
         return None
+
+    s = StringIO(content)
+    d = np.loadtxt(s, skiprows=2, dtype="str")
+    z, positions = d[:, 0], d[:, 1:].astype(np.float32)
+    z = np.array([atom_table.GetAtomicNumber(s) for s in z])
+    xs = np.stack((z, np.zeros_like(z)), axis=-1)
+    e = e_map[code]
     
     conf = dict(
         atomic_inputs=np.concatenate((xs, positions), axis=-1, dtype=np.float32),
-        name=np.array([f"water_{n_waters}"]),
+        name=np.array([name]),
         energies=np.array([e], dtype=np.float32)[:, None] ,
         n_atoms=np.array([positions.shape[0]], dtype=np.int32),
-        subset=np.array([f"water_{n_waters}"]),
+        subset=np.array(["tmqm"]),
     )
 
     return conf
 
 
-def read_xyz(fname, n_waters):
-    s = 3*n_waters+2
+def read_xyz(fname, e_map):
     with open(fname, "r") as f:
-        lines = f.readlines()
-        contents = ["".join(lines[i:i+s]) for i in range(0, len(lines), s)]
+        contents = f.read().split("\n\n")
             
-    res = [content_to_xyz(content, n_waters) for content in tqdm(contents)]
+    print("toto", len(contents))
+    res = [content_to_xyz(content, e_map) for content in tqdm(contents)]
     return res
 
 
-class WaterClusters(BaseDataset):
-    __name__ = "waterclusters3_30"
+class TMQM(BaseDataset):
+    __name__ = "tmqm"
 
     # Energy in hartree, all zeros by default
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
     __energy_methods__ = [
-        "ttm2.1-f"
+        "tpssh_tz"
     ]
 
     energy_target_names = [
-        "TTM2.1-F Potential"
+        "TPSSh/def2TZVP level"
     ]
 
     def __init__(self) -> None:
         super().__init__()
 
     def read_raw_entries(self):
+        df = pd.read_csv(p_join(self.root, "tmQM_y.csv"), sep=";", usecols=["CSD_code", "Electronic_E"])
+        e_map = dict(zip(df["CSD_code"], df["Electronic_E"]))
+        raw_fnames = ["tmQM_X1.xyz", "tmQM_X2.xyz", "Benchmark2_TPSSh_Opt.xyz"]
         samples = []
-        for i in range(3, 31):
-            raw_path = p_join(self.root, f"W3-W30_all_geoms_TTM2.1-F/W{i}_geoms_all.xyz")
-            data = read_xyz(raw_path, i,)
+        for fname in raw_fnames:
+            data = read_xyz(p_join(self.root, fname), e_map)
             samples += data
-                
+
         return samples
 
 
 if __name__ == "__main__":
-    for data_class in [WaterClusters]:
+    for data_class in [TMQM]:
         data = data_class()
         n = len(data)
 

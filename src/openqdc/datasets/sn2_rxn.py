@@ -7,33 +7,34 @@ from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 
 
 class SN2RXN(BaseDataset):
-    __name__ = "iso_17"
+    __name__ = "sn2_rxn"
 
     # Energy in hartree, all zeros by default
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
     __energy_methods__ = [
-        "pbe-ts",
+        "dsd-blyp-d3(bj)_tz",
     ]
 
     energy_target_names = [
-        "PBE-TS Energy",
+        "DSD-BLYP-D3(BJ):def2-TZVP Atomization Energy",
     ]
 
     __force_methods__ = [
-        "pbe-ts",
+        "dsd-blyp-d3(bj)_tz",
     ]
 
     force_target_names = [
-        "PBE-TS Gradient",
+        "DSD-BLYP-D3(BJ):def2-TZVP Gradient",
     ]
 
     def __init__(self) -> None:
         super().__init__()
 
     def read_raw_entries(self):
-        raw_path = p_join(self.root, "iso_17.h5")
-        samples = read_qc_archive_h5(raw_path, "iso_17", self.energy_target_names, self.force_target_names)
+        raw_path = p_join(self.root, "sn2_rxn.h5")
+        samples = read_qc_archive_h5(raw_path, "sn2_rxn", self.energy_target_names, 
+                                     self.force_target_names)
 
         return samples
 

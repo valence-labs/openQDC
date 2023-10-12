@@ -146,3 +146,5 @@ nohup.out
 *.xyz
 *.csv
 *.txt
+*.sh
+

@@ -9,7 +9,7 @@ from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 from openqdc.utils.molecule import atom_table
 
 
-def read_mol(mol_id, conf_dict, base_path, energy_target_names):
+def read_archive(mol_id, conf_dict, base_path, energy_target_names):
     res = []
     for conf_id, conf_label in conf_dict.items():
         try:

@@ -12,7 +12,7 @@ from openqdc.utils.molecule import get_atomic_number_and_charge
 
 def read_mol(mol_dir):
     filenames = glob(p_join(mol_dir, "*.sdf"))
-    mols = [dm.read_sdf(f)[0] for f in filenames]
+    mols = [dm.read_sdf(f, remove_hs=False)[0] for f in filenames]
     n_confs = len(mols)
 
     if len(mols) == 0:
