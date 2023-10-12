@@ -1,46 +1,48 @@
-from os.path import join as p_join
 import json
 import tarfile
+from glob import glob
+from os.path import join as p_join
+
 import datamol as dm
 import numpy as np
 import pandas as pd
-from glob import glob
-from tqdm import tqdm
-from rdkit.Chem import MolFromMolBlock
+
 from openqdc.datasets.base import BaseDataset
-from openqdc.utils import load_json, load_pkl
 from openqdc.utils.constants import MAX_ATOMIC_NUMBER
-from openqdc.utils.molecule import get_atomic_number_and_charge
 
 
-def flatten_dict(d, sep: str= '.'):
-    return  pd.json_normalize(d, sep=sep).to_dict(orient='records')[0]
+def flatten_dict(d, sep: str = "."):
+    return pd.json_normalize(d, sep=sep).to_dict(orient="records")[0]
 
-def read_content(fd):
+
+def read_content(f):
     try:
-        f = tar.extractfile(fd)
         r = flatten_dict(json.load(f))
-        x = np.concatenate((r['atoms.elements.number'][:, None], 
-                            r['atoms.core electrons'][:, None],
-                            r['atoms.coords.3d'].reshape(-1, 3)), 
-                        axis=-1).astype(np.float32)
+        x = np.concatenate(
+            (
+                r["atoms.elements.number"][:, None],
+                r["atoms.core electrons"][:, None],
+                r["atoms.coords.3d"].reshape(-1, 3),
+            ),
+            axis=-1,
+        ).astype(np.float32)
 
         res = dict(
-            name=np.array([r['smiles']]),
-            subset=np.array([r['formula']]),
-            energies=np.array(['properties.energy.total']).astype(np.float32)[None, :],
+            name=np.array([r["smiles"]]),
+            subset=np.array([r["formula"]]),
+            energies=np.array(["properties.energy.total"]).astype(np.float32)[None, :],
             atomic_inputs=x,
             n_atoms=np.array([x.shape[0]], dtype=np.int32),
         )
-    except Exception as e:
+    except Exception:
         res = None
 
     return res
 
-def read_archive(path):
 
+def read_archive(path):
     with tarfile.open(path) as tar:
-        res = [read_content(member) for member in tar.getmembers()]
+        res = [read_content(tar.extractfile(member)) for member in tar.getmembers()]
     # print(len(res))
     return res
 
@@ -48,13 +50,13 @@ def read_archive(path):
 class PubchemQC(BaseDataset):
     __name__ = "pubchemqc"
     __energy_methods__ = [
-        'b3lyp',
-        'pm6',
+        "b3lyp",
+        "pm6",
     ]
 
     energy_target_names = [
-        'b3lyp',
-        'pm6',
+        "b3lyp",
+        "pm6",
     ]
 
     # Energy in hartree, all zeros by default
@@ -68,7 +70,7 @@ class PubchemQC(BaseDataset):
     def _read_raw_(self, part):
         arxiv_paths = glob(p_join(self.root, f"{part}", "*.tar.gz"))
         print(len(arxiv_paths))
-        samples = dm.parallelized(read_archive, arxiv_paths, n_jobs=-1, progress=True, scheduler='threads')
+        samples = dm.parallelized(read_archive, arxiv_paths, n_jobs=-1, progress=True, scheduler="threads")
         res = sum(samples, [])
         print(len(res))
         exit()
@@ -90,4 +92,3 @@ if __name__ == "__main__":
             for k in x:
                 if x[k] is not None:
                     print(k, x[k].shape, end=" ")
-

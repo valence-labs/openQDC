@@ -33,8 +33,7 @@ class SN2RXN(BaseDataset):
 
     def read_raw_entries(self):
         raw_path = p_join(self.root, "sn2_rxn.h5")
-        samples = read_qc_archive_h5(raw_path, "sn2_rxn", self.energy_target_names, 
-                                     self.force_target_names)
+        samples = read_qc_archive_h5(raw_path, "sn2_rxn", self.energy_target_names, self.force_target_names)
 
         return samples
 

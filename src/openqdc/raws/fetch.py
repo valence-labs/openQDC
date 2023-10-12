@@ -1,17 +1,17 @@
 """Script to download the molecule3d dataset from Google Drive."""
-import os
 import gzip
-import tqdm
-import gdown
-import fsspec
+import os
 import shutil
 import socket
 import tarfile
-import zipfile
-import requests
 import urllib.error
 import urllib.request
-import datamol as dm
+import zipfile
+
+import fsspec
+import gdown
+import requests
+import tqdm
 from loguru import logger
 from sklearn.utils import Bunch
 
@@ -26,7 +26,7 @@ def download_url(url, local_filename):
         gdown.download(url, local_filename, quiet=False)
     elif "raw.github" in url:
         r = requests.get(url, allow_redirects=True)
-        with open(local_filename, 'wb') as f:
+        with open(local_filename, "wb") as f:
             f.write(r.content)
     else:
         r = requests.get(url, stream=True)
@@ -35,7 +35,7 @@ def download_url(url, local_filename):
                 if chunk:
                     f.write(chunk)
 
-    
+
 def decompress_tar_gz(local_filename):
     parent = os.path.dirname(local_filename)
     with tarfile.open(local_filename) as tar:
@@ -64,8 +64,6 @@ def decompress_zip(local_filename):
 
 
 def decompress_gz(local_filename):
-    parent = os.path.dirname(local_filename)
-
     logger.info(f"Verifying archive extraction states: {local_filename}")
     out_filename = local_filename.replace(".gz", "")
     if out_filename.endswith("hdf5"):
@@ -78,7 +76,6 @@ def decompress_gz(local_filename):
             shutil.copyfileobj(f_in, f_out)
     else:
         logger.info(f"Archive already extracted: {local_filename}")
-
 
 
 # function to download large files with requests

@@ -1,13 +1,13 @@
+from io import StringIO
+from os.path import join as p_join
 
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-from os.path import join as p_join
-from openqdc.datasets.base import BaseDataset, read_qc_archive_h5
+
+from openqdc.datasets.base import BaseDataset
 from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 from openqdc.utils.molecule import atom_table
-from openqdc.utils.io import load_hdf5_file
-from io import StringIO
 
 
 def content_to_xyz(content, e_map):
@@ -15,7 +15,7 @@ def content_to_xyz(content, e_map):
         tmp = content.split("\n")[1].split(" | ")
         code = tmp[0].split(" ")[-1]
         name = tmp[3].split(" ")[-1]
-    except:
+    except Exception:
         print(content)
         return None
 
@@ -25,11 +25,11 @@ def content_to_xyz(content, e_map):
     z = np.array([atom_table.GetAtomicNumber(s) for s in z])
     xs = np.stack((z, np.zeros_like(z)), axis=-1)
     e = e_map[code]
-    
+
     conf = dict(
         atomic_inputs=np.concatenate((xs, positions), axis=-1, dtype=np.float32),
         name=np.array([name]),
-        energies=np.array([e], dtype=np.float32)[:, None] ,
+        energies=np.array([e], dtype=np.float32)[:, None],
         n_atoms=np.array([positions.shape[0]], dtype=np.int32),
         subset=np.array(["tmqm"]),
     )
@@ -40,7 +40,7 @@ def content_to_xyz(content, e_map):
 def read_xyz(fname, e_map):
     with open(fname, "r") as f:
         contents = f.read().split("\n\n")
-            
+
     print("toto", len(contents))
     res = [content_to_xyz(content, e_map) for content in tqdm(contents)]
     return res
@@ -52,13 +52,9 @@ class TMQM(BaseDataset):
     # Energy in hartree, all zeros by default
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
-    __energy_methods__ = [
-        "tpssh_tz"
-    ]
+    __energy_methods__ = ["tpssh_tz"]
 
-    energy_target_names = [
-        "TPSSh/def2TZVP level"
-    ]
+    energy_target_names = ["TPSSh/def2TZVP level"]
 
     def __init__(self) -> None:
         super().__init__()

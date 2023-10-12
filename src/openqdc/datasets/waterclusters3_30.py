@@ -1,12 +1,12 @@
+from io import StringIO
+from os.path import join as p_join
 
 import numpy as np
 from tqdm import tqdm
-from os.path import join as p_join
-from openqdc.datasets.base import BaseDataset, read_qc_archive_h5
+
+from openqdc.datasets.base import BaseDataset
 from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 from openqdc.utils.molecule import atom_table
-from openqdc.utils.io import load_hdf5_file
-from io import StringIO
 
 
 def content_to_xyz(content, n_waters):
@@ -20,15 +20,15 @@ def content_to_xyz(content, n_waters):
         z = np.array([atom_table.GetAtomicNumber(s) for s in z])
         xs = np.stack((z, np.zeros_like(z)), axis=-1)
         e = float(tmp[1].strip().split(" ")[-1])
-    except: 
+    except Exception:
         print("Error in reading xyz file")
         print(n_waters, content)
         return None
-    
+
     conf = dict(
         atomic_inputs=np.concatenate((xs, positions), axis=-1, dtype=np.float32),
         name=np.array([f"water_{n_waters}"]),
-        energies=np.array([e], dtype=np.float32)[:, None] ,
+        energies=np.array([e], dtype=np.float32)[:, None],
         n_atoms=np.array([positions.shape[0]], dtype=np.int32),
         subset=np.array([f"water_{n_waters}"]),
     )
@@ -37,11 +37,11 @@ def content_to_xyz(content, n_waters):
 
 
 def read_xyz(fname, n_waters):
-    s = 3*n_waters+2
+    s = 3 * n_waters + 2
     with open(fname, "r") as f:
         lines = f.readlines()
-        contents = ["".join(lines[i:i+s]) for i in range(0, len(lines), s)]
-            
+        contents = ["".join(lines[i : i + s]) for i in range(0, len(lines), s)]
+
     res = [content_to_xyz(content, n_waters) for content in tqdm(contents)]
     return res
 
@@ -52,13 +52,9 @@ class WaterClusters(BaseDataset):
     # Energy in hartree, all zeros by default
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
-    __energy_methods__ = [
-        "ttm2.1-f"
-    ]
+    __energy_methods__ = ["ttm2.1-f"]
 
-    energy_target_names = [
-        "TTM2.1-F Potential"
-    ]
+    energy_target_names = ["TTM2.1-F Potential"]
 
     def __init__(self) -> None:
         super().__init__()
@@ -67,9 +63,12 @@ class WaterClusters(BaseDataset):
         samples = []
         for i in range(3, 31):
             raw_path = p_join(self.root, f"W3-W30_all_geoms_TTM2.1-F/W{i}_geoms_all.xyz")
-            data = read_xyz(raw_path, i,)
+            data = read_xyz(
+                raw_path,
+                i,
+            )
             samples += data
-                
+
         return samples
 
 

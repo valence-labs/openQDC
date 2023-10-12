@@ -65,7 +65,7 @@ class DataConfigFactory:
     )
 
     qm7x = dict(
-        dataset_name="qm7x", # https://zenodo.org/record/4288677/files/1000.xz?download=1
+        dataset_name="qm7x",  # https://zenodo.org/record/4288677/files/1000.xz?download=1
         links={f"{i}000.xz": f"https://zenodo.org/record/4288677/files/{i}000.xz" for i in range(1, 9)},
     )
 
@@ -84,16 +84,18 @@ class DataConfigFactory:
 
     dess = dict(
         dataset_name="dess5m",
-        links={"DESS5M.zip": "https://zenodo.org/record/5706002/files/DESS5M.zip",
-               "DESS370.zip":"https://zenodo.org/record/5676266/files/DES370K.zip"},
+        links={
+            "DESS5M.zip": "https://zenodo.org/record/5706002/files/DESS5M.zip",
+            "DESS370.zip": "https://zenodo.org/record/5676266/files/DES370K.zip",
+        },
     )
-    
+
     tmqm = dict(
         dataset_name="tmqm",
         links={
             x: f"https://raw.githubusercontent.com/bbskjelstad/tmqm/master/data/{x}"
             for x in ["tmQM_X1.xyz.gz", "tmQM_X2.xyz.gz", "tmQM_y.csv", "Benchmark2_TPSSh_Opt.xyz"]
-            },
+        },
     )
 
     misato = dict(
