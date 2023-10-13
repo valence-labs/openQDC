@@ -50,9 +50,13 @@ def read_archive(path):
 class PubchemQC(BaseDataset):
     __name__ = "pubchemqc"
     __energy_methods__ = [
-        "b3lyp",
+        "b3lyp/6-31g*",
         "pm6",
     ]
+    
+    __energy_unit__   = "ev"
+    __distance_unit__ = "ang"
+    __forces_unit__   = "ev/ang"
 
     energy_target_names = [
         "b3lyp",
