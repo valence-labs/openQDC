@@ -13,7 +13,7 @@ class ISO17(BaseDataset):
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
     __energy_methods__ = [
-        "pbe-ts",
+        "pbe+vdw-ts",
     ]
 
     energy_target_names = [
@@ -21,15 +21,19 @@ class ISO17(BaseDataset):
     ]
 
     __force_methods__ = [
-        "pbe-ts",
+        "pbe+vdw-ts",
     ]
 
     force_target_names = [
         "PBE-TS Gradient",
     ]
-
-    def __init__(self) -> None:
-        super().__init__()
+    
+    __energy_unit__   = "ev"
+    __distance_unit__ = "ang"
+    __forces_unit__   = "ev/ang"
+    
+    def __init__(self, energy_unit = None, distance_unit = None) -> None:
+        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
 
     def read_raw_entries(self):
         raw_path = p_join(self.root, "iso_17.h5")

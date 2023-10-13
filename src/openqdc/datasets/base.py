@@ -7,6 +7,7 @@ from loguru import logger
 from sklearn.utils import Bunch
 from tqdm import tqdm
 
+from openqdc.utils.units import get_conversion
 from openqdc.utils.constants import NB_ATOMIC_FEATURES
 from openqdc.utils.io import (
     copy_exists,
@@ -65,15 +66,33 @@ class BaseDataset(torch.utils.data.Dataset):
     energy_target_names = []
     force_target_names = []
 
-    energy_unit = "hartree"
+    __energy_unit__   = "hartree"
+    __distance_unit__ = "bohr"
+    __forces_unit__   = "hartree/bohr"
+    __fn_energy__     = lambda x : x
+    __fn_distance__   = lambda x : x
+    __fn_forces__     = lambda x : x
 
-    def __init__(self) -> None:
+    def __init__(self, energy_unit = None, distance_unit = None) -> None:
         self.data = None
+        self._set_units(energy_unit, distance_unit)
         if not self.is_preprocessed():
             entries = self.read_raw_entries()
             res = self.collate_list(entries)
             self.save_preprocess(res)
         self.read_preprocess()
+
+    @property
+    def energy_unit(self):
+        return self.__energy_unit__
+
+    @property
+    def distance_unit(self):
+        return self.__distance_unit__
+
+    @property
+    def force_unit(self):
+        return self.__forces_unit__
 
     @property
     def root(self):
@@ -109,6 +128,34 @@ class BaseDataset(torch.utils.data.Dataset):
             "energies": (-1, len(self.energy_target_names)),
             "forces": (-1, 3, len(self.force_target_names)),
         }
+    
+    def _set_units(self, en , ds):
+        old_en, old_ds = self.energy_unit, self.distance_unit
+        if en is not None:
+            self.set_energy_unit(en)
+        if ds is not None:
+            self.set_distance_unit(ds)
+        self.__forces_unit__ = self.energy_unit + "/" + self.distance_unit
+        self.__class__.__fn_forces__ = get_conversion(old_en+"/"+old_ds, self.__forces_unit__)
+
+    def convert_energy(self, x):
+        return self.__class__.__fn_energy__(x)
+    
+    def convert_distance(self, x):
+        return self.__class__.__fn_distance__(x)
+    
+    def convert_forces(self, x):
+        return self.__class__.__fn_forces__(x)
+
+    def set_energy_unit(self, value):
+        old_unit = self.energy_unit
+        self.__energy_unit__ = value
+        self.__class__.__fn_energy__=get_conversion(old_unit, value)
+
+    def set_distance_unit(self, value):
+        old_unit = self.distance_unit
+        self.__distance_unit__ = value
+        self.__class__.__fn_distance__=get_conversion(old_unit, value)
 
     def read_raw_entries(self):
         raise NotImplementedError
@@ -180,14 +227,14 @@ class BaseDataset(torch.utils.data.Dataset):
         z, c, positions, energies = (
             np.array(input[:, 0], dtype=np.int32),
             np.array(input[:, 1], dtype=np.int32),
-            np.array(input[:, -3:], dtype=np.float32),
-            np.array(self.data["energies"][idx], dtype=np.float32),
+            self.convert_distance(np.array(input[:, -3:], dtype=np.float32)),
+            self.convert_energy(np.array(self.data["energies"][idx], dtype=np.float32)),
         )
         name = self.data["name"]["uniques"][self.data["name"]["inv_indices"][idx]]
         subset = self.data["subset"]["uniques"][self.data["subset"]["inv_indices"][idx]]
 
         if "forces" in self.data:
-            forces = np.array(self.data["forces"][p_start:p_end], dtype=np.float32)
+            forces = self.convert_forces(np.array(self.data["forces"][p_start:p_end], dtype=np.float32))
         else:
             forces = None
 

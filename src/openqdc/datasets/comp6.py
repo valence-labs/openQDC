@@ -11,9 +11,13 @@ class COMP6(BaseDataset):
 
     # Energy in hartree, all zeros by default
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
+    # watchout that forces are stored as -grad(E)
+    __energy_unit__   = "hartree"
+    __distance_unit__ = "ang"
+    __forces_unit__   = "hartree/ang"
 
     __energy_methods__ = [
-        "wb97x_6-31g*",
+        "wb97x/6-31g*",
         "b3lyp-d3m(bj)_tz",
         "b3lyp_tz",
         "hf_tz",
@@ -37,15 +41,16 @@ class COMP6(BaseDataset):
     ]
 
     __force_methods__ = [
-        "wb97x_6-31g*",
+        "wb97x/6-31g*",
     ]
 
     force_target_names = [
         "Gradient",
     ]
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, energy_unit = None, distance_unit = None) -> None:
+        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
+
 
     def read_raw_entries(self):
         samples = []

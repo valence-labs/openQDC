@@ -8,6 +8,7 @@ from openqdc.datasets.base import BaseDataset
 from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 from openqdc.utils.molecule import atom_table
 
+# we could use ase.io.read to read extxyz files
 
 def content_to_xyz(content, n_waters):
     content = content.strip()
@@ -51,13 +52,13 @@ class WaterClusters(BaseDataset):
 
     # Energy in hartree, all zeros by default
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
-
+    # need to know where to find the data
     __energy_methods__ = ["ttm2.1-f"]
 
     energy_target_names = ["TTM2.1-F Potential"]
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, energy_unit = None, distance_unit = None) -> None:
+        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
 
     def read_raw_entries(self):
         samples = []

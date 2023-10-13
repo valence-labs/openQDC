@@ -38,15 +38,18 @@ def read_chunk_from_db(raw_path, start_idx, stop_idx, step_size=1000):
 
 class NablaDFT(BaseDataset):
     __name__ = "nabladft"
-    __energy_methods__ = ["wb97x-d_svp"]
+    __energy_methods__ = ["wb97x-d/def2-svp"]
 
     energy_target_names = ["ωB97X-D/def2-SVP"]
+    __energy_unit__   = "hartree"
+    __distance_unit__ = "ang"
+    __forces_unit__   = "hartree/ang"
 
     # Energy in hartree, all zeros by default
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, energy_unit = None, distance_unit = None) -> None:
+        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
 
     def read_raw_entries(self):
         raw_path = p_join(self.root, "dataset_full.db")
