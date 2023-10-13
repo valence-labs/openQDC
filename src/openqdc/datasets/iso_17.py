@@ -27,12 +27,12 @@ class ISO17(BaseDataset):
     force_target_names = [
         "PBE-TS Gradient",
     ]
-    
-    __energy_unit__   = "ev"
+
+    __energy_unit__ = "ev"
     __distance_unit__ = "ang"
-    __forces_unit__   = "ev/ang"
-    
-    def __init__(self, energy_unit = None, distance_unit = None) -> None:
+    __forces_unit__ = "ev/ang"
+
+    def __init__(self, energy_unit=None, distance_unit=None) -> None:
         super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
 
     def read_raw_entries(self):

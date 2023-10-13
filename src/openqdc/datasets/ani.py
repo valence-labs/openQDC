@@ -21,11 +21,11 @@ class ANI1(BaseDataset):
     energy_target_names = [
         "ωB97x:6-31G(d) Energy",
     ]
-    __energy_unit__   = "hartree"
+    __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
-    __forces_unit__   = "hartree/ang"
+    __forces_unit__ = "hartree/ang"
 
-    def __init__(self, energy_unit = None, distance_unit = None) -> None:
+    def __init__(self, energy_unit=None, distance_unit=None) -> None:
         super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
 
     @property

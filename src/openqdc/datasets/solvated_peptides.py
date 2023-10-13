@@ -29,11 +29,11 @@ class SolvatedPeptides(BaseDataset):
     ]
 
     # TO CHECK
-    __energy_unit__   = "hartree"
+    __energy_unit__ = "hartree"
     __distance_unit__ = "bohr"
-    __forces_unit__   = "hartree/bohr"
+    __forces_unit__ = "hartree/bohr"
 
-    def __init__(self, energy_unit = None, distance_unit = None) -> None:
+    def __init__(self, energy_unit=None, distance_unit=None) -> None:
         super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
 
     def read_raw_entries(self):

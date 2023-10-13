@@ -2,6 +2,7 @@ from typing import Callable
 
 CONVERSION_REGISTRY = {}
 
+
 class Conversion:
     def __init__(self, in_unit: str, out_unit: str, func: Callable[[float], float]):
         """
@@ -12,9 +13,7 @@ class Conversion:
         name = "convert_" + in_unit.lower().strip() + "_to_" + out_unit.lower().strip()
 
         if name in CONVERSION_REGISTRY:
-            raise ValueError(
-                f"{name} is already registered. To reuse the same metric, use Metric.get_by_name()."
-            )
+            raise ValueError(f"{name} is already registered. To reuse the same metric, use Metric.get_by_name().")
         CONVERSION_REGISTRY[name] = self
 
         self.name = name
@@ -23,45 +22,48 @@ class Conversion:
     def __call__(self, x):
         """Convert measure"""
         return self.fn(x)
-    
+
+
 # ev conversion
 Conversion("ev", "kcal/mol", lambda x: x * 23.0605)
 Conversion("ev", "hartree", lambda x: x * 0.0367493)
 Conversion("ev", "kj/mol", lambda x: x * 96.4853)
-Conversion("mev", "ev", lambda x: x * 1000.)
-Conversion("ev", "mev", lambda x: x * .0001)
+Conversion("mev", "ev", lambda x: x * 1000.0)
+Conversion("ev", "mev", lambda x: x * 0.0001)
 
-#kcal/mol conversion
+# kcal/mol conversion
 Conversion("kcal/mol", "ev", lambda x: x * 0.0433641)
 Conversion("kcal/mol", "hartree", lambda x: x * 0.00159362)
 Conversion("kcal/mol", "kj/mol", lambda x: x * 4.184)
 
-#hartree conversion
+# hartree conversion
 Conversion("hartree", "ev", lambda x: x * 27.211386246)
 Conversion("hartree", "kcal/mol", lambda x: x * 627.509)
 Conversion("hartree", "kj/mol", lambda x: x * 2625.5)
 
-#kj/mol conversion
+# kj/mol conversion
 Conversion("kj/mol", "ev", lambda x: x * 0.0103643)
 Conversion("kj/mol", "kcal/mol", lambda x: x * 0.239006)
 Conversion("kj/mol", "hartree", lambda x: x * 0.000380879)
 
-#bohr conversion
+# bohr conversion
 Conversion("bohr", "ang", lambda x: x * 0.52917721092)
 Conversion("ang", "bohr", lambda x: x / 0.52917721092)
 
-#common conversion
+# common conversion
 Conversion("hartree/bohr", "ev/ang", lambda x: get_conversion("ang", "bohr")(get_conversion("hartree", "ev")(x)))
 Conversion("hartree/bohr", "ev/bohr", lambda x: get_conversion("hartree", "ev")(x))
 Conversion("hartree/bohr", "kcal/mol/bohr", lambda x: get_conversion("hartree", "kcal/mol")(x))
-Conversion("hartree/bohr", "kcal/mol/ang",  lambda x: get_conversion("ang", "bohr")(get_conversion("hartree", "kcal/mol")(x)))
+Conversion(
+    "hartree/bohr", "kcal/mol/ang", lambda x: get_conversion("ang", "bohr")(get_conversion("hartree", "kcal/mol")(x))
+)
+Conversion("hartree/ang", "kcal/mol/ang", lambda x: get_conversion("hartree", "kcal/mol")(x))
+
 
 def get_conversion(in_unit: str, out_unit: str):
     name = "convert_" + in_unit.lower().strip() + "_to_" + out_unit.lower().strip()
     if in_unit.lower().strip() == out_unit.lower().strip():
         return lambda x: x
     if name not in CONVERSION_REGISTRY:
-        raise ValueError(
-            f"{name} is not a valid metric. Valid metrics are: {list(CONVERSION_REGISTRY.keys())}"
-        )
+        raise ValueError(f"{name} is not a valid metric. Valid metrics are: {list(CONVERSION_REGISTRY.keys())}")
     return CONVERSION_REGISTRY[name]

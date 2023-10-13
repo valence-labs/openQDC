@@ -39,21 +39,17 @@ class QM7X(BaseDataset):
     # Energy in hartree, all zeros by default
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
-    __energy_methods__ = [
-        "pbe+vdw-ts",  "mbd"
-    ]
+    __energy_methods__ = ["pbe+vdw-ts", "mbd"]
 
     energy_target_names = ["ePBE0", "eMBD"]
 
-    __force_methods__ = [
-        "pbe+vdw-ts",  "mbd"
-    ]
+    __force_methods__ = ["pbe+vdw-ts", "mbd"]
 
     force_target_names = ["pbe0FOR", "vdwFOR"]
-    
-    __energy_unit__   = "ev"
+
+    __energy_unit__ = "ev"
     __distance_unit__ = "ang"
-    __forces_unit__   = "ev/ang"
+    __forces_unit__ = "ev/ang"
 
     def read_raw_entries(self):
         samples = []
