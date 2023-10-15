@@ -10,7 +10,7 @@ from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 from openqdc.utils.molecule import atom_table
 
 
-def read_mol(mol_id, conf_dict, base_path, energy_target_names: List[str]) -> Dict[str, np.ndarray]:
+def read_archive(mol_id, conf_dict, base_path, energy_target_names: List[str]) -> Dict[str, np.ndarray]:
     res = []
     for conf_id, conf_label in conf_dict.items():
         try:
@@ -71,7 +71,14 @@ class OrbnetDenali(BaseDataset):
             for mol_id, group in df.groupby("mol_id")
         }
 
-        fn = lambda x: read_mol(x[0], x[1], self.root, self.energy_target_names)
+        # print(df.head())
+        # tmp = df.to_dict('index')
+        # for i, k in enumerate(tmp):
+        #     print(k, tmp[k])
+        #     if i > 10:
+        #         break
+        # exit()
+        fn = lambda x: read_archive(x[0], x[1], self.root, self.energy_target_names)
         res = dm.parallelized(fn, list(labels.items()), scheduler="threads", n_jobs=-1, progress=True)
         samples = sum(res, [])
         return samples

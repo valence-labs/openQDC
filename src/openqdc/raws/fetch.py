@@ -16,7 +16,66 @@ from loguru import logger
 from sklearn.utils import Bunch
 
 from openqdc.raws.config_factory import DataConfigFactory
+from openqdc.raws.pubchemqc import download_b3lyp_pm6
 from openqdc.utils.io import get_local_cache
+
+
+def download_url(url, local_filename):
+    logger.info(f"Url: {url}  File: {local_filename}")
+    if "drive.google.com" in url:
+        gdown.download(url, local_filename, quiet=False)
+    elif "raw.github" in url:
+        r = requests.get(url, allow_redirects=True)
+        with open(local_filename, "wb") as f:
+            f.write(r.content)
+    else:
+        r = requests.get(url, stream=True)
+        with fsspec.open(local_filename, "wb") as f:
+            for chunk in tqdm.tqdm(r.iter_content(chunk_size=16384)):
+                if chunk:
+                    f.write(chunk)
+
+
+def decompress_tar_gz(local_filename):
+    parent = os.path.dirname(local_filename)
+    with tarfile.open(local_filename) as tar:
+        logger.info(f"Verifying archive extraction states: {local_filename}")
+        all_names = tar.getnames()
+        all_extracted = all([os.path.exists(os.path.join(parent, x)) for x in all_names])
+        if not all_extracted:
+            logger.info(f"Extracting archive: {local_filename}")
+            tar.extractall(path=parent)
+        else:
+            logger.info(f"Archive already extracted: {local_filename}")
+
+
+def decompress_zip(local_filename):
+    parent = os.path.dirname(local_filename)
+
+    logger.info(f"Verifying archive extraction states: {local_filename}")
+    with zipfile.ZipFile(local_filename, "r") as zip_ref:
+        all_names = zip_ref.namelist()
+        all_extracted = all([os.path.exists(os.path.join(parent, x)) for x in all_names])
+        if not all_extracted:
+            logger.info(f"Extracting archive: {local_filename}")
+            zip_ref.extractall(parent)
+        else:
+            logger.info(f"Archive already extracted: {local_filename}")
+
+
+def decompress_gz(local_filename):
+    logger.info(f"Verifying archive extraction states: {local_filename}")
+    out_filename = local_filename.replace(".gz", "")
+    if out_filename.endswith("hdf5"):
+        out_filename = local_filename.replace("hdf5", "h5")
+
+    all_extracted = os.path.exists(out_filename)
+    if not all_extracted:
+        logger.info(f"Extracting archive: {local_filename}")
+        with gzip.open(local_filename, "rb") as f_in, open(out_filename, "wb") as f_out:
+            shutil.copyfileobj(f_in, f_out)
+    else:
+        logger.info(f"Archive already extracted: {local_filename}")
 
 
 # function to download large files with requests
@@ -40,50 +99,18 @@ def fetch_file(url, local_filename, overwrite=False):
         if os.path.exists(local_filename) and not overwrite:
             logger.info("File already exists, skipping download")
         else:
-            logger.info(f"File: {local_filename}")
-            if "drive.google.com" in url:
-                gdown.download(url, local_filename, quiet=False)
-            else:
-                r = requests.get(url, stream=True)
-                with fsspec.open(local_filename, "wb") as f:
-                    for chunk in tqdm.tqdm(r.iter_content(chunk_size=16384)):
-                        if chunk:
-                            f.write(chunk)
+            download_url(url, local_filename)
 
         # decompress archive if necessary
         parent = os.path.dirname(local_filename)
         if local_filename.endswith("tar.gz"):
-            with tarfile.open(local_filename) as tar:
-                logger.info(f"Verifying archive extraction states: {local_filename}")
-                all_names = tar.getnames()
-                all_extracted = all([os.path.exists(os.path.join(parent, x)) for x in all_names])
-                if not all_extracted:
-                    logger.info(f"Extracting archive: {local_filename}")
-                    tar.extractall(path=parent)
-                else:
-                    logger.info(f"Archive already extracted: {local_filename}")
+            decompress_tar_gz(local_filename)
 
         elif local_filename.endswith("zip"):
-            logger.info(f"Verifying archive extraction states: {local_filename}")
-            with zipfile.ZipFile(local_filename, "r") as zip_ref:
-                all_names = zip_ref.namelist()
-                all_extracted = all([os.path.exists(os.path.join(parent, x)) for x in all_names])
-                if not all_extracted:
-                    logger.info(f"Extracting archive: {local_filename}")
-                    zip_ref.extractall(parent)
-                else:
-                    logger.info(f"Archive already extracted: {local_filename}")
+            decompress_zip(local_filename)
 
-        elif local_filename.endswith("hdf5.gz"):
-            logger.info(f"Verifying archive extraction states: {local_filename}")
-            out_filename = local_filename.replace("hdf5.gz", "h5")
-            all_extracted = os.path.exists(out_filename)
-            if not all_extracted:
-                logger.info(f"Extracting archive: {local_filename}")
-                with gzip.open(local_filename, "rb") as f_in, open(out_filename, "wb") as f_out:
-                    shutil.copyfileobj(f_in, f_out)
-            else:
-                logger.info(f"Archive already extracted: {local_filename}")
+        elif local_filename.endswith(".gz"):
+            decompress_gz(local_filename)
 
         elif local_filename.endswith("xz"):
             logger.info(f"Extracting archive: {local_filename}")
@@ -132,8 +159,9 @@ class DataDownloader:
 
 
 if __name__ == "__main__":
-    dataset_names = DataConfigFactory.available_datasets
-    dataset_names = ["ani"]
-    for dataset_name in dataset_names:
-        dd = DataDownloader()
-        dd.from_name(dataset_name)
+    download_b3lyp_pm6()
+    # dataset_names = DataConfigFactory.available_datasets
+    # dataset_names = ["tmqm"]
+    # for dataset_name in dataset_names:
+    #     dd = DataDownloader()
+    #     dd.from_name(dataset_name)
