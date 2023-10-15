@@ -1,7 +1,9 @@
 import os
 from os.path import join as p_join
+from typing import Dict, List, Optional
 
 import numpy as np
+import pandas as pd
 import torch
 from loguru import logger
 from sklearn.utils import Bunch
@@ -18,7 +20,13 @@ from openqdc.utils.io import (
 from openqdc.utils.molecule import atom_table
 
 
-def extract_entry(df, i, subset, energy_target_names, force_target_names=None):
+def extract_entry(
+    df: pd.DataFrame,
+    i: int,
+    subset: str,
+    energy_target_names: List[str],
+    force_target_names: Optional[List[str]] = None,
+) -> Dict[str, np.ndarray]:
     x = np.array([atom_table.GetAtomicNumber(s) for s in df["symbols"][i]])
     xs = np.stack((x, np.zeros_like(x)), axis=-1)
     positions = df["geometry"][i].reshape((-1, 3))
@@ -42,18 +50,12 @@ def extract_entry(df, i, subset, energy_target_names, force_target_names=None):
     return res
 
 
-def read_qc_archive_h5(raw_path, subset, energy_target_names, force_target_names):
+def read_qc_archive_h5(
+    raw_path: str, subset: str, energy_target_names: List[str], force_target_names: List[str]
+) -> List[Dict[str, np.ndarray]]:
     data = load_hdf5_file(raw_path)
     data_t = {k2: data[k1][k2][:] for k1 in data.keys() for k2 in data[k1].keys()}
     n = len(data_t["molecule_id"])
-    # print(f"Reading {n} entries from {raw_path}")
-    # for k in data_t:
-    #     print(f"Loaded {k} with shape {data_t[k].shape}, dtype {data_t[k].dtype}")
-    #     if "Energy" in k:
-    #         print(np.isnan(data_t[k]).mean(), f"{data_t[k][0]}")
-
-    # print('\n'*3)
-    # exit()
 
     samples = [extract_entry(data_t, i, subset, energy_target_names, force_target_names) for i in tqdm(range(n))]
     return samples
