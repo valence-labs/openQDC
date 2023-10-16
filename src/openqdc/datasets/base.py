@@ -135,8 +135,9 @@ class BaseDataset(torch.utils.data.Dataset):
             self.set_energy_unit(en)
         if ds is not None:
             self.set_distance_unit(ds)
-        self.__forces_unit__ = self.energy_unit + "/" + self.distance_unit
-        self.__class__.__fn_forces__ = get_conversion(old_en + "/" + old_ds, self.__forces_unit__)
+        if self.__force_methods__:
+            self.__forces_unit__ = self.energy_unit + "/" + self.distance_unit
+            self.__class__.__fn_forces__ = get_conversion(old_en+"/"+old_ds, self.__forces_unit__)
 
     def convert_energy(self, x):
         return self.__class__.__fn_energy__(x)
@@ -173,6 +174,9 @@ class BaseDataset(torch.utils.data.Dataset):
     def save_preprocess(self, data_dict):
         # save memmaps
         logger.info("Preprocessing data and saving it to cache.")
+        logger.info(f"Dataset {self.__name__} data with the following units:\n"
+                    f"Energy: {self.energy_unit}, Distance: {self.distance_unit}, "
+                    f"Forces: {self.force_unit if self.__force_methods__ else 'None'}")
         for key in self.data_keys:
             local_path = p_join(self.preprocess_path, f"{key}.mmap")
             out = np.memmap(local_path, mode="w+", dtype=data_dict[key].dtype, shape=data_dict[key].shape)
@@ -248,7 +252,7 @@ class BaseDataset(torch.utils.data.Dataset):
             positions=positions,
             atomic_numbers=z,
             charges=c,
-            e0=self.convert_distance(self.atomic_energies[z]),
+            e0=self.convert_energy(self.atomic_energies[z]),
             energies=energies,
             name=name,
             subset=subset,

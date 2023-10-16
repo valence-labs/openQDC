@@ -36,8 +36,8 @@ class Spice(BaseDataset):
     __energy_methods__ = ["wb97x/def2-tzvp"]
     __force_methods__ = ["wb97x/def2-tzvp"]
     __energy_unit__ = "hartree"
-    __distance_unit__ = "bohr"
-    __forces_unit__ = "hartree/bohr"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "hartree/ang"
 
     energy_target_names = ["dft_total_energy"]
 
