@@ -40,7 +40,7 @@ class NablaDFT(BaseDataset):
     __name__ = "nabladft"
     __energy_methods__ = ["wb97x-d/def2-svp"]
 
-    energy_target_names = ["ωB97X-D/def2-SVP"]
+    energy_target_names = ["wb97x-d/def2-svp"]
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
