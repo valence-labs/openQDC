@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils import load_hdf5_file
-from openqdc.utils.constants import BOHR2ANG, MAX_ATOMIC_NUMBER
+from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 from openqdc.utils.molecule import get_atomic_number_and_charge
 
 
@@ -15,13 +15,13 @@ def read_record(r):
     subset = r["subset"][0].decode("utf-8")
     n_confs = r["conformations"].shape[0]
     x = get_atomic_number_and_charge(dm.to_mol(smiles, add_hs=True))
-    positions = r["conformations"][:] * BOHR2ANG
+    positions = r["conformations"][:]
 
     res = dict(
         smiles=np.array([smiles] * n_confs),
         subset=np.array([Spice.subset_mapping[subset]] * n_confs),
         energies=r[Spice.energy_target_names[0]][:][:, None].astype(np.float32),
-        forces=r[Spice.force_target_names[0]][:].reshape(-1, 3, 1) / BOHR2ANG,
+        forces=r[Spice.force_target_names[0]][:].reshape(-1, 3, 1),
         atomic_inputs=np.concatenate(
             (x[None, ...].repeat(n_confs, axis=0), positions), axis=-1, dtype=np.float32
         ).reshape(-1, 5),
@@ -36,8 +36,8 @@ class Spice(BaseDataset):
     __energy_methods__ = ["wb97x/def2-tzvp"]
     __force_methods__ = ["wb97x/def2-tzvp"]
     __energy_unit__ = "hartree"
-    __distance_unit__ = "ang"
-    __forces_unit__ = "hartree/ang"
+    __distance_unit__ = "bohr"
+    __forces_unit__ = "hartree/bohr"
 
     energy_target_names = ["dft_total_energy"]
 

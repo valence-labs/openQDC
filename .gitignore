@@ -147,3 +147,4 @@ nohup.out
 *.csv
 *.txt
 *.sh
+.DS_Store

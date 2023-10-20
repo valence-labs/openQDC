@@ -1,0 +1,69 @@
+site_name: "Open Quantum Data Commons (openQDC)"
+site_description: "I don't know... Something about data and Quantum stuff I guess :D"
+site_url: "https://github.com/OpenDrugDiscovery/openQDC"
+repo_url: "https://github.com/OpenDrugDiscovery/openQDC"
+repo_name: "openQDC"
+copyright: Copyright 2023 Valence Labs
+
+remote_branch: "privpage"
+use_directory_urls: false
+docs_dir: "docs"
+
+nav:
+  - Overview: index.md
+  - Available Datasets: datasets.md
+theme:
+  name: material
+  custom_dir: docs/_overrides
+  palette:
+    primary: teal
+    accent: purple
+  features:
+    - navigation.expand
+
+extra_css:
+  - css/custom.css
+
+extra_javascript:
+  - javascripts/config.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+markdown_extensions:
+  - admonition
+  - markdown_include.include
+  - pymdownx.emoji
+  - pymdownx.highlight
+  - pymdownx.magiclink
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.tasklist
+  # For `tab_length=2` in the markdown extension
+  # See https://github.com/mkdocs/mkdocs/issues/545
+  - mdx_truly_sane_lists
+  - mkdocs-click
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+  - mkdocstrings:
+      watch:
+        - src/
+      handlers:
+        python:
+          setup_commands:
+            - import sys
+            - sys.path.append("docs")
+            - sys.path.append("src")
+          selection:
+            new_path_syntax: yes
+          rendering:
+            show_root_heading: yes
+            heading_level: 3
+            show_if_no_docstring: true
+  - mkdocs-jupyter:
+      execute: False
+      # kernel_name: python3
