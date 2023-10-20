@@ -7,6 +7,23 @@ from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 
 
 class ISO17(BaseDataset):
+    """
+    ISO17 dataset consists of the largest set of isomers from the QM9 dataset that consists of a fixed
+    composition of atoms (C7O2H10) arranged in different chemically valid structures. It consists of consist
+    of 129 molecules each containing 5,000 conformational geometries, energies and forces with a resolution
+    of 1 femtosecond in the molecular dynamics trajectories. The simulations were carried out using the
+    Perdew-Burke-Ernzerhof (PBE) functional and the Tkatchenko-Scheffler (TS) van der Waals correction method.
+
+    Usage:
+    ```python
+    from openqdc.datasets import ISO17
+    dataset = ISO17()
+    ```
+
+    References:
+    - https://paperswithcode.com/dataset/iso17
+    """
+
     __name__ = "iso_17"
 
     # Energy in hartree, all zeros by default

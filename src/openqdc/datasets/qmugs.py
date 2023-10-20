@@ -36,6 +36,22 @@ def read_mol(mol_dir):
 
 
 class QMugs(BaseDataset):
+    """
+    The QMugs dataset contains 2 million conformers for 665k biologically and pharmacologically relevant molecules
+    extracted from the ChEMBL database. The atomic and molecular properties are calculated using both,
+    semi-empirical methods (GFN2-xTB) and DFT method (ωB97X-D/def2-SVP).
+
+    Usage:
+    ```python
+    from openqdc.datasets import QMugs
+    dataset = QMugs()
+    ```
+
+    References:
+    - https://www.nature.com/articles/s41597-022-01390-7#ethics
+    - https://www.research-collection.ethz.ch/handle/20.500.11850/482129
+    """
+
     __name__ = "qmugs"
     __energy_methods__ = ["gfn2_xtb", "b3lyp/6-31g*"]
     __energy_unit__ = "hartree"

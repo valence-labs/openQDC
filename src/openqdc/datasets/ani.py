@@ -9,6 +9,22 @@ from openqdc.utils.io import get_local_cache
 
 
 class ANI1(BaseDataset):
+    """
+    The ANI-1 dataset is a collection of 22 x 10^6 structural conformations from 57,000 distinct small
+    organic molecules with energy labels calculated using DFT. The molecules
+    contain 4 distinct atoms, C, N, O and H.
+
+    Usage
+    ```python
+    from openqdc.datasets import ANI1
+    dataset = ANI1()
+    ```
+
+    References:
+    - ANI-1: https://www.nature.com/articles/sdata2017193
+    - Github: https://github.com/aiqm/ANI1x_datasets
+    """
+
     __name__ = "ani1"
 
     # Energy in hartree, all zeros by default
@@ -45,6 +61,21 @@ class ANI1(BaseDataset):
 
 
 class ANI1CCX(ANI1):
+    """
+    ANI1-CCX is a dataset of 500k conformers subsampled from the 5.5M conformers of ANI-1X dataset. The selected
+    conformations are then labelled using a high accuracy CCSD(T)*/CBS method.
+
+    Usage
+    ```python
+    from openqdc.datasets import ANI1CCX
+    dataset = ANI1CCX()
+    ```
+
+    References:
+    - ANI-1ccx: https://doi.org/10.1038/s41467-019-10827-4
+    - Github: https://github.com/aiqm/ANI1x_datasets
+    """
+
     __name__ = "ani1ccx"
 
     # Energy in hartree, all zeros by default
@@ -72,6 +103,21 @@ class ANI1CCX(ANI1):
 
 
 class ANI1X(ANI1):
+    """
+    The ANI-1X dataset consists of ANI-1 molecules + some molecules added using active learning which leads to
+    a total of 5,496,771 conformers with 63,865 unique molecules.
+
+    Usage
+    ```python
+    from openqdc.datasets import ANI1X
+    dataset = ANI1X()
+    ```
+
+    References:
+    - ANI-1x: https://doi.org/10.1063/1.5023802
+    - Github: https://github.com/aiqm/ANI1x_datasets
+    """
+
     __name__ = "ani1x"
 
     # Energy in hartree, all zeros by default
