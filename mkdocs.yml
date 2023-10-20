@@ -12,6 +12,8 @@ docs_dir: "docs"
 nav:
   - Overview: index.md
   - Available Datasets: datasets.md
+  - Tutorials:
+    - Really hard example: tutorials/usage.ipynb
 theme:
   name: material
   custom_dir: docs/_overrides
@@ -19,7 +21,9 @@ theme:
     primary: teal
     accent: purple
   features:
+    - navigation.tabs
     - navigation.expand
+
 
 extra_css:
   - css/custom.css

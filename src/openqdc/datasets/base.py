@@ -67,6 +67,7 @@ class BaseDataset(torch.utils.data.Dataset):
     __force_methods__ = []
     energy_target_names = []
     force_target_names = []
+    # convert force gradient -1
 
     __energy_unit__ = "hartree"
     __distance_unit__ = "bohr"
