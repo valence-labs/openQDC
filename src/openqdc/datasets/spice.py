@@ -49,8 +49,11 @@ class Spice(BaseDataset):
     """
 
     __name__ = "spice"
-    __energy_methods__ = ["wb97x_tz"]
-    __force_methods__ = ["wb97x_tz"]
+    __energy_methods__ = ["wb97x/def2-tzvp"]
+    __force_methods__ = ["wb97x/def2-tzvp"]
+    __energy_unit__ = "hartree"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "hartree/ang"
 
     energy_target_names = ["dft_total_energy"]
 
@@ -93,8 +96,8 @@ class Spice(BaseDataset):
         "SPICE Ion Pairs Single Points Dataset v1.1": "Ion Pairs",
     }
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, energy_unit=None, distance_unit=None) -> None:
+        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
 
     def read_raw_entries(self):
         raw_path = p_join(self.root, "SPICE-1.1.4.hdf5")

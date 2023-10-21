@@ -13,7 +13,7 @@ class SolvatedPeptides(BaseDataset):
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
     __energy_methods__ = [
-        "revpbe-d3(bj)_tz",
+        "revpbe-d3(bj)/def2-tzvp",
     ]
 
     energy_target_names = [
@@ -21,15 +21,20 @@ class SolvatedPeptides(BaseDataset):
     ]
 
     __force_methods__ = [
-        "revpbe-d3(bj)_tz",
+        "revpbe-d3(bj)/def2-tzvp",
     ]
 
     force_target_names = [
         "revPBE-D3(BJ):def2-TZVP Gradient",
     ]
 
-    def __init__(self) -> None:
-        super().__init__()
+    # TO CHECK
+    __energy_unit__ = "hartree"
+    __distance_unit__ = "bohr"
+    __forces_unit__ = "hartree/bohr"
+
+    def __init__(self, energy_unit=None, distance_unit=None) -> None:
+        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
 
     def read_raw_entries(self):
         raw_path = p_join(self.root, "solvated_peptides.h5")

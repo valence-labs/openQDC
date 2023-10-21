@@ -50,9 +50,13 @@ def read_archive(path):
 class PubchemQC(BaseDataset):
     __name__ = "pubchemqc"
     __energy_methods__ = [
-        "b3lyp",
+        "b3lyp/6-31g*",
         "pm6",
     ]
+
+    __energy_unit__ = "ev"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "ev/ang"
 
     energy_target_names = [
         "b3lyp",
@@ -64,8 +68,8 @@ class PubchemQC(BaseDataset):
 
     partitions = ["b3lyp", "pm6"]
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, energy_unit=None, distance_unit=None) -> None:
+        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
 
     def _read_raw_(self, part):
         arxiv_paths = glob(p_join(self.root, f"{part}", "*.tar.gz"))

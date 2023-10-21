@@ -52,7 +52,7 @@ class TMQM(BaseDataset):
     # Energy in hartree, all zeros by default
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
-    __energy_methods__ = ["tpssh_tz"]
+    __energy_methods__ = ["tpssh/def2tzvp"]
 
     energy_target_names = ["TPSSh/def2TZVP level"]
 

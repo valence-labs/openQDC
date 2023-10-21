@@ -79,6 +79,10 @@ class GEOM(BaseDataset):
     __name__ = "geom"
     __energy_methods__ = ["gfn2_xtb"]
 
+    __energy_unit__ = "hartree"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "hartree/ang"
+
     energy_target_names = ["gfn2_xtb.energy"]
     force_target_names = []
 
@@ -87,8 +91,8 @@ class GEOM(BaseDataset):
 
     partitions = ["qm9", "drugs"]
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, energy_unit=None, distance_unit=None) -> None:
+        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
 
     def _read_raw_(self, partition):
         raw_path = p_join(self.root, "rdkit_folder")

@@ -31,15 +31,18 @@ class ANI1(BaseDataset):
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
     __energy_methods__ = [
-        "wb97x_6-31g(d)",
+        "wb97x/6-31g(d)",
     ]
 
     energy_target_names = [
         "ωB97x:6-31G(d) Energy",
     ]
+    __energy_unit__ = "hartree"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "hartree/ang"
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, energy_unit=None, distance_unit=None) -> None:
+        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
 
     @property
     def root(self):
