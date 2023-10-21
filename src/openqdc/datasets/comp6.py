@@ -7,6 +7,22 @@ from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 
 
 class COMP6(BaseDataset):
+    """
+    COMP6 is a benchmark suite consisting of broad regions of bio-chemical and organic space
+    developed for testing the ANI-1x potential. It is curated from 6 benchmark sets:
+    S66x8, ANI Molecular Dynamics, GDB7to9, GDB10to13, DrugBank, and Tripeptides.
+
+    Usage
+    ```python
+    from openqdc.datasets import COMP6
+    dataset = COMP6()
+    ```
+
+    References:
+    - https://aip.scitation.org/doi/abs/10.1063/1.5023802
+    - Github: https://github.com/isayev/COMP6
+    """
+
     __name__ = "comp6"
 
     # Energy in hartree, all zeros by default
