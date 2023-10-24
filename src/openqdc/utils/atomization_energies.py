@@ -20,13 +20,12 @@ class IsolatedAtomEnergyFactory:
         except ValueError:
             func = level_of_theory
             is_dft = not is_dft
-
-        functional_dict = getattr(ISOLATED_ATOM_ENERGIES, func, None)
+        functional_dict = ISOLATED_ATOM_ENERGIES.get(func, None)
         if functional_dict is None:
             logger.warning(f"Isolated atom energies not found for {level_of_theory}")
         if not is_dft:
             return functional_dict
-        return getattr(ISOLATED_ATOM_ENERGIES, basis, None)
+        return functional_dict.get(basis, None)
 
 
 SPICE = {
