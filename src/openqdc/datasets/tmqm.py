@@ -52,9 +52,13 @@ class TMQM(BaseDataset):
     # Energy in hartree, all zeros by default
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
-    __energy_methods__ = ["tpssh/def2tzvp"]
+    __energy_methods__ = ["tpssh/def2-tzvp"]
 
     energy_target_names = ["TPSSh/def2TZVP level"]
+
+    __energy_unit__ = "hartree"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "hartree/ang"
 
     def __init__(self) -> None:
         super().__init__()

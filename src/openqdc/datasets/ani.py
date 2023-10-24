@@ -82,10 +82,10 @@ class ANI1CCX(ANI1):
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
     __energy_methods__ = [
-        "ccsd(t)_cbs",
-        "npno_ccsd(t)_dz",
-        "npno_ccsd(t)_tz",
-        "tpno_ccsd(t)_dz",
+        "ccsd(t)/cbs",
+        "ccsd(t)/cc-pvdz",
+        "ccsd(t)/cc-pvtz",
+        "ccsd(t)/cc-pvdz",
     ]
 
     energy_target_names = [
@@ -98,8 +98,8 @@ class ANI1CCX(ANI1):
     __force_methods__ = []
     force_target_names = []
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, energy_unit=None, distance_unit=None) -> None:
+        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
 
 
 class ANI1X(ANI1):
@@ -124,14 +124,14 @@ class ANI1X(ANI1):
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
     __energy_methods__ = [
-        "hf_dz",
-        "hf_qz",
-        "hf_tz",
-        "mp2_dz",
-        "mp2_qz",
-        "mp2_tz",
-        "wb97x_6-31g(d)",
-        "wb97x_tz",
+        "hf/cc-pvdz",
+        "hf/cc-pvqz",
+        "hf/cc-pvtz",
+        "mp2/cc-pvdz",
+        "mp2/cc-pvqz",
+        "mp2/cc-pvtz",
+        "wb97x/6-31g(d)",
+        "wb97x/cc-pvtz",
     ]
 
     energy_target_names = [
@@ -155,8 +155,8 @@ class ANI1X(ANI1):
         "wb97x_tz",
     ]
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, energy_unit=None, distance_unit=None) -> None:
+        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
 
 
 if __name__ == "__main__":

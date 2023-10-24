@@ -36,14 +36,14 @@ def read_mol(mol_path, smiles, subset, targets):
 class DESS(BaseDataset):
     __name__ = "dess"
     __energy_methods__ = [
-        "mp2_cc",
-        "mp2_qz",
-        "mp2_tz",
-        "mp2_cbs",
-        "ccsd(t)_cc",
-        "ccsd(t)_cbs",
-        "ccsd(t)_nn",
-        "sapt",
+        "mp2/cc-pvdz",
+        "mp2/cc-pvqz",
+        "mp2/cc-pvtz",
+        "mp2/cbs",
+        "ccsd(t)/cc-pvdz",
+        "ccsd(t)/cbs",  # cbs
+        "ccsd(t)/nn",  # nn
+        "sapt/aug-cc-pwcvxz",
     ]
 
     energy_target_names = [

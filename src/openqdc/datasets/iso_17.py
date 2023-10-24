@@ -30,7 +30,7 @@ class ISO17(BaseDataset):
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
     __energy_methods__ = [
-        "pbe+vdw-ts",
+        "pbe/vdw-ts",
     ]
 
     energy_target_names = [
@@ -38,7 +38,7 @@ class ISO17(BaseDataset):
     ]
 
     __force_methods__ = [
-        "pbe+vdw-ts",
+        "pbe/vdw-ts",
     ]
 
     force_target_names = [

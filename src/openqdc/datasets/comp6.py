@@ -34,14 +34,14 @@ class COMP6(BaseDataset):
 
     __energy_methods__ = [
         "wb97x/6-31g*",
-        "b3lyp-d3m(bj)_tz",
-        "b3lyp_tz",
-        "hf_tz",
-        "pbe-d3(bj)_dz",
-        "pbe_tz",
-        "svwm_tz",
-        "wb97m-d3(bj)_tz",
-        "wb97m_tz",
+        "b3lyp-d3mbj/def2-tzvp",
+        "b3lyp/def2-tzvp",
+        "hf/def2-tzvp",
+        "pbe-d3bj/def2-tzvp",
+        "pbe/def2-tzvp",
+        "svwn/def2-tzvp",
+        "wb97m-d3bj/def2-tzvp",
+        "wb97m/def2-tzvp",
     ]
 
     energy_target_names = [

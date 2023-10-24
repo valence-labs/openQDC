@@ -9,6 +9,7 @@ from loguru import logger
 from sklearn.utils import Bunch
 from tqdm import tqdm
 
+from openqdc.utils.atomization_energies import IsolatedAtomEnergyFactory
 from openqdc.utils.constants import NB_ATOMIC_FEATURES
 from openqdc.utils.io import (
     copy_exists,
@@ -67,6 +68,7 @@ class BaseDataset(torch.utils.data.Dataset):
     __force_methods__ = []
     energy_target_names = []
     force_target_names = []
+    __isolated_atom_energies__ = []
     # convert force gradient -1
 
     __energy_unit__ = "hartree"
@@ -84,6 +86,15 @@ class BaseDataset(torch.utils.data.Dataset):
             res = self.collate_list(entries)
             self.save_preprocess(res)
         self.read_preprocess()
+        self.compute_properties()
+        self.__isolated_atom_energies__ = (
+            [IsolatedAtomEnergyFactory.get(en_method) for en_method in self.__energy_methods__]
+            if self.__energy_methods__
+            else None
+        )
+
+    def compute_properties():
+        pass
 
     @property
     def energy_unit(self):

@@ -38,9 +38,9 @@ class GDML(BaseDataset):
     __energy_methods__ = [
         "ccsd/cc-pvdz",
         "ccsd(t)/cc-pvdz",
-        # "pbe+mbd/light", #MD22
+        "pbe/mbd",  # MD22
         # "pbe+mbd/tight", #MD22
-        "pbe+vdw-ts",  # MD17
+        "pbe/vdw-ts",  # MD17
     ]
 
     energy_target_names = [
@@ -52,9 +52,9 @@ class GDML(BaseDataset):
     __force_methods__ = [
         "ccsd/cc-pvdz",
         "ccsd(t)/cc-pvdz",
-        # "pbe+mbd/light", #MD22
+        "pbe/mbd",  # MD22
         # "pbe+mbd/tight", #MD22
-        "pbe+vdw-ts",  # MD17
+        "pbe/vdw-ts",  # MD17
     ]
 
     force_target_names = [

@@ -13,7 +13,7 @@ class SN2RXN(BaseDataset):
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
     __energy_methods__ = [
-        "dsd-blyp-d3(bj)_tz",
+        "dsd-blyp-d3(bj)/def2-tzvp",
     ]
     __energy_unit__ = "ev"
     __distance_unit__ = "ang"
@@ -24,7 +24,7 @@ class SN2RXN(BaseDataset):
     ]
 
     __force_methods__ = [
-        "dsd-blyp-d3(bj)_tz",
+        "dsd-blyp-d3(bj)/def2-tzvp",
     ]
 
     force_target_names = [

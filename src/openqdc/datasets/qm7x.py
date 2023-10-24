@@ -39,11 +39,11 @@ class QM7X(BaseDataset):
     # Energy in hartree, all zeros by default
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
-    __energy_methods__ = ["pbe0+mbd", "dft3b+mbd"]
+    __energy_methods__ = ["pbe0/mbd", "dft3b"]
 
     energy_target_names = ["ePBE0", "eMBD"]
 
-    __force_methods__ = ["pbe0+mbd", "dft3b+mbd"]
+    __force_methods__ = ["pbe0/mbd", "dft3b"]
 
     force_target_names = ["pbe0FOR", "vdwFOR"]
 
