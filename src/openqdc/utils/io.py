@@ -150,3 +150,23 @@ def load_json(path):
 
 def load_xyz(path):
     return MolFromXYZFile(path)
+
+
+def print_h5_tree(val, pre=""):
+    items = len(val)
+    for key, val in val.items():
+        items -= 1
+        if items == 0:
+            # the last item
+            if type(val) == h5py._hl.group.Group:
+                print(pre + "└── " + key)
+                print_h5_tree(val, pre + "    ")
+            else:
+                print(pre + "└── " + key + " (%d)" % len(val))
+        else:
+            if type(val) == h5py._hl.group.Group:
+                print(pre + "├── " + key)
+                print_h5_tree(val, pre + "│   ")
+            else:
+                # pass
+                print(pre + "├── " + key + " (%d)" % len(val))

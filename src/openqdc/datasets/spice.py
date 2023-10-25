@@ -18,7 +18,7 @@ def read_record(r):
     positions = r["conformations"][:] * BOHR2ANG
 
     res = dict(
-        smiles=np.array([smiles] * n_confs),
+        name=np.array([smiles] * n_confs),
         subset=np.array([Spice.subset_mapping[subset]] * n_confs),
         energies=r[Spice.energy_target_names[0]][:][:, None].astype(np.float32),
         forces=r[Spice.force_target_names[0]][:].reshape(-1, 3, 1) / BOHR2ANG,
