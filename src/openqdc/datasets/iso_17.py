@@ -7,13 +7,30 @@ from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 
 
 class ISO17(BaseDataset):
+    """
+    ISO17 dataset consists of the largest set of isomers from the QM9 dataset that consists of a fixed
+    composition of atoms (C7O2H10) arranged in different chemically valid structures. It consists of consist
+    of 129 molecules each containing 5,000 conformational geometries, energies and forces with a resolution
+    of 1 femtosecond in the molecular dynamics trajectories. The simulations were carried out using the
+    Perdew-Burke-Ernzerhof (PBE) functional and the Tkatchenko-Scheffler (TS) van der Waals correction method.
+
+    Usage:
+    ```python
+    from openqdc.datasets import ISO17
+    dataset = ISO17()
+    ```
+
+    References:
+    - https://paperswithcode.com/dataset/iso17
+    """
+
     __name__ = "iso_17"
 
     # Energy in hartree, all zeros by default
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
     __energy_methods__ = [
-        "pbe-ts",
+        "pbe+vdw-ts",
     ]
 
     energy_target_names = [
@@ -21,15 +38,19 @@ class ISO17(BaseDataset):
     ]
 
     __force_methods__ = [
-        "pbe-ts",
+        "pbe+vdw-ts",
     ]
 
     force_target_names = [
         "PBE-TS Gradient",
     ]
 
-    def __init__(self) -> None:
-        super().__init__()
+    __energy_unit__ = "ev"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "ev/ang"
+
+    def __init__(self, energy_unit=None, distance_unit=None) -> None:
+        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
 
     def read_raw_entries(self):
         raw_path = p_join(self.root, "iso_17.h5")

@@ -7,15 +7,40 @@ from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 
 
 class GDML(BaseDataset):
+    """
+    Gradient Domain Machine Learning (GDML) is a dataset consisting of samples from ab initio
+    molecular dynamics (AIMD) trajectories. The dataset consists of,
+    - Benzene: 627000 samples
+    - Uracil: 133000 samples
+    - Naptalene: 326000 samples
+    - Aspirin: 211000 samples
+    - Salicylic Acid: 320000 samples
+    - Malonaldehyde: 993000 samples
+    - Ethanol: 555000 samples
+    - Toluene: 100000 samples
+
+    Usage
+    ```python
+    from openqdc.datasets import GDML
+    dataset = GDML()
+    ```
+
+    References:
+    - https://www.science.org/doi/10.1126/sciadv.1603015
+    - http://www.sgdml.org/#datasets
+    """
+
     __name__ = "gdml"
 
     # Energy in hartree, all zeros by default
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
     __energy_methods__ = [
-        "ccsd",
-        "ccsd(t)",
-        "pbe-ts",
+        "ccsd/cc-pvdz",
+        "ccsd(t)/cc-pvdz",
+        # "pbe+mbd/light", #MD22
+        # "pbe+mbd/tight", #MD22
+        "pbe+vdw-ts",  # MD17
     ]
 
     energy_target_names = [
@@ -25,9 +50,11 @@ class GDML(BaseDataset):
     ]
 
     __force_methods__ = [
-        "ccsd",
-        "ccsd(t)",
-        "pbe-ts",
+        "ccsd/cc-pvdz",
+        "ccsd(t)/cc-pvdz",
+        # "pbe+mbd/light", #MD22
+        # "pbe+mbd/tight", #MD22
+        "pbe+vdw-ts",  # MD17
     ]
 
     force_target_names = [
@@ -36,8 +63,12 @@ class GDML(BaseDataset):
         "PBE-TS Gradient",
     ]
 
-    def __init__(self) -> None:
-        super().__init__()
+    __energy_unit__ = "kcal/mol"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "kcal/mol/ang"
+
+    def __init__(self, energy_unit=None, distance_unit=None) -> None:
+        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
 
     def read_raw_entries(self):
         raw_path = p_join(self.root, "gdml.h5")

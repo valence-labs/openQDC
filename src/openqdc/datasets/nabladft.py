@@ -1,5 +1,6 @@
 import os
 from os.path import join as p_join
+from typing import Dict
 
 import datamol as dm
 import numpy as np
@@ -10,7 +11,7 @@ from openqdc.datasets.base import BaseDataset
 from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 
 
-def to_mol(entry):
+def to_mol(entry) -> Dict[str, np.ndarray]:
     Z, R, E, F = entry[:4]
     C = np.zeros_like(Z)
 
@@ -37,16 +38,35 @@ def read_chunk_from_db(raw_path, start_idx, stop_idx, step_size=1000):
 
 
 class NablaDFT(BaseDataset):
-    __name__ = "nabladft"
-    __energy_methods__ = ["wb97x-d_svp"]
+    """
+    NablaDFT is a dataset constructed from a subset of the
+    [Molecular Sets (MOSES) dataset](https://github.com/molecularsets/moses) consisting of 1 million molecules
+    with 5,340,152 unique conformations generated using ωB97X-D/def2-SVP level of theory.
 
-    energy_target_names = ["ωB97X-D/def2-SVP"]
+    Usage:
+    ```python
+    from openqdc.datasets import NablaDFT
+    dataset = NablaDFT()
+    ```
+
+    References:
+    - https://pubs.rsc.org/en/content/articlelanding/2022/CP/D2CP03966D
+    - https://github.com/AIRI-Institute/nablaDFT
+    """
+
+    __name__ = "nabladft"
+    __energy_methods__ = ["wb97x-d/def2-svp"]
+
+    energy_target_names = ["wb97x-d/def2-svp"]
+    __energy_unit__ = "hartree"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "hartree/ang"
 
     # Energy in hartree, all zeros by default
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, energy_unit=None, distance_unit=None) -> None:
+        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
 
     def read_raw_entries(self):
         raw_path = p_join(self.root, "dataset_full.db")

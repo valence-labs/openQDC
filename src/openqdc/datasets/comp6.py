@@ -7,13 +7,33 @@ from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 
 
 class COMP6(BaseDataset):
+    """
+    COMP6 is a benchmark suite consisting of broad regions of bio-chemical and organic space
+    developed for testing the ANI-1x potential. It is curated from 6 benchmark sets:
+    S66x8, ANI Molecular Dynamics, GDB7to9, GDB10to13, DrugBank, and Tripeptides.
+
+    Usage
+    ```python
+    from openqdc.datasets import COMP6
+    dataset = COMP6()
+    ```
+
+    References:
+    - https://aip.scitation.org/doi/abs/10.1063/1.5023802
+    - Github: https://github.com/isayev/COMP6
+    """
+
     __name__ = "comp6"
 
     # Energy in hartree, all zeros by default
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
+    # watchout that forces are stored as -grad(E)
+    __energy_unit__ = "hartree"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "hartree/ang"
 
     __energy_methods__ = [
-        "wb97x_6-31g*",
+        "wb97x/6-31g*",
         "b3lyp-d3m(bj)_tz",
         "b3lyp_tz",
         "hf_tz",
@@ -37,15 +57,15 @@ class COMP6(BaseDataset):
     ]
 
     __force_methods__ = [
-        "wb97x_6-31g*",
+        "wb97x/6-31g*",
     ]
 
     force_target_names = [
         "Gradient",
     ]
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, energy_unit=None, distance_unit=None) -> None:
+        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
 
     def read_raw_entries(self):
         samples = []

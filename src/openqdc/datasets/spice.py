@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils import load_hdf5_file
-from openqdc.utils.constants import BOHR2ANG, MAX_ATOMIC_NUMBER
+from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 from openqdc.utils.molecule import get_atomic_number_and_charge
 
 
@@ -15,13 +15,13 @@ def read_record(r):
     subset = r["subset"][0].decode("utf-8")
     n_confs = r["conformations"].shape[0]
     x = get_atomic_number_and_charge(dm.to_mol(smiles, add_hs=True))
-    positions = r["conformations"][:] * BOHR2ANG
+    positions = r["conformations"][:]
 
     res = dict(
         name=np.array([smiles] * n_confs),
         subset=np.array([Spice.subset_mapping[subset]] * n_confs),
         energies=r[Spice.energy_target_names[0]][:][:, None].astype(np.float32),
-        forces=r[Spice.force_target_names[0]][:].reshape(-1, 3, 1) / BOHR2ANG,
+        forces=r[Spice.force_target_names[0]][:].reshape(-1, 3, 1) * (-1.0),  # forces -ve of energy gradient
         atomic_inputs=np.concatenate(
             (x[None, ...].repeat(n_confs, axis=0), positions), axis=-1, dtype=np.float32
         ).reshape(-1, 5),
@@ -32,8 +32,28 @@ def read_record(r):
 
 
 class Spice(BaseDataset):
+    """
+    Spice Dataset consists of 1.1 million conformations for a diverse set of 19k unique molecules consisting of
+    small molecules, dimers, dipeptides, and solvated amino acids. It consists of both forces and energies calculated
+    at {\omega}B97M-D3(BJ)/def2-TZVPPD level of theory.
+
+    Usage:
+    ```python
+    from openqdc.datasets import Spice
+    dataset = Spice()
+    ```
+
+    References:
+    - https://arxiv.org/abs/2209.10702
+    - https://github.com/openmm/spice-dataset
+    """
+
     __name__ = "spice"
-    __energy_methods__ = ["wb97x_tz"]
+    __energy_methods__ = ["wb97x/def2-tzvp"]
+    __force_methods__ = ["wb97x/def2-tzvp"]
+    __energy_unit__ = "hartree"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "hartree/ang"
 
     energy_target_names = ["dft_total_energy"]
 
@@ -76,8 +96,8 @@ class Spice(BaseDataset):
         "SPICE Ion Pairs Single Points Dataset v1.1": "Ion Pairs",
     }
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, energy_unit=None, distance_unit=None) -> None:
+        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
 
     def read_raw_entries(self):
         raw_path = p_join(self.root, "SPICE-1.1.4.hdf5")

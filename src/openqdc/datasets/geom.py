@@ -1,4 +1,5 @@
 from os.path import join as p_join
+from typing import Dict
 
 import datamol as dm
 import numpy as np
@@ -9,7 +10,7 @@ from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 from openqdc.utils.molecule import get_atomic_number_and_charge
 
 
-def read_mol(mol_id, mol_dict, base_path, partition):
+def read_mol(mol_id: str, mol_dict, base_path: str, partition: str) -> Dict[str, np.ndarray]:
     """Read molecule from pickle file and return dict with conformers and energies
 
     Parameters
@@ -20,15 +21,18 @@ def read_mol(mol_id, mol_dict, base_path, partition):
         Dictionary containing the pickle_path and smiles of the molecule
     base_path: str
         Path to the folder containing the pickle files
+    partition: str
+        Name of the dataset partition, one of ['qm9', 'drugs']
 
     Returns
     -------
     res: dict
         Dictionary containing the following keys:
-            - atomic_inputs: flatten np.ndarray of shape (M, 4) containing the atomic numbers and positions
-            - smiles: np.ndarray of shape (N,) containing the smiles of the molecule
-            - energies: np.ndarray of shape (N,1) containing the energies of the conformers
-            - n_atoms: np.ndarray of shape (N,) containing the number of atoms in each conformer
+        - atomic_inputs: flatten np.ndarray of shape (M, 5) containing the atomic numbers, charges and positions
+        - smiles: np.ndarray of shape (N,) containing the smiles of the molecule
+        - energies: np.ndarray of shape (N,1) containing the energies of the conformers
+        - n_atoms: np.ndarray of shape (N,) containing the number of atoms in each conformer
+        - subset: np.ndarray of shape (N,) containing the name of the dataset partition
     """
 
     try:
@@ -56,8 +60,28 @@ def read_mol(mol_id, mol_dict, base_path, partition):
 
 
 class GEOM(BaseDataset):
+    """
+    The Geometric Ensemble Of Molecules (GEOM) dataset contains 37 million conformers for 133,000 molecules
+    from QM9, and 317,000 molecules with experimental data related to biophysics, physiology,
+    and physical chemistry. The dataset is generated using the GFN2-xTB semi-empirical method.
+
+    Usage:
+    ```python
+    from openqdc.datasets import GEOM
+    dataset = GEOM()
+    ```
+
+    References:
+    - https://www.nature.com/articles/s41597-022-01288-4
+    - https://github.com/learningmatter-mit/geom
+    """
+
     __name__ = "geom"
     __energy_methods__ = ["gfn2_xtb"]
+
+    __energy_unit__ = "hartree"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "hartree/ang"
 
     energy_target_names = ["gfn2_xtb.energy"]
     force_target_names = []
@@ -67,8 +91,8 @@ class GEOM(BaseDataset):
 
     partitions = ["qm9", "drugs"]
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, energy_unit=None, distance_unit=None) -> None:
+        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
 
     def _read_raw_(self, partition):
         raw_path = p_join(self.root, "rdkit_folder")
