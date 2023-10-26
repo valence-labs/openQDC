@@ -96,9 +96,6 @@ class Spice(BaseDataset):
         "SPICE Ion Pairs Single Points Dataset v1.1": "Ion Pairs",
     }
 
-    def __init__(self, energy_unit=None, distance_unit=None) -> None:
-        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
-
     def read_raw_entries(self):
         raw_path = p_join(self.root, "SPICE-1.1.4.hdf5")
 

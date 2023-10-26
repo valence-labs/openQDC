@@ -60,9 +60,6 @@ class WaterClusters(BaseDataset):
     __energy_methods__ = ["ttm2.1-f"]
     energy_target_names = ["TTM2.1-F Potential"]
 
-    def __init__(self, energy_unit=None, distance_unit=None) -> None:
-        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
-
     def read_raw_entries(self):
         samples = []
         for i in range(3, 31):

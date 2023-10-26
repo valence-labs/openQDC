@@ -66,9 +66,6 @@ class DESS(BaseDataset):
 
     partitions = ["DES370K", "DES5M"]
 
-    def __init__(self, energy_unit=None, distance_unit=None) -> None:
-        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
-
     def _read_raw_(self, part):
         df = pd.read_csv(p_join(self.root, f"{part}.csv"))
         for col in self.energy_target_names:

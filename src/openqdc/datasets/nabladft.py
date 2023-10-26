@@ -68,9 +68,6 @@ class NablaDFT(BaseDataset):
     # Energy in hartree, all zeros by default
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
-    def __init__(self, energy_unit=None, distance_unit=None) -> None:
-        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
-
     @requires_package("nablaDFT")
     def read_raw_entries(self):
         from nablaDFT.dataset import HamiltonianDatabase

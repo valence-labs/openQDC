@@ -60,9 +60,6 @@ class TMQM(BaseDataset):
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
 
-    def __init__(self) -> None:
-        super().__init__()
-
     def read_raw_entries(self):
         df = pd.read_csv(p_join(self.root, "tmQM_y.csv"), sep=";", usecols=["CSD_code", "Electronic_E"])
         e_map = dict(zip(df["CSD_code"], df["Electronic_E"]))

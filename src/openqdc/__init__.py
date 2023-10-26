@@ -9,9 +9,7 @@ from typing import TYPE_CHECKING  # noqa F401
 
 _lazy_imports_obj = {}
 
-_lazy_imports_mod = {
-    "datasets": "openqdc.datamodule",
-}
+_lazy_imports_mod = {"datasets": "openqdc.datamodule", "utils": "openqdc.utils"}
 
 
 def __getattr__(name):

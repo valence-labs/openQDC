@@ -64,9 +64,6 @@ class COMP6(BaseDataset):
         "Gradient",
     ]
 
-    def __init__(self, energy_unit=None, distance_unit=None) -> None:
-        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
-
     def read_raw_entries(self):
         samples = []
         for subset in ["ani_md", "drugbank", "gdb7_9", "gdb10_13", "s66x8", "tripeptides"]:

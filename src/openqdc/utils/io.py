@@ -13,9 +13,24 @@ from rdkit.Chem import MolFromXYZFile
 gcp_filesys = fsspec.filesystem("gs")
 local_filesys = LocalFileSystem()
 
+_OPENQDC_CACHE_DIR = "~/.cache/openqdc"
+
+
+def set_cache_dir(d):
+    r"""
+    Optionally set the _OPENQDC_CACHE_DIR directory.
+
+    Args:
+        d (str): path to a local folder.
+    """
+    if d is None:
+        return
+    global _OPENQDC_CACHE_DIR
+    _OPENQDC_CACHE_DIR = os.path.expanduser(d)
+
 
 def get_local_cache():
-    cache_dir = os.path.expanduser(os.path.expandvars("~/.cache/openqdc"))
+    cache_dir = os.path.expanduser(os.path.expandvars(_OPENQDC_CACHE_DIR))
     os.makedirs(cache_dir, exist_ok=True)
     return cache_dir
 

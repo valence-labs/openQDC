@@ -41,9 +41,6 @@ class ANI1(BaseDataset):
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
 
-    def __init__(self, energy_unit=None, distance_unit=None) -> None:
-        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
-
     @property
     def root(self):
         return p_join(get_local_cache(), "ani")
@@ -98,9 +95,6 @@ class ANI1CCX(ANI1):
     __force_methods__ = []
     force_target_names = []
 
-    def __init__(self, energy_unit=None, distance_unit=None) -> None:
-        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
-
 
 class ANI1X(ANI1):
     """
@@ -154,9 +148,6 @@ class ANI1X(ANI1):
         "wb97x/6-31g(d)",
         "wb97x/cc-pvtz",
     ]
-
-    def __init__(self, energy_unit=None, distance_unit=None) -> None:
-        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
 
 
 if __name__ == "__main__":

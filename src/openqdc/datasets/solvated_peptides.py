@@ -33,9 +33,6 @@ class SolvatedPeptides(BaseDataset):
     __distance_unit__ = "bohr"
     __forces_unit__ = "hartree/bohr"
 
-    def __init__(self, energy_unit=None, distance_unit=None) -> None:
-        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
-
     def read_raw_entries(self):
         raw_path = p_join(self.root, "solvated_peptides.h5")
         samples = read_qc_archive_h5(raw_path, "solvated_peptides", self.energy_target_names, self.force_target_names)

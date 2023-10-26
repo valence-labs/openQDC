@@ -67,9 +67,6 @@ class GDML(BaseDataset):
     __distance_unit__ = "ang"
     __forces_unit__ = "kcal/mol/ang"
 
-    def __init__(self, energy_unit=None, distance_unit=None) -> None:
-        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
-
     def read_raw_entries(self):
         raw_path = p_join(self.root, "gdml.h5")
         samples = read_qc_archive_h5(raw_path, "gdml", self.energy_target_names, self.force_target_names)

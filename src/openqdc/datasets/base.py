@@ -17,6 +17,7 @@ from openqdc.utils.io import (
     load_hdf5_file,
     pull_locally,
     push_remote,
+    set_cache_dir,
 )
 from openqdc.utils.molecule import atom_table
 from openqdc.utils.units import get_conversion
@@ -78,7 +79,10 @@ class BaseDataset(torch.utils.data.Dataset):
     __fn_distance__ = lambda x: x
     __fn_forces__ = lambda x: x
 
-    def __init__(self, energy_unit=None, distance_unit=None) -> None:
+    def __init__(
+        self, energy_unit: Optional[str] = None, distance_unit: Optional[str] = None, cache_dir: Optional[str] = None
+    ) -> None:
+        set_cache_dir(cache_dir)
         self.data = None
         self._set_units(energy_unit, distance_unit)
         if not self.is_preprocessed():
@@ -86,15 +90,11 @@ class BaseDataset(torch.utils.data.Dataset):
             res = self.collate_list(entries)
             self.save_preprocess(res)
         self.read_preprocess()
-        self.compute_properties()
         self.__isolated_atom_energies__ = (
             [IsolatedAtomEnergyFactory.get(en_method) for en_method in self.__energy_methods__]
             if self.__energy_methods__
             else None
         )
-
-    def compute_properties():
-        pass
 
     @property
     def energy_unit(self):
@@ -275,3 +275,9 @@ class BaseDataset(torch.utils.data.Dataset):
             subset=subset,
             forces=forces,
         )
+
+    def __str__(self):
+        return f"{self.__name__}"
+
+    def __repr__(self):
+        return f"{self.__name__}"

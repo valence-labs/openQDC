@@ -20,9 +20,9 @@ class Dummy(BaseDataset):
 
     force_target_names = ["forces"]
 
-    def __init__(self, energy_unit=None, distance_unit=None) -> None:
+    def __init__(self, energy_unit=None, distance_unit=None, cache_dir=None) -> None:
         try:
-            super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
+            super().__init__(energy_unit=energy_unit, distance_unit=distance_unit, cache_dir=cache_dir)
         except:  # noqa
             pass
 

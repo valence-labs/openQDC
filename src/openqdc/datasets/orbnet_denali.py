@@ -62,9 +62,6 @@ class OrbnetDenali(BaseDataset):
     # Energy in hartree, all zeros by default
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
-    def __init__(self, energy_unit=None, distance_unit=None) -> None:
-        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
-
     def read_raw_entries(self):
         label_path = p_join(self.root, "denali_labels.csv")
         df = pd.read_csv(label_path, usecols=["sample_id", "mol_id", "subset", "dft_energy", "xtb1_energy"])

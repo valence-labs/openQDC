@@ -31,9 +31,6 @@ class SN2RXN(BaseDataset):
         "DSD-BLYP-D3(BJ):def2-TZVP Gradient",
     ]
 
-    def __init__(self, energy_unit=None, distance_unit=None) -> None:
-        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
-
     def read_raw_entries(self):
         raw_path = p_join(self.root, "sn2_rxn.h5")
         samples = read_qc_archive_h5(raw_path, "sn2_rxn", self.energy_target_names, self.force_target_names)
