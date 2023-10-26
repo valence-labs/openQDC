@@ -46,7 +46,7 @@ class ISO17(BaseDataset):
     ]
 
     __energy_unit__ = "ev"
-    __distance_unit__ = "ang"
+    __distance_unit__ = "ang"  # bohr
     __forces_unit__ = "ev/ang"
 
     def __init__(self, energy_unit=None, distance_unit=None) -> None:

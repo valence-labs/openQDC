@@ -53,7 +53,7 @@ class QMugs(BaseDataset):
     """
 
     __name__ = "qmugs"
-    __energy_methods__ = ["gfn2_xtb", "b3lyp/6-31g*"]
+    __energy_methods__ = ["gfn2_xtb", "wb97x-d-D/def2-svp"]
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"

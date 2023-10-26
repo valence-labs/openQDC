@@ -3,6 +3,8 @@ from loguru import logger
 ATOM_SPECIES = "H", "Li", "B", "C", "N", "O", "F", "Na", "Mg", "Si", "P", "S", "Cl", "K", "Ca", "Br", "I"
 # Energy in atomic unit/ Hartree / Ang
 
+# didn t calculate for Pd, Pt, Mo, Ni, Fe, Cu, see DESS
+
 
 class IsolatedAtomEnergyFactory:
     def __init__(self):
@@ -23,12 +25,44 @@ class IsolatedAtomEnergyFactory:
         functional_dict = ISOLATED_ATOM_ENERGIES.get(func, None)
         if functional_dict is None:
             logger.warning(f"Isolated atom energies not found for {level_of_theory}")
+            return ZEROS
         if not is_dft:
             return functional_dict
-        return functional_dict.get(basis, None)
+        return functional_dict.get(basis, ZEROS)
 
 
-SPICE = {
+ZEROS = {
+    ("Br", -1): 0.0,
+    ("Br", 0): 0.0,
+    ("C", -1): 0.0,
+    ("C", 0): 0.0,
+    ("C", 1): 0.0,
+    ("Ca", 2): 0.0,
+    ("Cl", -1): 0.0,
+    ("Cl", 0): 0.0,
+    ("F", -1): 0.0,
+    ("F", 0): 0.0,
+    ("H", 0): 0.0,
+    ("I", -1): 0.0,
+    ("I", 0): 0.0,
+    ("K", 1): 0.0,
+    ("Li", 1): 0.0,
+    ("Mg", 2): 0.0,
+    ("N", -1): 0.0,
+    ("N", 0): 0.0,
+    ("N", 1): 0.0,
+    ("Na", 1): 0.0,
+    ("O", -1): 0.0,
+    ("O", 0): 0.0,
+    ("O", 1): 0.0,
+    ("P", 0): 0.0,
+    ("P", 1): 0.0,
+    ("S", -1): 0.0,
+    ("S", 0): 0.0,
+    ("S", 1): 0.0,
+}
+
+wb97m_d3bj_def2_tzvp = {
     ("Br", -1): -2574.2451510945853,
     ("Br", 0): -2574.1167240829964,
     ("C", -1): -37.91424135791358,
@@ -247,7 +281,7 @@ TMQM = {
     ("I", 0): -297.5887657326151,
 }
 # "wb97m-d3bj/def2-TZVPPD"
-wb97m_d3bj_def2_TZVPPD = {
+SPICE = {
     ("H", 0): -0.4987605100487541,
     ("Li", 1): -7.285254714046117,
     ("B", -3): -24.191211616488623,
@@ -1487,7 +1521,7 @@ ISOLATED_ATOM_ENERGIES = {
     "wb97m": {
         "def2-tzvp": COMP6_9,
     },
-    "wb97m-d3bj": {"def2-tzvp": SPICE},
+    "wb97m-d3bj": {"def2-tzvp": wb97m_d3bj_def2_tzvp, "def2-tzvppd": SPICE},
     "tpssh": {"def2-tzvp": TMQM},
     "revpbe-d3(bj)": {"def2-tzvp": SolvatedPeptides},
     "dsd-blyp-d3(bj)": {"def2-tzvp": SN2RXN},
@@ -1535,7 +1569,7 @@ ISOLATED_ATOM_ENERGIES = {
         "cbs": mp2aug,
     },
     # SAPT0
-    "sapt": {
+    "sapt0": {
         "aug-cc-pwcvxz": None,  # DOESNT MAKE SENSE
     },
     # SEMI EMPIRICAL

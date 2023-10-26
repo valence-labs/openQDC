@@ -35,6 +35,9 @@ def read_mol(mol_path, smiles, subset, targets):
 
 class DESS(BaseDataset):
     __name__ = "dess"
+    __energy_unit__ = "hartree"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "hartree/ang"
     __energy_methods__ = [
         "mp2/cc-pvdz",
         "mp2/cc-pvqz",
@@ -43,7 +46,7 @@ class DESS(BaseDataset):
         "ccsd(t)/cc-pvdz",
         "ccsd(t)/cbs",  # cbs
         "ccsd(t)/nn",  # nn
-        "sapt/aug-cc-pwcvxz",
+        "sapt0/aug-cc-pwcvxz",
     ]
 
     energy_target_names = [

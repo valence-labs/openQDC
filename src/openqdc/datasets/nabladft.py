@@ -4,11 +4,11 @@ from typing import Dict
 
 import datamol as dm
 import numpy as np
-from nablaDFT.dataset import HamiltonianDatabase
 from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils.constants import MAX_ATOMIC_NUMBER
+from openqdc.utils.package_utils import requires_package
 
 
 def to_mol(entry) -> Dict[str, np.ndarray]:
@@ -27,7 +27,10 @@ def to_mol(entry) -> Dict[str, np.ndarray]:
     return res
 
 
+@requires_package("nablaDFT")
 def read_chunk_from_db(raw_path, start_idx, stop_idx, step_size=1000):
+    from nablaDFT.dataset import HamiltonianDatabase
+
     print(f"Loading from {start_idx} to {stop_idx}")
     db = HamiltonianDatabase(raw_path)
     idxs = list(np.arange(start_idx, stop_idx))
@@ -59,8 +62,8 @@ class NablaDFT(BaseDataset):
 
     energy_target_names = ["wb97x-d/def2-svp"]
     __energy_unit__ = "hartree"
-    __distance_unit__ = "ang"
-    __forces_unit__ = "hartree/ang"
+    __distance_unit__ = "bohr"  # ANG??
+    __forces_unit__ = "hartree/bohr"
 
     # Energy in hartree, all zeros by default
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
@@ -68,7 +71,10 @@ class NablaDFT(BaseDataset):
     def __init__(self, energy_unit=None, distance_unit=None) -> None:
         super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
 
+    @requires_package("nablaDFT")
     def read_raw_entries(self):
+        from nablaDFT.dataset import HamiltonianDatabase
+
         raw_path = p_join(self.root, "dataset_full.db")
         train = HamiltonianDatabase(raw_path)
         n, c = len(train), 20

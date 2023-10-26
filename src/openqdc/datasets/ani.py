@@ -151,8 +151,8 @@ class ANI1X(ANI1):
     ]
 
     __force_methods__ = [
-        "wb97x_6-31g(d)",
-        "wb97x_tz",
+        "wb97x/6-31g(d)",
+        "wb97x/cc-pvtz",
     ]
 
     def __init__(self, energy_unit=None, distance_unit=None) -> None:

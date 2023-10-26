@@ -248,6 +248,7 @@ class BaseDataset(torch.utils.data.Dataset):
         return self.data["energies"].shape[0]
 
     def __getitem__(self, idx: int):
+        # if idx is more than len doesn t throw error
         p_start, p_end = self.data["position_idx_range"][idx]
         input = self.data["atomic_inputs"][p_start:p_end]
         z, c, positions, energies = (

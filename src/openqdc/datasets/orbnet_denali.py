@@ -54,7 +54,6 @@ class OrbnetDenali(BaseDataset):
 
     __name__ = "orbnet_denali"
     __energy_methods__ = ["wb97x-d3/def2-tzvp", "gfn1_xtb"]
-    # not sure probably Hartree ang -> must manually check
     energy_target_names = ["dft_energy", "xtb1_energy"]
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
