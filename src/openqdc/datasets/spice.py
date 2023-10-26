@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils import load_hdf5_file
-from openqdc.utils.constants import BOHR2ANG, MAX_ATOMIC_NUMBER
+from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 from openqdc.utils.molecule import get_atomic_number_and_charge
 
 
@@ -15,13 +15,13 @@ def read_record(r):
     subset = r["subset"][0].decode("utf-8")
     n_confs = r["conformations"].shape[0]
     x = get_atomic_number_and_charge(dm.to_mol(smiles, add_hs=True))
-    positions = r["conformations"][:] * BOHR2ANG
+    positions = r["conformations"][:]
 
     res = dict(
         name=np.array([smiles] * n_confs),
         subset=np.array([Spice.subset_mapping[subset]] * n_confs),
         energies=r[Spice.energy_target_names[0]][:][:, None].astype(np.float32),
-        forces=r[Spice.force_target_names[0]][:].reshape(-1, 3, 1) / BOHR2ANG * (-1.0),  # forces -ve of energy gradient
+        forces=r[Spice.force_target_names[0]][:].reshape(-1, 3, 1) * (-1.0),  # forces -ve of energy gradient
         atomic_inputs=np.concatenate(
             (x[None, ...].repeat(n_confs, axis=0), positions), axis=-1, dtype=np.float32
         ).reshape(-1, 5),

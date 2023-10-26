@@ -8,6 +8,7 @@ import urllib.error
 import urllib.request
 import zipfile
 
+import click
 import fsspec
 import gdown
 import requests
@@ -16,7 +17,6 @@ from loguru import logger
 from sklearn.utils import Bunch
 
 from openqdc.raws.config_factory import DataConfigFactory
-from openqdc.raws.pubchemqc import download_b3lyp_pm6
 from openqdc.utils.io import get_local_cache
 
 
@@ -158,10 +158,18 @@ class DataDownloader:
         return self.from_config(cfg)
 
 
+@click.command(help="Fecth raw datasets. if a list seperate all names by a comma. e.g. tmqm,dess")
+@click.argument("datasets", type=str)
+def main(datasets):
+    if datasets == "all":
+        dataset_names = DataConfigFactory.available_datasets
+    else:
+        dataset_names = datasets.split(",")
+
+    for dataset_name in dataset_names:
+        dd = DataDownloader()
+        dd.from_name(dataset_name)
+
+
 if __name__ == "__main__":
-    download_b3lyp_pm6()
-    # dataset_names = DataConfigFactory.available_datasets
-    # dataset_names = ["tmqm"]
-    # for dataset_name in dataset_names:
-    #     dd = DataDownloader()
-    #     dd.from_name(dataset_name)
+    main()

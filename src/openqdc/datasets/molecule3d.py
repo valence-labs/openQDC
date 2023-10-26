@@ -9,7 +9,7 @@ from rdkit import Chem
 from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
-from openqdc.utils.constants import BOHR2ANG, MAX_ATOMIC_NUMBER
+from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 from openqdc.utils.molecule import get_atomic_number_and_charge
 
 
@@ -36,7 +36,7 @@ def read_mol(mol: Chem.rdchem.Mol, energy: float) -> Dict[str, np.ndarray]:
     smiles = dm.to_smiles(mol, explicit_hs=False)
     # subset = dm.to_smiles(dm.to_scaffold_murcko(mol, make_generic=True), explicit_hs=False)
     x = get_atomic_number_and_charge(mol)
-    positions = mol.GetConformer().GetPositions() * BOHR2ANG
+    positions = mol.GetConformer().GetPositions()
 
     res = dict(
         name=np.array([smiles]),

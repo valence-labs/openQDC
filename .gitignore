@@ -139,6 +139,7 @@ cache/
 *.json.bz2
 *.hdf5
 nohup.out
+cookie.txt
 *.out
 *.crt
 *.key
