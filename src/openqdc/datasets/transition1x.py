@@ -4,7 +4,7 @@ import numpy as np
 from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
-from openqdc.utils.constants import MAX_ATOMIC_NUMBER, NB_ATOMIC_FEATURES
+from openqdc.utils.constants import NB_ATOMIC_FEATURES
 from openqdc.utils.io import load_hdf5_file
 
 
@@ -39,9 +39,6 @@ def read_record(r, group):
 class Transition1X(BaseDataset):
     __name__ = "transition1x"
 
-    # Energy in hartree, all zeros by default
-    atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
-
     __energy_methods__ = [
         "wb97x/6-31G(d)",
     ]
@@ -67,18 +64,3 @@ class Transition1X(BaseDataset):
 
         res = sum([read_record(f[g], group=g) for g in tqdm(f)], [])  # don't use parallelized here
         return res
-
-
-if __name__ == "__main__":
-    for data_class in [Transition1X]:
-        data = data_class()
-        n = len(data)
-
-        for i in np.random.choice(n, 3, replace=False):
-            x = data[i]
-            print(x.name, x.subset, end=" ")
-            for k in x:
-                if x[k] is not None:
-                    print(k, x[k].shape, end=" ")
-
-            print()

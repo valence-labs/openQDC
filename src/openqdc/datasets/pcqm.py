@@ -1,7 +1,7 @@
 import json
 import os
 import pickle as pkl
-import tarfile  # noqa
+import tarfile
 from glob import glob
 from os.path import join as p_join
 
@@ -11,7 +11,6 @@ import pandas as pd
 from loguru import logger
 
 from openqdc.datasets.base import BaseDataset
-from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 from openqdc.utils.io import get_local_cache
 
 
@@ -47,20 +46,21 @@ def read_content(f, prefix="pubchem.PM6."):
 
 
 def read_archive(path):
-    out = path.replace(".tar.xz", ".pkl")
-    if os.path.exists(out):
-        with open(out, "rb") as f:
-            res = pkl.load(f)
-    else:
-        res = []
-        # partition = path.split("/")[-2]
-        # prefix = "pubchem.PM6." if partition == "pm6" else "pubchem.B3LYP@PM6."
-        # with tarfile.open(path, mode='r:xz') as tar:
-        #     members = [tar.extractfile(x) for x in tar.getmembers()
-        #             if x is not None and x.name.endswith(".json")]
-        #     res = [read_content(x, prefix=prefix) for x in members if x is not None]
-        #     logger.info(f"Read {len(res)} entries")
+    res = []
+    partition = path.split("/")[-2]
+    prefix = "pubchem.PM6." if partition == "pm6" else "pubchem.B3LYP@PM6."
+    with tarfile.open(path, mode="r:xz") as tar:
+        members = [tar.extractfile(x) for x in tar.getmembers() if x is not None and x.name.endswith(".json")]
+        res = [read_content(x, prefix=prefix) for x in members if x is not None]
 
+    return res
+
+
+def read_preprocessed_archive(path):
+    res = []
+    if os.path.exists(path):
+        with open(path, "rb") as f:
+            res = pkl.load(f)
     return res
 
 
@@ -72,9 +72,6 @@ class PCQM_PM6(BaseDataset):
 
     __force_methods__ = []
     force_target_names = []
-
-    # Energy in hartree, all zeros by default
-    atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
     def __init__(self, energy_unit=None, distance_unit=None) -> None:
         super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
@@ -98,8 +95,8 @@ class PCQM_PM6(BaseDataset):
             return res
 
     def read_raw_entries(self):
-        arxiv_paths = glob(p_join(self.root, f"{self.__energy_methods__[0]}", "*.tar.xz"))
-        f = lambda x: self.collate_list(read_archive(x), partial=True)
+        arxiv_paths = glob(p_join(self.root, f"{self.__energy_methods__[0]}", "*.pkl"))
+        f = lambda x: self.collate_list(read_preprocessed_archive(x), partial=True)
         samples = dm.parallelized(f, arxiv_paths, n_jobs=1, progress=True)
         samples = [x for x in samples if x is not None]
         return samples
@@ -111,21 +108,5 @@ class PCQM_B3LYP(PCQM_PM6):
 
     energy_target_names = ["b3lyp"]
 
-    # Energy in hartree, all zeros by default
-    atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
-
     def __init__(self, energy_unit=None, distance_unit=None) -> None:
         super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
-
-
-if __name__ == "__main__":
-    for data_class in [PCQM_PM6, PCQM_B3LYP]:
-        data = data_class()
-        n = len(data)
-
-        for i in np.random.choice(n, 3, replace=False):
-            x = data[i]
-            print(x.name, x.subset, end=" ")
-            for k in x:
-                if x[k] is not None:
-                    print(k, x[k].shape, end=" ")

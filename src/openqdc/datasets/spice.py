@@ -106,17 +106,3 @@ class Spice(BaseDataset):
         tmp = [read_record(data[mol_name]) for mol_name in tqdm(data)]  # don't use parallelized here
 
         return tmp
-
-
-if __name__ == "__main__":
-    data = Spice()
-    n = len(data)
-
-    for i in np.random.choice(n, 10, replace=False):
-        x = data[i]
-        print(x.smiles, x.subset, end=" ")
-        for k in x:
-            if k != "smiles" and k != "subset":
-                print(k, x[k].shape if x[k] is not None else None, end=" ")
-
-        print()

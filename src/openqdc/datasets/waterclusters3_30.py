@@ -5,7 +5,6 @@ import numpy as np
 from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
-from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 from openqdc.utils.molecule import atom_table
 
 # we could use ase.io.read to read extxyz files
@@ -51,8 +50,6 @@ def read_xyz(fname, n_waters):
 class WaterClusters(BaseDataset):
     __name__ = "waterclusters3_30"
 
-    # Energy in hartree, all zeros by default
-    atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
     # need to know where to find the data
     __energy_methods__ = ["ttm2.1-f"]
 
@@ -72,16 +69,3 @@ class WaterClusters(BaseDataset):
             samples += data
 
         return samples
-
-
-if __name__ == "__main__":
-    for data_class in [WaterClusters]:
-        data = data_class()
-        n = len(data)
-
-        for i in np.random.choice(n, 3, replace=False):
-            x = data[i]
-            print(x.name, x.subset, end=" ")
-            for k in x:
-                if x[k] is not None:
-                    print(k, x[k].shape, end=" ")

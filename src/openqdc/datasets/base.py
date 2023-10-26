@@ -75,14 +75,13 @@ class BaseDataset(torch.utils.data.Dataset):
     __fn_distance__ = lambda x: x
     __fn_forces__ = lambda x: x
 
-    def __init__(self, energy_unit=None, distance_unit=None) -> None:
+    def __init__(self, energy_unit=None, distance_unit=None, overwrite_local_cache=False) -> None:
         self.data = None
         self._set_units(energy_unit, distance_unit)
         if not self.is_preprocessed():
-            entries = self.read_raw_entries()
-            res = self.collate_list(entries)
-            self.save_preprocess(res)
-        self.read_preprocess()
+            logger.info("This dataset not available. Please open an issue on Github for the team to look into it.")
+        else:
+            self.read_preprocess(overwrite_local_cache=overwrite_local_cache)
 
     @property
     def energy_unit(self):
@@ -186,7 +185,7 @@ class BaseDataset(torch.utils.data.Dataset):
             out = np.memmap(local_path, mode="w+", dtype=data_dict[key].dtype, shape=data_dict[key].shape)
             out[:] = data_dict.pop(key)[:]
             out.flush()
-            push_remote(local_path)
+            push_remote(local_path, overwrite=True)
 
         # save smiles and subset
         for key in ["name", "subset"]:
@@ -196,7 +195,7 @@ class BaseDataset(torch.utils.data.Dataset):
                 np.savez_compressed(f, uniques=uniques, inv_indices=inv_indices)
             push_remote(local_path)
 
-    def read_preprocess(self):
+    def read_preprocess(self, overwrite_local_cache=False):
         logger.info("Reading preprocessed data")
         logger.info(
             f"{self.__name__} data with the following units:\
@@ -207,7 +206,7 @@ class BaseDataset(torch.utils.data.Dataset):
         self.data = {}
         for key in self.data_keys:
             filename = p_join(self.preprocess_path, f"{key}.mmap")
-            pull_locally(filename)
+            pull_locally(filename, overwrite=overwrite_local_cache)
             self.data[key] = np.memmap(
                 filename,
                 mode="r",
@@ -231,6 +230,12 @@ class BaseDataset(torch.utils.data.Dataset):
         predicats = [copy_exists(p_join(self.preprocess_path, f"{key}.mmap")) for key in self.data_keys]
         predicats += [copy_exists(p_join(self.preprocess_path, f"{x}.npz")) for x in ["name", "subset"]]
         return all(predicats)
+
+    def preprocess(self):
+        if not self.is_preprocessed():
+            entries = self.read_raw_entries()
+            res = self.collate_list(entries)
+            self.save_preprocess(res)
 
     def __len__(self):
         return self.data["energies"].shape[0]

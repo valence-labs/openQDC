@@ -6,7 +6,6 @@ import pandas as pd
 from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
-from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 from openqdc.utils.molecule import get_atomic_number_and_charge
 
 
@@ -58,9 +57,6 @@ class DESS(BaseDataset):
     ]
     # ['qz_MP2_all', 'tz_MP2_all', 'cbs_MP2_all', 'sapt_all', 'nn_CCSD(T)_all']
 
-    # Energy in hartree, all zeros by default
-    atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
-
     partitions = ["DES370K", "DES5M"]
 
     def __init__(self, energy_unit=None, distance_unit=None) -> None:
@@ -95,16 +91,3 @@ class DESS(BaseDataset):
     def read_raw_entries(self):
         samples = sum([self._read_raw_(partition) for partition in self.partitions], [])
         return samples
-
-
-if __name__ == "__main__":
-    for data_class in [DESS]:
-        data = data_class()
-        n = len(data)
-
-        for i in np.random.choice(n, 3, replace=False):
-            x = data[i]
-            print(x.name, x.subset, end=" ")
-            for k in x:
-                if x[k] is not None:
-                    print(k, x[k].shape, end=" ")

@@ -4,7 +4,6 @@ import numpy as np
 from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
-from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 from openqdc.utils.io import load_hdf5_file
 
 
@@ -36,9 +35,6 @@ def read_mol(mol_h5, mol_name, energy_target_names, force_target_names):
 class QM7X(BaseDataset):
     __name__ = "qm7x"
 
-    # Energy in hartree, all zeros by default
-    atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
-
     __energy_methods__ = ["pbe0+mbd", "dft3b+mbd"]
 
     energy_target_names = ["ePBE0", "eMBD"]
@@ -61,16 +57,3 @@ class QM7X(BaseDataset):
             ]
 
         return samples
-
-
-if __name__ == "__main__":
-    for data_class in [QM7X]:
-        data = data_class()
-        n = len(data)
-
-        for i in np.random.choice(n, 3, replace=False):
-            x = data[i]
-            print(x.name, x.subset, end=" ")
-            for k in x:
-                if x[k] is not None:
-                    print(k, x[k].shape, end=" ")
