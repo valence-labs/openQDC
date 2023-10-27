@@ -21,7 +21,9 @@ def read_record(r):
         name=np.array([smiles] * n_confs),
         subset=np.array([Spice.subset_mapping[subset]] * n_confs),
         energies=r[Spice.energy_target_names[0]][:][:, None].astype(np.float32),
-        forces=r[Spice.force_target_names[0]][:].reshape(-1, 3, 1) * (-1.0),
+        forces=r[Spice.force_target_names[0]][:].reshape(
+            -1, 3, 1
+        ),  # forces -ve of energy gradient but the -1.0 is done in the convert_forces method
         atomic_inputs=np.concatenate(
             (x[None, ...].repeat(n_confs, axis=0), positions), axis=-1, dtype=np.float32
         ).reshape(-1, 5),
@@ -106,17 +108,3 @@ class Spice(BaseDataset):
         tmp = [read_record(data[mol_name]) for mol_name in tqdm(data)]  # don't use parallelized here
 
         return tmp
-
-
-if __name__ == "__main__":
-    data = Spice()
-    n = len(data)
-
-    for i in np.random.choice(n, 10, replace=False):
-        x = data[i]
-        print(x.smiles, x.subset, end=" ")
-        for k in x:
-            if k != "smiles" and k != "subset":
-                print(k, x[k].shape if x[k] is not None else None, end=" ")
-
-        print()

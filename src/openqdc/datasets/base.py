@@ -81,21 +81,27 @@ class BaseDataset(torch.utils.data.Dataset):
     __fn_forces__ = lambda x: x
 
     def __init__(
-        self, energy_unit: Optional[str] = None, distance_unit: Optional[str] = None, cache_dir: Optional[str] = None
+        self,
+        energy_unit: Optional[str] = None,
+        distance_unit: Optional[str] = None,
+        overwrite_local_cache: bool = False,
+        cache_dir: Optional[str] = None,
     ) -> None:
         set_cache_dir(cache_dir)
         self.data = None
         self._set_units(energy_unit, distance_unit)
         if not self.is_preprocessed():
-            entries = self.read_raw_entries()
-            res = self.collate_list(entries)
-            self.save_preprocess(res)
-        self.read_preprocess()
-        self.__isolated_atom_energies__ = (
-            [IsolatedAtomEnergyFactory.get(en_method) for en_method in self.__energy_methods__]
-            if self.__energy_methods__
-            else None
-        )
+            logger.info("This dataset not available. Please open an issue on Github for the team to look into it.")
+            # entries = self.read_raw_entries()
+            # res = self.collate_list(entries)
+            # self.save_preprocess(res)
+        else:
+            self.read_preprocess(overwrite_local_cache=overwrite_local_cache)
+            self.__isolated_atom_energies__ = (
+                [IsolatedAtomEnergyFactory.get(en_method) for en_method in self.__energy_methods__]
+                if self.__energy_methods__
+                else None
+            )
 
     @property
     def energy_unit(self):
@@ -194,7 +200,7 @@ class BaseDataset(torch.utils.data.Dataset):
             out = np.memmap(local_path, mode="w+", dtype=data_dict[key].dtype, shape=data_dict[key].shape)
             out[:] = data_dict.pop(key)[:]
             out.flush()
-            push_remote(local_path)
+            push_remote(local_path, overwrite=True)
 
         # save smiles and subset
         for key in ["name", "subset"]:
@@ -204,7 +210,7 @@ class BaseDataset(torch.utils.data.Dataset):
                 np.savez_compressed(f, uniques=uniques, inv_indices=inv_indices)
             push_remote(local_path)
 
-    def read_preprocess(self):
+    def read_preprocess(self, overwrite_local_cache=False):
         logger.info("Reading preprocessed data")
         logger.info(
             f"{self.__name__} data with the following units:\n\
@@ -215,7 +221,7 @@ class BaseDataset(torch.utils.data.Dataset):
         self.data = {}
         for key in self.data_keys:
             filename = p_join(self.preprocess_path, f"{key}.mmap")
-            pull_locally(filename)
+            pull_locally(filename, overwrite=overwrite_local_cache)
             self.data[key] = np.memmap(
                 filename,
                 mode="r",
@@ -239,6 +245,12 @@ class BaseDataset(torch.utils.data.Dataset):
         predicats = [copy_exists(p_join(self.preprocess_path, f"{key}.mmap")) for key in self.data_keys]
         predicats += [copy_exists(p_join(self.preprocess_path, f"{x}.npz")) for x in ["name", "subset"]]
         return all(predicats)
+
+    def preprocess(self):
+        if not self.is_preprocessed():
+            entries = self.read_raw_entries()
+            res = self.collate_list(entries)
+            self.save_preprocess(res)
 
     def save_xyz(self, idx: int, path: Optional[str] = None):
         if path is None:

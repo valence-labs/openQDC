@@ -6,7 +6,6 @@ import numpy as np
 
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils import load_json, load_pkl
-from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 from openqdc.utils.molecule import get_atomic_number_and_charge
 
 
@@ -86,9 +85,6 @@ class GEOM(BaseDataset):
     energy_target_names = ["gfn2_xtb.energy"]
     force_target_names = []
 
-    # Energy in hartree, all zeros by default
-    atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
-
     partitions = ["qm9", "drugs"]
 
     def _read_raw_(self, partition):
@@ -104,18 +100,3 @@ class GEOM(BaseDataset):
     def read_raw_entries(self):
         samples = sum([self._read_raw_(partition) for partition in self.partitions], [])
         return samples
-
-
-if __name__ == "__main__":
-    for data_class in [GEOM]:
-        data = data_class()
-        n = len(data)
-
-        for i in np.random.choice(n, 3, replace=False):
-            x = data[i]
-            print(x.name, x.subset, end=" ")
-            for k in x:
-                if x[k] is not None:
-                    print(k, x[k].shape, end=" ")
-
-            print()

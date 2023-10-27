@@ -53,7 +53,7 @@ class QMugs(BaseDataset):
     """
 
     __name__ = "qmugs"
-    __energy_methods__ = ["gfn2_xtb", "wb97x-d-D/def2-svp"]
+    __energy_methods__ = ["gfn2_xtb", "wb97x-d/def2-svp"]
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
@@ -72,18 +72,3 @@ class QMugs(BaseDataset):
 
         samples = dm.parallelized(read_mol, mol_dirs, n_jobs=-1, progress=True, scheduler="threads")
         return samples
-
-
-if __name__ == "__main__":
-    for data_class in [QMugs]:
-        data = data_class()
-        n = len(data)
-
-        for i in np.random.choice(n, 3, replace=False):
-            x = data[i]
-            print(x.name, x.subset, end=" ")
-            for k in x:
-                if x[k] is not None:
-                    print(k, x[k].shape, end=" ")
-
-            print()

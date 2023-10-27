@@ -172,3 +172,23 @@ def dict_to_atoms(d: dict):
     pos, atomic_numbers, charges = d.pop("positions"), d.pop("atomic_numbers"), d.pop("charges")
     at = Atoms(positions=pos, numbers=atomic_numbers, charges=charges, info=d)
     return at
+
+
+def print_h5_tree(val, pre=""):
+    items = len(val)
+    for key, val in val.items():
+        items -= 1
+        if items == 0:
+            # the last item
+            if type(val) == h5py._hl.group.Group:
+                print(pre + "└── " + key)
+                print_h5_tree(val, pre + "    ")
+            else:
+                print(pre + "└── " + key + " (%d)" % len(val))
+        else:
+            if type(val) == h5py._hl.group.Group:
+                print(pre + "├── " + key)
+                print_h5_tree(val, pre + "│   ")
+            else:
+                # pass
+                print(pre + "├── " + key + " (%d)" % len(val))

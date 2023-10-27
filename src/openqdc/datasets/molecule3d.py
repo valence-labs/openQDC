@@ -103,18 +103,3 @@ class Molecule3D(BaseDataset):
         res = dm.parallelized(fn, sdf_paths, n_jobs=1)  # don't use more than 1 job
         samples = sum(res, [])
         return samples
-
-
-if __name__ == "__main__":
-    for data_class in [Molecule3D]:
-        data = data_class()
-        n = len(data)
-
-        for i in np.random.choice(n, 3, replace=False):
-            x = data[i]
-            print(x.name, x.subset, end=" ")
-            for k in x:
-                if x[k] is not None:
-                    print(k, x[k].shape, end=" ")
-
-            print()

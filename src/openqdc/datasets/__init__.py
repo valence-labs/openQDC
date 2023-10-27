@@ -27,6 +27,9 @@ _lazy_imports_obj = {
     "WaterClusters": "openqdc.datasets.waterclusters3_30",
     "TMQM": "openqdc.datasets.tmqm",
     "Dummy": "openqdc.datasets.dummy",
+    "PCQM_B3LYP": "openqdc.datasets.pcqm",
+    "PCQM_PM6": "openqdc.datasets.pcqm",
+    "Transition1X": "openqdc.datasets.transition1x",
 }
 
 _lazy_imports_mod = {}
@@ -68,12 +71,14 @@ if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
     from .molecule3d import Molecule3D  # noqa
     from .nabladft import NablaDFT  # noqa
     from .orbnet_denali import OrbnetDenali  # noqa
+    from .pcqm import PCQM_B3LYP, PCQM_PM6  # noqa
     from .qm7x import QM7X  # noqa
     from .qmugs import QMugs  # noqa
     from .sn2_rxn import SN2RXN  # noqa
     from .solvated_peptides import SolvatedPeptides  # noqa
     from .spice import Spice  # noqa
     from .tmqm import TMQM  # noqa
+    from .transition1x import Transition1X  # noqa
     from .waterclusters3_30 import WaterClusters  # noqa
 
     __all__ = [
@@ -95,5 +100,8 @@ if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
         "SolvatedPeptides",
         "WaterClusters",
         "TMQM",
+        "PCQM_B3LYP",
+        "PCQM_PM6",
+        "Transition1X",
         "Dummy",
     ]

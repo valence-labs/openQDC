@@ -83,18 +83,3 @@ class NablaDFT(BaseDataset):
         )  # don't use more than 1 job
 
         return sum(samples, [])
-
-
-if __name__ == "__main__":
-    for data_class in [NablaDFT]:
-        data = data_class()
-        n = len(data)
-
-        for i in np.random.choice(n, 3, replace=False):
-            x = data[i]
-            print(x.name, x.subset, end=" ")
-            for k in x:
-                if x[k] is not None:
-                    print(k, x[k].shape, end=" ")
-
-            print()

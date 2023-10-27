@@ -1,9 +1,6 @@
 from os.path import join as p_join
 
-import numpy as np
-
 from openqdc.datasets.base import BaseDataset, read_qc_archive_h5
-from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 
 
 class COMP6(BaseDataset):
@@ -25,8 +22,6 @@ class COMP6(BaseDataset):
 
     __name__ = "comp6"
 
-    # Energy in hartree, all zeros by default
-    atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
     # watchout that forces are stored as -grad(E)
     __energy_unit__ = "kcal/mol"
     __distance_unit__ = "bohr"  # bohr
@@ -71,18 +66,3 @@ class COMP6(BaseDataset):
             samples += read_qc_archive_h5(raw_path, subset, self.energy_target_names, self.force_target_names)
 
         return samples
-
-
-if __name__ == "__main__":
-    for data_class in [COMP6]:
-        data = data_class()
-        n = len(data)
-
-        for i in np.random.choice(n, 3, replace=False):
-            x = data[i]
-            print(x.name, x.subset, end=" ")
-            for k in x:
-                if x[k] is not None:
-                    print(k, x[k].shape, end=" ")
-
-            print()

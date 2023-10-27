@@ -1,10 +1,7 @@
 import os
 from os.path import join as p_join
 
-import numpy as np
-
 from openqdc.datasets.base import BaseDataset, read_qc_archive_h5
-from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 from openqdc.utils.io import get_local_cache
 
 
@@ -26,9 +23,6 @@ class ANI1(BaseDataset):
     """
 
     __name__ = "ani1"
-
-    # Energy in hartree, all zeros by default
-    atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
     __energy_methods__ = [
         "wb97x/6-31g(d)",
@@ -78,9 +72,6 @@ class ANI1CCX(ANI1):
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
 
-    # Energy in hartree, all zeros by default
-    atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
-
     __energy_methods__ = [
         "ccsd(t)/cbs",
         "ccsd(t)/cc-pvdz",
@@ -120,9 +111,6 @@ class ANI1X(ANI1):
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
 
-    # Energy in hartree, all zeros by default
-    atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
-
     __energy_methods__ = [
         "hf/cc-pvdz",
         "hf/cc-pvqz",
@@ -157,23 +145,3 @@ class ANI1X(ANI1):
 
     def convert_forces(self, x):
         return super().convert_forces(x) * 0.529177249  # correct the Dataset error
-
-
-if __name__ == "__main__":
-    for data_class in [
-        ANI1,
-        # ANI1CCX,
-        # ANI1X
-    ]:
-        data = data_class()
-        n = len(data)
-
-        for i in np.random.choice(n, 3, replace=False):
-            x = data[i]
-            print(x.name, x.subset, end=" ")
-            for k in x:
-                if x[k] is not None:
-                    print(k, x[k].shape, end=" ")
-
-            print()
-        exit()

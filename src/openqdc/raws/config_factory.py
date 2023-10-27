@@ -126,6 +126,10 @@ class DataConfigFactory:
         ],
     )
 
+    transition1x = dict(
+        dataset_name="transition1x",
+        links={"Transition1x.h5": "https://figshare.com/ndownloader/files/36035789"},
+    )
     available_datasets = [k for k in locals().keys() if not k.startswith("__")]
 
     def __init__(self):
