@@ -16,8 +16,8 @@ class SN2RXN(BaseDataset):
         "dsd-blyp-d3(bj)/def2-tzvp",
     ]
     __energy_unit__ = "ev"
-    __distance_unit__ = "ang"
-    __forces_unit__ = "ev/ang"
+    __distance_unit__ = "bohr"
+    __forces_unit__ = "ev/bohr"
 
     energy_target_names = [
         "DSD-BLYP-D3(BJ):def2-TZVP Atomization Energy",

@@ -96,6 +96,9 @@ class Spice(BaseDataset):
         "SPICE Ion Pairs Single Points Dataset v1.1": "Ion Pairs",
     }
 
+    def convert_forces(self, x):
+        return (-1.0) * super().convert_forces(x)
+
     def read_raw_entries(self):
         raw_path = p_join(self.root, "SPICE-1.1.4.hdf5")
 

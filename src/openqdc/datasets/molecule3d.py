@@ -86,7 +86,7 @@ class Molecule3D(BaseDataset):
     __energy_methods__ = ["b3lyp/6-31g*"]
     # UNITS MOST LIKELY WRONG, MUST CHECK THEM MANUALLY
     __energy_unit__ = "ev"  # CALCULATED
-    __distance_unit__ = "wrong unit . it is 1/bohr somehow"  # 1/bohr wrong unit
+    __distance_unit__ = "ang"
     __forces_unit__ = "ev/ang"
 
     energy_target_names = ["b3lyp/6-31g*.energy"]

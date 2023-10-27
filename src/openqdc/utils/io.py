@@ -6,6 +6,7 @@ import pickle as pkl
 import fsspec
 import h5py
 import torch
+from ase.atoms import Atoms
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from rdkit.Chem import MolFromXYZFile
@@ -165,3 +166,9 @@ def load_json(path):
 
 def load_xyz(path):
     return MolFromXYZFile(path)
+
+
+def dict_to_atoms(d: dict):
+    pos, atomic_numbers, charges = d.pop("positions"), d.pop("atomic_numbers"), d.pop("charges")
+    at = Atoms(positions=pos, numbers=atomic_numbers, charges=charges, info=d)
+    return at

@@ -5,6 +5,7 @@ from typing import Dict, List, Optional
 import numpy as np
 import pandas as pd
 import torch
+from ase.io.extxyz import write_extxyz
 from loguru import logger
 from sklearn.utils import Bunch
 from tqdm import tqdm
@@ -13,6 +14,7 @@ from openqdc.utils.atomization_energies import IsolatedAtomEnergyFactory
 from openqdc.utils.constants import NB_ATOMIC_FEATURES
 from openqdc.utils.io import (
     copy_exists,
+    dict_to_atoms,
     get_local_cache,
     load_hdf5_file,
     pull_locally,
@@ -70,7 +72,6 @@ class BaseDataset(torch.utils.data.Dataset):
     energy_target_names = []
     force_target_names = []
     __isolated_atom_energies__ = []
-    # convert force gradient -1
 
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
@@ -188,11 +189,6 @@ class BaseDataset(torch.utils.data.Dataset):
     def save_preprocess(self, data_dict):
         # save memmaps
         logger.info("Preprocessing data and saving it to cache.")
-        logger.info(
-            f"Dataset {self.__name__} data with the following units:\n"
-            f"Energy: {self.energy_unit}, Distance: {self.distance_unit}, "
-            f"Forces: {self.force_unit if self.__force_methods__ else 'None'}"
-        )
         for key in self.data_keys:
             local_path = p_join(self.preprocess_path, f"{key}.mmap")
             out = np.memmap(local_path, mode="w+", dtype=data_dict[key].dtype, shape=data_dict[key].shape)
@@ -211,10 +207,10 @@ class BaseDataset(torch.utils.data.Dataset):
     def read_preprocess(self):
         logger.info("Reading preprocessed data")
         logger.info(
-            f"{self.__name__} data with the following units:\
-                     Energy: {self.energy_unit},\
-                     Distance: {self.distance_unit},\
-                     Forces: {self.force_unit}"
+            f"{self.__name__} data with the following units:\n\
+                     Energy: {self.energy_unit},\n\
+                     Distance: {self.distance_unit},\n\
+                     Forces: {self.force_unit if self.__force_methods__ else 'None'}"
         )
         self.data = {}
         for key in self.data_keys:
@@ -243,6 +239,14 @@ class BaseDataset(torch.utils.data.Dataset):
         predicats = [copy_exists(p_join(self.preprocess_path, f"{key}.mmap")) for key in self.data_keys]
         predicats += [copy_exists(p_join(self.preprocess_path, f"{x}.npz")) for x in ["name", "subset"]]
         return all(predicats)
+
+    def save_xyz(self, idx: int, path: Optional[str] = None):
+        if path is None:
+            path = os.getcwd()
+        entry = self[idx]
+        name = entry.pop("name").decode()
+        at = dict_to_atoms(entry)
+        write_extxyz(p_join(path, f"{name}.xyz"), at)
 
     def __len__(self):
         return self.data["energies"].shape[0]

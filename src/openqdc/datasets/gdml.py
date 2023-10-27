@@ -64,8 +64,8 @@ class GDML(BaseDataset):
     ]
 
     __energy_unit__ = "kcal/mol"
-    __distance_unit__ = "ang"
-    __forces_unit__ = "kcal/mol/ang"
+    __distance_unit__ = "bohr"
+    __forces_unit__ = "kcal/mol/bohr"
 
     def read_raw_entries(self):
         raw_path = p_join(self.root, "gdml.h5")

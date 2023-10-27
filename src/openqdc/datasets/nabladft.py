@@ -62,7 +62,7 @@ class NablaDFT(BaseDataset):
 
     energy_target_names = ["wb97x-d/def2-svp"]
     __energy_unit__ = "hartree"
-    __distance_unit__ = "bohr"  # ANG??
+    __distance_unit__ = "bohr"
     __forces_unit__ = "hartree/bohr"
 
     # Energy in hartree, all zeros by default

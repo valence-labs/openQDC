@@ -28,9 +28,9 @@ class COMP6(BaseDataset):
     # Energy in hartree, all zeros by default
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
     # watchout that forces are stored as -grad(E)
-    __energy_unit__ = "hartree"  # kcal/mol now
-    __distance_unit__ = "ang"  # bohr
-    __forces_unit__ = "hartree/ang"
+    __energy_unit__ = "kcal/mol"
+    __distance_unit__ = "bohr"  # bohr
+    __forces_unit__ = "kcal/mol/bohr"
 
     __energy_methods__ = [
         "wb97x/6-31g*",

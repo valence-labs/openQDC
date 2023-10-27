@@ -38,8 +38,8 @@ class ANI1(BaseDataset):
         "ωB97x:6-31G(d) Energy",
     ]
     __energy_unit__ = "hartree"
-    __distance_unit__ = "ang"
-    __forces_unit__ = "hartree/ang"
+    __distance_unit__ = "bohr"
+    __forces_unit__ = "hartree/bohr"
 
     @property
     def root(self):
@@ -74,6 +74,9 @@ class ANI1CCX(ANI1):
     """
 
     __name__ = "ani1ccx"
+    __energy_unit__ = "hartree"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "hartree/ang"
 
     # Energy in hartree, all zeros by default
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
@@ -113,6 +116,9 @@ class ANI1X(ANI1):
     """
 
     __name__ = "ani1x"
+    __energy_unit__ = "hartree"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "hartree/ang"
 
     # Energy in hartree, all zeros by default
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
@@ -148,6 +154,9 @@ class ANI1X(ANI1):
         "wb97x/6-31g(d)",
         "wb97x/cc-pvtz",
     ]
+
+    def convert_forces(self, x):
+        return super().convert_forces(x) * 0.529177249  # correct the Dataset error
 
 
 if __name__ == "__main__":

@@ -46,8 +46,8 @@ class ISO17(BaseDataset):
     ]
 
     __energy_unit__ = "ev"
-    __distance_unit__ = "ang"  # bohr
-    __forces_unit__ = "ev/ang"
+    __distance_unit__ = "bohr"  # bohr
+    __forces_unit__ = "ev/bohr"
 
     def read_raw_entries(self):
         raw_path = p_join(self.root, "iso_17.h5")
