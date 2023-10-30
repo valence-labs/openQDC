@@ -97,11 +97,7 @@ class BaseDataset(torch.utils.data.Dataset):
             # self.save_preprocess(res)
         else:
             self.read_preprocess(overwrite_local_cache=overwrite_local_cache)
-            self.__isolated_atom_energies__ = (
-                [IsolatedAtomEnergyFactory.get_matrix(en_method) for en_method in self.__energy_methods__]
-                if self.__energy_methods__
-                else None
-            )
+            self._set_isolated_atom_energies()
 
     @property
     def energy_unit(self):
@@ -159,6 +155,14 @@ class BaseDataset(torch.utils.data.Dataset):
         if self.__force_methods__:
             self.__forces_unit__ = self.energy_unit + "/" + self.distance_unit
             self.__class__.__fn_forces__ = get_conversion(old_en + "/" + old_ds, self.__forces_unit__)
+
+    def _set_isolated_atom_energies(self):
+        if self.__energy_methods__ is None:
+            logger.error("No energy methods defined for this dataset.")
+        f = get_conversion("hartree", self.__energy_unit__)
+        self.__isolated_atom_energies__ = f(
+            np.array([IsolatedAtomEnergyFactory.get_matrix(en_method) for en_method in self.__energy_methods__])
+        )
 
     def convert_energy(self, x):
         return self.__class__.__fn_energy__(x)
@@ -281,14 +285,11 @@ class BaseDataset(torch.utils.data.Dataset):
             forces = self.convert_forces(np.array(self.data["forces"][p_start:p_end], dtype=np.float32))
         else:
             forces = None
-        isolated_atom_energies = [
-            get_conversion("hartree", self.__energy_unit__)(x[z, c + shift]) for x in self.__isolated_atom_energies__
-        ]
         return Bunch(
             positions=positions,
             atomic_numbers=z,
             charges=c,
-            e0=isolated_atom_energies,
+            e0=self.__isolated_atom_energies__[..., z, c + shift],
             energies=energies,
             name=name,
             subset=subset,
