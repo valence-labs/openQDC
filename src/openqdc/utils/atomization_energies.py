@@ -1736,6 +1736,13 @@ ANI1X_8 = {
     ("I", -1): None,
     ("I", 0): None,
 }
+# FF ttm2.1-f, calculated with ttm3-f f90 routine
+# For isolated atoms doesn't change as it is always 0
+# Typed down for clarity
+TTM2 = {
+    ("H", 0): 0.0,
+    ("O", 0): 0.0,
+}
 
 
 ISOLATED_ATOM_ENERGIES = {
@@ -1806,6 +1813,8 @@ ISOLATED_ATOM_ENERGIES = {
     "gfn1_xtb": GFN1,
     "dft3b": DFTB,
     "pm6": PM6,
+    # FF
+    "ttm2.1-f": TTM2,
 }
 
 # TODO: Talk with ivan about cbs extrapolation from from av[TQ]z. For now this should be ok
