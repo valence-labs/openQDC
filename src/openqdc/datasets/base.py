@@ -289,7 +289,7 @@ class BaseDataset(torch.utils.data.Dataset):
             positions=positions,
             atomic_numbers=z,
             charges=c,
-            e0=self.__isolated_atom_energies__[..., z, c + shift],
+            e0=self.__isolated_atom_energies__[..., z, c + shift].T,
             energies=energies,
             name=name,
             subset=subset,
