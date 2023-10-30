@@ -6,7 +6,6 @@ import pandas as pd
 from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
-from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 from openqdc.utils.molecule import atom_table
 
 
@@ -47,9 +46,6 @@ def read_xyz(fname, e_map):
 
 class TMQM(BaseDataset):
     __name__ = "tmqm"
-
-    # Energy in hartree, all zeros by default
-    atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
     __energy_methods__ = ["tpssh/def2-tzvp"]
 

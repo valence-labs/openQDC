@@ -7,7 +7,6 @@ import numpy as np
 from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
-from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 from openqdc.utils.package_utils import requires_package
 
 
@@ -64,9 +63,6 @@ class NablaDFT(BaseDataset):
     __energy_unit__ = "hartree"
     __distance_unit__ = "bohr"
     __forces_unit__ = "hartree/bohr"
-
-    # Energy in hartree, all zeros by default
-    atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
     @requires_package("nablaDFT")
     def read_raw_entries(self):

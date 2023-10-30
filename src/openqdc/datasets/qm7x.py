@@ -4,7 +4,6 @@ import numpy as np
 from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
-from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 from openqdc.utils.io import load_hdf5_file
 
 
@@ -35,9 +34,6 @@ def read_mol(mol_h5, mol_name, energy_target_names, force_target_names):
 
 class QM7X(BaseDataset):
     __name__ = "qm7x"
-
-    # Energy in hartree, all zeros by default
-    atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
     __energy_methods__ = ["pbe0/mbd", "dft3b"]
 

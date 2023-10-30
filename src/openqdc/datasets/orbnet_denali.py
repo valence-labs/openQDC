@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 
 from openqdc.datasets.base import BaseDataset
-from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 from openqdc.utils.molecule import atom_table
 
 
@@ -58,9 +57,6 @@ class OrbnetDenali(BaseDataset):
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
-
-    # Energy in hartree, all zeros by default
-    atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
     def read_raw_entries(self):
         label_path = p_join(self.root, "denali_labels.csv")

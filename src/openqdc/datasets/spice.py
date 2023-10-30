@@ -6,7 +6,6 @@ from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils import load_hdf5_file
-from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 from openqdc.utils.molecule import get_atomic_number_and_charge
 
 
@@ -60,28 +59,6 @@ class Spice(BaseDataset):
     energy_target_names = ["dft_total_energy"]
 
     force_target_names = ["dft_total_gradient"]
-
-    # Energy in hartree, all zeros by default
-    atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
-    tmp = {
-        35: -2574.2451510945853,
-        6: -37.91424135791358,
-        20: -676.9528465198214,
-        17: -460.3350243496703,
-        9: -99.91298732343974,
-        1: -0.5027370838721259,
-        53: -297.8813829975981,
-        19: -599.8025677513111,
-        3: -7.285254714046546,
-        12: -199.2688420040449,
-        7: -54.62327513368922,
-        11: -162.11366478783253,
-        8: -75.17101657391741,
-        15: -341.3059197024934,
-        16: -398.2405387031612,
-    }
-    for key in tmp:
-        atomic_energies[key] = tmp[key]
 
     subset_mapping = {
         "SPICE Solvated Amino Acids Single Points Dataset v1.1": "Solvated Amino Acids",

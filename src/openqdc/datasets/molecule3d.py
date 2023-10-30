@@ -9,7 +9,6 @@ from rdkit import Chem
 from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
-from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 from openqdc.utils.molecule import get_atomic_number_and_charge
 
 
@@ -90,9 +89,6 @@ class Molecule3D(BaseDataset):
     __forces_unit__ = "ev/ang"
 
     energy_target_names = ["b3lyp/6-31g*.energy"]
-
-    # Energy in hartree, all zeros by default
-    atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
     def read_raw_entries(self):
         raw = p_join(self.root, "data", "raw")

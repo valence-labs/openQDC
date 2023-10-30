@@ -6,7 +6,6 @@ import datamol as dm
 import numpy as np
 
 from openqdc.datasets.base import BaseDataset
-from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 from openqdc.utils.molecule import get_atomic_number_and_charge
 
 
@@ -62,9 +61,6 @@ class QMugs(BaseDataset):
         "GFN2:TOTAL_ENERGY",
         "DFT:TOTAL_ENERGY",
     ]
-
-    # Energy in hartree, all zeros by default
-    atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
 
     def read_raw_entries(self):
         raw_path = p_join(self.root, "structures")

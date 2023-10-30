@@ -1,12 +1,128 @@
+import numpy as np
 from loguru import logger
+
+from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 
 ATOM_SPECIES = "H", "Li", "B", "C", "N", "O", "F", "Na", "Mg", "Si", "P", "S", "Cl", "K", "Ca", "Br", "I"
 # Energy in atomic unit/ Hartree / Ang
 
 # didn t calculate for Pd, Pt, Mo, Ni, Fe, Cu, see DESS
+atomic_numbers = {}
+chemical_symbols = [
+    "X",
+    "H",
+    "He",
+    "Li",
+    "Be",
+    "B",
+    "C",
+    "N",
+    "O",
+    "F",
+    "Ne",
+    "Na",
+    "Mg",
+    "Al",
+    "Si",
+    "P",
+    "S",
+    "Cl",
+    "Ar",
+    "K",
+    "Ca",
+    "Sc",
+    "Ti",
+    "V",
+    "Cr",
+    "Mn",
+    "Fe",
+    "Co",
+    "Ni",
+    "Cu",
+    "Zn",
+    "Ga",
+    "Ge",
+    "As",
+    "Se",
+    "Br",
+    "Kr",
+    "Rb",
+    "Sr",
+    "Y",
+    "Zr",
+    "Nb",
+    "Mo",
+    "Tc",
+    "Ru",
+    "Rh",
+    "Pd",
+    "Ag",
+    "Cd",
+    "In",
+    "Sn",
+    "Sb",
+    "Te",
+    "I",
+    "Xe",
+    "Cs",
+    "Ba",
+    "La",
+    "Ce",
+    "Pr",
+    "Nd",
+    "Pm",
+    "Sm",
+    "Eu",
+    "Gd",
+    "Tb",
+    "Dy",
+    "Ho",
+    "Er",
+    "Tm",
+    "Yb",
+    "Lu",
+    "Hf",
+    "Ta",
+    "W",
+    "Re",
+    "Os",
+    "Ir",
+    "Pt",
+    "Au",
+    "Hg",
+    "Tl",
+    "Pb",
+    "Bi",
+    "Po",
+    "At",
+    "Rn",
+    "Fr",
+    "Ra",
+    "Ac",
+    "Th",
+    "Pa",
+    "U",
+    "Np",
+    "Pu",
+    "Am",
+    "Cm",
+    "Bk",
+    "Cf",
+    "Es",
+    "Fm",
+    "Md",
+    "No",
+    "Lr",
+]
+
+
+for Z, symbol in enumerate(chemical_symbols):
+    atomic_numbers[symbol] = Z
 
 
 class IsolatedAtomEnergyFactory:
+    max_charge = 4
+
     def __init__(self):
         pass
 
@@ -29,6 +145,17 @@ class IsolatedAtomEnergyFactory:
         if not is_dft:
             return functional_dict
         return functional_dict.get(basis, ZEROS)
+
+    @staticmethod
+    def get_matrix(level_of_theory: str):
+        shift = IsolatedAtomEnergyFactory.max_charge
+        matrix = np.zeros((MAX_ATOMIC_NUMBER, shift * 2 + 1))
+        tuple_hashmap = IsolatedAtomEnergyFactory.get(level_of_theory)
+        if tuple_hashmap is None:
+            return matrix
+        for key in tuple_hashmap.keys():
+            matrix[atomic_numbers[key[0]], key[1] + shift] = tuple_hashmap[key]
+        return matrix
 
 
 ZEROS = {

@@ -98,7 +98,7 @@ class BaseDataset(torch.utils.data.Dataset):
         else:
             self.read_preprocess(overwrite_local_cache=overwrite_local_cache)
             self.__isolated_atom_energies__ = (
-                [IsolatedAtomEnergyFactory.get(en_method) for en_method in self.__energy_methods__]
+                [IsolatedAtomEnergyFactory.get_matrix(en_method) for en_method in self.__energy_methods__]
                 if self.__energy_methods__
                 else None
             )
@@ -265,6 +265,7 @@ class BaseDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx: int):
         # if idx is more than len doesn t throw error
+        shift = IsolatedAtomEnergyFactory.max_charge
         p_start, p_end = self.data["position_idx_range"][idx]
         input = self.data["atomic_inputs"][p_start:p_end]
         z, c, positions, energies = (
@@ -280,12 +281,14 @@ class BaseDataset(torch.utils.data.Dataset):
             forces = self.convert_forces(np.array(self.data["forces"][p_start:p_end], dtype=np.float32))
         else:
             forces = None
-
+        isolated_atom_energies = [
+            get_conversion("hartree", self.__energy_unit__)(x[z, c + shift]) for x in self.__isolated_atom_energies__
+        ]
         return Bunch(
             positions=positions,
             atomic_numbers=z,
             charges=c,
-            e0=self.convert_energy(self.atomic_energies[z]),
+            e0=isolated_atom_energies,
             energies=energies,
             name=name,
             subset=subset,
