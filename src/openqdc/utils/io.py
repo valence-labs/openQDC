@@ -30,13 +30,19 @@ def set_cache_dir(d):
     _OPENQDC_CACHE_DIR = os.path.expanduser(d)
 
 
-def get_local_cache():
+def get_local_cache() -> str:
+    """
+    Returns the local cache directory. It creates it if it does not exist.
+
+    Returns:
+        str: path to the local cache directory
+    """
     cache_dir = os.path.expanduser(os.path.expandvars(_OPENQDC_CACHE_DIR))
     os.makedirs(cache_dir, exist_ok=True)
     return cache_dir
 
 
-def get_remote_cache():
+def get_remote_cache() -> str:
     remote_cache = "gs://opendatasets/openqdc"
     return remote_cache
 
@@ -168,9 +174,19 @@ def load_xyz(path):
     return MolFromXYZFile(path)
 
 
-def dict_to_atoms(d: dict):
+def dict_to_atoms(d: dict, ext: bool = False) -> Atoms:
+    """
+    Converts dictionary to ase atoms object
+
+    Args:
+        d (dict): dictionary containing keys: positions, atomic_numbers, charges
+        ext (bool, optional): Whether to include all the rest of the dictionary in the atoms object info field.
+        Defaults to False.
+    """
     pos, atomic_numbers, charges = d.pop("positions"), d.pop("atomic_numbers"), d.pop("charges")
-    at = Atoms(positions=pos, numbers=atomic_numbers, charges=charges, info=d)
+    at = Atoms(positions=pos, numbers=atomic_numbers, charges=charges)
+    if ext:
+        at.info = d
     return at
 
 

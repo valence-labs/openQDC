@@ -1,7 +1,13 @@
+from typing import Dict, Tuple, TypeAlias
+
 import numpy as np
 from loguru import logger
 
 from openqdc.utils.constants import MAX_ATOMIC_NUMBER
+
+__all__ = ["chemical_symbols", "atomic_numbers", "IsolatedAtomEnergyFactory"]
+
+EF_KEY: TypeAlias = Tuple[str, int]
 
 ATOM_SPECIES = "H", "Li", "B", "C", "N", "O", "F", "Na", "Mg", "Si", "P", "S", "Cl", "K", "Ca", "Br", "I"
 # Energy in atomic unit/ Hartree / Ang
@@ -121,16 +127,43 @@ for Z, symbol in enumerate(chemical_symbols):
 
 
 class IsolatedAtomEnergyFactory:
+    """
+    Factory method to get the isolated atom energies for a given level of theory.
+    """
+
     max_charge = 4
 
     def __init__(self):
         pass
 
     def __call__(self, level_of_theory: str):
+        """
+        Wrapper to the get method
+
+        Parameters
+        ----------
+        level_of_theory: str
+        """
         return self.get(level_of_theory=level_of_theory)
 
     @staticmethod
-    def get(level_of_theory: str):
+    def get(level_of_theory: str) -> Dict[EF_KEY, float]:
+        """
+        Get the dict isolated atom energies for a given level of theory
+
+        Parameters
+        ----------
+        level_of_theory: str
+            Level of theory in the format "functional/basis" or "functional" if semi empirical
+
+        Returns
+        -------
+        dict[tuple[str, int], float]
+            Dictionary containing the isolated atom energies for each entry written as a tuple (atom, charge):
+
+                {("H", 1): 0.0, ...}
+
+        """
         level_of_theory = level_of_theory.lower()
         is_dft = True
         try:
@@ -147,7 +180,27 @@ class IsolatedAtomEnergyFactory:
         return functional_dict.get(basis, ZEROS)
 
     @staticmethod
-    def get_matrix(level_of_theory: str):
+    def get_matrix(level_of_theory: str) -> np.ndarray:
+        """
+        Get the matrix of isolated atom energies for a given level of theory
+
+        Parameters
+        ----------
+        level_of_theory: str
+            Level of theory in the format "functional/basis" or "functional" if semi empirical
+
+        Returns
+        -------
+        np.ndarray of shape (MAX_ATOMIC_NUMBER, 2 * max_charge + 1)
+            Matrix containing the isolated atom energies for each atom and charge written in the form:
+
+                         |   | -2 | -1 | 0 | +1 | +2 | <- charges
+                         |---|----|----|---|----|----|
+                         | 0 |    |    |   |    |    |
+                         | 1 |    |    |   |    |    |
+                         | 2 |    |    |   |    |    |
+
+        """
         shift = IsolatedAtomEnergyFactory.max_charge
         matrix = np.zeros((MAX_ATOMIC_NUMBER, shift * 2 + 1))
         tuple_hashmap = IsolatedAtomEnergyFactory.get(level_of_theory)
@@ -1737,6 +1790,7 @@ ANI1X_8 = {
     ("I", 0): None,
 }
 # FF ttm2.1-f, calculated with ttm3-f f90 routine
+# Link: https://www.pnnl.gov/science/ttm3f.asp
 # For isolated atoms doesn't change as it is always 0
 # Typed down for clarity
 TTM2 = {

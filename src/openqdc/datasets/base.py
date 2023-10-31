@@ -10,7 +10,10 @@ from loguru import logger
 from sklearn.utils import Bunch
 from tqdm import tqdm
 
-from openqdc.utils.atomization_energies import IsolatedAtomEnergyFactory
+from openqdc.utils.atomization_energies import (
+    IsolatedAtomEnergyFactory,
+    chemical_symbols,
+)
 from openqdc.utils.constants import NB_ATOMIC_FEATURES
 from openqdc.utils.io import (
     copy_exists,
@@ -22,6 +25,7 @@ from openqdc.utils.io import (
     set_cache_dir,
 )
 from openqdc.utils.molecule import atom_table
+from openqdc.utils.package_utils import requires_package
 from openqdc.utils.units import get_conversion
 
 
@@ -100,6 +104,17 @@ class BaseDataset(torch.utils.data.Dataset):
             self._set_isolated_atom_energies()
 
     @property
+    def numbers(self):
+        if hasattr(self, "_numbers"):
+            return self._numbers
+        self._numbers = np.array(list(set(self.data["atomic_inputs"][..., 0])), dtype=np.int32)
+        return self._numbers
+
+    @property
+    def chemical_species(self):
+        return [chemical_symbols[z] for z in self.numbers]
+
+    @property
     def energy_unit(self):
         return self.__energy_unit__
 
@@ -173,12 +188,18 @@ class BaseDataset(torch.utils.data.Dataset):
     def convert_forces(self, x):
         return self.__class__.__fn_forces__(x)
 
-    def set_energy_unit(self, value):
+    def set_energy_unit(self, value: str):
+        """
+        Set a new energy unit for the dataset.
+        """
         old_unit = self.energy_unit
         self.__energy_unit__ = value
         self.__class__.__fn_energy__ = get_conversion(old_unit, value)
 
-    def set_distance_unit(self, value):
+    def set_distance_unit(self, value: str):
+        """
+        Set a new distance unit for the dataset.
+        """
         old_unit = self.distance_unit
         self.__distance_unit__ = value
         self.__class__.__fn_distance__ = get_conversion(old_unit, value)
@@ -257,18 +278,115 @@ class BaseDataset(torch.utils.data.Dataset):
             self.save_preprocess(res)
 
     def save_xyz(self, idx: int, path: Optional[str] = None):
+        """
+        Save the entry at index idx as an extxyz file.
+        """
         if path is None:
             path = os.getcwd()
-        entry = self[idx]
-        name = entry.pop("name").decode()
-        at = dict_to_atoms(entry)
+        at = self.get_xyz(idx, ext=True)
+        name = at.info["name"]
         write_extxyz(p_join(path, f"{name}.xyz"), at)
+
+    def get_ase_atoms(self, idx: int, ext=True):
+        """
+        Get the ASE atoms object for the entry at index idx.
+
+        Parameters
+        ----------
+        idx : int
+            Index of the entry.
+        ext : bool, optional
+            Whether to include additional informations
+        """
+        entry = self[idx]
+        # _ = entry.pop("forces")
+        at = dict_to_atoms(entry, ext=ext)
+        return at
+
+    @requires_package("dscribe")
+    @requires_package("datamol")
+    def chemical_space(
+        self, n_samples: Optional[int] = None, return_idxs: bool = True, progress: bool = True, **soap_kwargs
+    ) -> Dict[str, np.ndarray]:
+        """
+        Compute the SOAP descriptors for the dataset.
+
+        Parameters
+        ----------
+        n_samples : Optional[int], optional
+            Number of samples to use for the computation, by default None. If None, all the dataset is used.
+        return_idxs : bool, optional
+            Whether to return the indices of the samples used, by default True.
+        progress : bool, optional
+            Whether to show a progress bar, by default True.
+        **soap_kwargs : dict
+            Keyword arguments to pass to the SOAP descriptor.
+            By defaut, the following values are used:
+                - r_cut : 5.0
+                - n_max : 8
+                - l_max : 6
+                - average : "inner"
+                - periodic : False
+                - compression : {"mode" : "mu1nu1"}
+
+        Returns
+        -------
+        Dict[str, np.ndarray]
+            Dictionary containing the following keys:
+                - soap : np.ndarray of shape (N, M) containing the SOAP descriptors for the dataset
+                - soap_kwargs : dict containing the keyword arguments used for the SOAP descriptor
+                - idxs : np.ndarray of shape (N,) containing the indices of the samples used
+
+        """
+        import datamol as dm
+        from dscribe.descriptors import SOAP
+
+        if n_samples is None:
+            idxs = list(range(len(self)))
+        else:
+            idxs = np.random.choice(len(self), size=n_samples, replace=False)
+        datum = {}
+        r_cut = soap_kwargs.pop("r_cut", 5.0)
+        n_max = soap_kwargs.pop("n_max", 8)
+        l_max = soap_kwargs.pop("l_max", 6)
+        average = soap_kwargs.pop("average", "inner")
+        periodic = soap_kwargs.pop("periodic", False)
+        compression = soap_kwargs.pop("compression", {"mode": "mu1nu1"})
+        soap = SOAP(
+            species=self.chemical_species,
+            periodic=periodic,
+            r_cut=r_cut,
+            n_max=n_max,
+            l_max=l_max,
+            average=average,
+            compression=compression,
+        )
+        datum["soap_kwargs"] = {
+            "r_cut": r_cut,
+            "n_max": n_max,
+            "l_max": l_max,
+            "average": average,
+            "compression": compression,
+            "species": self.chemical_species,
+            "periodic": periodic,
+            **soap_kwargs,
+        }
+
+        def wrapper(idx):
+            entry = self.get_ase_atoms(idx, ext=True)
+            soap.create(entry, centers=entry.positions)
+            return soap.create(entry, centers=entry.positions)
+
+        descr = dm.parallelized(wrapper, idxs, progress=progress, scheduler="threads")
+        datum["soap"] = np.vstack(descr)
+        if return_idxs:
+            datum["idxs"] = idxs
+        return datum
 
     def __len__(self):
         return self.data["energies"].shape[0]
 
     def __getitem__(self, idx: int):
-        # if idx is more than len doesn t throw error
         shift = IsolatedAtomEnergyFactory.max_charge
         p_start, p_end = self.data["position_idx_range"][idx]
         input = self.data["atomic_inputs"][p_start:p_end]

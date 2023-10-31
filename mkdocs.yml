@@ -16,6 +16,7 @@ nav:
     - Really hard example: tutorials/usage.ipynb
   - API:
     - Datasets: API/available_datasets.md
+    - Isolated Atoms Energies: API/isolated_atom_energies.md
 theme:
   name: material
   custom_dir: docs/_overrides
