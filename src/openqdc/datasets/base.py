@@ -374,7 +374,6 @@ class BaseDataset(torch.utils.data.Dataset):
 
         def wrapper(idx):
             entry = self.get_ase_atoms(idx, ext=True)
-            soap.create(entry, centers=entry.positions)
             return soap.create(entry, centers=entry.positions)
 
         descr = dm.parallelized(wrapper, idxs, progress=progress, scheduler="threads")
