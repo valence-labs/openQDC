@@ -76,7 +76,7 @@ class ANI1CCX(ANI1):
         "ccsd(t)/cbs",
         "ccsd(t)/cc-pvdz",
         "ccsd(t)/cc-pvtz",
-        "ccsd(t)/cc-pvdz",
+        "tccsd(t)/cc-pvdz",
     ]
 
     energy_target_names = [
