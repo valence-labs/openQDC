@@ -283,7 +283,7 @@ class BaseDataset(torch.utils.data.Dataset):
         """
         if path is None:
             path = os.getcwd()
-        at = self.get_xyz(idx, ext=True)
+        at = self.get_ase_atoms(idx, ext=True)
         name = at.info["name"]
         write_extxyz(p_join(path, f"{name}.xyz"), at)
 
