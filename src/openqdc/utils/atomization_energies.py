@@ -1847,8 +1847,7 @@ ISOLATED_ATOM_ENERGIES = {
         "cc-pvtz": CCSD_VTZ,
     },
     "tccsd(t)": {
-        "cc-pvdz",
-        ANI1CCX_2,
+        "cc-pvdz": ANI1CCX_2,
     },
     "ccsd(t)": {
         "cc-pvdz": GDML_2,
