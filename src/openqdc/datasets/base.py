@@ -1,6 +1,6 @@
 import os
 from os.path import join as p_join
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -306,15 +306,20 @@ class BaseDataset(torch.utils.data.Dataset):
     @requires_package("dscribe")
     @requires_package("datamol")
     def chemical_space(
-        self, n_samples: Optional[int] = None, return_idxs: bool = True, progress: bool = True, **soap_kwargs
+        self,
+        n_samples: Optional[Union[List[int], int]] = None,
+        return_idxs: bool = True,
+        progress: bool = True,
+        **soap_kwargs,
     ) -> Dict[str, np.ndarray]:
         """
         Compute the SOAP descriptors for the dataset.
 
         Parameters
         ----------
-        n_samples : Optional[int], optional
+        n_samples : Optional[Union[List[int],int]], optional
             Number of samples to use for the computation, by default None. If None, all the dataset is used.
+            If a list of integers is provided, the descriptors are computed for each of the specified idx of samples.
         return_idxs : bool, optional
             Whether to return the indices of the samples used, by default True.
         progress : bool, optional
@@ -343,8 +348,10 @@ class BaseDataset(torch.utils.data.Dataset):
 
         if n_samples is None:
             idxs = list(range(len(self)))
-        else:
+        elif isinstance(n_samples, int):
             idxs = np.random.choice(len(self), size=n_samples, replace=False)
+        elif isinstance(n_samples, list):
+            idxs = n_samples
         datum = {}
         r_cut = soap_kwargs.pop("r_cut", 5.0)
         n_max = soap_kwargs.pop("n_max", 8)
@@ -373,7 +380,7 @@ class BaseDataset(torch.utils.data.Dataset):
         }
 
         def wrapper(idx):
-            entry = self.get_ase_atoms(idx, ext=True)
+            entry = self.get_ase_atoms(idx, ext=False)
             return soap.create(entry, centers=entry.positions)
 
         descr = dm.parallelized(wrapper, idxs, progress=progress, scheduler="threads")
