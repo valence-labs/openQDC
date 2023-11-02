@@ -1,23 +1,31 @@
 import os
 from os.path import join as p_join
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
 import torch
+from ase.io.extxyz import write_extxyz
 from loguru import logger
 from sklearn.utils import Bunch
 from tqdm import tqdm
 
+from openqdc.utils.atomization_energies import (
+    IsolatedAtomEnergyFactory,
+    chemical_symbols,
+)
 from openqdc.utils.constants import NB_ATOMIC_FEATURES
 from openqdc.utils.io import (
     copy_exists,
+    dict_to_atoms,
     get_local_cache,
     load_hdf5_file,
     pull_locally,
     push_remote,
+    set_cache_dir,
 )
 from openqdc.utils.molecule import atom_table
+from openqdc.utils.package_utils import requires_package
 from openqdc.utils.units import get_conversion
 
 
@@ -67,21 +75,44 @@ class BaseDataset(torch.utils.data.Dataset):
     __force_methods__ = []
     energy_target_names = []
     force_target_names = []
+    __isolated_atom_energies__ = []
 
     __energy_unit__ = "hartree"
-    __distance_unit__ = "bohr"
-    __forces_unit__ = "hartree/bohr"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "hartree/ang"
     __fn_energy__ = lambda x: x
     __fn_distance__ = lambda x: x
     __fn_forces__ = lambda x: x
 
-    def __init__(self, energy_unit=None, distance_unit=None, overwrite_local_cache=False) -> None:
+    def __init__(
+        self,
+        energy_unit: Optional[str] = None,
+        distance_unit: Optional[str] = None,
+        overwrite_local_cache: bool = False,
+        cache_dir: Optional[str] = None,
+    ) -> None:
+        set_cache_dir(cache_dir)
         self.data = None
         self._set_units(energy_unit, distance_unit)
         if not self.is_preprocessed():
             logger.info("This dataset not available. Please open an issue on Github for the team to look into it.")
+            # entries = self.read_raw_entries()
+            # res = self.collate_list(entries)
+            # self.save_preprocess(res)
         else:
             self.read_preprocess(overwrite_local_cache=overwrite_local_cache)
+            self._set_isolated_atom_energies()
+
+    @property
+    def numbers(self):
+        if hasattr(self, "_numbers"):
+            return self._numbers
+        self._numbers = np.array(list(set(self.data["atomic_inputs"][..., 0])), dtype=np.int32)
+        return self._numbers
+
+    @property
+    def chemical_species(self):
+        return [chemical_symbols[z] for z in self.numbers]
 
     @property
     def energy_unit(self):
@@ -140,6 +171,14 @@ class BaseDataset(torch.utils.data.Dataset):
             self.__forces_unit__ = self.energy_unit + "/" + self.distance_unit
             self.__class__.__fn_forces__ = get_conversion(old_en + "/" + old_ds, self.__forces_unit__)
 
+    def _set_isolated_atom_energies(self):
+        if self.__energy_methods__ is None:
+            logger.error("No energy methods defined for this dataset.")
+        f = get_conversion("hartree", self.__energy_unit__)
+        self.__isolated_atom_energies__ = f(
+            np.array([IsolatedAtomEnergyFactory.get_matrix(en_method) for en_method in self.__energy_methods__])
+        )
+
     def convert_energy(self, x):
         return self.__class__.__fn_energy__(x)
 
@@ -149,12 +188,18 @@ class BaseDataset(torch.utils.data.Dataset):
     def convert_forces(self, x):
         return self.__class__.__fn_forces__(x)
 
-    def set_energy_unit(self, value):
+    def set_energy_unit(self, value: str):
+        """
+        Set a new energy unit for the dataset.
+        """
         old_unit = self.energy_unit
         self.__energy_unit__ = value
         self.__class__.__fn_energy__ = get_conversion(old_unit, value)
 
-    def set_distance_unit(self, value):
+    def set_distance_unit(self, value: str):
+        """
+        Set a new distance unit for the dataset.
+        """
         old_unit = self.distance_unit
         self.__distance_unit__ = value
         self.__class__.__fn_distance__ = get_conversion(old_unit, value)
@@ -175,11 +220,6 @@ class BaseDataset(torch.utils.data.Dataset):
     def save_preprocess(self, data_dict):
         # save memmaps
         logger.info("Preprocessing data and saving it to cache.")
-        logger.info(
-            f"Dataset {self.__name__} data with the following units:\n"
-            f"Energy: {self.energy_unit}, Distance: {self.distance_unit}, "
-            f"Forces: {self.force_unit if self.__force_methods__ else 'None'}"
-        )
         for key in self.data_keys:
             local_path = p_join(self.preprocess_path, f"{key}.mmap")
             out = np.memmap(local_path, mode="w+", dtype=data_dict[key].dtype, shape=data_dict[key].shape)
@@ -198,10 +238,10 @@ class BaseDataset(torch.utils.data.Dataset):
     def read_preprocess(self, overwrite_local_cache=False):
         logger.info("Reading preprocessed data")
         logger.info(
-            f"{self.__name__} data with the following units:\
-                     Energy: {self.energy_unit},\
-                     Distance: {self.distance_unit},\
-                     Forces: {self.force_unit}"
+            f"{self.__name__} data with the following units:\n\
+                     Energy: {self.energy_unit},\n\
+                     Distance: {self.distance_unit},\n\
+                     Forces: {self.force_unit if self.__force_methods__ else 'None'}"
         )
         self.data = {}
         for key in self.data_keys:
@@ -237,10 +277,123 @@ class BaseDataset(torch.utils.data.Dataset):
             res = self.collate_list(entries)
             self.save_preprocess(res)
 
+    def save_xyz(self, idx: int, path: Optional[str] = None):
+        """
+        Save the entry at index idx as an extxyz file.
+        """
+        if path is None:
+            path = os.getcwd()
+        at = self.get_ase_atoms(idx, ext=True)
+        name = at.info["name"]
+        write_extxyz(p_join(path, f"{name}.xyz"), at)
+
+    def get_ase_atoms(self, idx: int, ext=True):
+        """
+        Get the ASE atoms object for the entry at index idx.
+
+        Parameters
+        ----------
+        idx : int
+            Index of the entry.
+        ext : bool, optional
+            Whether to include additional informations
+        """
+        entry = self[idx]
+        # _ = entry.pop("forces")
+        at = dict_to_atoms(entry, ext=ext)
+        return at
+
+    @requires_package("dscribe")
+    @requires_package("datamol")
+    def chemical_space(
+        self,
+        n_samples: Optional[Union[List[int], int]] = None,
+        return_idxs: bool = True,
+        progress: bool = True,
+        **soap_kwargs,
+    ) -> Dict[str, np.ndarray]:
+        """
+        Compute the SOAP descriptors for the dataset.
+
+        Parameters
+        ----------
+        n_samples : Optional[Union[List[int],int]], optional
+            Number of samples to use for the computation, by default None. If None, all the dataset is used.
+            If a list of integers is provided, the descriptors are computed for each of the specified idx of samples.
+        return_idxs : bool, optional
+            Whether to return the indices of the samples used, by default True.
+        progress : bool, optional
+            Whether to show a progress bar, by default True.
+        **soap_kwargs : dict
+            Keyword arguments to pass to the SOAP descriptor.
+            By defaut, the following values are used:
+                - r_cut : 5.0
+                - n_max : 8
+                - l_max : 6
+                - average : "inner"
+                - periodic : False
+                - compression : {"mode" : "mu1nu1"}
+
+        Returns
+        -------
+        Dict[str, np.ndarray]
+            Dictionary containing the following keys:
+                - soap : np.ndarray of shape (N, M) containing the SOAP descriptors for the dataset
+                - soap_kwargs : dict containing the keyword arguments used for the SOAP descriptor
+                - idxs : np.ndarray of shape (N,) containing the indices of the samples used
+
+        """
+        import datamol as dm
+        from dscribe.descriptors import SOAP
+
+        if n_samples is None:
+            idxs = list(range(len(self)))
+        elif isinstance(n_samples, int):
+            idxs = np.random.choice(len(self), size=n_samples, replace=False)
+        elif isinstance(n_samples, list):
+            idxs = n_samples
+        datum = {}
+        r_cut = soap_kwargs.pop("r_cut", 5.0)
+        n_max = soap_kwargs.pop("n_max", 8)
+        l_max = soap_kwargs.pop("l_max", 6)
+        average = soap_kwargs.pop("average", "inner")
+        periodic = soap_kwargs.pop("periodic", False)
+        compression = soap_kwargs.pop("compression", {"mode": "mu1nu1"})
+        soap = SOAP(
+            species=self.chemical_species,
+            periodic=periodic,
+            r_cut=r_cut,
+            n_max=n_max,
+            l_max=l_max,
+            average=average,
+            compression=compression,
+        )
+        datum["soap_kwargs"] = {
+            "r_cut": r_cut,
+            "n_max": n_max,
+            "l_max": l_max,
+            "average": average,
+            "compression": compression,
+            "species": self.chemical_species,
+            "periodic": periodic,
+            **soap_kwargs,
+        }
+
+        def wrapper(idx):
+            entry = self.get_ase_atoms(idx, ext=False)
+            return soap.create(entry, centers=entry.positions)
+
+        descr = dm.parallelized(wrapper, idxs, progress=progress, scheduler="threads")
+        datum["soap"] = np.vstack(descr)
+        if return_idxs:
+            datum["idxs"] = idxs
+        return datum
+
     def __len__(self):
         return self.data["energies"].shape[0]
 
     def __getitem__(self, idx: int):
+        shift = IsolatedAtomEnergyFactory.max_charge
         p_start, p_end = self.data["position_idx_range"][idx]
         input = self.data["atomic_inputs"][p_start:p_end]
         z, c, positions, energies = (
@@ -256,14 +409,19 @@ class BaseDataset(torch.utils.data.Dataset):
             forces = self.convert_forces(np.array(self.data["forces"][p_start:p_end], dtype=np.float32))
         else:
             forces = None
-
         return Bunch(
             positions=positions,
             atomic_numbers=z,
             charges=c,
-            e0=self.convert_energy(self.atomic_energies[z]),
+            e0=self.__isolated_atom_energies__[..., z, c + shift].T,
             energies=energies,
             name=name,
             subset=subset,
             forces=forces,
         )
+
+    def __str__(self):
+        return f"{self.__name__}"
+
+    def __repr__(self):
+        return f"{self.__name__}"

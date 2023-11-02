@@ -32,11 +32,8 @@ class ANI1(BaseDataset):
         "ωB97x:6-31G(d) Energy",
     ]
     __energy_unit__ = "hartree"
-    __distance_unit__ = "ang"
-    __forces_unit__ = "hartree/ang"
-
-    def __init__(self, energy_unit=None, distance_unit=None) -> None:
-        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
+    __distance_unit__ = "bohr"
+    __forces_unit__ = "hartree/bohr"
 
     @property
     def root(self):
@@ -71,12 +68,15 @@ class ANI1CCX(ANI1):
     """
 
     __name__ = "ani1ccx"
+    __energy_unit__ = "hartree"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "hartree/ang"
 
     __energy_methods__ = [
-        "ccsd(t)_cbs",
-        "npno_ccsd(t)_dz",
-        "npno_ccsd(t)_tz",
-        "tpno_ccsd(t)_dz",
+        "ccsd(t)/cbs",
+        "ccsd(t)/cc-pvdz",
+        "ccsd(t)/cc-pvtz",
+        "tccsd(t)/cc-pvdz",
     ]
 
     energy_target_names = [
@@ -88,9 +88,6 @@ class ANI1CCX(ANI1):
 
     __force_methods__ = []
     force_target_names = []
-
-    def __init__(self) -> None:
-        super().__init__()
 
 
 class ANI1X(ANI1):
@@ -110,16 +107,19 @@ class ANI1X(ANI1):
     """
 
     __name__ = "ani1x"
+    __energy_unit__ = "hartree"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "hartree/ang"
 
     __energy_methods__ = [
-        "hf_dz",
-        "hf_qz",
-        "hf_tz",
-        "mp2_dz",
-        "mp2_qz",
-        "mp2_tz",
-        "wb97x_6-31g(d)",
-        "wb97x_tz",
+        "hf/cc-pvdz",
+        "hf/cc-pvqz",
+        "hf/cc-pvtz",
+        "mp2/cc-pvdz",
+        "mp2/cc-pvqz",
+        "mp2/cc-pvtz",
+        "wb97x/6-31g(d)",
+        "wb97x/cc-pvtz",
     ]
 
     energy_target_names = [
@@ -139,9 +139,9 @@ class ANI1X(ANI1):
     ]
 
     __force_methods__ = [
-        "wb97x_6-31g(d)",
-        "wb97x_tz",
+        "wb97x/6-31g(d)",
+        "wb97x/cc-pvtz",
     ]
 
-    def __init__(self) -> None:
-        super().__init__()
+    def convert_forces(self, x):
+        return super().convert_forces(x) * 0.529177249  # correct the Dataset error

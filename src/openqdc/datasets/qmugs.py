@@ -52,7 +52,7 @@ class QMugs(BaseDataset):
     """
 
     __name__ = "qmugs"
-    __energy_methods__ = ["gfn2_xtb", "b3lyp/6-31g*"]
+    __energy_methods__ = ["gfn2_xtb", "wb97x-d/def2-svp"]
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
@@ -61,9 +61,6 @@ class QMugs(BaseDataset):
         "GFN2:TOTAL_ENERGY",
         "DFT:TOTAL_ENERGY",
     ]
-
-    def __init__(self, energy_unit=None, distance_unit=None) -> None:
-        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
 
     def read_raw_entries(self):
         raw_path = p_join(self.root, "structures")

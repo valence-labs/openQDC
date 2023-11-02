@@ -34,15 +34,18 @@ def read_mol(mol_path, smiles, subset, targets):
 
 class DESS(BaseDataset):
     __name__ = "dess"
+    __energy_unit__ = "hartree"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "hartree/ang"
     __energy_methods__ = [
-        "mp2_cc",
-        "mp2_qz",
-        "mp2_tz",
-        "mp2_cbs",
-        "ccsd(t)_cc",
-        "ccsd(t)_cbs",
-        "ccsd(t)_nn",
-        "sapt",
+        "mp2/cc-pvdz",
+        "mp2/cc-pvqz",
+        "mp2/cc-pvtz",
+        "mp2/cbs",
+        "ccsd(t)/cc-pvdz",
+        "ccsd(t)/cbs",  # cbs
+        "ccsd(t)/nn",  # nn
+        "sapt0/aug-cc-pwcvxz",
     ]
 
     energy_target_names = [
@@ -58,9 +61,6 @@ class DESS(BaseDataset):
     # ['qz_MP2_all', 'tz_MP2_all', 'cbs_MP2_all', 'sapt_all', 'nn_CCSD(T)_all']
 
     partitions = ["DES370K", "DES5M"]
-
-    def __init__(self, energy_unit=None, distance_unit=None) -> None:
-        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
 
     def _read_raw_(self, part):
         df = pd.read_csv(p_join(self.root, f"{part}.csv"))

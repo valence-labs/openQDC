@@ -84,14 +84,11 @@ class Molecule3D(BaseDataset):
     __name__ = "molecule3d"
     __energy_methods__ = ["b3lyp/6-31g*"]
     # UNITS MOST LIKELY WRONG, MUST CHECK THEM MANUALLY
-    __energy_unit__ = "hartree"
+    __energy_unit__ = "ev"  # CALCULATED
     __distance_unit__ = "ang"
-    __forces_unit__ = "hartree/ang"
+    __forces_unit__ = "ev/ang"
 
     energy_target_names = ["b3lyp/6-31g*.energy"]
-
-    def __init__(self, energy_unit=None, distance_unit=None) -> None:
-        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
 
     def read_raw_entries(self):
         raw = p_join(self.root, "data", "raw")

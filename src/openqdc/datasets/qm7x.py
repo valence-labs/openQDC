@@ -35,11 +35,11 @@ def read_mol(mol_h5, mol_name, energy_target_names, force_target_names):
 class QM7X(BaseDataset):
     __name__ = "qm7x"
 
-    __energy_methods__ = ["pbe0+mbd", "dft3b+mbd"]
+    __energy_methods__ = ["pbe0/mbd", "dft3b"]
 
     energy_target_names = ["ePBE0", "eMBD"]
 
-    __force_methods__ = ["pbe0+mbd", "dft3b+mbd"]
+    __force_methods__ = ["pbe0/mbd", "dft3b"]
 
     force_target_names = ["pbe0FOR", "vdwFOR"]
 
