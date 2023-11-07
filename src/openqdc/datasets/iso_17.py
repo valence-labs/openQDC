@@ -39,9 +39,9 @@ class ISO17(BaseDataset):
         "PBE-TS Gradient",
     ]
 
-    __energy_unit__ = "ev"
+    __energy_unit__ = "eV/particle"
     __distance_unit__ = "bohr"  # bohr
-    __forces_unit__ = "ev/bohr"
+    __forces_unit__ = "eV/particle/bohr"
 
     def read_raw_entries(self):
         raw_path = p_join(self.root, "iso_17.h5")

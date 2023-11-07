@@ -10,6 +10,7 @@ from loguru import logger
 from sklearn.utils import Bunch
 from tqdm import tqdm
 
+from openqdc.utils import UNIT_REGISTRY
 from openqdc.utils.atomization_energies import (
     IsolatedAtomEnergyFactory,
     chemical_symbols,
@@ -26,7 +27,13 @@ from openqdc.utils.io import (
 )
 from openqdc.utils.molecule import atom_table
 from openqdc.utils.package_utils import requires_package
-from openqdc.utils.units import get_conversion
+
+# from openqdc.utils.units import get_conversion
+
+
+def get_conversion(old_unit, new_unit):
+    value = UNIT_REGISTRY.Quantity(1, old_unit).to(new_unit).magnitude
+    return lambda x: x * value
 
 
 def extract_entry(
@@ -77,9 +84,10 @@ class BaseDataset(torch.utils.data.Dataset):
     force_target_names = []
     __isolated_atom_energies__ = []
 
-    __energy_unit__ = "hartree"
-    __distance_unit__ = "ang"
-    __forces_unit__ = "hartree/ang"
+    __energy_unit__ = "hartree/particle"
+    # __distance_unit__ = "ang"
+    __distance_unit__ = "angstrom"
+    __forces_unit__ = "hartree/angstrom"
     __fn_energy__ = lambda x: x
     __fn_distance__ = lambda x: x
     __fn_forces__ = lambda x: x
@@ -174,7 +182,7 @@ class BaseDataset(torch.utils.data.Dataset):
     def _set_isolated_atom_energies(self):
         if self.__energy_methods__ is None:
             logger.error("No energy methods defined for this dataset.")
-        f = get_conversion("hartree", self.__energy_unit__)
+        f = get_conversion("hartree/particle", self.__energy_unit__)
         self.__isolated_atom_energies__ = f(
             np.array([IsolatedAtomEnergyFactory.get_matrix(en_method) for en_method in self.__energy_methods__])
         )

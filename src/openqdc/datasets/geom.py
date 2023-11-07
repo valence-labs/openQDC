@@ -78,9 +78,9 @@ class GEOM(BaseDataset):
     __name__ = "geom"
     __energy_methods__ = ["gfn2_xtb"]
 
-    __energy_unit__ = "hartree"
-    __distance_unit__ = "ang"
-    __forces_unit__ = "hartree/ang"
+    __energy_unit__ = "hartree/particle"
+    __distance_unit__ = "angstrom"
+    __forces_unit__ = "hartree/particle/angstrom"
 
     energy_target_names = ["gfn2_xtb.energy"]
     force_target_names = []

@@ -1,3 +1,5 @@
+from pint import UnitRegistry
+
 from .io import (
     check_file,
     create_hdf5_file,
@@ -11,7 +13,8 @@ from .io import (
     save_pkl,
     set_cache_dir,
 )
-from .units import get_conversion
+
+UNIT_REGISTRY = UnitRegistry()
 
 __all__ = [
     "load_pkl",
@@ -25,5 +28,5 @@ __all__ = [
     "set_cache_dir",
     "get_local_cache",
     "get_remote_cache",
-    "get_conversion",
+    "UNIT_REGISTRY",
 ]

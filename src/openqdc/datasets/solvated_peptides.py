@@ -23,9 +23,9 @@ class SolvatedPeptides(BaseDataset):
     ]
 
     # TO CHECK
-    __energy_unit__ = "hartree"
+    __energy_unit__ = "hartree/particle"
     __distance_unit__ = "bohr"
-    __forces_unit__ = "hartree/bohr"
+    __forces_unit__ = "hartree/particle/bohr"
 
     def read_raw_entries(self):
         raw_path = p_join(self.root, "solvated_peptides.h5")

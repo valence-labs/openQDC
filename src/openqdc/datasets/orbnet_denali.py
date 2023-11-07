@@ -54,9 +54,9 @@ class OrbnetDenali(BaseDataset):
     __name__ = "orbnet_denali"
     __energy_methods__ = ["wb97x-d3/def2-tzvp", "gfn1_xtb"]
     energy_target_names = ["dft_energy", "xtb1_energy"]
-    __energy_unit__ = "hartree"
-    __distance_unit__ = "ang"
-    __forces_unit__ = "hartree/ang"
+    __energy_unit__ = "hartree/particle"
+    __distance_unit__ = "angstrom"
+    __forces_unit__ = "hartree/particle/angstrom"
 
     def read_raw_entries(self):
         label_path = p_join(self.root, "denali_labels.csv")

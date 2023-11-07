@@ -51,9 +51,9 @@ class TMQM(BaseDataset):
 
     energy_target_names = ["TPSSh/def2TZVP level"]
 
-    __energy_unit__ = "hartree"
-    __distance_unit__ = "ang"
-    __forces_unit__ = "hartree/ang"
+    __energy_unit__ = "hartree/particle"
+    __distance_unit__ = "angstrom"
+    __forces_unit__ = "hartree/particle/angstrom"
 
     def read_raw_entries(self):
         df = pd.read_csv(p_join(self.root, "tmQM_y.csv"), sep=";", usecols=["CSD_code", "Electronic_E"])

@@ -31,9 +31,9 @@ class ANI1(BaseDataset):
     energy_target_names = [
         "ωB97x:6-31G(d) Energy",
     ]
-    __energy_unit__ = "hartree"
+    __energy_unit__ = "hartree/particle"
     __distance_unit__ = "bohr"
-    __forces_unit__ = "hartree/bohr"
+    __forces_unit__ = "hartree/particle/bohr"
 
     @property
     def root(self):
@@ -68,9 +68,9 @@ class ANI1CCX(ANI1):
     """
 
     __name__ = "ani1ccx"
-    __energy_unit__ = "hartree"
-    __distance_unit__ = "ang"
-    __forces_unit__ = "hartree/ang"
+    __energy_unit__ = "hartree/particle"
+    __distance_unit__ = "angstrom"
+    __forces_unit__ = "hartree/particle/angstrom"
 
     __energy_methods__ = [
         "ccsd(t)/cbs",
@@ -107,9 +107,9 @@ class ANI1X(ANI1):
     """
 
     __name__ = "ani1x"
-    __energy_unit__ = "hartree"
-    __distance_unit__ = "ang"
-    __forces_unit__ = "hartree/ang"
+    __energy_unit__ = "hartree/particle"
+    __distance_unit__ = "angstrom"
+    __forces_unit__ = "hartree/angstrom"
 
     __energy_methods__ = [
         "hf/cc-pvdz",

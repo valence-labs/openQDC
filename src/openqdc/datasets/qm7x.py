@@ -43,9 +43,9 @@ class QM7X(BaseDataset):
 
     force_target_names = ["pbe0FOR", "vdwFOR"]
 
-    __energy_unit__ = "ev"
-    __distance_unit__ = "ang"
-    __forces_unit__ = "ev/ang"
+    __energy_unit__ = "eV/particle"
+    __distance_unit__ = "angstrom"
+    __forces_unit__ = "eV/particle/angstrom"
 
     def read_raw_entries(self):
         samples = []

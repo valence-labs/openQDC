@@ -24,7 +24,7 @@ class COMP6(BaseDataset):
 
     # watchout that forces are stored as -grad(E)
     __energy_unit__ = "kcal/mol"
-    __distance_unit__ = "bohr"  # bohr
+    __distance_unit__ = "bohr"
     __forces_unit__ = "kcal/mol/bohr"
 
     __energy_methods__ = [

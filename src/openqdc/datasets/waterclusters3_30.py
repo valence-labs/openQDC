@@ -54,8 +54,8 @@ class WaterClusters(BaseDataset):
     # Energy in hartree, all zeros by default
     atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
     __energy_unit__ = "kcal/mol"
-    __distance_unit__ = "ang"
-    __forces_unit__ = "kcal/mol/ang"
+    __distance_unit__ = "angstrom"
+    __forces_unit__ = "kcal/mol/angstrom"
 
     __energy_methods__ = ["ttm2.1-f"]
     energy_target_names = ["TTM2.1-F Potential"]

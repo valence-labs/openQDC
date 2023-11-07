@@ -60,9 +60,9 @@ class NablaDFT(BaseDataset):
     __energy_methods__ = ["wb97x-d/def2-svp"]
 
     energy_target_names = ["wb97x-d/def2-svp"]
-    __energy_unit__ = "hartree"
+    __energy_unit__ = "hartree/particle"
     __distance_unit__ = "bohr"
-    __forces_unit__ = "hartree/bohr"
+    __forces_unit__ = "hartree/particle/bohr"
 
     @requires_package("nablaDFT")
     def read_raw_entries(self):

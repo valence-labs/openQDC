@@ -53,9 +53,9 @@ class QMugs(BaseDataset):
 
     __name__ = "qmugs"
     __energy_methods__ = ["gfn2_xtb", "wb97x-d/def2-svp"]
-    __energy_unit__ = "hartree"
-    __distance_unit__ = "ang"
-    __forces_unit__ = "hartree/ang"
+    __energy_unit__ = "hartree/particle"
+    __distance_unit__ = "angstrom"
+    __forces_unit__ = "hartree/particle/angstrom"
 
     energy_target_names = [
         "GFN2:TOTAL_ENERGY",
