@@ -85,7 +85,6 @@ class BaseDataset(torch.utils.data.Dataset):
     __isolated_atom_energies__ = []
 
     __energy_unit__ = "hartree/particle"
-    # __distance_unit__ = "ang"
     __distance_unit__ = "angstrom"
     __forces_unit__ = "hartree/angstrom"
     __fn_energy__ = lambda x: x
