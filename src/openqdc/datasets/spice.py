@@ -75,6 +75,36 @@ class Spice(BaseDataset):
         "SPICE Ion Pairs Single Points Dataset v1.1": "Ion Pairs",
     }
 
+    @property
+    def average_n_atoms(self):
+        return 29.88387509402179
+
+    def get_stats(self, tp: str = "formation"):
+        if tp not in ["formation", "total"]:
+            raise ValueError(f"type must be one of 'formation' or 'total', got {tp} instead")
+        if tp == "formation":
+            return {
+                "energy": {
+                    "mean": self.convert_energy(np.array([-5.6775709889409836])),
+                    "std": self.convert_energy(np.array([2.3371488471105013])),
+                },
+                "forces": {
+                    "mean": self.convert_energy(np.array([-1.03868e-08])),
+                    "std": self.convert_energy(np.array([0.021063408])),
+                },
+            }
+        else:
+            return {
+                "energy": {
+                    "mean": self.convert_energy(np.array([-1244.6562])),
+                    "std": self.convert_energy(np.array([1219.4248])),
+                },
+                "forces": {
+                    "mean": self.convert_energy(np.array([-1.03868e-08])),
+                    "std": self.convert_energy(np.array([0.021063408])),
+                },
+            }
+
     def convert_forces(self, x):
         return (-1.0) * super().convert_forces(x)
 

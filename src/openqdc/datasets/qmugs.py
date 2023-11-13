@@ -62,6 +62,36 @@ class QMugs(BaseDataset):
         "DFT:TOTAL_ENERGY",
     ]
 
+    @property
+    def average_n_atoms(self):
+        return 55.215926293326426
+
+    def get_stats(self, tp: str = "formation"):
+        if tp not in ["formation", "total"]:
+            raise ValueError(f"type must be one of 'formation' or 'total', got {tp} instead")
+        if tp == "formation":
+            return {
+                "energy": {
+                    "mean": self.convert_energy(np.array([-12.94348027, -9.83037297])),
+                    "std": self.convert_energy(np.array([4.39971409, 3.3574188])),
+                },
+                "forces": {
+                    "mean": np.array([0]),
+                    "std": np.array([0]),
+                },
+            }
+        else:
+            return {
+                "energy": {
+                    "mean": self.convert_energy(np.array([-89.44242, -1740.5336])),
+                    "std": self.convert_energy(np.array([29.599571, 791.48663])),
+                },
+                "forces": {
+                    "mean": np.array([0]),
+                    "std": np.array([0]),
+                },
+            }
+
     def read_raw_entries(self):
         raw_path = p_join(self.root, "structures")
         mol_dirs = [p_join(raw_path, d) for d in os.listdir(raw_path)]
