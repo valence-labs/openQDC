@@ -4,6 +4,7 @@ from os.path import join as p_join
 
 import datamol as dm
 import numpy as np
+from numpy import array
 
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils.molecule import get_atomic_number_and_charge
@@ -72,23 +73,27 @@ class QMugs(BaseDataset):
         if tp == "formation":
             return {
                 "energy": {
-                    "mean": self.convert_energy(np.array([-12.94348027, -9.83037297])),
-                    "std": self.convert_energy(np.array([4.39971409, 3.3574188])),
+                    "mean": self.convert_energy(array([-12.94348027, -9.83037297])),
+                    "std": self.convert_energy(array([4.39971409, 3.3574188])),
                 },
                 "forces": {
-                    "mean": np.array([0]),
-                    "std": np.array([0]),
+                    "mean": array([0]),
+                    "std": array([0]),
+                    "components": {
+                        "mean": self.convert_forces(array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]])),
+                        "std": self.convert_forces(array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]])),
+                    },
                 },
             }
         else:
             return {
                 "energy": {
-                    "mean": self.convert_energy(np.array([-89.44242, -1740.5336])),
-                    "std": self.convert_energy(np.array([29.599571, 791.48663])),
+                    "mean": self.convert_energy(array([-89.44242, -1740.5336])),
+                    "std": self.convert_energy(array([29.599571, 791.48663])),
                 },
                 "forces": {
-                    "mean": np.array([0]),
-                    "std": np.array([0]),
+                    "mean": array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]),
+                    "std": array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]),
                 },
             }
 

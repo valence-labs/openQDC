@@ -2,6 +2,7 @@ from os.path import join as p_join
 
 import datamol as dm
 import numpy as np
+from numpy import array
 from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
@@ -83,25 +84,35 @@ class Spice(BaseDataset):
         if tp not in ["formation", "total"]:
             raise ValueError(f"type must be one of 'formation' or 'total', got {tp} instead")
         if tp == "formation":
-            return {
-                "energy": {
-                    "mean": self.convert_energy(np.array([-5.6775709889409836])),
-                    "std": self.convert_energy(np.array([2.3371488471105013])),
+            return (
+                {
+                    "energy": {
+                        "mean": self.convert_energy(array([-5.67757058])),
+                        "std": self.convert_energy(array([2.33714861])),
+                    },
+                    "forces": {
+                        "mean": self.convert_forces(array([-1.0387013e-08])),
+                        "std": self.convert_forces(array([0.021063408])),
+                        "components": {
+                            "mean": self.convert_forces(array([[5.7479990e-09], [-4.8940532e-08], [1.2032132e-08]])),
+                            "std": self.convert_forces(array([[0.02017307], [0.02016141], [0.02014796]])),
+                        },
+                    },
                 },
-                "forces": {
-                    "mean": self.convert_energy(np.array([-1.03868e-08])),
-                    "std": self.convert_energy(np.array([0.021063408])),
-                },
-            }
+            )
         else:
             return {
                 "energy": {
-                    "mean": self.convert_energy(np.array([-1244.6562])),
-                    "std": self.convert_energy(np.array([1219.4248])),
+                    "mean": self.convert_energy(array([-1244.6562])),
+                    "std": self.convert_energy(array([1219.4248])),
                 },
                 "forces": {
-                    "mean": self.convert_energy(np.array([-1.03868e-08])),
-                    "std": self.convert_energy(np.array([0.021063408])),
+                    "mean": self.convert_forces(array([-1.0387013e-08])),
+                    "std": self.convert_forces(array([0.021063408])),
+                    "components": {
+                        "mean": self.convert_forces(array([[5.7479990e-09], [-4.8940532e-08], [1.2032132e-08]])),
+                        "std": self.convert_forces(array([[0.02017307], [0.02016141], [0.02014796]])),
+                    },
                 },
             }
 
