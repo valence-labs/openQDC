@@ -14,7 +14,7 @@ from openqdc.utils.atomization_energies import (
     IsolatedAtomEnergyFactory,
     chemical_symbols,
 )
-from openqdc.utils.constants import NB_ATOMIC_FEATURES
+from openqdc.utils.constants import NB_ATOMIC_FEATURES, POSSIBLE_NORMALIZATION
 from openqdc.utils.io import (
     copy_exists,
     dict_to_atoms,
@@ -83,6 +83,7 @@ class BaseDataset(torch.utils.data.Dataset):
     __fn_energy__ = lambda x: x
     __fn_distance__ = lambda x: x
     __fn_forces__ = lambda x: x
+    __average_nb_atoms__ = None
 
     def __init__(
         self,
@@ -425,3 +426,28 @@ class BaseDataset(torch.utils.data.Dataset):
 
     def __repr__(self):
         return f"{self.__name__}"
+
+    @property
+    def _stats(self):
+        return {}
+
+    @property
+    def average_n_atoms(self):
+        if self.__average_nb_atoms__ is None:
+            logger.info(
+                "This property for this dataset not available."
+                + "Please open an issue on Github for the team to look into it."
+            )
+            return 1
+        return self.__average_nb_atoms__
+
+    def get_statistics(self, normalization: str = "formation"):
+        stats = self._stats
+        if len(stats) == 0:
+            logger.info(
+                "This property for this dataset not available."
+                + "Please open an issue on Github for the team to look into it."
+            )
+        if normalization not in POSSIBLE_NORMALIZATION:
+            raise ValueError(f"normalization={normalization} is not valid. Must be one of {POSSIBLE_NORMALIZATION}")
+        return stats[normalization]

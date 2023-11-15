@@ -3,6 +3,7 @@ from sklearn.utils import Bunch
 
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils.atomization_energies import IsolatedAtomEnergyFactory
+from numpy import array
 
 
 class Dummy(BaseDataset):
@@ -21,6 +22,38 @@ class Dummy(BaseDataset):
 
     force_target_names = [f"forces{i}" for i in range(len(__force_methods__))]
     __isolated_atom_energies__ = []
+    __average_n_atoms__ = 20
+
+    @property
+    def _stats(self):
+        return {
+            "formation": {
+                "energy": {
+                    "mean": array([-12.94348027, -9.83037297]),
+                    "std": array([4.39971409, 3.3574188]),
+                },
+                "forces": {
+                    "mean": array([0]),
+                    "std": array([0]),
+                    "components": {
+                        "mean": array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]),
+                        "std": array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]),
+                        "rms": array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]),
+                    },
+                },
+            },
+            "total": {
+                "energy": {
+                    "mean": array([-89.44242, -1740.5336]),
+                    "std": array([29.599571, 791.48663]),
+                },
+                "forces": {
+                    "mean": array([[0.0], [0.0], [0.0]]),
+                    "std": array([[0.0], [0.0], [0.0]]),
+                    "rms": array([[0.0], [0.0], [0.0]]),
+                },
+            },
+        }
 
     def __init__(self, energy_unit=None, distance_unit=None, cache_dir=None) -> None:
         try:

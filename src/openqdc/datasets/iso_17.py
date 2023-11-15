@@ -1,5 +1,7 @@
 from os.path import join as p_join
 
+from numpy import array, float32
+
 from openqdc.datasets.base import BaseDataset, read_qc_archive_h5
 
 
@@ -42,6 +44,46 @@ class ISO17(BaseDataset):
     __energy_unit__ = "ev"
     __distance_unit__ = "bohr"  # bohr
     __forces_unit__ = "ev/bohr"
+    __average_nb_atoms__ = 19.0
+
+    @property
+    def _stats(self):
+        return {
+            "formation": {
+                "energy": {
+                    "mean": self.convert_energy(array([-103.58336533])),
+                    "std": self.convert_energy(array([0.79709836])),
+                },
+                "forces": {
+                    "mean": self.convert_forces(array([-1.2548699e-11])),
+                    "std": self.convert_forces(array([1.1287293])),
+                    "components": {
+                        "mean": self.convert_forces(
+                            array([[-2.7712117e-11], [-1.8989450e-12], [3.9721233e-11]], dtype=float32)
+                        ),
+                        "std": self.convert_forces(array([[1.1013116], [1.1273879], [1.1195794]], dtype=float32)),
+                        "rms": self.convert_forces(array([[1.1013116], [1.1273879], [1.1195794]], dtype=float32)),
+                    },
+                },
+            },
+            "total": {
+                "energy": {
+                    "mean": self.convert_energy(array([-11503.619]), dtype=float32),
+                    "std": self.convert_energy(array([0.79709935]), dtype=float32),
+                },
+                "forces": {
+                    "mean": self.convert_forces(array([-1.2548699e-11])),
+                    "std": self.convert_forces(array([1.1287293])),
+                    "components": {
+                        "mean": self.convert_forces(
+                            array([[-2.7712117e-11], [-1.8989450e-12], [3.9721233e-11]], dtype=float32)
+                        ),
+                        "std": self.convert_forces(array([[1.1013116], [1.1273879], [1.1195794]], dtype=float32)),
+                        "rms": self.convert_forces(array([[1.1013116], [1.1273879], [1.1195794]], dtype=float32)),
+                    },
+                },
+            },
+        }
 
     def read_raw_entries(self):
         raw_path = p_join(self.root, "iso_17.h5")

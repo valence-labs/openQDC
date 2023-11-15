@@ -1,5 +1,7 @@
 from os.path import join as p_join
 
+from numpy import array, float32, nan
+
 from openqdc.datasets.base import BaseDataset, read_qc_archive_h5
 
 
@@ -58,6 +60,95 @@ class COMP6(BaseDataset):
     force_target_names = [
         "Gradient",
     ]
+
+    __average_nb_atoms__ = 25.74051563378753
+
+    @property
+    def _stats(self):
+        return {
+            "formation": {
+                "energy": {
+                    "mean": self.convert_energy(
+                        array(
+                            [
+                                -2579.52016333,
+                                -2543.74519203,
+                                -354694.46157991,
+                                -2506.4300631,
+                                -2616.89224817,
+                                -3157.54118509,
+                                -354031.62984212,
+                                nan,
+                                nan,
+                            ]
+                        )
+                    ),
+                    "std": self.convert_energy(
+                        array(
+                            [
+                                1811.03171965,
+                                1471.95818836,
+                                201545.89189168,
+                                1385.50993753,
+                                1456.09915473,
+                                1728.51133182,
+                                208097.95666257,
+                                nan,
+                                nan,
+                            ]
+                        )
+                    ),
+                },
+                "forces": {
+                    "mean": self.convert_forces(6.6065984e-13),
+                    "std": self.convert_forces(0.056459695),
+                    "components": {
+                        "mean": self.convert_forces(
+                            array([[-4.1767219e-13], [1.0024132e-12], [-9.4386771e-13]], dtype=float32)
+                        ),
+                        "std": self.convert_forces(array([[0.05781676], [0.05793402], [0.05330585]], dtype=float32)),
+                        "rms": self.convert_forces(array([[0.05781676], [0.05793402], [0.05330585]], dtype=float32)),
+                    },
+                },
+            },
+            "total": {
+                "energy": {
+                    "mean": self.convert_energy(
+                        array(
+                            [
+                                -360972.16,
+                                -354729.66,
+                                -354699.38,
+                                -349555.7,
+                                -351555.97,
+                                -351530.44,
+                                -354027.8,
+                                nan,
+                                nan,
+                            ],
+                            dtype=float32,
+                        ),
+                    ),
+                    "std": self.convert_energy(
+                        array(
+                            [254766.0, 201559.77, 201537.8, 188725.47, 191028.78, 191016.1, 208089.4, nan, nan],
+                            dtype=float32,
+                        ),
+                    ),
+                },
+                "forces": {
+                    "mean": self.convert_forces(array([6.6065984e-13])),
+                    "std": self.convert_forces(array([0.056459695])),
+                    "components": {
+                        "mean": self.convert_forces(
+                            array([[-4.1767219e-13], [1.0024132e-12], [-9.4386771e-13]], dtype=float32)
+                        ),
+                        "std": self.convert_forces(array([[0.05781676], [0.05793402], [0.05330585]], dtype=float32)),
+                        "rms": self.convert_forces(array([[0.05781676], [0.05793402], [0.05330585]], dtype=float32)),
+                    },
+                },
+            },
+        }
 
     def read_raw_entries(self):
         samples = []

@@ -56,6 +56,7 @@ class Spice(BaseDataset):
     __energy_unit__ = "hartree"
     __distance_unit__ = "bohr"
     __forces_unit__ = "hartree/bohr"
+    __average_nb_atoms__ = 29.88387509402179
 
     energy_target_names = ["dft_total_energy"]
 
@@ -77,34 +78,12 @@ class Spice(BaseDataset):
     }
 
     @property
-    def average_n_atoms(self):
-        return 29.88387509402179
-
-    def get_stats(self, tp: str = "formation"):
-        if tp not in ["formation", "total"]:
-            raise ValueError(f"type must be one of 'formation' or 'total', got {tp} instead")
-        if tp == "formation":
-            return (
-                {
-                    "energy": {
-                        "mean": self.convert_energy(array([-5.67757058])),
-                        "std": self.convert_energy(array([2.33714861])),
-                    },
-                    "forces": {
-                        "mean": self.convert_forces(array([-1.0387013e-08])),
-                        "std": self.convert_forces(array([0.021063408])),
-                        "components": {
-                            "mean": self.convert_forces(array([[5.7479990e-09], [-4.8940532e-08], [1.2032132e-08]])),
-                            "std": self.convert_forces(array([[0.02017307], [0.02016141], [0.02014796]])),
-                        },
-                    },
-                },
-            )
-        else:
-            return {
+    def _stats(self):
+        return {
+            "formation": {
                 "energy": {
-                    "mean": self.convert_energy(array([-1244.6562])),
-                    "std": self.convert_energy(array([1219.4248])),
+                    "mean": self.convert_energy(array([-5.67757058])),
+                    "std": self.convert_energy(array([2.33714861])),
                 },
                 "forces": {
                     "mean": self.convert_forces(array([-1.0387013e-08])),
@@ -112,9 +91,28 @@ class Spice(BaseDataset):
                     "components": {
                         "mean": self.convert_forces(array([[5.7479990e-09], [-4.8940532e-08], [1.2032132e-08]])),
                         "std": self.convert_forces(array([[0.02017307], [0.02016141], [0.02014796]])),
+                        "rms": array([[0.02017307], [0.02016142], [0.02014796]]),
                     },
                 },
-            }
+            },
+            "total": {
+                {
+                    "energy": {
+                        "mean": self.convert_energy(array([-1244.6562])),
+                        "std": self.convert_energy(array([1219.4248])),
+                    },
+                    "forces": {
+                        "mean": self.convert_forces(array([-1.0387013e-08])),
+                        "std": self.convert_forces(array([0.021063408])),
+                        "components": {
+                            "mean": self.convert_forces(array([[5.7479990e-09], [-4.8940532e-08], [1.2032132e-08]])),
+                            "std": self.convert_forces(array([[0.02017307], [0.02016141], [0.02014796]])),
+                            "rms": array([[0.02017307], [0.02016142], [0.02014796]]),
+                        },
+                    },
+                }
+            },
+        }
 
     def convert_forces(self, x):
         return (-1.0) * super().convert_forces(x)

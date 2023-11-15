@@ -3,6 +3,7 @@ from os.path import join as p_join
 import datamol as dm
 import numpy as np
 import pandas as pd
+from numpy import array, float32
 from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
@@ -61,6 +62,70 @@ class DESS(BaseDataset):
     # ['qz_MP2_all', 'tz_MP2_all', 'cbs_MP2_all', 'sapt_all', 'nn_CCSD(T)_all']
 
     partitions = ["DES370K", "DES5M"]
+    __average_nb_atoms__ = 18.944905540514252
+
+    @property
+    def _stats(self):
+        return {
+            "formation": {
+                "energy": {
+                    "mean": array(
+                        [
+                            1.55021905e03,
+                            7.85244098e02,
+                            7.85022111e02,
+                            7.84864329e02,
+                            1.55072999e03,
+                            1.56925354e03,
+                            -7.76931930e-01,
+                            -2.29679257e00,
+                        ]
+                    ),
+                    "std": array(
+                        [
+                            1.89341080e03,
+                            9.68462074e02,
+                            9.68422393e02,
+                            9.70421004e02,
+                            1.89394888e03,
+                            1.91531274e03,
+                            1.38230279e00,
+                            1.27589212e01,
+                        ]
+                    ),
+                },
+                "forces": {
+                    "mean": array([0]),
+                    "std": array([0]),
+                    "components": {
+                        "mean": array([[0.0], [0.0], [0.0]]),
+                        "std": array([[0.0], [0.0], [0.0]]),
+                        "rms": array([[0.0], [0.0], [0.0]]),
+                    },
+                },
+            },
+            "total": {
+                "energy": {
+                    "mean": array(
+                        [-0.8121756, 4.1286583, 4.3558254, 3.9754286, -0.66178626, -1.0762144, 4.4547276, 3.4555712],
+                        dtype=float32,
+                    ),
+                    "std": array(
+                        [11.138448, 17.800674, 18.148039, 17.567768, 11.290686, 11.005155, 18.162294, 16.579735],
+                        dtype=float32,
+                    ),
+                },
+                "forces": {
+                    "mean": array([0]),
+                    "std": array([0]),
+                    "components": {
+                        "mean": array([[0.0], [0.0], [0.0]]),
+                        "std": array([[0.0], [0.0], [0.0]]),
+                        "rms": array([[0.0], [0.0], [0.0]]),
+                    },
+                },
+            },
+        }
 
     def _read_raw_(self, part):
         df = pd.read_csv(p_join(self.root, f"{part}.csv"))

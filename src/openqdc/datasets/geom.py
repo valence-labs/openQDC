@@ -3,6 +3,7 @@ from typing import Dict
 
 import datamol as dm
 import numpy as np
+from numpy import array
 
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils import load_json, load_pkl
@@ -84,8 +85,44 @@ class GEOM(BaseDataset):
 
     energy_target_names = ["gfn2_xtb.energy"]
     force_target_names = []
+    __average_nb_atoms__ = 50.07244573677837
 
     partitions = ["qm9", "drugs"]
+
+    @property
+    def _stats(self):
+        return {
+            "formation": {
+                "energy": {
+                    "mean": self.convert_energy(array([-8.47811605])),
+                    "std": self.convert_energy(array([3.68015507])),
+                },
+                "forces": {
+                    "mean": array([0]),
+                    "std": array([0]),
+                    "components": {
+                        "mean": array([[0.0], [0.0], [0.0]]),
+                        "std": array([[0.0], [0.0], [0.0]]),
+                        "rms": array([[0.0], [0.0], [0.0]]),
+                    },
+                },
+            },
+            "total": {
+                "energy": {
+                    "mean": self.convert_energy(array([-78.264725])),
+                    "std": self.convert_energy(array([20.200787])),
+                },
+                "forces": {
+                    "mean": array([0]),
+                    "std": array([0]),
+                    "components": {
+                        "mean": array([[0.0], [0.0], [0.0]]),
+                        "std": array([[0.0], [0.0], [0.0]]),
+                        "rms": array([[0.0], [0.0], [0.0]]),
+                    },
+                },
+            },
+        }
 
     def _read_raw_(self, partition):
         raw_path = p_join(self.root, "rdkit_folder")

@@ -5,6 +5,7 @@ from typing import Dict, List
 import datamol as dm
 import numpy as np
 import pandas as pd
+from numpy import array, float32
 from rdkit import Chem
 from tqdm import tqdm
 
@@ -89,6 +90,7 @@ class Molecule3D(BaseDataset):
     __forces_unit__ = "ev/ang"
 
     energy_target_names = ["b3lyp/6-31g*.energy"]
+    __average_nb_atoms__ = 29.111696292432697
 
     def read_raw_entries(self):
         raw = p_join(self.root, "data", "raw")
@@ -99,3 +101,38 @@ class Molecule3D(BaseDataset):
         res = dm.parallelized(fn, sdf_paths, n_jobs=1)  # don't use more than 1 job
         samples = sum(res, [])
         return samples
+
+    @property
+    def _stats(self):
+        return {
+            "formation": {
+                "energy": {
+                    "mean": self.convert_energy(array([-191.66717791])),
+                    "std": self.convert_energy(array([2005.52732443])),
+                },
+                "forces": {
+                    "mean": array([0]),
+                    "std": array([0]),
+                    "components": {
+                        "mean": array([[0.0], [0.0], [0.0]]),
+                        "std": array([[0.0], [0.0], [0.0]]),
+                        "rms": array([[0.0], [0.0], [0.0]]),
+                    },
+                },
+            },
+            "total": {
+                "energy": {
+                    "mean": self.convert_energy(array([-21100.502], dtype=float32)),
+                    "std": self.convert_energy(array([9345.366], dtype=float32)),
+                },
+                "forces": {
+                    "mean": array([0]),
+                    "std": array([0]),
+                    "components": {
+                        "mean": array([[0.0], [0.0], [0.0]]),
+                        "std": array([[0.0], [0.0], [0.0]]),
+                        "rms": array([[0.0], [0.0], [0.0]]),
+                    },
+                },
+            },
+        }

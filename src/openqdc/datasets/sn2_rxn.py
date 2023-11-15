@@ -24,6 +24,9 @@ class SN2RXN(BaseDataset):
     force_target_names = [
         "DSD-BLYP-D3(BJ):def2-TZVP Gradient",
     ]
+    __average_nb_atoms__ = 5.444471933343348
+
+    # TODO: Check this
 
     def read_raw_entries(self):
         raw_path = p_join(self.root, "sn2_rxn.h5")

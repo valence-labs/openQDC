@@ -4,6 +4,7 @@ from typing import Dict, List
 import datamol as dm
 import numpy as np
 import pandas as pd
+from numpy import array, float32
 
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils.molecule import atom_table
@@ -57,6 +58,7 @@ class OrbnetDenali(BaseDataset):
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
+    __average_nb_atoms__ = 44.87857092772292
 
     def read_raw_entries(self):
         label_path = p_join(self.root, "denali_labels.csv")
@@ -77,3 +79,38 @@ class OrbnetDenali(BaseDataset):
         res = dm.parallelized(fn, list(labels.items()), scheduler="threads", n_jobs=-1, progress=True)
         samples = sum(res, [])
         return samples
+
+    @property
+    def _stats(self):
+        return {
+            "formation": {
+                "energy": {
+                    "mean": self.convert_energy(array([-13.87283487, -7.79357297])),
+                    "std": self.convert_energy(array([75.34652971, 3.3274954])),
+                },
+                "forces": {
+                    "mean": array([0]),
+                    "std": array([0]),
+                    "components": {
+                        "mean": array([[0.0], [0.0], [0.0]]),
+                        "std": array([[0.0], [0.0], [0.0]]),
+                        "rms": array([[0.0], [0.0], [0.0]]),
+                    },
+                },
+            },
+            "total": {
+                "energy": {
+                    "mean": self.convert_energy(array([-1630.8182, -74.17469], dtype=float32)),
+                    "std": self.convert_energy(array([929.9734, 19.751446], dtype=float32)),
+                },
+                "forces": {
+                    "mean": array([0]),
+                    "std": array([0]),
+                    "components": {
+                        "mean": array([[0.0], [0.0], [0.0]]),
+                        "std": array([[0.0], [0.0], [0.0]]),
+                        "rms": array([[0.0], [0.0], [0.0]]),
+                    },
+                },
+            },
+        }

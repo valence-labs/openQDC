@@ -57,6 +57,7 @@ class QMugs(BaseDataset):
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
+    __average_nb_atoms__ = 55.215926293326426
 
     energy_target_names = [
         "GFN2:TOTAL_ENERGY",
@@ -64,14 +65,9 @@ class QMugs(BaseDataset):
     ]
 
     @property
-    def average_n_atoms(self):
-        return 55.215926293326426
-
-    def get_stats(self, tp: str = "formation"):
-        if tp not in ["formation", "total"]:
-            raise ValueError(f"type must be one of 'formation' or 'total', got {tp} instead")
-        if tp == "formation":
-            return {
+    def _stats(self):
+        return {
+            "formation": {
                 "energy": {
                     "mean": self.convert_energy(array([-12.94348027, -9.83037297])),
                     "std": self.convert_energy(array([4.39971409, 3.3574188])),
@@ -80,22 +76,24 @@ class QMugs(BaseDataset):
                     "mean": array([0]),
                     "std": array([0]),
                     "components": {
-                        "mean": self.convert_forces(array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]])),
-                        "std": self.convert_forces(array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]])),
+                        "mean": array([[0.0], [0.0], [0.0]]),
+                        "std": array([[0.0], [0.0], [0.0]]),
+                        "rms": array([[0.0], [0.0], [0.0]]),
                     },
                 },
-            }
-        else:
-            return {
+            },
+            "total": {
                 "energy": {
                     "mean": self.convert_energy(array([-89.44242, -1740.5336])),
                     "std": self.convert_energy(array([29.599571, 791.48663])),
                 },
                 "forces": {
-                    "mean": array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]),
-                    "std": array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]),
+                    "mean": array([[0.0], [0.0], [0.0]]),
+                    "std": array([[0.0], [0.0], [0.0]]),
+                    "rms": array([[0.0], [0.0], [0.0]]),
                 },
-            }
+            },
+        }
 
     def read_raw_entries(self):
         raw_path = p_join(self.root, "structures")

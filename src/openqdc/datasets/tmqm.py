@@ -3,6 +3,7 @@ from os.path import join as p_join
 
 import numpy as np
 import pandas as pd
+from numpy import array, float32
 from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
@@ -54,6 +55,42 @@ class TMQM(BaseDataset):
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
+    __average_nb_atoms__ = 65.9905035539555
+
+    @property
+    def _stats(self):
+        return {
+            "formation": {
+                "energy": {
+                    "mean": self.convert_energy(array([-669.31056277])),
+                    "std": self.convert_energy(array([896.83091033])),
+                },
+                "forces": {
+                    "mean": array([0]),
+                    "std": array([0]),
+                    "components": {
+                        "mean": array([[0.0], [0.0], [0.0]]),
+                        "std": array([[0.0], [0.0], [0.0]]),
+                        "rms": array([[0.0], [0.0], [0.0]]),
+                    },
+                },
+            },
+            "total": {
+                "energy": {
+                    "mean": self.convert_energy(array([-2952.1428], dtype=float32)),
+                    "std": self.convert_energy(array([1608.7888], dtype=float32)),
+                },
+                "forces": {
+                    "mean": array([0]),
+                    "std": array([0]),
+                    "components": {
+                        "mean": array([[0.0], [0.0], [0.0]]),
+                        "std": array([[0.0], [0.0], [0.0]]),
+                        "rms": array([[0.0], [0.0], [0.0]]),
+                    },
+                },
+            },
+        }
 
     def read_raw_entries(self):
         df = pd.read_csv(p_join(self.root, "tmQM_y.csv"), sep=";", usecols=["CSD_code", "Electronic_E"])
