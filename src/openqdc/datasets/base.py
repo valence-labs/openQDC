@@ -193,7 +193,7 @@ class BaseDataset(torch.utils.data.Dataset):
             uniques, inv_indices = np.unique(data_dict[key], return_inverse=True)
             with open(local_path, "wb") as f:
                 np.savez_compressed(f, uniques=uniques, inv_indices=inv_indices)
-            push_remote(local_path)
+            push_remote(local_path, overwrite=True)
 
     def read_preprocess(self, overwrite_local_cache=False):
         logger.info("Reading preprocessed data")
@@ -218,7 +218,7 @@ class BaseDataset(torch.utils.data.Dataset):
 
         for key in ["name", "subset"]:
             filename = p_join(self.preprocess_path, f"{key}.npz")
-            pull_locally(filename)
+            pull_locally(filename, overwrite=overwrite_local_cache)
             self.data[key] = dict()
             with open(filename, "rb") as f:
                 tmp = np.load(f)
