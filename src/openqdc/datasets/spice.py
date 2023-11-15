@@ -96,21 +96,19 @@ class Spice(BaseDataset):
                 },
             },
             "total": {
-                {
-                    "energy": {
-                        "mean": self.convert_energy(array([-1244.6562])),
-                        "std": self.convert_energy(array([1219.4248])),
+                "energy": {
+                    "mean": self.convert_energy(array([-1244.6562])),
+                    "std": self.convert_energy(array([1219.4248])),
+                },
+                "forces": {
+                    "mean": self.convert_forces(array([-1.0387013e-08])),
+                    "std": self.convert_forces(array([0.021063408])),
+                    "components": {
+                        "mean": self.convert_forces(array([[5.7479990e-09], [-4.8940532e-08], [1.2032132e-08]])),
+                        "std": self.convert_forces(array([[0.02017307], [0.02016141], [0.02014796]])),
+                        "rms": array([[0.02017307], [0.02016142], [0.02014796]]),
                     },
-                    "forces": {
-                        "mean": self.convert_forces(array([-1.0387013e-08])),
-                        "std": self.convert_forces(array([0.021063408])),
-                        "components": {
-                            "mean": self.convert_forces(array([[5.7479990e-09], [-4.8940532e-08], [1.2032132e-08]])),
-                            "std": self.convert_forces(array([[0.02017307], [0.02016141], [0.02014796]])),
-                            "rms": array([[0.02017307], [0.02016142], [0.02014796]]),
-                        },
-                    },
-                }
+                },
             },
         }
 

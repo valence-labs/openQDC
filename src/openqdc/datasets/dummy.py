@@ -1,9 +1,9 @@
 import numpy as np  # noqa
+from numpy import array
 from sklearn.utils import Bunch
 
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils.atomization_energies import IsolatedAtomEnergyFactory
-from numpy import array
 
 
 class Dummy(BaseDataset):
