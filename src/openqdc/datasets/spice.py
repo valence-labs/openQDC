@@ -91,7 +91,7 @@ class Spice(BaseDataset):
                     "components": {
                         "mean": self.convert_forces(array([[5.7479990e-09], [-4.8940532e-08], [1.2032132e-08]])),
                         "std": self.convert_forces(array([[0.02017307], [0.02016141], [0.02014796]])),
-                        "rms": array([[0.02017307], [0.02016142], [0.02014796]]),
+                        "rms": self.convert_forces(array([[0.02017307], [0.02016142], [0.02014796]])),
                     },
                 },
             },
@@ -106,7 +106,7 @@ class Spice(BaseDataset):
                     "components": {
                         "mean": self.convert_forces(array([[5.7479990e-09], [-4.8940532e-08], [1.2032132e-08]])),
                         "std": self.convert_forces(array([[0.02017307], [0.02016141], [0.02014796]])),
-                        "rms": array([[0.02017307], [0.02016142], [0.02014796]]),
+                        "rms": self.convert_forces(array([[0.02017307], [0.02016142], [0.02014796]])),
                     },
                 },
             },
