@@ -32,9 +32,9 @@ class GDML(BaseDataset):
     __energy_methods__ = [
         "ccsd/cc-pvdz",
         "ccsd(t)/cc-pvdz",
-        # "pbe+mbd/light", #MD22
+        "pbe/mbd",  # MD22
         # "pbe+mbd/tight", #MD22
-        "pbe+vdw-ts",  # MD17
+        "pbe/vdw-ts",  # MD17
     ]
 
     energy_target_names = [
@@ -46,9 +46,9 @@ class GDML(BaseDataset):
     __force_methods__ = [
         "ccsd/cc-pvdz",
         "ccsd(t)/cc-pvdz",
-        # "pbe+mbd/light", #MD22
+        "pbe/mbd",  # MD22
         # "pbe+mbd/tight", #MD22
-        "pbe+vdw-ts",  # MD17
+        "pbe/vdw-ts",  # MD17
     ]
 
     force_target_names = [
@@ -58,11 +58,8 @@ class GDML(BaseDataset):
     ]
 
     __energy_unit__ = "kcal/mol"
-    __distance_unit__ = "ang"
-    __forces_unit__ = "kcal/mol/ang"
-
-    def __init__(self, energy_unit=None, distance_unit=None) -> None:
-        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
+    __distance_unit__ = "bohr"
+    __forces_unit__ = "kcal/mol/bohr"
 
     def read_raw_entries(self):
         raw_path = p_join(self.root, "gdml.h5")

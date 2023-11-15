@@ -47,12 +47,13 @@ def read_xyz(fname, e_map):
 class TMQM(BaseDataset):
     __name__ = "tmqm"
 
-    __energy_methods__ = ["tpssh/def2tzvp"]
+    __energy_methods__ = ["tpssh/def2-tzvp"]
 
     energy_target_names = ["TPSSh/def2TZVP level"]
 
-    def __init__(self) -> None:
-        super().__init__()
+    __energy_unit__ = "hartree"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "hartree/ang"
 
     def read_raw_entries(self):
         df = pd.read_csv(p_join(self.root, "tmQM_y.csv"), sep=";", usecols=["CSD_code", "Electronic_E"])

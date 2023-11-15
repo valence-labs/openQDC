@@ -148,3 +148,4 @@ cookie.txt
 *.csv
 *.txt
 *.sh
+.DS_Store

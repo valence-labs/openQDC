@@ -87,9 +87,6 @@ class GEOM(BaseDataset):
 
     partitions = ["qm9", "drugs"]
 
-    def __init__(self, energy_unit=None, distance_unit=None) -> None:
-        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
-
     def _read_raw_(self, partition):
         raw_path = p_join(self.root, "rdkit_folder")
 

@@ -24,7 +24,7 @@ class ISO17(BaseDataset):
     __name__ = "iso_17"
 
     __energy_methods__ = [
-        "pbe+vdw-ts",
+        "pbe/vdw-ts",
     ]
 
     energy_target_names = [
@@ -32,7 +32,7 @@ class ISO17(BaseDataset):
     ]
 
     __force_methods__ = [
-        "pbe+vdw-ts",
+        "pbe/vdw-ts",
     ]
 
     force_target_names = [
@@ -40,11 +40,8 @@ class ISO17(BaseDataset):
     ]
 
     __energy_unit__ = "ev"
-    __distance_unit__ = "ang"
-    __forces_unit__ = "ev/ang"
-
-    def __init__(self, energy_unit=None, distance_unit=None) -> None:
-        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
+    __distance_unit__ = "bohr"  # bohr
+    __forces_unit__ = "ev/bohr"
 
     def read_raw_entries(self):
         raw_path = p_join(self.root, "iso_17.h5")

@@ -55,9 +55,6 @@ class Transition1X(BaseDataset):
         "wB97x_6-31G(d).forces",
     ]
 
-    def __init__(self) -> None:
-        super().__init__()
-
     def read_raw_entries(self):
         raw_path = p_join(self.root, "Transition1x.h5")
         f = load_hdf5_file(raw_path)["data"]

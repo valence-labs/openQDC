@@ -6,7 +6,6 @@ from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils import load_hdf5_file
-from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 from openqdc.utils.molecule import get_atomic_number_and_charge
 
 
@@ -21,7 +20,9 @@ def read_record(r):
         name=np.array([smiles] * n_confs),
         subset=np.array([Spice.subset_mapping[subset]] * n_confs),
         energies=r[Spice.energy_target_names[0]][:][:, None].astype(np.float32),
-        forces=r[Spice.force_target_names[0]][:].reshape(-1, 3, 1) * (-1.0),  # forces -ve of energy gradient
+        forces=r[Spice.force_target_names[0]][:].reshape(
+            -1, 3, 1
+        ),  # forces -ve of energy gradient but the -1.0 is done in the convert_forces method
         atomic_inputs=np.concatenate(
             (x[None, ...].repeat(n_confs, axis=0), positions), axis=-1, dtype=np.float32
         ).reshape(-1, 5),
@@ -49,37 +50,15 @@ class Spice(BaseDataset):
     """
 
     __name__ = "spice"
-    __energy_methods__ = ["wb97x/def2-tzvp"]
-    __force_methods__ = ["wb97x/def2-tzvp"]
+    __energy_methods__ = ["wb97m-d3bj/def2-tzvppd"]
+    __force_methods__ = ["wb97m-d3bj/def2-tzvppd"]
     __energy_unit__ = "hartree"
-    __distance_unit__ = "ang"
-    __forces_unit__ = "hartree/ang"
+    __distance_unit__ = "bohr"
+    __forces_unit__ = "hartree/bohr"
 
     energy_target_names = ["dft_total_energy"]
 
     force_target_names = ["dft_total_gradient"]
-
-    # Energy in hartree, all zeros by default
-    atomic_energies = np.zeros((MAX_ATOMIC_NUMBER,), dtype=np.float32)
-    tmp = {
-        35: -2574.2451510945853,
-        6: -37.91424135791358,
-        20: -676.9528465198214,
-        17: -460.3350243496703,
-        9: -99.91298732343974,
-        1: -0.5027370838721259,
-        53: -297.8813829975981,
-        19: -599.8025677513111,
-        3: -7.285254714046546,
-        12: -199.2688420040449,
-        7: -54.62327513368922,
-        11: -162.11366478783253,
-        8: -75.17101657391741,
-        15: -341.3059197024934,
-        16: -398.2405387031612,
-    }
-    for key in tmp:
-        atomic_energies[key] = tmp[key]
 
     subset_mapping = {
         "SPICE Solvated Amino Acids Single Points Dataset v1.1": "Solvated Amino Acids",
@@ -96,8 +75,8 @@ class Spice(BaseDataset):
         "SPICE Ion Pairs Single Points Dataset v1.1": "Ion Pairs",
     }
 
-    def __init__(self, energy_unit=None, distance_unit=None) -> None:
-        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
+    def convert_forces(self, x):
+        return (-1.0) * super().convert_forces(x)
 
     def read_raw_entries(self):
         raw_path = p_join(self.root, "SPICE-1.1.4.hdf5")
