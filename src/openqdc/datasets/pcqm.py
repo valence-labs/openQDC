@@ -1,3 +1,4 @@
+import gzip
 import json
 import os
 import pickle as pkl
@@ -131,13 +132,21 @@ class PCQM_PM6(BaseDataset):
             push_remote(local_path, overwrite=True)
 
         # save smiles and subset
+        tmp = dict()
+        local_path = p_join(self.preprocess_path, "props.pkl.gz")
         for key in ["name", "subset"]:
             local_path = p_join(self.preprocess_path, f"{key}.npz")
-            x = [el for i in range(len(list_entries)) for el in list_entries[i].pop(key)]
-            uniques, inv_indices = np.unique(x, return_inverse=True)
-            with open(local_path, "wb") as f:
-                np.savez_compressed(f, uniques=uniques, inv_indices=inv_indices)
-            push_remote(local_path, overwrite=True)
+            tmp[key] = [el for i in range(len(list_entries)) for el in list_entries[i].pop(key)]
+        with gzip.open(local_path, "wb") as f:
+            pkl.dump(x, f)
+        push_remote(local_path, overwrite=True)
+        # for key in ["name", "subset"]:
+        #     local_path = p_join(self.preprocess_path, f"{key}.npz")
+        #     x = [el for i in range(len(list_entries)) for el in list_entries[i].pop(key)]
+        #     uniques, inv_indices = np.unique(x, return_inverse=True)
+        #     with open(local_path, "wb") as f:
+        #         np.savez_compressed(f, uniques=uniques, inv_indices=inv_indices)
+        #     push_remote(local_path, overwrite=True)
 
 
 class PCQM_B3LYP(PCQM_PM6):

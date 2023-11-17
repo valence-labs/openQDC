@@ -1,4 +1,6 @@
+import gzip
 import os
+import pickle as pkl
 from os.path import join as p_join
 from typing import Dict, List, Optional, Union
 
@@ -215,6 +217,7 @@ class BaseDataset(torch.utils.data.Dataset):
         x = np.zeros((csum.shape[0], 2), dtype=np.int32)
         x[1:, 0], x[:, 1] = csum[:-1], csum
         res["position_idx_range"] = x
+
         return res
 
     def save_preprocess(self, data_dict):
@@ -228,12 +231,17 @@ class BaseDataset(torch.utils.data.Dataset):
             push_remote(local_path, overwrite=True)
 
         # save smiles and subset
-        for key in ["name", "subset"]:
-            local_path = p_join(self.preprocess_path, f"{key}.npz")
-            uniques, inv_indices = np.unique(data_dict[key], return_inverse=True)
-            with open(local_path, "wb") as f:
-                np.savez_compressed(f, uniques=uniques, inv_indices=inv_indices)
-            push_remote(local_path, overwrite=True)
+        local_path = p_join(self.preprocess_path, "props.pkl.gz")
+        with gzip.open(local_path, "wb") as f:
+            pkl.dump(data_dict, f)
+        push_remote(local_path, overwrite=True)
+
+        # for key in ["name", "subset"]:
+        #     local_path = p_join(self.preprocess_path, f"{key}.npz")
+        #     uniques, inv_indices = np.unique(data_dict[key], return_inverse=True)
+        #     with open(local_path, "wb") as f:
+        #         np.savez_compressed(f, uniques=uniques, inv_indices=inv_indices)
+        #     push_remote(local_path, overwrite=True)
 
     def read_preprocess(self, overwrite_local_cache=False):
         logger.info("Reading preprocessed data")
@@ -256,19 +264,25 @@ class BaseDataset(torch.utils.data.Dataset):
         for key in self.data:
             print(f"Loaded {key} with shape {self.data[key].shape}, dtype {self.data[key].dtype}")
 
-        for key in ["name", "subset"]:
-            filename = p_join(self.preprocess_path, f"{key}.npz")
-            pull_locally(filename, overwrite=overwrite_local_cache)
-            self.data[key] = dict()
-            with open(filename, "rb") as f:
-                tmp = np.load(f)
-                for k in tmp:
-                    self.data[key][k] = tmp[k]
-                    print(f"Loaded {key}_{k} with shape {self.data[key][k].shape}, dtype {self.data[key][k].dtype}")
+        filename = p_join(self.preprocess_path, "props.pkl.gz")
+        pull_locally(filename, overwrite=overwrite_local_cache)
+        with gzip.open(filename, "rb") as f:
+            tmp = pkl.load(f)
+            self.data.update(tmp)
+
+        # for key in ["name", "subset"]:
+        #     filename = p_join(self.preprocess_path, f"{key}.npz")
+        #     pull_locally(filename, overwrite=overwrite_local_cache)
+        #     self.data[key] = dict()
+        #     with open(filename, "rb") as f:
+        #         tmp = np.load(f)
+        #         for k in tmp:
+        #             self.data[key][k] = tmp[k]
+        #             print(f"Loaded {key}_{k} with shape {self.data[key][k].shape}, dtype {self.data[key][k].dtype}")
 
     def is_preprocessed(self):
         predicats = [copy_exists(p_join(self.preprocess_path, f"{key}.mmap")) for key in self.data_keys]
-        predicats += [copy_exists(p_join(self.preprocess_path, f"{x}.npz")) for x in ["name", "subset"]]
+        predicats += [copy_exists(p_join(self.preprocess_path, "props.pkl.gz"))]
         return all(predicats)
 
     def preprocess(self):
@@ -383,7 +397,7 @@ class BaseDataset(torch.utils.data.Dataset):
             entry = self.get_ase_atoms(idx, ext=False)
             return soap.create(entry, centers=entry.positions)
 
-        descr = dm.parallelized(wrapper, idxs, progress=progress, scheduler="threads")
+        descr = dm.parallelized(wrapper, idxs, progress=progress, scheduler="threads", n_jobs=-1)
         datum["soap"] = np.vstack(descr)
         if return_idxs:
             datum["idxs"] = idxs
@@ -402,8 +416,8 @@ class BaseDataset(torch.utils.data.Dataset):
             self.convert_distance(np.array(input[:, -3:], dtype=np.float32)),
             self.convert_energy(np.array(self.data["energies"][idx], dtype=np.float32)),
         )
-        name = self.data["name"]["uniques"][self.data["name"]["inv_indices"][idx]]
-        subset = self.data["subset"]["uniques"][self.data["subset"]["inv_indices"][idx]]
+        name = self.data["name"][idx]
+        subset = self.data["subset"][idx]
 
         if "forces" in self.data:
             forces = self.convert_forces(np.array(self.data["forces"][p_start:p_end], dtype=np.float32))
