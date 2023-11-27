@@ -278,14 +278,15 @@ class BaseDataset(torch.utils.data.Dataset):
             res = self.collate_list(entries)
             self.save_preprocess(res)
 
-    def save_xyz(self, idx: int, path: Optional[str] = None):
+    def save_xyz(self, idx: int, path: Optional[str] = None, name=None):
         """
         Save the entry at index idx as an extxyz file.
         """
         if path is None:
             path = os.getcwd()
         at = self.get_ase_atoms(idx, ext=True)
-        name = at.info["name"]
+        if name is not None:
+            name = at.info["name"]
         write_extxyz(p_join(path, f"{name}.xyz"), at)
 
     def get_ase_atoms(self, idx: int, ext=True):

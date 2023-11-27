@@ -131,7 +131,7 @@ class IsolatedAtomEnergyFactory:
     Factory method to get the isolated atom energies for a given level of theory.
     """
 
-    max_charge = 4
+    max_charge = 9
 
     def __init__(self):
         pass
