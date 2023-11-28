@@ -4,10 +4,8 @@ from os.path import join as p_join
 
 import datamol as dm
 import numpy as np
-from numpy import array
 
 from openqdc.datasets.base import BaseDataset
-from openqdc.utils.constants import NOT_DEFINED
 from openqdc.utils.molecule import get_atomic_number_and_charge
 
 
@@ -58,31 +56,11 @@ class QMugs(BaseDataset):
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
-    __average_nb_atoms__ = 55.215926293326426
 
     energy_target_names = [
         "GFN2:TOTAL_ENERGY",
         "DFT:TOTAL_ENERGY",
     ]
-
-    @property
-    def _stats(self):
-        return {
-            "formation": {
-                "energy": {
-                    "mean": self.convert_energy(array([-12.94348027, -9.83037297])),
-                    "std": self.convert_energy(array([4.39971409, 3.3574188])),
-                },
-                "forces": NOT_DEFINED,
-            },
-            "total": {
-                "energy": {
-                    "mean": self.convert_energy(array([-89.44242, -1740.5336])),
-                    "std": self.convert_energy(array([29.599571, 791.48663])),
-                },
-                "forces": NOT_DEFINED,
-            },
-        }
 
     def read_raw_entries(self):
         raw_path = p_join(self.root, "structures")

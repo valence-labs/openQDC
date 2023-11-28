@@ -1,10 +1,7 @@
 import os
 from os.path import join as p_join
 
-from numpy import array, float32
-
 from openqdc.datasets.base import BaseDataset, read_qc_archive_h5
-from openqdc.utils.constants import NOT_DEFINED
 from openqdc.utils.io import get_local_cache
 
 
@@ -37,7 +34,6 @@ class ANI1(BaseDataset):
     __energy_unit__ = "hartree"
     __distance_unit__ = "bohr"
     __forces_unit__ = "hartree/bohr"
-    __average_nb_atoms__ = 15.91676229984414
 
     @property
     def root(self):
@@ -60,25 +56,6 @@ class ANI1(BaseDataset):
         samples = read_qc_archive_h5(raw_path, self.__name__, self.energy_target_names, self.force_target_names)
         return samples
 
-    @property
-    def _stats(self):
-        return {
-            "formation": {
-                "energy": {
-                    "mean": self.convert_energy(array([-2.37376472])),
-                    "std": self.convert_energy(array([0.50266975])),
-                },
-                "forces": NOT_DEFINED,
-            },
-            "total": {
-                "energy": {
-                    "mean": self.convert_energy(array([-333.67322], dtype=float32)),
-                    "std": self.convert_energy(array([61.21667], dtype=float32)),
-                },
-                "forces": NOT_DEFINED,
-            },
-        }
-
 
 class ANI1CCX(ANI1):
     """
@@ -100,7 +77,6 @@ class ANI1CCX(ANI1):
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
-    __average_nb_atoms__ = 15.274685315870588
 
     __energy_methods__ = [
         "ccsd(t)/cbs",
@@ -118,25 +94,6 @@ class ANI1CCX(ANI1):
 
     __force_methods__ = []
     force_target_names = []
-
-    @property
-    def _stats(self):
-        return {
-            "formation": {
-                "energy": {
-                    "mean": self.convert_energy(array([-3.23959548, 500.30384627, 500.40706776, 500.76740432])),
-                    "std": self.convert_energy(array([1.03021261, 132.52707152, 132.56092469, 132.65261362])),
-                },
-                "forces": NOT_DEFINED,
-            },
-            "total": {
-                "energy": {
-                    "mean": self.convert_energy(array([-374.40665, -1.2378153, -1.505962, -1.2396905], dtype=float32)),
-                    "std": self.convert_energy(array([101.63995, 0.32444745, 0.39500558, 0.3250212], dtype=float32)),
-                },
-                "forces": NOT_DEFINED,
-            },
-        }
 
     def __smiles_converter__(self, x):
         """util function to convert string to smiles: useful if the smiles is
@@ -197,135 +154,6 @@ class ANI1X(ANI1):
         "wb97x/6-31g(d)",
         "wb97x/cc-pvtz",
     ]
-
-    __average_nb_atoms__ = 15.274685315870588
-
-    @property
-    def _stats(self):
-        return {
-            "formation": {
-                "energy": {
-                    "mean": self.convert_energy(
-                        array(
-                            [
-                                -2.87910686,
-                                -2.91460298,
-                                -2.91182519,
-                                500.00748497,
-                                500.27885605,
-                                500.11130961,
-                                -3.66090173,
-                                -4.40643278,
-                            ]
-                        )
-                    ),
-                    "std": self.convert_energy(
-                        array(
-                            [
-                                0.92849657,
-                                0.93421854,
-                                0.93411345,
-                                132.44580372,
-                                132.52326771,
-                                132.47987395,
-                                1.60180792,
-                                1.75414812,
-                            ]
-                        )
-                    ),
-                },
-                "forces": {
-                    "mean": self.convert_forces(array([-6.139757e-06])),
-                    "std": self.convert_forces(array([0.07401004])),
-                    "components": {
-                        "mean": self.convert_forces(
-                            array(
-                                [
-                                    [6.6829815e-13, 3.5682501e-07],
-                                    [-5.1223647e-13, -1.8487021e-06],
-                                    [8.1159564e-13, -3.6849189e-05],
-                                ],
-                                dtype=float32,
-                            )
-                        ),
-                        "std": self.convert_forces(
-                            array(
-                                [[0.0759203, 0.06799112], [0.07694941, 0.06652647], [0.06229663, 0.05442103]],
-                                dtype=float32,
-                            )
-                        ),
-                        "rms": self.convert_forces(
-                            array(
-                                [[0.0759203, 0.06799113], [0.07694941, 0.06652647], [0.06229663, 0.05442095]],
-                                dtype=float32,
-                            )
-                        ),
-                    },
-                },
-            },
-            "total": {
-                "energy": {
-                    "mean": self.convert_energy(
-                        array(
-                            [
-                                -372.68945,
-                                -372.74274,
-                                -372.7326,
-                                -1.1540408,
-                                -1.5152899,
-                                -1.4195863,
-                                -392.72458,
-                                -391.208,
-                            ],
-                            dtype=float32,
-                        )
-                    ),
-                    "std": self.convert_energy(
-                        array(
-                            [
-                                101.166664,
-                                101.19915,
-                                101.191895,
-                                0.30445468,
-                                0.39988872,
-                                0.37456134,
-                                136.79112,
-                                137.48692,
-                            ],
-                            dtype=float32,
-                        )
-                    ),
-                },
-                "forces": {
-                    "mean": self.convert_forces(array([-6.139757e-06])),
-                    "std": self.convert_forces(array([0.07401004])),
-                    "components": {
-                        "mean": self.convert_forces(
-                            array(
-                                [
-                                    [6.6829815e-13, 3.5682501e-07],
-                                    [-5.1223647e-13, -1.8487021e-06],
-                                    [8.1159564e-13, -3.6849189e-05],
-                                ],
-                                dtype=float32,
-                            )
-                        ),
-                        "std": self.convert_forces(
-                            array(
-                                [[0.0759203, 0.06799112], [0.07694941, 0.06652647], [0.06229663, 0.05442103]],
-                                dtype=float32,
-                            )
-                        ),
-                        "rms": self.convert_forces(
-                            array(
-                                [[0.0759203, 0.06799113], [0.07694941, 0.06652647], [0.06229663, 0.05442095]],
-                                dtype=float32,
-                            )
-                        ),
-                    },
-                },
-            },
-        }
 
     def convert_forces(self, x):
         return super().convert_forces(x) * 0.529177249  # correct the Dataset error

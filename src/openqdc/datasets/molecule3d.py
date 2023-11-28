@@ -5,12 +5,10 @@ from typing import Dict, List
 import datamol as dm
 import numpy as np
 import pandas as pd
-from numpy import array, float32
 from rdkit import Chem
 from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
-from openqdc.utils.constants import NOT_DEFINED
 from openqdc.utils.molecule import get_atomic_number_and_charge
 
 
@@ -91,7 +89,6 @@ class Molecule3D(BaseDataset):
     __forces_unit__ = "ev/ang"
 
     energy_target_names = ["b3lyp/6-31g*.energy"]
-    __average_nb_atoms__ = 29.111696292432697
 
     def read_raw_entries(self):
         raw = p_join(self.root, "data", "raw")
@@ -102,22 +99,3 @@ class Molecule3D(BaseDataset):
         res = dm.parallelized(fn, sdf_paths, n_jobs=1)  # don't use more than 1 job
         samples = sum(res, [])
         return samples
-
-    @property
-    def _stats(self):
-        return {
-            "formation": {
-                "energy": {
-                    "mean": self.convert_energy(array([-191.66717791])),
-                    "std": self.convert_energy(array([2005.52732443])),
-                },
-                "forces": NOT_DEFINED,
-            },
-            "total": {
-                "energy": {
-                    "mean": self.convert_energy(array([-21100.502], dtype=float32)),
-                    "std": self.convert_energy(array([9345.366], dtype=float32)),
-                },
-                "forces": NOT_DEFINED,
-            },
-        }

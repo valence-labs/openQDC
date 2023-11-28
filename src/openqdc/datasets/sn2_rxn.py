@@ -24,9 +24,6 @@ class SN2RXN(BaseDataset):
     force_target_names = [
         "DSD-BLYP-D3(BJ):def2-TZVP Gradient",
     ]
-    __average_nb_atoms__ = 5.444471933343348
-
-    # TODO: Check this
 
     def __smiles_converter__(self, x):
         """util function to convert string to smiles: useful if the smiles is

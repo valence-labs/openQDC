@@ -3,11 +3,9 @@ from typing import Dict
 
 import datamol as dm
 import numpy as np
-from numpy import array
 
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils import load_json, load_pkl
-from openqdc.utils.constants import NOT_DEFINED
 from openqdc.utils.molecule import get_atomic_number_and_charge
 
 
@@ -86,28 +84,8 @@ class GEOM(BaseDataset):
 
     energy_target_names = ["gfn2_xtb.energy"]
     force_target_names = []
-    __average_nb_atoms__ = 50.07244573677837
 
     partitions = ["qm9", "drugs"]
-
-    @property
-    def _stats(self):
-        return {
-            "formation": {
-                "energy": {
-                    "mean": self.convert_energy(array([-8.47811605])),
-                    "std": self.convert_energy(array([3.68015507])),
-                },
-                "forces": NOT_DEFINED,
-            },
-            "total": {
-                "energy": {
-                    "mean": self.convert_energy(array([-78.264725])),
-                    "std": self.convert_energy(array([20.200787])),
-                },
-                "forces": NOT_DEFINED,
-            },
-        }
 
     def _read_raw_(self, partition):
         raw_path = p_join(self.root, "rdkit_folder")

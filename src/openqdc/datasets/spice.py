@@ -2,7 +2,6 @@ from os.path import join as p_join
 
 import datamol as dm
 import numpy as np
-from numpy import array
 from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
@@ -56,7 +55,6 @@ class Spice(BaseDataset):
     __energy_unit__ = "hartree"
     __distance_unit__ = "bohr"
     __forces_unit__ = "hartree/bohr"
-    __average_nb_atoms__ = 29.88387509402179
 
     energy_target_names = ["dft_total_energy"]
 
@@ -76,41 +74,6 @@ class Spice(BaseDataset):
         "SPICE PubChem Set 6 Single Points Dataset v1.2": "PubChem",
         "SPICE Ion Pairs Single Points Dataset v1.1": "Ion Pairs",
     }
-
-    @property
-    def _stats(self):
-        return {
-            "formation": {
-                "energy": {
-                    "mean": self.convert_energy(array([-5.67757058])),
-                    "std": self.convert_energy(array([2.33714861])),
-                },
-                "forces": {
-                    "mean": self.convert_forces(array([-1.0387013e-08])),
-                    "std": self.convert_forces(array([0.021063408])),
-                    "components": {
-                        "mean": self.convert_forces(array([[5.7479990e-09], [-4.8940532e-08], [1.2032132e-08]])),
-                        "std": self.convert_forces(array([[0.02017307], [0.02016141], [0.02014796]])),
-                        "rms": self.convert_forces(array([[0.02017307], [0.02016142], [0.02014796]])),
-                    },
-                },
-            },
-            "total": {
-                "energy": {
-                    "mean": self.convert_energy(array([-1244.6562])),
-                    "std": self.convert_energy(array([1219.4248])),
-                },
-                "forces": {
-                    "mean": self.convert_forces(array([-1.0387013e-08])),
-                    "std": self.convert_forces(array([0.021063408])),
-                    "components": {
-                        "mean": self.convert_forces(array([[5.7479990e-09], [-4.8940532e-08], [1.2032132e-08]])),
-                        "std": self.convert_forces(array([[0.02017307], [0.02016141], [0.02014796]])),
-                        "rms": self.convert_forces(array([[0.02017307], [0.02016142], [0.02014796]])),
-                    },
-                },
-            },
-        }
 
     def convert_forces(self, x):
         return (-1.0) * super().convert_forces(x)

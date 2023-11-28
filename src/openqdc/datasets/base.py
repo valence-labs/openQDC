@@ -15,7 +15,11 @@ from openqdc.utils.atomization_energies import (
     IsolatedAtomEnergyFactory,
     chemical_symbols,
 )
-from openqdc.utils.constants import NB_ATOMIC_FEATURES, POSSIBLE_NORMALIZATION
+from openqdc.utils.constants import (
+    NB_ATOMIC_FEATURES,
+    NOT_DEFINED,
+    POSSIBLE_NORMALIZATION,
+)
 from openqdc.utils.exceptions import (
     PROPERTY_NOT_AVAILABLE_ERROR,
     DatasetNotAvailableError,
@@ -91,6 +95,7 @@ class BaseDataset(torch.utils.data.Dataset):
     __fn_distance__ = lambda x: x
     __fn_forces__ = lambda x: x
     __average_nb_atoms__ = None
+    __stats__ = {}
 
     def __init__(
         self,
@@ -107,14 +112,52 @@ class BaseDataset(torch.utils.data.Dataset):
         else:
             self.read_preprocess(overwrite_local_cache=overwrite_local_cache)
         self._set_isolated_atom_energies()
+        self._precompute_statistics()
 
-    def _download(self):
-        try:
-            self.read_preprocess(overwrite_local_cache=True)
-            if not self.is_preprocessed():
-                raise Exception
-        except Exception:
-            raise DatasetNotAvailableError(self.__name__)
+    def _precompute_statistics(self):
+        logger.info("Precomputing relevant statistics")
+        self._compute_average_nb_atoms()
+        (formation_E_mean, formation_E_std, total_E_mean, total_E_std) = self._precompute_E()
+        forces_dict = self._precompute_F()
+        self.__stats__ = {
+            "formation": {"energy": {"mean": formation_E_mean, "std": formation_E_std}, "forces": forces_dict},
+            "total": {"energy": {"mean": total_E_mean, "std": total_E_std}, "forces": forces_dict},
+        }
+
+    def _compute_average_nb_atoms(self):
+        self.__average_nb_atoms__ = np.mean(self.data["n_atoms"])
+
+    def _precompute_E(self):
+        splits_idx = self.data["position_idx_range"][:, 1]
+        s = np.array(self.data["atomic_inputs"][:, :2], dtype=int)
+        s[:, 1] += IsolatedAtomEnergyFactory.max_charge
+        matrixs = [matrix[s[:, 0], s[:, 1]] for matrix in self.__isolated_atom_energies__]
+        matrixs = [np.split(matrix, splits_idx)[:-1] for matrix in matrixs]
+        converted_energy_data = self.convert_energy(self.data["energies"])
+        # calculation per molecule formation energy statistics
+        e = []
+        for i in range(len(self.__energy_methods__)):
+            e.append(converted_energy_data[:, i] - np.array(list(map(lambda x: x.sum(), matrixs[i]))))
+        E = np.array(e).T
+        formation_E_mean = np.nanmean(E, axis=0)
+        formation_E_std = np.nanstd(E, axis=0)
+        total_E_mean = np.nanmean(converted_energy_data, axis=0)
+        total_E_std = np.nanstd(converted_energy_data, axis=0)
+
+        return formation_E_mean, formation_E_std, total_E_mean, total_E_std
+
+    def _precompute_F(self):
+        if len(self.__force_methods__) == 0:
+            return NOT_DEFINED
+        converted_force_data = self.convert_forces(self.data["forces"])
+        force_mean = np.nanmean(converted_force_data, axis=0)
+        force_std = np.nanstd(converted_force_data, axis=0)
+        force_rms = np.sqrt(np.nanmean(converted_force_data**2, axis=0))
+        return {
+            "mean": force_mean,
+            "std": force_std,
+            "components": {"rms": force_rms, "std": force_std.mean(axis=0), "mean": force_mean.mean(axis=0)},
+        }
 
     @property
     def numbers(self):
@@ -447,7 +490,7 @@ class BaseDataset(torch.utils.data.Dataset):
 
     @property
     def _stats(self):
-        return {}
+        return self.__stats__
 
     @property
     def average_n_atoms(self):
