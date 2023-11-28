@@ -30,6 +30,7 @@ from openqdc.utils.io import (
     dict_to_atoms,
     get_local_cache,
     load_hdf5_file,
+    load_pkl,
     pull_locally,
     push_remote,
     set_cache_dir,
@@ -113,15 +114,23 @@ class BaseDataset(torch.utils.data.Dataset):
         self._set_isolated_atom_energies()
         self._precompute_statistics()
 
-    def _precompute_statistics(self):
-        logger.info("Precomputing relevant statistics")
+    def _precompute_statistics(self, overwrite_local_cache: bool = False):
+        local_path = p_join(self.preprocess_path, "stats.pkl")
+        if self.is_preprocessed_statistics() and not overwrite_local_cache:
+            stats = load_pkl(local_path)
+            logger.info("Loaded precomputed statistics")
+        else:
+            logger.info("Precomputing relevant statistics")
+            (formation_E_mean, formation_E_std, total_E_mean, total_E_std) = self._precompute_E()
+            forces_dict = self._precompute_F()
+            stats = {
+                "formation": {"energy": {"mean": formation_E_mean, "std": formation_E_std}, "forces": forces_dict},
+                "total": {"energy": {"mean": total_E_mean, "std": total_E_std}, "forces": forces_dict},
+            }
+            with open(local_path, "wb") as f:
+                pkl.dump(stats, f)
         self._compute_average_nb_atoms()
-        (formation_E_mean, formation_E_std, total_E_mean, total_E_std) = self._precompute_E()
-        forces_dict = self._precompute_F()
-        self.__stats__ = {
-            "formation": {"energy": {"mean": formation_E_mean, "std": formation_E_std}, "forces": forces_dict},
-            "total": {"energy": {"mean": total_E_mean, "std": total_E_std}, "forces": forces_dict},
-        }
+        self.__stats__ = stats
 
     def _compute_average_nb_atoms(self):
         self.__average_nb_atoms__ = np.mean(self.data["n_atoms"])
@@ -325,6 +334,9 @@ class BaseDataset(torch.utils.data.Dataset):
         predicats = [copy_exists(p_join(self.preprocess_path, f"{key}.mmap")) for key in self.data_keys]
         predicats += [copy_exists(p_join(self.preprocess_path, "props.pkl"))]
         return all(predicats)
+
+    def is_preprocessed_statistics(self):
+        return bool(copy_exists(p_join(self.preprocess_path, "stats.pkl")))
 
     def preprocess(self, overwrite=False):
         if overwrite or not self.is_preprocessed():
