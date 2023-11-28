@@ -21,7 +21,6 @@ from openqdc.utils.constants import (
     POSSIBLE_NORMALIZATION,
 )
 from openqdc.utils.exceptions import (
-    PROPERTY_NOT_AVAILABLE_ERROR,
     DatasetNotAvailableError,
     NormalizationNotAvailableError,
     StatisticsNotAvailableError,
@@ -132,15 +131,13 @@ class BaseDataset(torch.utils.data.Dataset):
         s = np.array(self.data["atomic_inputs"][:, :2], dtype=int)
         s[:, 1] += IsolatedAtomEnergyFactory.max_charge
         matrixs = [matrix[s[:, 0], s[:, 1]] for matrix in self.__isolated_atom_energies__]
-        # matrixs = [np.split(matrix, splits_idx)[:-1] for matrix in matrixs]
         converted_energy_data = self.convert_energy(self.data["energies"])
         # calculation per molecule formation energy statistics
-        n = len(self.__energy_methods__)
         E = []
         for i, matrix in enumerate(matrixs):
             c = np.cumsum(np.append([0], matrix))[splits_idx]
             c[1:] = c[1:] - c[:-1]
-            E.append(converted_energy_data[:, i] -c)
+            E.append(converted_energy_data[:, i] - c)
         E = np.array(E).T
         formation_E_mean = np.nanmean(E, axis=0)
         formation_E_std = np.nanstd(E, axis=0)
@@ -501,8 +498,7 @@ class BaseDataset(torch.utils.data.Dataset):
         Average number of atoms in a molecule in the dataset.
         """
         if self.__average_nb_atoms__ is None:
-            logger.info(PROPERTY_NOT_AVAILABLE_ERROR)
-            return 1
+            raise StatisticsNotAvailableError(self.__name__)
         return self.__average_nb_atoms__
 
     def get_statistics(self, normalization: str = "formation", return_none: bool = True):

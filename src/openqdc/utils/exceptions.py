@@ -31,6 +31,11 @@ class DatasetNotAvailableError(OpenQDCException):
 class StatisticsNotAvailableError(DatasetNotAvailableError):
     """Raised when statistics are not available"""
 
+    msg = (
+        "Statistics for dataset {dataset_name} are not available."
+        + "Please open an issue on Github for the team to look into it."
+    )
+
 
 class NormalizationNotAvailableError(OpenQDCException):
     """Raised when normalization is not available"""
@@ -44,7 +49,7 @@ class ConversionNotDefinedError(OpenQDCException, ValueError):
     """Raised when a conversion is not defined"""
 
     _error_message = """
-    Conversion from {in_unit} to {out_unit} is not defined in the conversion registry. 
+    Conversion from {in_unit} to {out_unit} is not defined in the conversion registry.
     To add a new conversion, use the following syntax or open an issue on Github for the team to look into it:
 
     Conversion("{in_unit}", "{out_unit}", lambda x: x * conversion_factor)
@@ -58,6 +63,6 @@ class ConversionAlreadyDefined(ConversionNotDefinedError):
     """Raised when a conversion is not defined"""
 
     _error_message = """
-    Conversion from {in_unit} to {out_unit} is alread defined in the conversion registry. 
+    Conversion from {in_unit} to {out_unit} is alread defined in the conversion registry.
     To reuse the same metric, use get_conversion({in_unit}, {out_unit}).
     """
