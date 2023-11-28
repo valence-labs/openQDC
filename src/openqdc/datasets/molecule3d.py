@@ -10,6 +10,7 @@ from rdkit import Chem
 from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
+from openqdc.utils.constants import NOT_DEFINED
 from openqdc.utils.molecule import get_atomic_number_and_charge
 
 
@@ -110,29 +111,13 @@ class Molecule3D(BaseDataset):
                     "mean": self.convert_energy(array([-191.66717791])),
                     "std": self.convert_energy(array([2005.52732443])),
                 },
-                "forces": {
-                    "mean": array([0]),
-                    "std": array([0]),
-                    "components": {
-                        "mean": array([[0.0], [0.0], [0.0]]),
-                        "std": array([[0.0], [0.0], [0.0]]),
-                        "rms": array([[0.0], [0.0], [0.0]]),
-                    },
-                },
+                "forces": NOT_DEFINED,
             },
             "total": {
                 "energy": {
                     "mean": self.convert_energy(array([-21100.502], dtype=float32)),
                     "std": self.convert_energy(array([9345.366], dtype=float32)),
                 },
-                "forces": {
-                    "mean": array([0]),
-                    "std": array([0]),
-                    "components": {
-                        "mean": array([[0.0], [0.0], [0.0]]),
-                        "std": array([[0.0], [0.0], [0.0]]),
-                        "rms": array([[0.0], [0.0], [0.0]]),
-                    },
-                },
+                "forces": NOT_DEFINED,
             },
         }

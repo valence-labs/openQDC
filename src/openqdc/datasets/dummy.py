@@ -4,6 +4,7 @@ from sklearn.utils import Bunch
 
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils.atomization_energies import IsolatedAtomEnergyFactory
+from openqdc.utils.constants import NOT_DEFINED
 
 
 class Dummy(BaseDataset):
@@ -32,26 +33,14 @@ class Dummy(BaseDataset):
                     "mean": array([-12.94348027, -9.83037297]),
                     "std": array([4.39971409, 3.3574188]),
                 },
-                "forces": {
-                    "mean": array([0]),
-                    "std": array([0]),
-                    "components": {
-                        "mean": array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]),
-                        "std": array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]),
-                        "rms": array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]),
-                    },
-                },
+                "forces": NOT_DEFINED,
             },
             "total": {
                 "energy": {
                     "mean": array([-89.44242, -1740.5336]),
                     "std": array([29.599571, 791.48663]),
                 },
-                "forces": {
-                    "mean": array([[0.0], [0.0], [0.0]]),
-                    "std": array([[0.0], [0.0], [0.0]]),
-                    "rms": array([[0.0], [0.0], [0.0]]),
-                },
+                "forces": NOT_DEFINED,
             },
         }
 

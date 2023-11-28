@@ -7,3 +7,15 @@ HAR2EV = 27.211386246
 BOHR2ANG = 0.52917721092
 
 POSSIBLE_NORMALIZATION = ["formation", "total"]
+
+NOT_DEFINED = {
+    "forces": {
+        "mean": None,
+        "std": None,
+        "components": {
+            "mean": None,
+            "std": None,
+            "rms": None,
+        },
+    },
+}

@@ -4,6 +4,7 @@ from os.path import join as p_join
 from numpy import array, float32
 
 from openqdc.datasets.base import BaseDataset, read_qc_archive_h5
+from openqdc.utils.constants import NOT_DEFINED
 from openqdc.utils.io import get_local_cache
 
 
@@ -61,30 +62,14 @@ class ANI1(BaseDataset):
                     "mean": self.convert_energy(array([-2.37376472])),
                     "std": self.convert_energy(array([0.50266975])),
                 },
-                "forces": {
-                    "mean": array([0]),
-                    "std": array([0]),
-                    "components": {
-                        "mean": array([[0.0], [0.0], [0.0]]),
-                        "std": array([[0.0], [0.0], [0.0]]),
-                        "rms": array([[0.0], [0.0], [0.0]]),
-                    },
-                },
+                "forces": NOT_DEFINED,
             },
             "total": {
                 "energy": {
                     "mean": self.convert_energy(array([-333.67322], dtype=float32)),
                     "std": self.convert_energy(array([61.21667], dtype=float32)),
                 },
-                "forces": {
-                    "mean": array([0]),
-                    "std": array([0]),
-                    "components": {
-                        "mean": array([[0.0], [0.0], [0.0]]),
-                        "std": array([[0.0], [0.0], [0.0]]),
-                        "rms": array([[0.0], [0.0], [0.0]]),
-                    },
-                },
+                "forces": NOT_DEFINED,
             },
         }
 
@@ -136,30 +121,14 @@ class ANI1CCX(ANI1):
                     "mean": self.convert_energy(array([-3.23959548, 500.30384627, 500.40706776, 500.76740432])),
                     "std": self.convert_energy(array([1.03021261, 132.52707152, 132.56092469, 132.65261362])),
                 },
-                "forces": {
-                    "mean": array([0]),
-                    "std": array([0]),
-                    "components": {
-                        "mean": array([[0.0], [0.0], [0.0]]),
-                        "std": array([[0.0], [0.0], [0.0]]),
-                        "rms": array([[0.0], [0.0], [0.0]]),
-                    },
-                },
+                "forces": NOT_DEFINED,
             },
             "total": {
                 "energy": {
                     "mean": self.convert_energy(array([-374.40665, -1.2378153, -1.505962, -1.2396905], dtype=float32)),
                     "std": self.convert_energy(array([101.63995, 0.32444745, 0.39500558, 0.3250212], dtype=float32)),
                 },
-                "forces": {
-                    "mean": array([0]),
-                    "std": array([0]),
-                    "components": {
-                        "mean": array([[0.0], [0.0], [0.0]]),
-                        "std": array([[0.0], [0.0], [0.0]]),
-                        "rms": array([[0.0], [0.0], [0.0]]),
-                    },
-                },
+                "forces": NOT_DEFINED,
             },
         }
 

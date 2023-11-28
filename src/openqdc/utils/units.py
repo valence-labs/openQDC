@@ -1,5 +1,7 @@
 from typing import Callable
 
+from openqdc.utils.exceptions import ConversionAlreadyDefined, ConversionNotDefinedError
+
 CONVERSION_REGISTRY = {}
 
 
@@ -13,7 +15,7 @@ class Conversion:
         name = "convert_" + in_unit.lower().strip() + "_to_" + out_unit.lower().strip()
 
         if name in CONVERSION_REGISTRY:
-            raise ValueError(f"{name} is already registered. To reuse the same metric, use Metric.get_by_name().")
+            raise ConversionAlreadyDefined(in_unit, out_unit)
         CONVERSION_REGISTRY[name] = self
 
         self.name = name
@@ -29,7 +31,7 @@ def get_conversion(in_unit: str, out_unit: str):
     if in_unit.lower().strip() == out_unit.lower().strip():
         return lambda x: x
     if name not in CONVERSION_REGISTRY:
-        raise ValueError(f"{name} is not a valid metric. Valid metrics are: {list(CONVERSION_REGISTRY.keys())}")
+        raise ConversionNotDefinedError(in_unit, out_unit)
     return CONVERSION_REGISTRY[name]
 
 

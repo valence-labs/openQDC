@@ -7,6 +7,7 @@ import pandas as pd
 from numpy import array, float32
 
 from openqdc.datasets.base import BaseDataset
+from openqdc.utils.constants import NOT_DEFINED
 from openqdc.utils.molecule import atom_table
 
 
@@ -88,29 +89,13 @@ class OrbnetDenali(BaseDataset):
                     "mean": self.convert_energy(array([-13.87283487, -7.79357297])),
                     "std": self.convert_energy(array([75.34652971, 3.3274954])),
                 },
-                "forces": {
-                    "mean": array([0]),
-                    "std": array([0]),
-                    "components": {
-                        "mean": array([[0.0], [0.0], [0.0]]),
-                        "std": array([[0.0], [0.0], [0.0]]),
-                        "rms": array([[0.0], [0.0], [0.0]]),
-                    },
-                },
+                "forces": NOT_DEFINED,
             },
             "total": {
                 "energy": {
                     "mean": self.convert_energy(array([-1630.8182, -74.17469], dtype=float32)),
                     "std": self.convert_energy(array([929.9734, 19.751446], dtype=float32)),
                 },
-                "forces": {
-                    "mean": array([0]),
-                    "std": array([0]),
-                    "components": {
-                        "mean": array([[0.0], [0.0], [0.0]]),
-                        "std": array([[0.0], [0.0], [0.0]]),
-                        "rms": array([[0.0], [0.0], [0.0]]),
-                    },
-                },
+                "forces": NOT_DEFINED,
             },
         }

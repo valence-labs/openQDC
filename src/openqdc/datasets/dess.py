@@ -7,6 +7,7 @@ from numpy import array, float32
 from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
+from openqdc.utils.constants import NOT_DEFINED
 from openqdc.utils.molecule import get_atomic_number_and_charge
 
 
@@ -94,15 +95,7 @@ class DESS(BaseDataset):
                         ]
                     ),
                 },
-                "forces": {
-                    "mean": array([0]),
-                    "std": array([0]),
-                    "components": {
-                        "mean": array([[0.0], [0.0], [0.0]]),
-                        "std": array([[0.0], [0.0], [0.0]]),
-                        "rms": array([[0.0], [0.0], [0.0]]),
-                    },
-                },
+                "forces": NOT_DEFINED,
             },
             "total": {
                 "energy": {
@@ -115,15 +108,7 @@ class DESS(BaseDataset):
                         dtype=float32,
                     ),
                 },
-                "forces": {
-                    "mean": array([0]),
-                    "std": array([0]),
-                    "components": {
-                        "mean": array([[0.0], [0.0], [0.0]]),
-                        "std": array([[0.0], [0.0], [0.0]]),
-                        "rms": array([[0.0], [0.0], [0.0]]),
-                    },
-                },
+                "forces": NOT_DEFINED,
             },
         }
 

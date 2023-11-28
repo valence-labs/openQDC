@@ -7,6 +7,7 @@ from numpy import array
 
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils import load_json, load_pkl
+from openqdc.utils.constants import NOT_DEFINED
 from openqdc.utils.molecule import get_atomic_number_and_charge
 
 
@@ -97,30 +98,14 @@ class GEOM(BaseDataset):
                     "mean": self.convert_energy(array([-8.47811605])),
                     "std": self.convert_energy(array([3.68015507])),
                 },
-                "forces": {
-                    "mean": array([0]),
-                    "std": array([0]),
-                    "components": {
-                        "mean": array([[0.0], [0.0], [0.0]]),
-                        "std": array([[0.0], [0.0], [0.0]]),
-                        "rms": array([[0.0], [0.0], [0.0]]),
-                    },
-                },
+                "forces": NOT_DEFINED,
             },
             "total": {
                 "energy": {
                     "mean": self.convert_energy(array([-78.264725])),
                     "std": self.convert_energy(array([20.200787])),
                 },
-                "forces": {
-                    "mean": array([0]),
-                    "std": array([0]),
-                    "components": {
-                        "mean": array([[0.0], [0.0], [0.0]]),
-                        "std": array([[0.0], [0.0], [0.0]]),
-                        "rms": array([[0.0], [0.0], [0.0]]),
-                    },
-                },
+                "forces": NOT_DEFINED,
             },
         }
 

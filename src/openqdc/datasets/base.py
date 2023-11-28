@@ -15,6 +15,12 @@ from openqdc.utils.atomization_energies import (
     chemical_symbols,
 )
 from openqdc.utils.constants import NB_ATOMIC_FEATURES, POSSIBLE_NORMALIZATION
+from openqdc.utils.exceptions import (
+    PROPERTY_NOT_AVAILABLE_ERROR,
+    DatasetNotAvailableError,
+    NormalizationNotAvailableError,
+    StatisticsNotAvailableError,
+)
 from openqdc.utils.io import (
     copy_exists,
     dict_to_atoms,
@@ -96,10 +102,7 @@ class BaseDataset(torch.utils.data.Dataset):
         self.data = None
         self._set_units(energy_unit, distance_unit)
         if not self.is_preprocessed():
-            logger.info("This dataset not available. Please open an issue on Github for the team to look into it.")
-            # entries = self.read_raw_entries()
-            # res = self.collate_list(entries)
-            # self.save_preprocess(res)
+            raise DatasetNotAvailableError(self.__name__)
         else:
             self.read_preprocess(overwrite_local_cache=overwrite_local_cache)
             self._set_isolated_atom_energies()
@@ -255,7 +258,7 @@ class BaseDataset(torch.utils.data.Dataset):
             ).reshape(self.data_shapes[key])
 
         for key in self.data:
-            print(f"Loaded {key} with shape {self.data[key].shape}, dtype {self.data[key].dtype}")
+            logger.info(f"Loaded {key} with shape {self.data[key].shape}, dtype {self.data[key].dtype}")
 
         for key in ["name", "subset"]:
             filename = p_join(self.preprocess_path, f"{key}.npz")
@@ -265,7 +268,9 @@ class BaseDataset(torch.utils.data.Dataset):
                 tmp = np.load(f)
                 for k in tmp:
                     self.data[key][k] = tmp[k]
-                    print(f"Loaded {key}_{k} with shape {self.data[key][k].shape}, dtype {self.data[key][k].dtype}")
+                    logger.info(
+                        f"Loaded {key}_{k} with shape {self.data[key][k].shape}, dtype {self.data[key][k].dtype}"
+                    )
 
     def is_preprocessed(self):
         predicats = [copy_exists(p_join(self.preprocess_path, f"{key}.mmap")) for key in self.data_keys]
@@ -434,21 +439,41 @@ class BaseDataset(torch.utils.data.Dataset):
 
     @property
     def average_n_atoms(self):
+        """
+        Average number of atoms in a molecule in the dataset.
+        """
         if self.__average_nb_atoms__ is None:
-            logger.info(
-                "This property for this dataset not available."
-                + "Please open an issue on Github for the team to look into it."
-            )
+            logger.info(PROPERTY_NOT_AVAILABLE_ERROR)
             return 1
         return self.__average_nb_atoms__
 
-    def get_statistics(self, normalization: str = "formation"):
+    def get_statistics(self, normalization: str = "formation", return_none: bool = True):
+        """
+        Get the statistics of the dataset.
+        normalization : str, optional
+            Type of energy, by default "formation", must be one of ["formation", "total"]
+        return_none : bool, optional
+            Whether to return None if the statistics for the forces are not available, by default True
+            Otherwise, the statistics for the forces are set to 0.0
+        """
         stats = self._stats
         if len(stats) == 0:
-            logger.info(
-                "This property for this dataset not available."
-                + "Please open an issue on Github for the team to look into it."
-            )
+            raise StatisticsNotAvailableError(self.__name__)
         if normalization not in POSSIBLE_NORMALIZATION:
-            raise ValueError(f"normalization={normalization} is not valid. Must be one of {POSSIBLE_NORMALIZATION}")
-        return stats[normalization]
+            raise NormalizationNotAvailableError(normalization)
+        selected_stats = stats[normalization]
+        if len(self.__force_methods__) == 0 and not return_none:
+            selected_stats.update(
+                {
+                    "forces": {
+                        "mean": np.array([0.0]),
+                        "std": np.array([0.0]),
+                        "components": {
+                            "mean": np.array([[0.0], [0.0], [0.0]]),
+                            "std": np.array([[0.0], [0.0], [0.0]]),
+                            "rms": np.array([[0.0], [0.0], [0.0]]),
+                        },
+                    }
+                }
+            )
+        return selected_stats

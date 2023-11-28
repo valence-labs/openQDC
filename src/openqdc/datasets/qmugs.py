@@ -7,6 +7,7 @@ import numpy as np
 from numpy import array
 
 from openqdc.datasets.base import BaseDataset
+from openqdc.utils.constants import NOT_DEFINED
 from openqdc.utils.molecule import get_atomic_number_and_charge
 
 
@@ -72,26 +73,14 @@ class QMugs(BaseDataset):
                     "mean": self.convert_energy(array([-12.94348027, -9.83037297])),
                     "std": self.convert_energy(array([4.39971409, 3.3574188])),
                 },
-                "forces": {
-                    "mean": array([0]),
-                    "std": array([0]),
-                    "components": {
-                        "mean": array([[0.0], [0.0], [0.0]]),
-                        "std": array([[0.0], [0.0], [0.0]]),
-                        "rms": array([[0.0], [0.0], [0.0]]),
-                    },
-                },
+                "forces": NOT_DEFINED,
             },
             "total": {
                 "energy": {
                     "mean": self.convert_energy(array([-89.44242, -1740.5336])),
                     "std": self.convert_energy(array([29.599571, 791.48663])),
                 },
-                "forces": {
-                    "mean": array([[0.0], [0.0], [0.0]]),
-                    "std": array([[0.0], [0.0], [0.0]]),
-                    "rms": array([[0.0], [0.0], [0.0]]),
-                },
+                "forces": NOT_DEFINED,
             },
         }
 
