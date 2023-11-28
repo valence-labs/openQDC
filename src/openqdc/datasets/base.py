@@ -26,6 +26,7 @@ from openqdc.utils.io import (
     dict_to_atoms,
     get_local_cache,
     load_hdf5_file,
+    load_pkl,
     pull_locally,
     push_remote,
     set_cache_dir,
@@ -102,10 +103,18 @@ class BaseDataset(torch.utils.data.Dataset):
         self.data = None
         self._set_units(energy_unit, distance_unit)
         if not self.is_preprocessed():
-            raise DatasetNotAvailableError(self.__name__)
+            self._download()
         else:
             self.read_preprocess(overwrite_local_cache=overwrite_local_cache)
-            self._set_isolated_atom_energies()
+        self._set_isolated_atom_energies()
+
+    def _download(self):
+        try:
+            self.read_preprocess(overwrite_local_cache=True)
+            if not self.is_preprocessed():
+                raise Exception
+        except Exception:
+            raise DatasetNotAvailableError(self.__name__)
 
     @property
     def numbers(self):
@@ -260,21 +269,23 @@ class BaseDataset(torch.utils.data.Dataset):
         for key in self.data:
             logger.info(f"Loaded {key} with shape {self.data[key].shape}, dtype {self.data[key].dtype}")
 
-        for key in ["name", "subset"]:
-            filename = p_join(self.preprocess_path, f"{key}.npz")
+        for key in ["props"]:
+            filename = p_join(self.preprocess_path, f"{key}.pkl")
             pull_locally(filename)
-            self.data[key] = dict()
-            with open(filename, "rb") as f:
-                tmp = np.load(f)
-                for k in tmp:
-                    self.data[key][k] = tmp[k]
-                    logger.info(
-                        f"Loaded {key}_{k} with shape {self.data[key][k].shape}, dtype {self.data[key][k].dtype}"
-                    )
+            for key, v in load_pkl(filename).items():
+                self.data[key] = dict()
+                if key == "n_atoms":
+                    self.data[key] = v
+                    logger.info(f"Loaded {key} with shape {self.data[key].shape}, dtype {self.data[key].dtype}")
+                else:
+                    self.data[key]["uniques"] = v[0]
+                    self.data[key]["inv_indices"] = v[1]
+                    logger.info(f"Loaded {key}_{'uniques'} with shape {v[0].shape}, dtype { v[0].dtype}")
+                    logger.info(f"Loaded {key}_{'inv_indices'} with shape {v[1].shape}, dtype {v[1].dtype}")
 
     def is_preprocessed(self):
         predicats = [copy_exists(p_join(self.preprocess_path, f"{key}.mmap")) for key in self.data_keys]
-        predicats += [copy_exists(p_join(self.preprocess_path, f"{x}.npz")) for x in ["name", "subset"]]
+        predicats += [copy_exists(p_join(self.preprocess_path, f"{x}.pkl")) for x in ["props"]]
         return all(predicats)
 
     def preprocess(self):
@@ -411,7 +422,7 @@ class BaseDataset(torch.utils.data.Dataset):
         )
         name = self.data["name"]["uniques"][self.data["name"]["inv_indices"][idx]]
         subset = self.data["subset"]["uniques"][self.data["subset"]["inv_indices"][idx]]
-
+        n_atoms = self.data["n_atoms"][idx]
         if "forces" in self.data:
             forces = self.convert_forces(np.array(self.data["forces"][p_start:p_end], dtype=np.float32))
         else:
@@ -425,6 +436,7 @@ class BaseDataset(torch.utils.data.Dataset):
             name=name,
             subset=subset,
             forces=forces,
+            n_atoms=n_atoms,
         )
 
     def __str__(self):
