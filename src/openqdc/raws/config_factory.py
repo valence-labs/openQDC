@@ -37,7 +37,7 @@ class DataConfigFactory:
 
     sn2_rxn = dict(
         dataset_name="sn2_rxn",
-        links={"sn2_rxn.hdf5.gz": "https://zenodo.org/record/3585800/files/212.hdf5.gz"},
+        links={"sn2_rxn.hdf5.gz": "https://zenodo.org/records/2605341/files/sn2_reactions.npz"},
     )
 
     # FROM: https://sites.uw.edu/wdbase/database-of-water-clusters/

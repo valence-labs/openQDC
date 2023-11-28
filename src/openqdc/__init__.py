@@ -32,7 +32,7 @@ _lazy_imports_obj = {
     "Transition1X": "openqdc.datasets.transition1x",
 }
 
-_lazy_imports_mod = {"datasets": "openqdc.datamodule", "utils": "openqdc.utils"}
+_lazy_imports_mod = {"datasets": "openqdc.datasets", "utils": "openqdc.utils"}
 
 
 def __getattr__(name):

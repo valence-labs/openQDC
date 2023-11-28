@@ -43,6 +43,12 @@ class ANI1(BaseDataset):
     def root(self):
         return p_join(get_local_cache(), "ani")
 
+    def __smiles_converter__(self, x):
+        """util function to convert string to smiles: useful if the smiles is
+        encoded in a different format than its display format
+        """
+        return "-".join(x.decode("ascii").split("-")[:-1])
+
     @property
     def preprocess_path(self):
         path = p_join(self.root, "preprocessed", self.__name__)
@@ -131,6 +137,12 @@ class ANI1CCX(ANI1):
                 "forces": NOT_DEFINED,
             },
         }
+
+    def __smiles_converter__(self, x):
+        """util function to convert string to smiles: useful if the smiles is
+        encoded in a different format than its display format
+        """
+        return x
 
 
 class ANI1X(ANI1):
@@ -317,3 +329,9 @@ class ANI1X(ANI1):
 
     def convert_forces(self, x):
         return super().convert_forces(x) * 0.529177249  # correct the Dataset error
+
+    def __smiles_converter__(self, x):
+        """util function to convert string to smiles: useful if the smiles is
+        encoded in a different format than its display format
+        """
+        return x

@@ -37,8 +37,8 @@ class COMP6(BaseDataset):
         "pbe-d3bj/def2-tzvp",
         "pbe/def2-tzvp",
         "svwn/def2-tzvp",
-        "wb97m-d3bj/def2-tzvp",
-        "wb97m/def2-tzvp",
+        # "wb97m-d3bj/def2-tzvp",
+        # "wb97m/def2-tzvp",
     ]
 
     energy_target_names = [
@@ -49,8 +49,8 @@ class COMP6(BaseDataset):
         "PBE-D3M(BJ):def2-tzvp",
         "PBE:def2-tzvp",
         "SVWN:def2-tzvp",
-        "WB97M-D3(BJ):def2-tzvp",
-        "WB97M:def2-tzvp",
+        # "WB97M-D3(BJ):def2-tzvp",
+        # "WB97M:def2-tzvp",
     ]
 
     __force_methods__ = [
@@ -149,6 +149,12 @@ class COMP6(BaseDataset):
                 },
             },
         }
+
+    def __smiles_converter__(self, x):
+        """util function to convert string to smiles: useful if the smiles is
+        encoded in a different format than its display format
+        """
+        return "-".join(x.decode("ascii").split("_")[:-1])
 
     def read_raw_entries(self):
         samples = []

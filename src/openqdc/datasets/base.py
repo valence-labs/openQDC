@@ -1,4 +1,5 @@
 import os
+import pickle as pkl
 from os.path import join as p_join
 from typing import Dict, List, Optional, Union
 
@@ -26,12 +27,11 @@ from openqdc.utils.io import (
     dict_to_atoms,
     get_local_cache,
     load_hdf5_file,
-    load_pkl,
     pull_locally,
     push_remote,
     set_cache_dir,
 )
-from openqdc.utils.molecule import atom_table
+from openqdc.utils.molecule import atom_table, z_to_formula
 from openqdc.utils.package_utils import requires_package
 from openqdc.utils.units import get_conversion
 
@@ -50,7 +50,7 @@ def extract_entry(
 
     res = dict(
         name=np.array([df["name"][i]]),
-        subset=np.array([subset]),
+        subset=np.array([subset if subset is not None else z_to_formula(x)]),
         energies=energies.reshape((1, -1)).astype(np.float32),
         atomic_inputs=np.concatenate((xs, positions), axis=-1, dtype=np.float32),
         n_atoms=np.array([x.shape[0]], dtype=np.int32),
@@ -71,8 +71,8 @@ def read_qc_archive_h5(
 ) -> List[Dict[str, np.ndarray]]:
     data = load_hdf5_file(raw_path)
     data_t = {k2: data[k1][k2][:] for k1 in data.keys() for k2 in data[k1].keys()}
-    n = len(data_t["molecule_id"])
 
+    n = len(data_t["molecule_id"])
     samples = [extract_entry(data_t, i, subset, energy_target_names, force_target_names) for i in tqdm(range(n))]
     return samples
 
@@ -103,7 +103,7 @@ class BaseDataset(torch.utils.data.Dataset):
         self.data = None
         self._set_units(energy_unit, distance_unit)
         if not self.is_preprocessed():
-            self._download()
+            raise DatasetNotAvailableError(self.__name__)
         else:
             self.read_preprocess(overwrite_local_cache=overwrite_local_cache)
         self._set_isolated_atom_energies()
@@ -120,12 +120,12 @@ class BaseDataset(torch.utils.data.Dataset):
     def numbers(self):
         if hasattr(self, "_numbers"):
             return self._numbers
-        self._numbers = np.array(list(set(self.data["atomic_inputs"][..., 0])), dtype=np.int32)
+        self._numbers = np.unique(self.data["atomic_inputs"][..., 0]).astype(np.int32)
         return self._numbers
 
     @property
     def chemical_species(self):
-        return [chemical_symbols[z] for z in self.numbers]
+        return np.array(chemical_symbols)[self.numbers]
 
     @property
     def energy_unit(self):
@@ -224,10 +224,11 @@ class BaseDataset(torch.utils.data.Dataset):
         # concatenate entries
         res = {key: np.concatenate([r[key] for r in list_entries if r is not None], axis=0) for key in list_entries[0]}
 
-        csum = np.cumsum(res.pop("n_atoms"))
+        csum = np.cumsum(res.get("n_atoms"))
         x = np.zeros((csum.shape[0], 2), dtype=np.int32)
         x[1:, 0], x[:, 1] = csum[:-1], csum
         res["position_idx_range"] = x
+
         return res
 
     def save_preprocess(self, data_dict):
@@ -241,12 +242,13 @@ class BaseDataset(torch.utils.data.Dataset):
             push_remote(local_path, overwrite=True)
 
         # save smiles and subset
+        local_path = p_join(self.preprocess_path, "props.pkl")
         for key in ["name", "subset"]:
-            local_path = p_join(self.preprocess_path, f"{key}.npz")
-            uniques, inv_indices = np.unique(data_dict[key], return_inverse=True)
-            with open(local_path, "wb") as f:
-                np.savez_compressed(f, uniques=uniques, inv_indices=inv_indices)
-            push_remote(local_path)
+            data_dict[key] = np.unique(data_dict[key], return_inverse=True)
+
+        with open(local_path, "wb") as f:
+            pkl.dump(data_dict, f)
+        push_remote(local_path, overwrite=True)
 
     def read_preprocess(self, overwrite_local_cache=False):
         logger.info("Reading preprocessed data")
@@ -260,36 +262,29 @@ class BaseDataset(torch.utils.data.Dataset):
         for key in self.data_keys:
             filename = p_join(self.preprocess_path, f"{key}.mmap")
             pull_locally(filename, overwrite=overwrite_local_cache)
-            self.data[key] = np.memmap(
-                filename,
-                mode="r",
-                dtype=self.data_types[key],
-            ).reshape(self.data_shapes[key])
+            self.data[key] = np.memmap(filename, mode="r", dtype=self.data_types[key]).reshape(self.data_shapes[key])
+
+        filename = p_join(self.preprocess_path, "props.pkl")
+        pull_locally(filename, overwrite=overwrite_local_cache)
+        with open(filename, "rb") as f:
+            tmp = pkl.load(f)
+            for key in ["name", "subset", "n_atoms"]:
+                x = tmp.pop(key)
+                if len(x) == 2:
+                    self.data[key] = x[0][x[1]]
+                else:
+                    self.data[key] = x
 
         for key in self.data:
             logger.info(f"Loaded {key} with shape {self.data[key].shape}, dtype {self.data[key].dtype}")
 
-        for key in ["props"]:
-            filename = p_join(self.preprocess_path, f"{key}.pkl")
-            pull_locally(filename)
-            for key, v in load_pkl(filename).items():
-                self.data[key] = dict()
-                if key == "n_atoms":
-                    self.data[key] = v
-                    logger.info(f"Loaded {key} with shape {self.data[key].shape}, dtype {self.data[key].dtype}")
-                else:
-                    self.data[key]["uniques"] = v[0]
-                    self.data[key]["inv_indices"] = v[1]
-                    logger.info(f"Loaded {key}_{'uniques'} with shape {v[0].shape}, dtype { v[0].dtype}")
-                    logger.info(f"Loaded {key}_{'inv_indices'} with shape {v[1].shape}, dtype {v[1].dtype}")
-
     def is_preprocessed(self):
         predicats = [copy_exists(p_join(self.preprocess_path, f"{key}.mmap")) for key in self.data_keys]
-        predicats += [copy_exists(p_join(self.preprocess_path, f"{x}.pkl")) for x in ["props"]]
+        predicats += [copy_exists(p_join(self.preprocess_path, "props.pkl"))]
         return all(predicats)
 
-    def preprocess(self):
-        if not self.is_preprocessed():
+    def preprocess(self, overwrite=False):
+        if overwrite or not self.is_preprocessed():
             entries = self.read_raw_entries()
             res = self.collate_list(entries)
             self.save_preprocess(res)
@@ -323,7 +318,7 @@ class BaseDataset(torch.utils.data.Dataset):
 
     @requires_package("dscribe")
     @requires_package("datamol")
-    def chemical_space(
+    def soap_descriptors(
         self,
         n_samples: Optional[Union[List[int], int]] = None,
         return_idxs: bool = True,
@@ -368,7 +363,7 @@ class BaseDataset(torch.utils.data.Dataset):
             idxs = list(range(len(self)))
         elif isinstance(n_samples, int):
             idxs = np.random.choice(len(self), size=n_samples, replace=False)
-        elif isinstance(n_samples, list):
+        else:  # list, set, np.ndarray
             idxs = n_samples
         datum = {}
         r_cut = soap_kwargs.pop("r_cut", 5.0)
@@ -401,7 +396,7 @@ class BaseDataset(torch.utils.data.Dataset):
             entry = self.get_ase_atoms(idx, ext=False)
             return soap.create(entry, centers=entry.positions)
 
-        descr = dm.parallelized(wrapper, idxs, progress=progress, scheduler="threads")
+        descr = dm.parallelized(wrapper, idxs, progress=progress, scheduler="threads", n_jobs=-1)
         datum["soap"] = np.vstack(descr)
         if return_idxs:
             datum["idxs"] = idxs
@@ -409,6 +404,12 @@ class BaseDataset(torch.utils.data.Dataset):
 
     def __len__(self):
         return self.data["energies"].shape[0]
+
+    def __smiles_converter__(self, x):
+        """util function to convert string to smiles: useful if the smiles is
+        encoded in a different format than its display format
+        """
+        return x
 
     def __getitem__(self, idx: int):
         shift = IsolatedAtomEnergyFactory.max_charge
@@ -420,9 +421,9 @@ class BaseDataset(torch.utils.data.Dataset):
             self.convert_distance(np.array(input[:, -3:], dtype=np.float32)),
             self.convert_energy(np.array(self.data["energies"][idx], dtype=np.float32)),
         )
-        name = self.data["name"]["uniques"][self.data["name"]["inv_indices"][idx]]
-        subset = self.data["subset"]["uniques"][self.data["subset"]["inv_indices"][idx]]
-        n_atoms = self.data["n_atoms"][idx]
+        name = self.__smiles_converter__(self.data["name"][idx])
+        subset = self.data["subset"][idx]
+
         if "forces" in self.data:
             forces = self.convert_forces(np.array(self.data["forces"][p_start:p_end], dtype=np.float32))
         else:
@@ -436,7 +437,6 @@ class BaseDataset(torch.utils.data.Dataset):
             name=name,
             subset=subset,
             forces=forces,
-            n_atoms=n_atoms,
         )
 
     def __str__(self):
