@@ -43,6 +43,12 @@ class ISO17(BaseDataset):
     __distance_unit__ = "bohr"  # bohr
     __forces_unit__ = "ev/bohr"
 
+    def __smiles_converter__(self, x):
+        """util function to convert string to smiles: useful if the smiles is
+        encoded in a different format than its display format
+        """
+        return "-".join(x.decode("ascii").split("_")[:-1])
+
     def read_raw_entries(self):
         raw_path = p_join(self.root, "iso_17.h5")
         samples = read_qc_archive_h5(raw_path, "iso_17", self.energy_target_names, self.force_target_names)

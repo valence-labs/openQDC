@@ -73,3 +73,6 @@ Conversion(
 Conversion("hartree/ang", "kcal/mol/ang", lambda x: get_conversion("hartree", "kcal/mol")(x))
 Conversion("hartree/ang", "hartree/bohr", lambda x: get_conversion("bohr", "ang")(x))
 Conversion("hartree/bohr", "hartree/ang", lambda x: get_conversion("ang", "bohr")(x))
+Conversion("ev/bohr", "kcal/mol/ang", lambda x: get_conversion("ang", "bohr")(get_conversion("ev", "kcal/mol")(x)))
+Conversion("kcal/mol/bohr", "kcal/mol/ang", lambda x: get_conversion("ang", "bohr")(x))
+Conversion("ev/ang", "kcal/mol/ang", lambda x: get_conversion("ev", "kcal/mol")(x))

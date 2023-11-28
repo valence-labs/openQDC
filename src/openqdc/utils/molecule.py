@@ -4,7 +4,17 @@ import numpy as np
 from numpy import ndarray
 from rdkit import Chem
 
+from openqdc.utils.atomization_energies import chemical_symbols
+
 atom_table = Chem.GetPeriodicTable()
+
+
+def z_to_formula(z):
+    u, c = np.unique(z, return_counts=True)
+    idxs = np.argsort(u)
+    u, c = u[idxs], c[idxs]
+
+    return "".join([f"{chemical_symbols[u[i]]}{c[i] if c[i] > 1 else ''}" for i in range(len(u))])
 
 
 def get_atomic_number(mol: Chem.Mol):

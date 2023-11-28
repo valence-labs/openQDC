@@ -1,4 +1,3 @@
-import gzip
 import json
 import os
 import pickle as pkl
@@ -90,7 +89,11 @@ class PCQM_PM6(BaseDataset):
     def collate_list(self, list_entries):
         predicat = list_entries is not None and len(list_entries) > 0
         list_entries = [x for x in list_entries if x is not None]
-        return super().collate_list(list_entries) if predicat else None
+        if predicat:
+            res = super().collate_list(list_entries)
+        else:
+            res = None
+        return res
 
     def read_raw_entries(self):
         arxiv_paths = glob(p_join(self.root, f"{self.__energy_methods__[0]}", "*.pkl"))
@@ -99,8 +102,8 @@ class PCQM_PM6(BaseDataset):
         samples = [x for x in samples if x is not None]
         return samples
 
-    def preprocess(self):
-        if not self.is_preprocessed():
+    def preprocess(self, overwrite=False):
+        if overwrite or not self.is_preprocessed():
             logger.info("Preprocessing data and saving it to cache.")
             logger.info(
                 f"Dataset {self.__name__} data with the following units:\n"
@@ -132,13 +135,19 @@ class PCQM_PM6(BaseDataset):
             push_remote(local_path, overwrite=True)
 
         # save smiles and subset
-        tmp = dict()
-        local_path = p_join(self.preprocess_path, "props.pkl.gz")
-        for key in ["name", "subset"]:
-            local_path = p_join(self.preprocess_path, f"{key}.npz")
-            tmp[key] = [el for i in range(len(list_entries)) for el in list_entries[i].pop(key)]
-        with gzip.open(local_path, "wb") as f:
-            pkl.dump(x, f)
+        tmp, n = dict(name=[]), len(list_entries)
+        local_path = p_join(self.preprocess_path, "props.pkl")
+        names = [list_entries[i].pop("name") for i in range(n)]
+        f = lambda xs: [dm.to_inchikey(x) for x in xs]
+        res = dm.parallelized(f, names, n_jobs=-1, progress=False)
+        for x in res:
+            tmp["name"] += x
+        for key in ["subset", "n_atoms"]:
+            tmp[key] = []
+            for i in range(n):
+                tmp[key] += list(list_entries[i].pop(key))
+        with open(local_path, "wb") as f:
+            pkl.dump(tmp, f)
         push_remote(local_path, overwrite=True)
         # for key in ["name", "subset"]:
         #     local_path = p_join(self.preprocess_path, f"{key}.npz")
