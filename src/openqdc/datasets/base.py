@@ -1,5 +1,6 @@
 import os
 import pickle as pkl
+from copy import deepcopy
 from os.path import join as p_join
 from typing import Dict, List, Optional, Union
 
@@ -560,7 +561,7 @@ class BaseDataset(torch.utils.data.Dataset):
             Whether to return None if the statistics for the forces are not available, by default True
             Otherwise, the statistics for the forces are set to 0.0
         """
-        stats = self._stats
+        stats = deepcopy(self._stats)
         if len(stats) == 0:
             raise StatisticsNotAvailableError(self.__name__)
         if normalization not in POSSIBLE_NORMALIZATION:
