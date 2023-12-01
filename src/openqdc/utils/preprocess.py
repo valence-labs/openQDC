@@ -36,9 +36,11 @@ options_map = {d.__name__: d for d in options}
 def preprocess(dataset):
     if dataset not in options_map:
         dataset_id = int(dataset)
+        data_class = options[dataset_id]
+    else:
+        data_class = options_map[dataset]
 
-    data_class = options[dataset_id]
-    data_class().preprocess()
+    data_class().preprocess(overwrite=False)
     data = data_class()
     logger.info(f"Preprocessing {data.__name__}")
 
@@ -47,7 +49,7 @@ def preprocess(dataset):
         x = data[i]
         print(x.name, x.subset, end=" ")
         for k in x:
-            if x[k] is not None:
+            if isinstance(x[k], np.ndarray):
                 print(k, x[k].shape, end=" ")
         print()
 

@@ -1,5 +1,7 @@
 from typing import Callable
 
+from openqdc.utils.exceptions import ConversionAlreadyDefined, ConversionNotDefinedError
+
 CONVERSION_REGISTRY = {}
 
 
@@ -13,7 +15,7 @@ class Conversion:
         name = "convert_" + in_unit.lower().strip() + "_to_" + out_unit.lower().strip()
 
         if name in CONVERSION_REGISTRY:
-            raise ValueError(f"{name} is already registered. To reuse the same metric, use Metric.get_by_name().")
+            raise ConversionAlreadyDefined(in_unit, out_unit)
         CONVERSION_REGISTRY[name] = self
 
         self.name = name
@@ -29,7 +31,7 @@ def get_conversion(in_unit: str, out_unit: str):
     if in_unit.lower().strip() == out_unit.lower().strip():
         return lambda x: x
     if name not in CONVERSION_REGISTRY:
-        raise ValueError(f"{name} is not a valid metric. Valid metrics are: {list(CONVERSION_REGISTRY.keys())}")
+        raise ConversionNotDefinedError(in_unit, out_unit)
     return CONVERSION_REGISTRY[name]
 
 
@@ -73,3 +75,10 @@ Conversion(
 Conversion("hartree/ang", "kcal/mol/ang", lambda x: get_conversion("hartree", "kcal/mol")(x))
 Conversion("hartree/ang", "hartree/bohr", lambda x: get_conversion("bohr", "ang")(x))
 Conversion("hartree/bohr", "hartree/ang", lambda x: get_conversion("ang", "bohr")(x))
+Conversion("kcal/mol/bohr", "Hartree/bohr", lambda x: get_conversion("kcal/mol", "hartree")(x))
+Conversion("ev/ang", "hartree/ang", lambda x: get_conversion("ev", "hartree")(x))
+Conversion("ev/bohr", "hartree/bohr", lambda x: get_conversion("ev", "hartree")(x))
+Conversion("ev/bohr", "ev/ang", lambda x: get_conversion("ang", "bohr")(x))
+Conversion("ev/bohr", "kcal/mol/ang", lambda x: get_conversion("ang", "bohr")(get_conversion("ev", "kcal/mol")(x)))
+Conversion("kcal/mol/bohr", "kcal/mol/ang", lambda x: get_conversion("ang", "bohr")(x))
+Conversion("ev/ang", "kcal/mol/ang", lambda x: get_conversion("ev", "kcal/mol")(x))

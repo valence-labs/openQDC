@@ -2,124 +2,126 @@ from typing import Dict, Tuple, TypeAlias
 
 import numpy as np
 from loguru import logger
+from rdkit import Chem
 
 from openqdc.utils.constants import MAX_ATOMIC_NUMBER
+
+atom_table = Chem.GetPeriodicTable()
 
 __all__ = ["chemical_symbols", "atomic_numbers", "IsolatedAtomEnergyFactory"]
 
 EF_KEY: TypeAlias = Tuple[str, int]
 
-ATOM_SPECIES = "H", "Li", "B", "C", "N", "O", "F", "Na", "Mg", "Si", "P", "S", "Cl", "K", "Ca", "Br", "I"
-# Energy in atomic unit/ Hartree / Ang
-
 # didn t calculate for Pd, Pt, Mo, Ni, Fe, Cu, see DESS
 atomic_numbers = {}
-chemical_symbols = [
-    "X",
-    "H",
-    "He",
-    "Li",
-    "Be",
-    "B",
-    "C",
-    "N",
-    "O",
-    "F",
-    "Ne",
-    "Na",
-    "Mg",
-    "Al",
-    "Si",
-    "P",
-    "S",
-    "Cl",
-    "Ar",
-    "K",
-    "Ca",
-    "Sc",
-    "Ti",
-    "V",
-    "Cr",
-    "Mn",
-    "Fe",
-    "Co",
-    "Ni",
-    "Cu",
-    "Zn",
-    "Ga",
-    "Ge",
-    "As",
-    "Se",
-    "Br",
-    "Kr",
-    "Rb",
-    "Sr",
-    "Y",
-    "Zr",
-    "Nb",
-    "Mo",
-    "Tc",
-    "Ru",
-    "Rh",
-    "Pd",
-    "Ag",
-    "Cd",
-    "In",
-    "Sn",
-    "Sb",
-    "Te",
-    "I",
-    "Xe",
-    "Cs",
-    "Ba",
-    "La",
-    "Ce",
-    "Pr",
-    "Nd",
-    "Pm",
-    "Sm",
-    "Eu",
-    "Gd",
-    "Tb",
-    "Dy",
-    "Ho",
-    "Er",
-    "Tm",
-    "Yb",
-    "Lu",
-    "Hf",
-    "Ta",
-    "W",
-    "Re",
-    "Os",
-    "Ir",
-    "Pt",
-    "Au",
-    "Hg",
-    "Tl",
-    "Pb",
-    "Bi",
-    "Po",
-    "At",
-    "Rn",
-    "Fr",
-    "Ra",
-    "Ac",
-    "Th",
-    "Pa",
-    "U",
-    "Np",
-    "Pu",
-    "Am",
-    "Cm",
-    "Bk",
-    "Cf",
-    "Es",
-    "Fm",
-    "Md",
-    "No",
-    "Lr",
-]
+chemical_symbols = np.array(
+    [
+        "X",
+        "H",
+        "He",
+        "Li",
+        "Be",
+        "B",
+        "C",
+        "N",
+        "O",
+        "F",
+        "Ne",
+        "Na",
+        "Mg",
+        "Al",
+        "Si",
+        "P",
+        "S",
+        "Cl",
+        "Ar",
+        "K",
+        "Ca",
+        "Sc",
+        "Ti",
+        "V",
+        "Cr",
+        "Mn",
+        "Fe",
+        "Co",
+        "Ni",
+        "Cu",
+        "Zn",
+        "Ga",
+        "Ge",
+        "As",
+        "Se",
+        "Br",
+        "Kr",
+        "Rb",
+        "Sr",
+        "Y",
+        "Zr",
+        "Nb",
+        "Mo",
+        "Tc",
+        "Ru",
+        "Rh",
+        "Pd",
+        "Ag",
+        "Cd",
+        "In",
+        "Sn",
+        "Sb",
+        "Te",
+        "I",
+        "Xe",
+        "Cs",
+        "Ba",
+        "La",
+        "Ce",
+        "Pr",
+        "Nd",
+        "Pm",
+        "Sm",
+        "Eu",
+        "Gd",
+        "Tb",
+        "Dy",
+        "Ho",
+        "Er",
+        "Tm",
+        "Yb",
+        "Lu",
+        "Hf",
+        "Ta",
+        "W",
+        "Re",
+        "Os",
+        "Ir",
+        "Pt",
+        "Au",
+        "Hg",
+        "Tl",
+        "Pb",
+        "Bi",
+        "Po",
+        "At",
+        "Rn",
+        "Fr",
+        "Ra",
+        "Ac",
+        "Th",
+        "Pa",
+        "U",
+        "Np",
+        "Pu",
+        "Am",
+        "Cm",
+        "Bk",
+        "Cf",
+        "Es",
+        "Fm",
+        "Md",
+        "No",
+        "Lr",
+    ]
+)
 
 
 for Z, symbol in enumerate(chemical_symbols):
@@ -131,7 +133,7 @@ class IsolatedAtomEnergyFactory:
     Factory method to get the isolated atom energies for a given level of theory.
     """
 
-    max_charge = 4
+    max_charge = 6
 
     def __init__(self):
         pass
@@ -207,7 +209,14 @@ class IsolatedAtomEnergyFactory:
         if tuple_hashmap is None:
             return matrix
         for key in tuple_hashmap.keys():
-            matrix[atomic_numbers[key[0]], key[1] + shift] = tuple_hashmap[key]
+            try:
+                matrix[atomic_numbers[key[0]], key[1] + shift] = tuple_hashmap[key]
+            except KeyError:
+                print(key, list(tuple_hashmap.items()))
+                print(key[0], "?", key[1], "?", shift)
+                print(matrix.shape, atomic_numbers[key[0]], key[1] + shift)
+                logger.warning(f"Isolated atom energies not found for {key} and level of theory {level_of_theory}")
+                matrix[atomic_numbers[key[0]], key[1] + shift] = 0
         return matrix
 
 

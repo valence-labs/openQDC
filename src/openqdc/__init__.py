@@ -7,9 +7,32 @@ from typing import TYPE_CHECKING  # noqa F401
 
 # Dictionary of objects to lazily import; maps the object's name to its module path
 
-_lazy_imports_obj = {}
+_lazy_imports_obj = {
+    "ANI1": "openqdc.datasets.ani",
+    "ANI1CCX": "openqdc.datasets.ani",
+    "ANI1X": "openqdc.datasets.ani",
+    "Spice": "openqdc.datasets.spice",
+    "GEOM": "openqdc.datasets.geom",
+    "QMugs": "openqdc.datasets.qmugs",
+    "ISO17": "openqdc.datasets.iso_17",
+    "COMP6": "openqdc.datasets.comp6",
+    "GDML": "openqdc.datasets.gdml",
+    "Molecule3D": "openqdc.datasets.molecule3d",
+    "OrbnetDenali": "openqdc.datasets.orbnet_denali",
+    "SN2RXN": "openqdc.datasets.sn2_rxn",
+    "QM7X": "openqdc.datasets.qm7x",
+    "DESS": "openqdc.datasets.dess",
+    "NablaDFT": "openqdc.datasets.nabladft",
+    "SolvatedPeptides": "openqdc.datasets.solvated_peptides",
+    "WaterClusters": "openqdc.datasets.waterclusters3_30",
+    "TMQM": "openqdc.datasets.tmqm",
+    "Dummy": "openqdc.datasets.dummy",
+    "PCQM_B3LYP": "openqdc.datasets.pcqm",
+    "PCQM_PM6": "openqdc.datasets.pcqm",
+    "Transition1X": "openqdc.datasets.transition1x",
+}
 
-_lazy_imports_mod = {"datasets": "openqdc.datamodule", "utils": "openqdc.utils"}
+_lazy_imports_mod = {"datasets": "openqdc.datasets", "utils": "openqdc.utils"}
 
 
 def __getattr__(name):

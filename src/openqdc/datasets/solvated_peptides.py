@@ -27,6 +27,12 @@ class SolvatedPeptides(BaseDataset):
     __distance_unit__ = "bohr"
     __forces_unit__ = "hartree/bohr"
 
+    def __smiles_converter__(self, x):
+        """util function to convert string to smiles: useful if the smiles is
+        encoded in a different format than its display format
+        """
+        return "_".join(x.decode("ascii").split("_")[:-1])
+
     def read_raw_entries(self):
         raw_path = p_join(self.root, "solvated_peptides.h5")
         samples = read_qc_archive_h5(raw_path, "solvated_peptides", self.energy_target_names, self.force_target_names)
