@@ -253,6 +253,16 @@ class BaseDataset(torch.utils.data.Dataset):
             "forces": (-1, 3, len(self.force_target_names)),
         }
 
+    @property
+    def atoms_per_molecules(self):
+        try:
+            if hasattr(self, "_n_atoms"):
+                return self._n_atoms
+            self._n_atoms = self.data["n_atoms"]
+            return self._n_atoms
+        except:  # noqa
+            return None
+
     def _set_units(self, en, ds):
         old_en, old_ds = self.energy_unit, self.distance_unit
         if en is not None:

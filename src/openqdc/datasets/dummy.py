@@ -23,7 +23,7 @@ class Dummy(BaseDataset):
 
     force_target_names = [f"forces{i}" for i in range(len(__force_methods__))]
     __isolated_atom_energies__ = []
-    __average_n_atoms__ = 20
+    __average_n_atoms__ = None
 
     @property
     def _stats(self):
@@ -51,6 +51,11 @@ class Dummy(BaseDataset):
         except:  # noqa
             pass
         self._set_isolated_atom_energies()
+        self.setup_dummy()
+
+    def setup_dummy(self):
+        self._n_atoms = np.array([np.random.randint(1, 100) for _ in range(self.__len__())])
+        self.__average_nb_atoms__ = self._n_atoms.mean()
 
     def is_preprocessed(self):
         return True
@@ -63,7 +68,7 @@ class Dummy(BaseDataset):
 
     def __getitem__(self, idx: int):
         shift = IsolatedAtomEnergyFactory.max_charge
-        size = np.random.randint(1, 100)
+        size = self._n_atoms[idx]
         z = np.random.randint(1, 100, size)
         c = np.random.randint(-1, 2, size)
         return Bunch(
