@@ -30,15 +30,15 @@ class Dummy(BaseDataset):
         return {
             "formation": {
                 "energy": {
-                    "mean": array([-12.94348027, -9.83037297]),
-                    "std": array([4.39971409, 3.3574188]),
+                    "mean": array([[-12.94348027, -9.83037297]]),
+                    "std": array([[4.39971409, 3.3574188]]),
                 },
                 "forces": NOT_DEFINED,
             },
             "total": {
                 "energy": {
-                    "mean": array([-89.44242, -1740.5336]),
-                    "std": array([29.599571, 791.48663]),
+                    "mean": array([[-89.44242, -1740.5336]]),
+                    "std": array([[29.599571, 791.48663]]),
                 },
                 "forces": NOT_DEFINED,
             },
