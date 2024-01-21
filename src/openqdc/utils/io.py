@@ -43,7 +43,7 @@ def get_local_cache() -> str:
 
 
 def get_remote_cache() -> str:
-    remote_cache = "gs://opendatasets/openqdc"
+    remote_cache = "gs://qmdata-public/openqdc"
     return remote_cache
 
 
