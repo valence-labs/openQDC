@@ -5,7 +5,6 @@ import pickle as pkl
 
 import fsspec
 import h5py
-import torch
 from ase.atoms import Atoms
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
@@ -68,21 +67,6 @@ def pull_locally(local_path, overwrite=False):
 def copy_exists(local_path):
     remote_path = local_path.replace(get_local_cache(), get_remote_cache())
     return os.path.exists(local_path) or gcp_filesys.exists(remote_path)
-
-
-def load_torch_gcs(path):
-    """Loads torch file"""
-    # get file system
-    fs: GCSFileSystem = fsspec.filesystem("gs")
-
-    # load from GCS
-    with fs.open(path, "rb") as fp:
-        return torch.load(fp)
-
-
-def load_torch(path):
-    """Loads torch file"""
-    return torch.load(path)
 
 
 def makedirs_gcs(path, exist_ok=True):

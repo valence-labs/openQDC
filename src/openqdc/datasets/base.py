@@ -6,7 +6,6 @@ from typing import Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
-import torch
 from ase.io.extxyz import write_extxyz
 from loguru import logger
 from sklearn.utils import Bunch
@@ -82,7 +81,7 @@ def read_qc_archive_h5(
     return samples
 
 
-class BaseDataset(torch.utils.data.Dataset):
+class BaseDataset:
     __energy_methods__ = []
     __force_methods__ = []
     energy_target_names = []
