@@ -143,10 +143,18 @@ class BaseDataset(torch.utils.data.Dataset):
             logger.info("Loaded precomputed statistics")
         else:
             logger.info("Precomputing relevant statistics")
-            (formation_E_mean, formation_E_std, total_E_mean, total_E_std) = self._precompute_E()
+            (
+                inter_E_mean,
+                inter_E_std,
+                formation_E_mean,
+                formation_E_std,
+                total_E_mean,
+                total_E_std,
+            ) = self._precompute_E()
             forces_dict = self._precompute_F()
             stats = {
                 "formation": {"energy": {"mean": formation_E_mean, "std": formation_E_std}, "forces": forces_dict},
+                "inter": {"energy": {"mean": inter_E_mean, "std": inter_E_std}, "forces": forces_dict},
                 "total": {"energy": {"mean": total_E_mean, "std": total_E_std}, "forces": forces_dict},
             }
             with open(local_path, "wb") as f:
@@ -162,7 +170,7 @@ class BaseDataset(torch.utils.data.Dataset):
         s = np.array(self.data["atomic_inputs"][:, :2], dtype=int)
         s[:, 1] += IsolatedAtomEnergyFactory.max_charge
         matrixs = [matrix[s[:, 0], s[:, 1]] for matrix in self.__isolated_atom_energies__]
-        converted_energy_data = self.convert_energy(self.data["energies"])
+        converted_energy_data = self.data["energies"]
         # calculation per molecule formation energy statistics
         E = []
         for i, matrix in enumerate(matrixs):
@@ -170,12 +178,16 @@ class BaseDataset(torch.utils.data.Dataset):
             c[1:] = c[1:] - c[:-1]
             E.append(converted_energy_data[:, i] - c)
         E = np.array(E).T
+        inter_E_mean = np.nanmean(E / self.data["n_atoms"][:, None], axis=0)
+        inter_E_std = np.nanstd(E / self.data["n_atoms"][:, None], axis=0)
         formation_E_mean = np.nanmean(E, axis=0)
         formation_E_std = np.nanstd(E, axis=0)
         total_E_mean = np.nanmean(converted_energy_data, axis=0)
         total_E_std = np.nanstd(converted_energy_data, axis=0)
 
         return (
+            np.atleast_2d(inter_E_mean),
+            np.atleast_2d(inter_E_std),
             np.atleast_2d(formation_E_mean),
             np.atleast_2d(formation_E_std),
             np.atleast_2d(total_E_mean),
@@ -265,10 +277,13 @@ class BaseDataset(torch.utils.data.Dataset):
 
     def _set_units(self, en, ds):
         old_en, old_ds = self.energy_unit, self.distance_unit
-        if en is not None:
-            self.set_energy_unit(en)
-        if ds is not None:
-            self.set_distance_unit(ds)
+        en = en if en is not None else old_en
+        ds = ds if ds is not None else old_ds
+
+        # if en is None:
+        self.set_energy_unit(en)
+        # if ds is not None:
+        self.set_distance_unit(ds)
         if self.__force_methods__:
             self.__forces_unit__ = self.energy_unit + "/" + self.distance_unit
             self.__class__.__fn_forces__ = get_conversion(old_en + "/" + old_ds, self.__forces_unit__)
@@ -566,7 +581,7 @@ class BaseDataset(torch.utils.data.Dataset):
         """
         Get the statistics of the dataset.
         normalization : str, optional
-            Type of energy, by default "formation", must be one of ["formation", "total"]
+            Type of energy, by default "formation", must be one of ["formation", "total", "inter"]
         return_none : bool, optional
             Whether to return None if the statistics for the forces are not available, by default True
             Otherwise, the statistics for the forces are set to 0.0
