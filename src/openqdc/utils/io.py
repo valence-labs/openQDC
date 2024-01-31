@@ -10,7 +10,7 @@ from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from rdkit.Chem import MolFromXYZFile
 
-gcp_filesys = fsspec.filesystem("gs")
+gcp_filesys = fsspec.filesystem("https")
 local_filesys = LocalFileSystem()
 
 _OPENQDC_CACHE_DIR = "~/.cache/openqdc"
@@ -42,7 +42,8 @@ def get_local_cache() -> str:
 
 
 def get_remote_cache() -> str:
-    remote_cache = "gs://qmdata-public/openqdc"
+    #remote_cache = "gs://qmdata-public/openqdc"
+    remote_cache = "https://storage.googleapis.com/qmdata-public/openqdc"
     return remote_cache
 
 
