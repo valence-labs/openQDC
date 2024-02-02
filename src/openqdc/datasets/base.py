@@ -121,6 +121,7 @@ class BaseDataset:
         self._set_units(None, None)
         self._set_isolated_atom_energies()
         self._precompute_statistics(overwrite_local_cache=overwrite_local_cache)
+        self._set_new_e0s_unit(energy_unit)
         self._set_units(energy_unit, distance_unit)
         self._convert_data()
         self._set_isolated_atom_energies()
@@ -135,27 +136,40 @@ class BaseDataset:
         for key in self.data_keys:
             self.data[key] = self._convert_on_loading(self.data[key], key)
 
+    def _compute_linear_e0s(self):
+        len_train = len(self)
+        len_zs = len(self.numbers)
+        A = np.zeros((len_train, len_zs))
+        zs = self.numbers
+        atomic_numbers = self.data["atomic_inputs"][:, 0].astype("int32")
+        B = self.data["energies"]
+        for i, ij in enumerate(self.data["position_idx_range"]):
+            tmp = atomic_numbers[ij[0] : ij[1]]
+            for j, z in enumerate(zs):
+                A[i, j] = np.count_nonzero(tmp == z)
+        try:
+            E0s = np.linalg.lstsq(A, B, rcond=None)[0]
+            atomic_energies_dict = {}
+            for i, z in enumerate(zs):
+                atomic_energies_dict[z] = E0s[i]
+        except np.linalg.LinAlgError:
+            logger.warning("Failed to compute E0s using least squares regression, using formation for all atoms")
+        return atomic_energies_dict
+
     def _precompute_statistics(self, overwrite_local_cache: bool = False):
         local_path = p_join(self.preprocess_path, "stats.pkl")
         if self.is_preprocessed_statistics() and not overwrite_local_cache:
             stats = load_pkl(local_path)
+            self.linear_e0s = stats.get("linear_regression_values")
+            self._set_linear_e0s()
             logger.info("Loaded precomputed statistics")
         else:
             logger.info("Precomputing relevant statistics")
-            (
-                inter_E_mean,
-                inter_E_std,
-                formation_E_mean,
-                formation_E_std,
-                total_E_mean,
-                total_E_std,
-            ) = self._precompute_E()
+            stats = self._precompute_E()
             forces_dict = self._precompute_F()
-            stats = {
-                "formation": {"energy": {"mean": formation_E_mean, "std": formation_E_std}, "forces": forces_dict},
-                "inter": {"energy": {"mean": inter_E_mean, "std": inter_E_std}, "forces": forces_dict},
-                "total": {"energy": {"mean": total_E_mean, "std": total_E_std}, "forces": forces_dict},
-            }
+            for key in stats:
+                if key != "linear_regression_values":
+                    stats[key].update({"forces": forces_dict})
             with open(local_path, "wb") as f:
                 pkl.dump(stats, f)
         self._compute_average_nb_atoms()
@@ -164,34 +178,53 @@ class BaseDataset:
     def _compute_average_nb_atoms(self):
         self.__average_nb_atoms__ = np.mean(self.data["n_atoms"])
 
+    def _set_linear_e0s(self):
+        new_e0s = [np.zeros((max(self.numbers) + 1, 21)) for _ in range(len(self.__energy_methods__))]
+        for z, e0 in self.linear_e0s.items():
+            for i in range(len(self.__energy_methods__)):
+                new_e0s[i][z, :] = e0[i]
+        self.new_e0s = np.array(new_e0s)
+
     def _precompute_E(self):
         splits_idx = self.data["position_idx_range"][:, 1]
         s = np.array(self.data["atomic_inputs"][:, :2], dtype=int)
         s[:, 1] += IsolatedAtomEnergyFactory.max_charge
         matrixs = [matrix[s[:, 0], s[:, 1]] for matrix in self.__isolated_atom_energies__]
+        self.linear_e0s = self._compute_linear_e0s()
+        self._set_linear_e0s()
+        linear_matrixs = [matrix[s[:, 0], s[:, 1]] for matrix in self.new_e0s]
         converted_energy_data = self.data["energies"]
         # calculation per molecule formation energy statistics
-        E = []
+        E, E_lin = [], []
         for i, matrix in enumerate(matrixs):
             c = np.cumsum(np.append([0], matrix))[splits_idx]
             c[1:] = c[1:] - c[:-1]
             E.append(converted_energy_data[:, i] - c)
+            c = np.cumsum(np.append([0], linear_matrixs[i]))[splits_idx]
+            c[1:] = c[1:] - c[:-1]
+            E_lin.append(converted_energy_data[:, i] - c)
         E = np.array(E).T
+        E_lin = np.array(E_lin).T
         inter_E_mean = np.nanmean(E / self.data["n_atoms"][:, None], axis=0)
         inter_E_std = np.nanstd(E / self.data["n_atoms"][:, None], axis=0)
         formation_E_mean = np.nanmean(E, axis=0)
         formation_E_std = np.nanstd(E, axis=0)
         total_E_mean = np.nanmean(converted_energy_data, axis=0)
         total_E_std = np.nanstd(converted_energy_data, axis=0)
-
-        return (
-            np.atleast_2d(inter_E_mean),
-            np.atleast_2d(inter_E_std),
-            np.atleast_2d(formation_E_mean),
-            np.atleast_2d(formation_E_std),
-            np.atleast_2d(total_E_mean),
-            np.atleast_2d(total_E_std),
-        )
+        linear_E_mean = np.nanmean(E_lin, axis=0)
+        linear_E_std = np.nanstd(E_lin, axis=0)
+        linear_inter_E_mean = np.nanmean(E_lin / self.data["n_atoms"][:, None], axis=0)
+        linear_inter_E_std = np.nanmean(E_lin / self.data["n_atoms"][:, None], axis=0)
+        return {
+            "formation": {"energy": {"mean": np.atleast_2d(formation_E_mean), "std": np.atleast_2d(formation_E_std)}},
+            "inter": {"energy": {"mean": np.atleast_2d(inter_E_mean), "std": np.atleast_2d(inter_E_std)}},
+            "total": {"energy": {"mean": np.atleast_2d(total_E_mean), "std": np.atleast_2d(total_E_std)}},
+            "regression": {"energy": {"mean": np.atleast_2d(linear_E_mean), "std": np.atleast_2d(linear_E_std)}},
+            "regression_inter": {
+                "energy": {"mean": np.atleast_2d(linear_inter_E_mean), "std": np.atleast_2d(linear_inter_E_std)}
+            },
+            "linear_regression_values": self.linear_e0s,
+        }
 
     def _precompute_F(self):
         if len(self.__force_methods__) == 0:
@@ -274,6 +307,12 @@ class BaseDataset:
         except:  # noqa
             return None
 
+    def _set_new_e0s_unit(self, en):
+        old_en = self.energy_unit
+        en = en if en is not None else old_en
+        f = get_conversion(old_en, en)
+        self.new_e0s = f(self.new_e0s)
+
     def _set_units(self, en, ds):
         old_en, old_ds = self.energy_unit, self.distance_unit
         en = en if en is not None else old_en
@@ -291,6 +330,7 @@ class BaseDataset:
         if self.__energy_methods__ is None:
             logger.error("No energy methods defined for this dataset.")
         f = get_conversion("hartree", self.__energy_unit__)
+
         self.__isolated_atom_energies__ = f(
             np.array([IsolatedAtomEnergyFactory.get_matrix(en_method) for en_method in self.__energy_methods__])
         )
@@ -551,6 +591,7 @@ class BaseDataset:
             atomic_numbers=z,
             charges=c,
             e0=self.__isolated_atom_energies__[..., z, c + shift].T,
+            linear_e0=self.new_e0s[..., z, c + shift].T,
             energies=energies,
             name=name,
             subset=subset,

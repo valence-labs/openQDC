@@ -6,7 +6,7 @@ HAR2EV = 27.211386246
 
 BOHR2ANG = 0.52917721092
 
-POSSIBLE_NORMALIZATION = ["formation", "total", "inter"]
+POSSIBLE_NORMALIZATION = ["formation", "total", "inter", "regression", "regression_inter"]
 
 NOT_DEFINED = {
     "mean": None,
