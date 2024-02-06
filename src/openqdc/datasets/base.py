@@ -121,7 +121,10 @@ class BaseDataset:
         self._set_units(None, None)
         self._set_isolated_atom_energies()
         self._precompute_statistics(overwrite_local_cache=overwrite_local_cache)
-        self._set_new_e0s_unit(energy_unit)
+        try:
+            self._set_new_e0s_unit(energy_unit)
+        except:  # noqa
+            pass
         self._set_units(energy_unit, distance_unit)
         self._convert_data()
         self._set_isolated_atom_energies()
@@ -154,6 +157,7 @@ class BaseDataset:
                 atomic_energies_dict[z] = E0s[i]
         except np.linalg.LinAlgError:
             logger.warning("Failed to compute E0s using least squares regression, using formation for all atoms")
+            raise np.linalg.LinAlgError
         return atomic_energies_dict
 
     def _precompute_statistics(self, overwrite_local_cache: bool = False):
@@ -190,9 +194,13 @@ class BaseDataset:
         s = np.array(self.data["atomic_inputs"][:, :2], dtype=int)
         s[:, 1] += IsolatedAtomEnergyFactory.max_charge
         matrixs = [matrix[s[:, 0], s[:, 1]] for matrix in self.__isolated_atom_energies__]
-        self.linear_e0s = self._compute_linear_e0s()
-        self._set_linear_e0s()
-        linear_matrixs = [matrix[s[:, 0], s[:, 1]] for matrix in self.new_e0s]
+        try:
+            self.linear_e0s = self._compute_linear_e0s()
+            self._set_linear_e0s()
+            linear_matrixs = [matrix[s[:, 0], s[:, 1]] for matrix in self.new_e0s]
+            SUCCESS = True
+        except np.linalg.LinAlgError:
+            SUCCESS = False
         converted_energy_data = self.data["energies"]
         # calculation per molecule formation energy statistics
         E, E_lin = [], []
@@ -200,30 +208,39 @@ class BaseDataset:
             c = np.cumsum(np.append([0], matrix))[splits_idx]
             c[1:] = c[1:] - c[:-1]
             E.append(converted_energy_data[:, i] - c)
-            c = np.cumsum(np.append([0], linear_matrixs[i]))[splits_idx]
-            c[1:] = c[1:] - c[:-1]
-            E_lin.append(converted_energy_data[:, i] - c)
+            if SUCCESS:
+                c = np.cumsum(np.append([0], linear_matrixs[i]))[splits_idx]
+                c[1:] = c[1:] - c[:-1]
+                E_lin.append(converted_energy_data[:, i] - c)
         E = np.array(E).T
-        E_lin = np.array(E_lin).T
         inter_E_mean = np.nanmean(E / self.data["n_atoms"][:, None], axis=0)
         inter_E_std = np.nanstd(E / self.data["n_atoms"][:, None], axis=0)
         formation_E_mean = np.nanmean(E, axis=0)
         formation_E_std = np.nanstd(E, axis=0)
         total_E_mean = np.nanmean(converted_energy_data, axis=0)
         total_E_std = np.nanstd(converted_energy_data, axis=0)
-        linear_E_mean = np.nanmean(E_lin, axis=0)
-        linear_E_std = np.nanstd(E_lin, axis=0)
-        linear_inter_E_mean = np.nanmean(E_lin / self.data["n_atoms"][:, None], axis=0)
-        linear_inter_E_std = np.nanmean(E_lin / self.data["n_atoms"][:, None], axis=0)
+        if SUCCESS:
+            E_lin = np.array(E_lin).T
+            linear_E_mean = np.nanmean(E_lin, axis=0)
+            linear_E_std = np.nanstd(E_lin, axis=0)
+            linear_inter_E_mean = np.nanmean(E_lin / self.data["n_atoms"][:, None], axis=0)
+            linear_inter_E_std = np.nanmean(E_lin / self.data["n_atoms"][:, None], axis=0)
+            return {
+                "formation": {
+                    "energy": {"mean": np.atleast_2d(formation_E_mean), "std": np.atleast_2d(formation_E_std)}
+                },
+                "inter": {"energy": {"mean": np.atleast_2d(inter_E_mean), "std": np.atleast_2d(inter_E_std)}},
+                "total": {"energy": {"mean": np.atleast_2d(total_E_mean), "std": np.atleast_2d(total_E_std)}},
+                "regression": {"energy": {"mean": np.atleast_2d(linear_E_mean), "std": np.atleast_2d(linear_E_std)}},
+                "regression_inter": {
+                    "energy": {"mean": np.atleast_2d(linear_inter_E_mean), "std": np.atleast_2d(linear_inter_E_std)}
+                },
+                "linear_regression_values": self.linear_e0s,
+            }
         return {
             "formation": {"energy": {"mean": np.atleast_2d(formation_E_mean), "std": np.atleast_2d(formation_E_std)}},
             "inter": {"energy": {"mean": np.atleast_2d(inter_E_mean), "std": np.atleast_2d(inter_E_std)}},
             "total": {"energy": {"mean": np.atleast_2d(total_E_mean), "std": np.atleast_2d(total_E_std)}},
-            "regression": {"energy": {"mean": np.atleast_2d(linear_E_mean), "std": np.atleast_2d(linear_E_std)}},
-            "regression_inter": {
-                "energy": {"mean": np.atleast_2d(linear_inter_E_mean), "std": np.atleast_2d(linear_inter_E_std)}
-            },
-            "linear_regression_values": self.linear_e0s,
         }
 
     def _precompute_F(self):

@@ -40,7 +40,7 @@ def preprocess(dataset):
     else:
         data_class = options_map[dataset]
 
-    data_class().preprocess(overwrite=False)
+    data_class().preprocess(overwrite=True)
     data = data_class()
     logger.info(f"Preprocessing {data.__name__}")
 
