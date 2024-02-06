@@ -13,7 +13,7 @@ def read_record(r):
     smiles = r["smiles"].asstr()[0]
     subset = r["subset"][0].decode("utf-8")
     n_confs = r["conformations"].shape[0]
-    x = get_atomic_number_and_charge(dm.to_mol(smiles, add_hs=True))
+    x = get_atomic_number_and_charge(dm.to_mol(smiles, remove_hs=False, ordered=True))
     positions = r["conformations"][:]
 
     res = dict(
