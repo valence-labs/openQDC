@@ -164,8 +164,11 @@ class BaseDataset:
         local_path = p_join(self.preprocess_path, "stats.pkl")
         if self.is_preprocessed_statistics() and not overwrite_local_cache:
             stats = load_pkl(local_path)
-            self.linear_e0s = stats.get("linear_regression_values")
-            self._set_linear_e0s()
+            try:
+                self.linear_e0s = stats.get("linear_regression_values")
+                self._set_linear_e0s()
+            except Exception:
+                logger.warning(f"Failed to load linear regression values for {self.__name__} dataset.")
             logger.info("Loaded precomputed statistics")
         else:
             logger.info("Precomputing relevant statistics")
@@ -200,6 +203,7 @@ class BaseDataset:
             linear_matrixs = [matrix[s[:, 0], s[:, 1]] for matrix in self.new_e0s]
             SUCCESS = True
         except np.linalg.LinAlgError:
+            logger.warning(f"Failed to compute linear regression values for {self.__name__} dataset.")
             SUCCESS = False
         converted_energy_data = self.data["energies"]
         # calculation per molecule formation energy statistics
@@ -608,7 +612,7 @@ class BaseDataset:
             atomic_numbers=z,
             charges=c,
             e0=self.__isolated_atom_energies__[..., z, c + shift].T,
-            linear_e0=self.new_e0s[..., z, c + shift].T,
+            linear_e0=self.new_e0s[..., z, c + shift].T if hasattr(self, "new_e0s") else None,
             energies=energies,
             name=name,
             subset=subset,
