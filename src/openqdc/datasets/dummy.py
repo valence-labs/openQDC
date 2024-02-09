@@ -54,23 +54,29 @@ class Dummy(BaseDataset):
             pass
         self._set_isolated_atom_energies()
         self.setup_dummy()
-        
+
     def setup_dummy(self):
         n_atoms = np.array([np.random.randint(1, 100) for _ in range(len(self))])
         position_idx_range = np.concatenate([[0], np.cumsum(n_atoms)]).repeat(2)[1:-1].reshape(-1, 2)
-        atomic_inputs = np.concatenate([np.concatenate([
-            # z, c, x, y, z
-            np.random.randint(1, 100, size=(size, 1)),
-            np.random.randint(-1, 2, size=(size, 1)),
-            np.random.randn(size, 3)
-        ], axis=1) for size in n_atoms], axis=0) # (sum(n_atoms), 5)
-        name=[f'dummy_{i}' for i in range(len(self))]
-        subset=["dummy" for i in range(len(self))]
+        atomic_inputs = np.concatenate(
+            [
+                np.concatenate(
+                    [
+                        # z, c, x, y, z
+                        np.random.randint(1, 100, size=(size, 1)),
+                        np.random.randint(-1, 2, size=(size, 1)),
+                        np.random.randn(size, 3),
+                    ],
+                    axis=1,
+                )
+                for size in n_atoms
+            ],
+            axis=0,
+        )  # (sum(n_atoms), 5)
+        name = [f"dummy_{i}" for i in range(len(self))]
+        subset = ["dummy" for i in range(len(self))]
         energies = np.random.rand(len(self), len(self.__energy_methods__))
-        forces = np.concatenate([
-            np.random.randn(size, 3, len(self.__force_methods__)) * 100
-            for size in n_atoms
-        ])
+        forces = np.concatenate([np.random.randn(size, 3, len(self.__force_methods__)) * 100 for size in n_atoms])
         self.data = dict(
             n_atoms=n_atoms,
             position_idx_range=position_idx_range,
