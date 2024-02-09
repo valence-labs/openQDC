@@ -73,9 +73,6 @@ class PCQM_PM6(BaseDataset):
     __force_methods__ = []
     force_target_names = []
 
-    def __init__(self, energy_unit=None, distance_unit=None) -> None:
-        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)
-
     @property
     def root(self):
         return p_join(get_local_cache(), "pubchemqc")
@@ -161,8 +158,4 @@ class PCQM_PM6(BaseDataset):
 class PCQM_B3LYP(PCQM_PM6):
     __name__ = "pubchemqc_b3lyp"
     __energy_methods__ = ["b3lyp"]
-
     energy_target_names = ["b3lyp"]
-
-    def __init__(self, energy_unit=None, distance_unit=None) -> None:
-        super().__init__(energy_unit=energy_unit, distance_unit=distance_unit)

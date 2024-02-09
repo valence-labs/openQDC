@@ -55,6 +55,10 @@ class Transition1X(BaseDataset):
         "wB97x_6-31G(d).forces",
     ]
 
+    __energy_unit__ = "hartree"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "hartree/ang"
+
     def read_raw_entries(self):
         raw_path = p_join(self.root, "Transition1x.h5")
         f = load_hdf5_file(raw_path)["data"]

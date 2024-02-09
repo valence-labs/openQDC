@@ -5,16 +5,18 @@ import pickle as pkl
 
 import fsspec
 import h5py
-import torch
 from ase.atoms import Atoms
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from rdkit.Chem import MolFromXYZFile
 
 gcp_filesys = fsspec.filesystem("gs")
+gcp_filesys_public = fsspec.filesystem("https")
 local_filesys = LocalFileSystem()
 
-_OPENQDC_CACHE_DIR = "~/.cache/openqdc"
+_OPENQDC_CACHE_DIR = (
+    "~/.cache/openqdc" if "OPENQDC_CACHE_DIR" not in os.environ else os.path.normpath(os.environ["OPENQDC_CACHE_DIR"])
+)
 
 
 def set_cache_dir(d):
@@ -27,7 +29,7 @@ def set_cache_dir(d):
     if d is None:
         return
     global _OPENQDC_CACHE_DIR
-    _OPENQDC_CACHE_DIR = os.path.expanduser(d)
+    _OPENQDC_CACHE_DIR = os.path.normpath(os.path.expanduser(d))
 
 
 def get_local_cache() -> str:
@@ -42,15 +44,18 @@ def get_local_cache() -> str:
     return cache_dir
 
 
-def get_remote_cache() -> str:
-    remote_cache = "gs://opendatasets/openqdc"
+def get_remote_cache(write_access=False) -> str:
+    if write_access:
+        remote_cache = "gs://qmdata-public/openqdc"
+    else:
+        remote_cache = "https://storage.googleapis.com/qmdata-public/openqdc"
     return remote_cache
 
 
 def push_remote(local_path, overwrite=True):
-    remote_path = local_path.replace(get_local_cache(), get_remote_cache())
+    remote_path = local_path.replace(get_local_cache(), get_remote_cache(write_access=overwrite))
     gcp_filesys.mkdirs(os.path.dirname(remote_path), exist_ok=False)
-    # print(f"Pushing {local_path} file to {remote_path}, ({gcp_filesys.exists(os.path.dirname(remote_path))})")
+    print(f"Pushing {local_path} file to {remote_path}, ({gcp_filesys.exists(os.path.dirname(remote_path))})")
     if not gcp_filesys.exists(remote_path) or overwrite:
         gcp_filesys.put_file(local_path, remote_path)
     return remote_path
@@ -61,28 +66,13 @@ def pull_locally(local_path, overwrite=False):
     os.makedirs(os.path.dirname(local_path), exist_ok=True)
     if not os.path.exists(local_path) or overwrite:
         # print(f"Pulling {remote_path} file to {local_path}")
-        gcp_filesys.get_file(remote_path, local_path)
+        gcp_filesys_public.get_file(remote_path, local_path)
     return local_path
 
 
 def copy_exists(local_path):
     remote_path = local_path.replace(get_local_cache(), get_remote_cache())
-    return os.path.exists(local_path) or gcp_filesys.exists(remote_path)
-
-
-def load_torch_gcs(path):
-    """Loads torch file"""
-    # get file system
-    fs: GCSFileSystem = fsspec.filesystem("gs")
-
-    # load from GCS
-    with fs.open(path, "rb") as fp:
-        return torch.load(fp)
-
-
-def load_torch(path):
-    """Loads torch file"""
-    return torch.load(path)
+    return os.path.exists(local_path) or gcp_filesys_public.exists(remote_path)
 
 
 def makedirs_gcs(path, exist_ok=True):

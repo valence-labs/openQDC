@@ -2,15 +2,14 @@
 
 Open Quantum Data Commons
 
-## Setup Datasets
-
-Use the scripts in `setup/` to download the datasets. For more information, see the [README](setup/README.md) in the `setup/` directory.
-
-# Install the library in dev mode
+### Installing openQDC
+```bash
+git clone git@github.com:OpenDrugDiscovery/openQDC.git
+cd openQDC
+# use mamba/conda
+mamba env create -n openqdc -f env.yml
 pip install -e .
 ```
-
-## Development lifecycle
 
 ### Tests
 
