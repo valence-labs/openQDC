@@ -268,6 +268,20 @@ class BaseDataset:
         return self._numbers
 
     @property
+    def charges(self):
+        if hasattr(self, "_charges"):
+            return self._charges
+        self._charges = np.unique(self.data["atomic_inputs"][..., :2], axis=0).astype(np.int32)
+        return self._charges
+
+    @property
+    def min_max_charges(self):
+        if hasattr(self, "_min_max_charges"):
+            return self._min_max_charges
+        self._min_max_charges = np.min(self.charges[:, 1]), np.max(self.charges[:, 1])
+        return self._min_max_charges
+
+    @property
     def chemical_species(self):
         return np.array(chemical_symbols)[self.numbers]
 
