@@ -103,14 +103,18 @@ class BaseDataset:
         distance_unit: Optional[str] = None,
         overwrite_local_cache: bool = False,
         cache_dir: Optional[str] = None,
+        do_not_throw_error: bool = False,
+        skip_statistics: bool = False,
     ) -> None:
         set_cache_dir(cache_dir)
         self.data = None
+        self._skip_statistics = skip_statistics
         if not self.is_preprocessed():
-            raise DatasetNotAvailableError(self.__name__)
+            if not do_not_throw_error:
+                raise DatasetNotAvailableError(self.__name__)
         else:
             self.read_preprocess(overwrite_local_cache=overwrite_local_cache)
-        self._post_init(overwrite_local_cache, energy_unit, distance_unit)
+            self._post_init(overwrite_local_cache, energy_unit, distance_unit)
 
     def _post_init(
         self,
@@ -120,7 +124,8 @@ class BaseDataset:
     ) -> None:
         self._set_units(None, None)
         self._set_isolated_atom_energies()
-        self._precompute_statistics(overwrite_local_cache=overwrite_local_cache)
+        if not self._skip_statistics:
+            self._precompute_statistics(overwrite_local_cache=overwrite_local_cache)
         try:
             self._set_new_e0s_unit(energy_unit)
         except:  # noqa

@@ -26,6 +26,7 @@ options = [
     datasets.TMQM,
     datasets.Transition1X,
     datasets.WaterClusters,
+    datasets.MultixcQM9,
 ]
 
 options_map = {d.__name__: d for d in options}

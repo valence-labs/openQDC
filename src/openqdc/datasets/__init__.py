@@ -30,6 +30,7 @@ _lazy_imports_obj = {
     "PCQM_B3LYP": "openqdc.datasets.pcqm",
     "PCQM_PM6": "openqdc.datasets.pcqm",
     "Transition1X": "openqdc.datasets.transition1x",
+    "MultixcQM9": "openqdc.datasets.multixcqm9",
 }
 
 _lazy_imports_mod = {}
