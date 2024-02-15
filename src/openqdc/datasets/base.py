@@ -377,11 +377,7 @@ class BaseDataset:
         for key in self.data_keys:
             filename = p_join(self.preprocess_path, f"{key}.mmap")
             pull_locally(filename, overwrite=overwrite_local_cache)
-            logger.debug(f"{self.data_types[key]} {self.data_shapes[key]} {filename}")
-            logger.debug(np.memmap(filename, mode="r", dtype=self.data_types[key]).shape)
-            logger.info(np.memmap(filename, mode="r", dtype=self.data_types[key]).reshape(*self.data_shapes[key]).shape)
             self.data[key] = np.memmap(filename, mode="r", dtype=self.data_types[key]).reshape(*self.data_shapes[key])
-            logger.debug(f"Loaded {key} with shape {self.data[key].shape}, dtype {self.data[key].dtype}")
 
         filename = p_join(self.preprocess_path, "props.pkl")
         pull_locally(filename, overwrite=overwrite_local_cache)

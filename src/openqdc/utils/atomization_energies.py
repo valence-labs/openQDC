@@ -4,6 +4,7 @@ import numpy as np
 from loguru import logger
 from rdkit import Chem
 
+from openqdc.utils.atomization_energies_addon import ISOLATED_ATOM_ENERGIES_ADDON
 from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 
 atom_table = Chem.GetPeriodicTable()
@@ -2387,6 +2388,7 @@ ISOLATED_ATOM_ENERGIES = {
     "pm6": PM6,
     # FF
     "ttm2.1-f": TTM2,
+    **ISOLATED_ATOM_ENERGIES_ADDON,
 }
 
 # TODO: Talk with ivan about cbs extrapolation from from av[TQ]z. For now this should be ok
