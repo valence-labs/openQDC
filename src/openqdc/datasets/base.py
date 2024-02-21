@@ -103,9 +103,11 @@ class BaseDataset:
         distance_unit: Optional[str] = None,
         overwrite_local_cache: bool = False,
         cache_dir: Optional[str] = None,
+        remove_outliers: bool = True,
     ) -> None:
         set_cache_dir(cache_dir)
         self.data = None
+        self.remove_outliers = remove_outliers
         if not self.is_preprocessed():
             raise DatasetNotAvailableError(self.__name__)
         else:
@@ -164,6 +166,27 @@ class BaseDataset:
     def _compute_average_nb_atoms(self):
         self.__average_nb_atoms__ = np.mean(self.data["n_atoms"])
 
+    def _remove_outliers(
+            self, 
+            formation_E: np.array, 
+            mean_or_median: str = "median", 
+            num_stds: float = 3.0,
+        ) -> np.array:
+        assert(
+            mean_or_median in ["mean", "median"],
+            f"{mean_or_median} is not a valid option, should be one of ['mean', 'median']"
+        )
+        logger.info(f"Removing outliers outside {mean_or_median} +/- {num_stds} stds")
+        fn = np.median if mean_or_median == "median" else np.mean
+        mid = fn(formation_E)
+        mask = np.logical_or(formation_E < mid - num_stds * formation_E.std(), formation_E > mid + num_stds * formation_E.std())
+        formation_E = formation_E[~mask] # TODO: Christian, your formation E values are different than the ones I calculated yesterday, not sure why?
+        for key in self.data:
+            # TODO: We need a way to map the mask to the 'atomic_inputs' array
+            if key != "atomic_inputs":
+                self.data[key] = self.data[key][~mask,...]
+        return np.expand_dims(formation_E, axis=0).T
+
     def _precompute_E(self):
         splits_idx = self.data["position_idx_range"][:, 1]
         s = np.array(self.data["atomic_inputs"][:, :2], dtype=int)
@@ -176,7 +199,12 @@ class BaseDataset:
             c = np.cumsum(np.append([0], matrix))[splits_idx]
             c[1:] = c[1:] - c[:-1]
             E.append(converted_energy_data[:, i] - c)
-        E = np.array(E).T
+        E = np.array(E).T # this is the formation energy
+
+        # remove outliers if requested in __init__
+        if self.remove_outliers:
+            E = self._remove_outliers(np.squeeze(E.T))
+
         inter_E_mean = np.nanmean(E / self.data["n_atoms"][:, None], axis=0)
         inter_E_std = np.nanstd(E / self.data["n_atoms"][:, None], axis=0)
         formation_E_mean = np.nanmean(E, axis=0)
