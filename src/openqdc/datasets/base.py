@@ -38,6 +38,7 @@ from openqdc.utils.io import (
 from openqdc.utils.molecule import atom_table, z_to_formula
 from openqdc.utils.package_utils import requires_package
 from openqdc.utils.units import get_conversion
+from openqdc.utils.regressor import Regressor
 
 
 def extract_entry(
@@ -103,9 +104,15 @@ class BaseDataset:
         distance_unit: Optional[str] = None,
         overwrite_local_cache: bool = False,
         cache_dir: Optional[str] = None,
+        regressor_kwargs={
+            "solver_type": "linear",
+            "sub_sample": None,
+            "stride": 1,
+        },
     ) -> None:
         set_cache_dir(cache_dir)
         self.data = None
+        self.regressor_kwargs = regressor_kwargs
         if not self.is_preprocessed():
             raise DatasetNotAvailableError(self.__name__)
         else:
@@ -139,26 +146,20 @@ class BaseDataset:
         for key in self.data_keys:
             self.data[key] = self._convert_on_loading(self.data[key], key)
 
+    def _set_lin_atom_species_dict(self, E0s, zs):
+        atomic_energies_dict = {}
+        for i, z in enumerate(zs):
+            atomic_energies_dict[z] = E0s[i]
+        self.linear_e0s = atomic_energies_dict
+
     def _compute_linear_e0s(self):
-        len_train = len(self)
-        len_zs = len(self.numbers)
-        A = np.zeros((len_train, len_zs))
-        zs = self.numbers
-        atomic_numbers = self.data["atomic_inputs"][:, 0].astype("int32")
-        B = self.data["energies"]
-        for i, ij in enumerate(self.data["position_idx_range"]):
-            tmp = atomic_numbers[ij[0] : ij[1]]
-            for j, z in enumerate(zs):
-                A[i, j] = np.count_nonzero(tmp == z)
         try:
-            E0s = np.linalg.lstsq(A, B, rcond=None)[0]
-            atomic_energies_dict = {}
-            for i, z in enumerate(zs):
-                atomic_energies_dict[z] = E0s[i]
+            regressor = Regressor.from_openqdc_dataset(self, **self.regressor_kwargs)
+            E0s, cov = regressor.solve()
         except np.linalg.LinAlgError:
             logger.warning("Failed to compute E0s using least squares regression, using formation for all atoms")
             raise np.linalg.LinAlgError
-        return atomic_energies_dict
+        self._set_lin_atom_species_dict(E0s, regressor.numbers)
 
     def _precompute_statistics(self, overwrite_local_cache: bool = False):
         local_path = p_join(self.preprocess_path, "stats.pkl")
@@ -198,7 +199,7 @@ class BaseDataset:
         s[:, 1] += IsolatedAtomEnergyFactory.max_charge
         matrixs = [matrix[s[:, 0], s[:, 1]] for matrix in self.__isolated_atom_energies__]
         try:
-            self.linear_e0s = self._compute_linear_e0s()
+            self._compute_linear_e0s()
             self._set_linear_e0s()
             linear_matrixs = [matrix[s[:, 0], s[:, 1]] for matrix in self.new_e0s]
             SUCCESS = True
