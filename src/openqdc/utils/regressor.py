@@ -108,25 +108,31 @@ class Regressor:
     def __call__(self):
         return self.solve()
 
+def atom_standardization(X, y):
+    X_norm = X.sum()
+    X = X / X_norm
+    y = y / X_norm
+    y_mean = y.sum() / X.sum()
+    return X, y, y_mean
 
 class LinearSolver(Solver):
     _regr_str = "LinearRegression"
 
     @staticmethod
     def solve(X, y):
-        E0s = np.linalg.lstsq(X, y, rcond=None)[0]
-        return E0s, None
-
+        X, y, y_mean=atom_standardization(X,y)
+        E0s = np.linalg.lstsq(X, y, rcond=None)[0]        
+        #Ainv=X.T @ X
+        #residuals=np.var(y - np.dot(X, E0s))
+        #np.sqrt(residuals * np.einsum("ij,kj,kl,li->i", Ainv, X, X, Ainv))
+        return E0s, None 
 
 class RidgeSolver(Solver):
     _regr_str = "RidgeRegression"
 
     @staticmethod
     def solve(X, y):
-        X_norm = X.sum()
-        X = X / X_norm
-        y = y / X_norm
-        y_mean = y.sum() / X.sum()
+        X, y, y_mean=atom_standardization(X,y)
         A = X.T @ X
         dy = y - (np.sum(X, axis=1, keepdims=True) * y_mean).reshape(y.shape)
         Xy = X.T @ dy
