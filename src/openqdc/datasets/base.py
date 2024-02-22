@@ -108,7 +108,7 @@ class BaseDataset:
         distance_unit: Optional[str] = None,
         overwrite_local_cache: bool = False,
         cache_dir: Optional[str] = None,
-        remove_outliers: bool = True,
+        remove_outliers: bool = False,
         avg_fn = "median",
         num_stds: float = 3.0,
     ) -> None:
