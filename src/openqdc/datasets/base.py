@@ -205,16 +205,17 @@ class BaseDataset:
             f"{avg_fn} is not a valid option, should be one of {list(BaseDataset.avg_options.keys())}"
         )
         logger.info(f"Removing outliers outside {avg_fn} +/- {num_stds} stds")
-        formation_E /= self.data["n_atoms"] # convert to avg formation energy / atom
         formation_E = np.squeeze(formation_E.T) # remove extra array dimension and transpose
+        formation_E = np.divide(formation_E, self.data["n_atoms"]) # convert to avg formation energy / atom
         fn = BaseDataset.avg_options[avg_fn]
         mid = fn(formation_E)
         mask = np.logical_or(formation_E < mid - num_stds * formation_E.std(), formation_E > mid + num_stds * formation_E.std())
+        removed_idxs = np.where(mask == True)[0]
         formation_E = formation_E[~mask] # TODO: Christian, your formation E values are different than the ones I calculated yesterday, not sure why?
-        print(self.data.keys())
+        logger.info(f"Removed {removed_idxs.shape[0]} outlier indices: {removed_idxs}")
         for key in self.data:
             # TODO: We need a way to map the mask to the 'atomic_inputs' array
-            if key != "atomic_inputs":
+            if key not in ["atomic_inputs", "forces"]:
                 self.data[key] = self.data[key][~mask,...]
         return np.expand_dims(formation_E, axis=0).T
 
