@@ -182,6 +182,24 @@ class BaseDataset:
             avg_fn: str = "median", 
             num_stds: float = 3.0,
         ) -> np.array:
+        """
+        Removes outliers from the dataset (based on formation_E) 
+        that are outside the range of 
+        ```
+            avg_fn(formation_E) +- num_stds * formation_E.std()
+        ```
+
+        Args:
+            formation_E : np.array
+                numpy array holding the formation energies for the dataset
+            avg_fn : str
+                str specifing the averaging function to be used (current options are "mean" and "median")
+            num_stds : float
+                the number of standard deviations to use for outlier detection
+
+        Returns:
+            np.array of formation energies with the outliers removed
+        """
         assert(
             avg_fn in BaseDataset.avg_options.keys(),
             f"{avg_fn} is not a valid option, should be one of {list(BaseDataset.avg_options.keys())}"
