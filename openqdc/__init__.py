@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING  # noqa F401
 
 _lazy_imports_obj = {
     "__version__": "openqdc._version",
-    "BaseDataset" : "openqdc.datasets",
+    "BaseDataset": "openqdc.datasets",
     "ANI1": "openqdc.datasets",
     "ANI1CCX": "openqdc.datasets",
     "ANI1X": "openqdc.datasets",
@@ -34,8 +34,7 @@ _lazy_imports_obj = {
     "Transition1X": "openqdc.datasets",
 }
 
-_lazy_imports_mod = {"datasets": "openqdc.datasets",
-                     "utils": "openqdc.utils"}
+_lazy_imports_mod = {"datasets": "openqdc.datasets", "utils": "openqdc.utils"}
 
 
 def __getattr__(name):
@@ -64,8 +63,9 @@ def __dir__():
 if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
     # These types are imported lazily at runtime, but we need to tell type
     # checkers what they are.
-    from ._version import __version__
+    from ._version import __version__  # noqa
     from .datasets.ani import ANI1, ANI1CCX, ANI1X  # noqa
+    from .datasets.base import BaseDataset  # noqa
     from .datasets.comp6 import COMP6  # noqa
     from .datasets.dess import DESS  # noqa
     from .datasets.dummy import Dummy  # noqa
@@ -84,4 +84,3 @@ if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
     from .datasets.tmqm import TMQM  # noqa
     from .datasets.transition1x import Transition1X  # noqa
     from .datasets.waterclusters3_30 import WaterClusters  # noqa
-    from .datasets.base import BaseDataset  # noqa

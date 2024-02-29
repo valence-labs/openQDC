@@ -6,16 +6,13 @@ import pickle as pkl
 import fsspec
 import h5py
 from ase.atoms import Atoms
+from fsspec.callbacks import TqdmCallback
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from rdkit.Chem import MolFromXYZFile
-import fsspec
-from fsspec.callbacks import TqdmCallback
-from tqdm import tqdm
-from loguru import logger
-                    
-gcp_filesys = fsspec.filesystem("gs") # entry point for google bucket (need gsutil permission)
-gcp_filesys_public = fsspec.filesystem("https") # public API for download
+
+gcp_filesys = fsspec.filesystem("gs")  # entry point for google bucket (need gsutil permission)
+gcp_filesys_public = fsspec.filesystem("https")  # public API for download
 local_filesys = LocalFileSystem()
 
 _OPENQDC_CACHE_DIR = (
@@ -58,22 +55,25 @@ def get_remote_cache(write_access=False) -> str:
         remote_cache = "https://storage.googleapis.com/qmdata-public/openqdc"
     return remote_cache
 
+
 def push_remote(local_path, overwrite=True):
     """
     Attempt to push file to remote gs path
     """
     remote_path = local_path.replace(get_local_cache(), get_remote_cache(write_access=overwrite))
     gcp_filesys.mkdirs(os.path.dirname(remote_path), exist_ok=False)
-    #print(f"Pushing {local_path} file to {remote_path}, ({gcp_filesys.exists(os.path.dirname(remote_path))})")
+    # print(f"Pushing {local_path} file to {remote_path}, ({gcp_filesys.exists(os.path.dirname(remote_path))})")
     if not gcp_filesys.exists(remote_path) or overwrite:
-        gcp_filesys.put_file(local_path, remote_path,
+        gcp_filesys.put_file(
+            local_path,
+            remote_path,
             callback=TqdmCallback(
                 tqdm_kwargs={
                     "ascii": " ▖▘▝▗▚▞-",
-                    "desc" : f"Uploading {os.path.basename(remote_path)}",
-                    "unit" : "B",
-                    },
-                )
+                    "desc": f"Uploading {os.path.basename(remote_path)}",
+                    "unit": "B",
+                },
+            ),
         )
     return remote_path
 
@@ -85,14 +85,16 @@ def pull_locally(local_path, overwrite=False):
     remote_path = local_path.replace(get_local_cache(), get_remote_cache())
     os.makedirs(os.path.dirname(local_path), exist_ok=True)
     if not os.path.exists(local_path) or overwrite:
-        gcp_filesys_public.get_file(remote_path, local_path,
+        gcp_filesys_public.get_file(
+            remote_path,
+            local_path,
             callback=TqdmCallback(
                 tqdm_kwargs={
                     "ascii": " ▖▘▝▗▚▞-",
-                    "desc" : f"Downloading {os.path.basename(remote_path)}",
-                    "unit" : "B",
-                    },
-                )
+                    "desc": f"Downloading {os.path.basename(remote_path)}",
+                    "unit": "B",
+                },
+            ),
         )
     return local_path
 

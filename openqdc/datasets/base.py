@@ -128,8 +128,8 @@ class BaseDataset:
         self._set_units(energy_unit, distance_unit)
         self._convert_data()
         self._set_isolated_atom_energies()
-        
-    @classmethod 
+
+    @classmethod
     def no_init(cls):
         """
         Class method to avoid the __init__ method to be called when the class is instanciated.
@@ -530,11 +530,11 @@ class BaseDataset:
         if return_idxs:
             datum["idxs"] = idxs
         return datum
-        
+
     def as_iter(self, atoms: bool = False):
         """
         Return the dataset as an iterator.
-        
+
         Parameters
         ----------
         atoms : bool, optional
@@ -607,7 +607,7 @@ class BaseDataset:
 
     def __repr__(self):
         return f"{self.__name__}"
-    
+
     def __len__(self):
         return self.data["energies"].shape[0]
 

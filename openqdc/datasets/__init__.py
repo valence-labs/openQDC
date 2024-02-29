@@ -1,4 +1,5 @@
 from .ani import ANI1, ANI1CCX, ANI1X  # noqa
+from .base import BaseDataset  # noqa
 from .comp6 import COMP6  # noqa
 from .dess import DESS  # noqa
 from .dummy import Dummy  # noqa
@@ -17,4 +18,3 @@ from .spice import Spice  # noqa
 from .tmqm import TMQM  # noqa
 from .transition1x import Transition1X  # noqa
 from .waterclusters3_30 import WaterClusters  # noqa
-from .base import BaseDataset  # noqa
