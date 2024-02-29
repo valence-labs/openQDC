@@ -21,12 +21,7 @@ def exist_dataset(dataset):
 
 @app.command()
 def download(
-    datasets: Annotated[
-        List[str],
-        typer.Option(
-            help="List of datasets to download",
-        ),
-    ],
+    datasets: List[str],
     overwrite: Annotated[
         bool,
         typer.Option(
@@ -66,14 +61,7 @@ def datasets():
 
 
 @app.command()
-def fetch(
-    datasets: Annotated[
-        List[str],
-        typer.Option(
-            help="List of datasets to fetch",
-        ),
-    ],
-):
+def fetch(datasets: List[str]):
     """
     Download the raw datasets files from openQDC.
     """
