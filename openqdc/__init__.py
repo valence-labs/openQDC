@@ -9,31 +9,33 @@ from typing import TYPE_CHECKING  # noqa F401
 
 _lazy_imports_obj = {
     "__version__": "openqdc._version",
-    "ANI1": "openqdc.datasets.ani",
-    "ANI1CCX": "openqdc.datasets.ani",
-    "ANI1X": "openqdc.datasets.ani",
-    "Spice": "openqdc.datasets.spice",
-    "GEOM": "openqdc.datasets.geom",
-    "QMugs": "openqdc.datasets.qmugs",
-    "ISO17": "openqdc.datasets.iso_17",
-    "COMP6": "openqdc.datasets.comp6",
-    "GDML": "openqdc.datasets.gdml",
-    "Molecule3D": "openqdc.datasets.molecule3d",
-    "OrbnetDenali": "openqdc.datasets.orbnet_denali",
-    "SN2RXN": "openqdc.datasets.sn2_rxn",
-    "QM7X": "openqdc.datasets.qm7x",
-    "DESS": "openqdc.datasets.dess",
-    "NablaDFT": "openqdc.datasets.nabladft",
-    "SolvatedPeptides": "openqdc.datasets.solvated_peptides",
-    "WaterClusters": "openqdc.datasets.waterclusters3_30",
-    "TMQM": "openqdc.datasets.tmqm",
-    "Dummy": "openqdc.datasets.dummy",
-    "PCQM_B3LYP": "openqdc.datasets.pcqm",
-    "PCQM_PM6": "openqdc.datasets.pcqm",
-    "Transition1X": "openqdc.datasets.transition1x",
+    "BaseDataset" : "openqdc.datasets",
+    "ANI1": "openqdc.datasets",
+    "ANI1CCX": "openqdc.datasets",
+    "ANI1X": "openqdc.datasets",
+    "Spice": "openqdc.datasets",
+    "GEOM": "openqdc.datasets",
+    "QMugs": "openqdc.datasets",
+    "ISO17": "openqdc.datasets",
+    "COMP6": "openqdc.datasets",
+    "GDML": "openqdc.datasets",
+    "Molecule3D": "openqdc.datasets",
+    "OrbnetDenali": "openqdc.datasets",
+    "SN2RXN": "openqdc.datasets",
+    "QM7X": "openqdc.datasets",
+    "DESS": "openqdc.datasets",
+    "NablaDFT": "openqdc.datasets",
+    "SolvatedPeptides": "openqdc.datasets",
+    "WaterClusters": "openqdc.datasets",
+    "TMQM": "openqdc.datasets",
+    "Dummy": "openqdc.datasets",
+    "PCQM_B3LYP": "openqdc.datasets",
+    "PCQM_PM6": "openqdc.datasets",
+    "Transition1X": "openqdc.datasets",
 }
 
-_lazy_imports_mod = {"datasets": "openqdc.datasets", "utils": "openqdc.utils"}
+_lazy_imports_mod = {"datasets": "openqdc.datasets",
+                     "utils": "openqdc.utils"}
 
 
 def __getattr__(name):
@@ -62,6 +64,24 @@ def __dir__():
 if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
     # These types are imported lazily at runtime, but we need to tell type
     # checkers what they are.
-    from .datasets import *
     from ._version import __version__
-    from .utils import * 
+    from .datasets.ani import ANI1, ANI1CCX, ANI1X  # noqa
+    from .datasets.comp6 import COMP6  # noqa
+    from .datasets.dess import DESS  # noqa
+    from .datasets.dummy import Dummy  # noqa
+    from .datasets.gdml import GDML  # noqa
+    from .datasets.geom import GEOM  # noqa
+    from .datasets.iso_17 import ISO17  # noqa
+    from .datasets.molecule3d import Molecule3D  # noqa
+    from .datasets.nabladft import NablaDFT  # noqa
+    from .datasets.orbnet_denali import OrbnetDenali  # noqa
+    from .datasets.pcqm import PCQM_B3LYP, PCQM_PM6  # noqa
+    from .datasets.qm7x import QM7X  # noqa
+    from .datasets.qmugs import QMugs  # noqa
+    from .datasets.sn2_rxn import SN2RXN  # noqa
+    from .datasets.solvated_peptides import SolvatedPeptides  # noqa
+    from .datasets.spice import Spice  # noqa
+    from .datasets.tmqm import TMQM  # noqa
+    from .datasets.transition1x import Transition1X  # noqa
+    from .datasets.waterclusters3_30 import WaterClusters  # noqa
+    from .datasets.base import BaseDataset  # noqa
