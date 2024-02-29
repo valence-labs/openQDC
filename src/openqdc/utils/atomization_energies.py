@@ -12,7 +12,6 @@ __all__ = ["chemical_symbols", "atomic_numbers", "IsolatedAtomEnergyFactory"]
 
 EF_KEY: TypeAlias = Tuple[str, int]
 
-# didn t calculate for Pd, Pt, Mo, Ni, Fe, Cu, see DESS
 atomic_numbers = {}
 chemical_symbols = np.array(
     [
