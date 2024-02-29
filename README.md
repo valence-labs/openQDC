@@ -19,6 +19,26 @@ You can run tests locally with:
 pytest
 ```
 
+### Documentation
+
+You can build the documentation locally with:
+
+```bash
+mkdocs serve
+```
+
+# Downloading Datasets
+
+A command line interface is available to download datasets or see which dataset is available, please run openqdc --help. 
+
+```bash
+# Display the available datasets 
+openqdc datasets
+
+# Download the Spice and QMugs dataset 
+openqdc download --datasets Spice QMugs
+```
+
 # Overview of Datasets
 
 <!-- Create a table with the following columns
