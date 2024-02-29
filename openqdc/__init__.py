@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING  # noqa F401
 # Dictionary of objects to lazily import; maps the object's name to its module path
 
 _lazy_imports_obj = {
+    "__version__": "openqdc._version",
     "ANI1": "openqdc.datasets.ani",
     "ANI1CCX": "openqdc.datasets.ani",
     "ANI1X": "openqdc.datasets.ani",
@@ -62,3 +63,5 @@ if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
     # These types are imported lazily at runtime, but we need to tell type
     # checkers what they are.
     from .datasets import *
+    from ._version import __version__
+    from .utils import * 
