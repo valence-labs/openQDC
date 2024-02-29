@@ -1,12 +1,14 @@
-NB_ATOMIC_FEATURES = 5
+from typing import Final, List
 
-MAX_ATOMIC_NUMBER = 119
+NB_ATOMIC_FEATURES: Final[int] = 5
 
-HAR2EV = 27.211386246
+MAX_ATOMIC_NUMBER: Final[int] = 119
 
-BOHR2ANG = 0.52917721092
+HAR2EV: Final[float] = 27.211386246
 
-POSSIBLE_NORMALIZATION = ["formation", "total", "inter"]
+BOHR2ANG: Final[float] = 0.52917721092
+
+POSSIBLE_NORMALIZATION: Final[List[str]] = ["formation", "total", "inter"]
 
 NOT_DEFINED = {
     "mean": None,

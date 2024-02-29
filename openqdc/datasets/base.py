@@ -392,6 +392,7 @@ class BaseDataset:
             self.data[key] = np.memmap(filename, mode="r", dtype=self.data_types[key]).reshape(self.data_shapes[key])
 
         filename = p_join(self.preprocess_path, "props.pkl")
+        pull_locally(filename, overwrite=overwrite_local_cache)
         with open(filename, "rb") as f:
             tmp = pkl.load(f)
             for key in ["name", "subset", "n_atoms"]:
@@ -407,6 +408,14 @@ class BaseDataset:
     def is_preprocessed(self):
         predicats = [copy_exists(p_join(self.preprocess_path, f"{key}.mmap")) for key in self.data_keys]
         predicats += [copy_exists(p_join(self.preprocess_path, "props.pkl"))]
+        return all(predicats)
+
+    def is_cached(self):
+        """
+        Check if the dataset is cached locally.
+        """
+        predicats = [os.path.exists(p_join(self.preprocess_path, f"{key}.mmap")) for key in self.data_keys]
+        predicats += [os.path.exists(p_join(self.preprocess_path, "props.pkl"))]
         return all(predicats)
 
     def is_preprocessed_statistics(self):

@@ -23,7 +23,7 @@ _lazy_imports_obj = {
     "OrbnetDenali": "openqdc.datasets",
     "SN2RXN": "openqdc.datasets",
     "QM7X": "openqdc.datasets",
-    "DESS": "openqdc.datasets",
+    "DES": "openqdc.datasets",
     "NablaDFT": "openqdc.datasets",
     "SolvatedPeptides": "openqdc.datasets",
     "WaterClusters": "openqdc.datasets",
@@ -32,6 +32,7 @@ _lazy_imports_obj = {
     "PCQM_B3LYP": "openqdc.datasets",
     "PCQM_PM6": "openqdc.datasets",
     "Transition1X": "openqdc.datasets",
+    "AVAILABLE_DATASETS": "openqdc.datasets",
 }
 
 _lazy_imports_mod = {"datasets": "openqdc.datasets", "utils": "openqdc.utils"}
@@ -64,10 +65,11 @@ if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
     # These types are imported lazily at runtime, but we need to tell type
     # checkers what they are.
     from ._version import __version__  # noqa
+    from .datasets import AVAILABLE_DATASETS  # noqa
     from .datasets.ani import ANI1, ANI1CCX, ANI1X  # noqa
     from .datasets.base import BaseDataset  # noqa
     from .datasets.comp6 import COMP6  # noqa
-    from .datasets.dess import DESS  # noqa
+    from .datasets.des import DES  # noqa
     from .datasets.dummy import Dummy  # noqa
     from .datasets.gdml import GDML  # noqa
     from .datasets.geom import GEOM  # noqa

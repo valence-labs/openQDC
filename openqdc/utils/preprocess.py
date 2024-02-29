@@ -9,7 +9,7 @@ options = [
     datasets.ANI1CCX,
     datasets.ANI1X,
     datasets.COMP6,
-    datasets.DESS,
+    datasets.DES,
     datasets.GDML,
     datasets.GEOM,
     datasets.ISO17,
@@ -40,7 +40,7 @@ def preprocess(dataset):
     else:
         data_class = options_map[dataset]
 
-    data_class().preprocess(overwrite=False)
+    data_class.no_init().preprocess(overwrite=False)
     data = data_class()
     logger.info(f"Preprocessing {data.__name__}")
 

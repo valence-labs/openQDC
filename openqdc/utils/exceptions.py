@@ -60,7 +60,7 @@ class ConversionNotDefinedError(OpenQDCException, ValueError):
 
 
 class ConversionAlreadyDefined(ConversionNotDefinedError):
-    """Raised when a conversion is not defined"""
+    """Raised when a conversion is already defined"""
 
     _error_message = """
     Conversion from {in_unit} to {out_unit} is alread defined in the conversion registry.
