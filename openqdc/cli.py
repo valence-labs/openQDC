@@ -53,12 +53,11 @@ def datasets():
     """
     Print the available datasets.
     """
-    table = PrettyTable(['Name', 'Level of theories', 'Has forces'], max_width=25)
-    table._max_width={}
+    table = PrettyTable(['Name', 'Forces', 'Level of theory'])
     for dataset in AVAILABLE_DATASETS:
         empty_dataset=AVAILABLE_DATASETS[dataset].no_init()
         has_forces = False if not empty_dataset.__force_methods__ else True
-        table.add_row([dataset, ",".join(empty_dataset.__energy_methods__),has_forces])
+        table.add_row([dataset,has_forces, ",".join(empty_dataset.__energy_methods__)])
     table.align="l"
     print(table)
     
