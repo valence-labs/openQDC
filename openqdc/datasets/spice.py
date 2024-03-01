@@ -34,9 +34,9 @@ def read_record(r):
 
 class Spice(BaseDataset):
     """
-    Spice Dataset consists of 1.1 million conformations for a diverse set of 19k unique molecules consisting of
+    The Spice dataset consists of 1.1 million conformations for a diverse set of 19k unique molecules consisting of
     small molecules, dimers, dipeptides, and solvated amino acids. It consists of both forces and energies calculated
-    at {\omega}B97M-D3(BJ)/def2-TZVPPD level of theory.
+    at the {\omega}B97M-D3(BJ)/def2-TZVPPD level of theory.
 
     Usage:
     ```python

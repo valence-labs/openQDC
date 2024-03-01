@@ -37,6 +37,21 @@ def read_record(r, group):
 
 
 class Transition1X(BaseDataset):
+    """
+    The Transition1x dataset contains structures from 10k organic reaction pathways of various types.
+    It contains DFT energy and force labels for 9.6 mio. conformers calculated at the
+    wB97x/6-31-G(d) level of theory.
+
+    Usage:
+    ```python
+    from openqdc.datasets import Transition1X
+    dataset = Transition1X()
+    ```
+
+    References:
+    - https://www.nature.com/articles/s41597-022-01870-w
+    - https://gitlab.com/matschreiner/Transition1x
+    """
     __name__ = "transition1x"
 
     __energy_methods__ = [

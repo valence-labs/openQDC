@@ -159,3 +159,4 @@ class PCQM_B3LYP(PCQM_PM6):
     __name__ = "pubchemqc_b3lyp"
     __energy_methods__ = ["b3lyp"]
     energy_target_names = ["b3lyp"]
+    # TODO: is it sufficient to just change the energy method here? Or is the actual PCQM_B3LYP dataset still missing?

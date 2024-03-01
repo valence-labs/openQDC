@@ -49,6 +49,22 @@ def read_xyz(fname, n_waters):
 
 
 class WaterClusters(BaseDataset):
+    """
+    The WaterClusters dataset contains putative minima and low energy networks for water
+    clusters of sizes n = 3 - 30. The cluster structures are derived and labeled with 
+    the TTM2.1-F ab-initio based interaction potential for water.
+    It contains approximately 4.5 mil. structures.
+
+    Usage:
+    ```python
+    from openqdc.datasets import WaterClusters
+    dataset = WaterClusters()
+    ```
+
+    References:
+    - https://doi.org/10.1063/1.5128378
+    - https://sites.uw.edu/wdbase/database-of-water-clusters/
+    """
     __name__ = "waterclusters3_30"
 
     # Energy in hartree, all zeros by default

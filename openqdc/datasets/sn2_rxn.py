@@ -4,6 +4,22 @@ from openqdc.datasets.base import BaseDataset, read_qc_archive_h5
 
 
 class SN2RXN(BaseDataset):
+    """
+    This dataset probes chemical reactions of methyl halides with halide anions, i.e. 
+    X- + CH3Y -> CH3X +  Y-, and contains structures for all possible combinations of 
+    X,Y = F, Cl, Br, I. It contains energy and forces for 452709 conformations calculated
+    at the DSD-BLYP-D3(BJ)/def2-TZVP level of theory.
+
+    Usage:
+    ```python
+    from openqdc.datasets import SN2RXN
+    dataset = SN2RXN()
+    ```
+
+    References:
+    - https://doi.org/10.1021/acs.jctc.9b00181
+    - https://zenodo.org/records/2605341
+    """
     __name__ = "sn2_rxn"
 
     __energy_methods__ = [
@@ -33,30 +49,6 @@ class SN2RXN(BaseDataset):
 
     def read_raw_entries(self):
         raw_path = p_join(self.root, "sn2_rxn.h5")
-
-        # raw_path = p_join(self.root, "sn2_reactions.npz")
-        # data = np.load(raw_path)
-
-        # # as example for accessing individual entries, print the data for entry idx=0
-        # idx = 0
-        # print("Data for entry " + str(idx)+":")
-        # print("Number of atoms")
-        # print(data["N"][idx])
-        # print("Energy [eV]")
-        # print(data["E"][idx])
-        # print("Total charge")
-        # print(data["Q"][idx])
-        # print("Dipole moment vector (with respect to [0.0 0.0 0.0]) [eA]")
-        # print(data["D"][idx,:])
-        # print("Nuclear charges")
-        # print(data["Z"][idx,:data["N"][idx]])
-        # print("Cartesian coordinates [A]")
-        # print(data["R"][idx,:data["N"][idx],:])
-        # print("Forces [eV/A]")
-        # print(data["F"][idx,:data["N"][idx],:])
-
-        # exit()
-
         samples = read_qc_archive_h5(raw_path, "sn2_rxn", self.energy_target_names, self.force_target_names)
 
         return samples

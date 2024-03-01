@@ -45,6 +45,22 @@ def read_xyz(fname, e_map):
 
 
 class TMQM(BaseDataset):
+    """
+    The tmQM dataset contains the geometries of a large transition metal-organic
+    compound space with a large variety of organic ligands and 30 transition metals.
+    It contains energy labels for 86,665 mononuclear complexe calculated
+    at the TPSSh-D3BJ/def2-SV DFT level of theory.
+
+    Usage:
+    ```python
+    from openqdc.datasets import TMQM
+    dataset = TMQM()
+    ```
+
+    References:
+    - https://pubs.acs.org/doi/10.1021/acs.jcim.0c01041
+    - https://github.com/bbskjelstad/tmqm
+    """
     __name__ = "tmqm"
 
     __energy_methods__ = ["tpssh/def2-tzvp"]
