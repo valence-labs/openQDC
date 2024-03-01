@@ -3,6 +3,8 @@ import pandas as pd
 
 from typing import Dict, List
 from collections import defaultdict, Counter
+
+from loguru import logger
 from torch.utils.data import Dataset
 
 class Dimer:
@@ -47,6 +49,7 @@ class Dimer:
 
 class DES370K(Dataset):
     def __init__(self, filepath="data/des370k.csv") -> None:
+        self.filepath = filepath
         self.df = pd.read_csv(filepath)
         self._atom_types = defaultdict(int)
         self.smiles = set()
@@ -54,6 +57,7 @@ class DES370K(Dataset):
         self._preprocess()
     
     def _preprocess(self) -> None:
+        logger.info(f"Reading data from {self.filepath}")
         for idx, row in self.df.iterrows():
             smiles0, smiles1 = row["smiles0"], row["smiles1"]
             charge0, charge1 = row["charge0"], row["charge1"]
