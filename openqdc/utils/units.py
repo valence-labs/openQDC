@@ -1,3 +1,12 @@
+"""
+Unit conversion utils.
+
+Energy units:
+    ["kcal/mol", "kj/mol", "hartree", "ev"]
+
+Distance units:
+    ["ang", "nm", "bohr"]
+"""
 from typing import Callable
 
 from openqdc.utils.exceptions import ConversionAlreadyDefined, ConversionNotDefinedError
@@ -6,11 +15,27 @@ CONVERSION_REGISTRY = {}
 
 
 class Conversion:
+    """
+    Conversion from one unit system to another.
+
+    Attributes
+    ----------
+    name
+        A human-readable name for the conversion
+    fn: 
+        The callable to compute the conversion
+    """
     def __init__(self, in_unit: str, out_unit: str, func: Callable[[float], float]):
         """
-        Args:
-            name: A human-readable name for the metric
-            fn: The callable to actually compute the metric
+
+        Parameters
+        ----------
+        in_unit
+            String defining the units of the current values
+        out_unit
+            String defining the target units
+        func
+            The callable to compute the conversion
         """
         name = "convert_" + in_unit.lower().strip() + "_to_" + out_unit.lower().strip()
 
@@ -57,7 +82,7 @@ Conversion("kj/mol", "ev", lambda x: x * 0.0103643)
 Conversion("kj/mol", "kcal/mol", lambda x: x * 0.239006)
 Conversion("kj/mol", "hartree", lambda x: x * 0.000380879)
 
-# bohr conversion
+# distance conversions
 Conversion("bohr", "ang", lambda x: x * 0.52917721092)
 Conversion("ang", "bohr", lambda x: x / 0.52917721092)
 Conversion("ang", "nm", lambda x: x * 0.1)
@@ -75,7 +100,7 @@ Conversion(
 Conversion("hartree/ang", "kcal/mol/ang", lambda x: get_conversion("hartree", "kcal/mol")(x))
 Conversion("hartree/ang", "hartree/bohr", lambda x: get_conversion("bohr", "ang")(x))
 Conversion("hartree/bohr", "hartree/ang", lambda x: get_conversion("ang", "bohr")(x))
-Conversion("kcal/mol/bohr", "Hartree/bohr", lambda x: get_conversion("kcal/mol", "hartree")(x))
+Conversion("kcal/mol/bohr", "hartree/bohr", lambda x: get_conversion("kcal/mol", "hartree")(x))
 Conversion("ev/ang", "hartree/ang", lambda x: get_conversion("ev", "hartree")(x))
 Conversion("ev/bohr", "hartree/bohr", lambda x: get_conversion("ev", "hartree")(x))
 Conversion("ev/bohr", "ev/ang", lambda x: get_conversion("ang", "bohr")(x))

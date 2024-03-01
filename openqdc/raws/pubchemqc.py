@@ -1,3 +1,4 @@
+"""Download funtionalities for PubChemQC."""
 import hashlib
 import os
 import pickle as pkl

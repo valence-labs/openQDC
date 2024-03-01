@@ -1,3 +1,4 @@
+"""The BaseDataset defining shared functionality between all datasets. """
 import os
 import pickle as pkl
 from copy import deepcopy
@@ -40,7 +41,7 @@ from openqdc.utils.package_utils import requires_package
 from openqdc.utils.units import get_conversion
 
 
-def extract_entry(
+def _extract_entry(
     df: pd.DataFrame,
     i: int,
     subset: str,
@@ -73,11 +74,12 @@ def extract_entry(
 def read_qc_archive_h5(
     raw_path: str, subset: str, energy_target_names: List[str], force_target_names: List[str]
 ) -> List[Dict[str, np.ndarray]]:
+    """Extracts data from the HDF5 archive file."""
     data = load_hdf5_file(raw_path)
     data_t = {k2: data[k1][k2][:] for k1 in data.keys() for k2 in data[k1].keys()}
 
     n = len(data_t["molecule_id"])
-    samples = [extract_entry(data_t, i, subset, energy_target_names, force_target_names) for i in tqdm(range(n))]
+    samples = [_extract_entry(data_t, i, subset, energy_target_names, force_target_names) for i in tqdm(range(n))]
     return samples
 
 
@@ -108,6 +110,19 @@ class BaseDataset:
         overwrite_local_cache: bool = False,
         cache_dir: Optional[str] = None,
     ) -> None:
+        """
+
+        Parameters
+        ----------
+        energy_unit
+            Energy unit to convert dataset to. Supported units: ["kcal/mol", "kj/mol", "hartree", "ev"]
+        distance_unit
+            Distance unit to convert dataset to. Supported units: ["ang", "nm", "bohr"]
+        overwrite_local_cache
+            Whether to overwrite the locally cached dataset.
+        cache_dir
+            Cache directory location. Defaults to "~/.cache/openqdc"
+        """
         set_cache_dir(cache_dir)
         self.data = None
         if not self.is_preprocessed():

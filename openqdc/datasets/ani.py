@@ -104,7 +104,7 @@ class ANI1CCX(ANI1):
 
 class ANI1X(ANI1):
     """
-    The ANI-1X dataset consists of ANI-1 molecules + some molecules added using active learning which leads to
+    The ANI-1X dataset consists of ANI-1 molecules + some molecules added using active learning, which leads to
     a total of 5,496,771 conformers with 63,865 unique molecules.
 
     Usage

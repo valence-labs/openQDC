@@ -1,4 +1,4 @@
-"""IO utilities for mlip package"""
+"""IO utilities."""
 
 import json
 import os

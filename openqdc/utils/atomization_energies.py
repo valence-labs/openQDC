@@ -1,3 +1,4 @@
+"""Look-up tables for isolated atom energies."""
 from typing import Dict, Tuple
 
 import numpy as np
