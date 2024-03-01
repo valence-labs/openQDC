@@ -1,33 +1,9 @@
 import click
 import numpy as np
 from loguru import logger
+from openqdc import AVAILABLE_DATASETS
 
-from openqdc import datasets
-
-options = [
-    datasets.ANI1,
-    datasets.ANI1CCX,
-    datasets.ANI1X,
-    datasets.COMP6,
-    datasets.DES,
-    datasets.GDML,
-    datasets.GEOM,
-    datasets.ISO17,
-    datasets.Molecule3D,
-    datasets.NablaDFT,
-    datasets.OrbnetDenali,
-    datasets.PCQM_B3LYP,
-    datasets.PCQM_PM6,
-    datasets.QM7X,
-    datasets.QMugs,
-    datasets.SN2RXN,
-    datasets.SolvatedPeptides,
-    datasets.Spice,
-    datasets.TMQM,
-    datasets.Transition1X,
-    datasets.WaterClusters,
-]
-
+options = list(AVAILABLE_DATASETS.values())
 options_map = {d.__name__: d for d in options}
 
 
