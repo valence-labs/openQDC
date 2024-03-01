@@ -1,6 +1,7 @@
 import click
 import numpy as np
 from loguru import logger
+
 from openqdc import AVAILABLE_DATASETS
 
 options = list(AVAILABLE_DATASETS.values())
