@@ -49,6 +49,7 @@ class DES370K(Dataset):
     def __init__(self, filepath="data/des370k.csv") -> None:
         self.df = pd.read_csv(filepath)
         self._atom_types = defaultdict(int)
+        self.smiles = set()
         self.data = []
         self._preprocess()
     
@@ -67,6 +68,10 @@ class DES370K(Dataset):
             )
             self.data.append(dimer)
 
+            # keep track of unique smiles strings
+            self.smiles.add(smiles0)
+            self.smiles.add(smiles1)
+
             # get atom types
             elems = row["elements"].split()
             counts = Counter(set(elems))
@@ -77,7 +82,9 @@ class DES370K(Dataset):
         self._atom_types = dict(self._atom_types)
 
     def __str__(self) -> str:
-        return f"DES370K(n_atoms={self.num_atoms}, n_molecules={self.num_molecules}, atom_types={self.species})"
+        return f"DES370K(n_atoms={self.num_atoms},\
+               n_molecules={self.num_molecules},\
+               atom_types={self.species})"
 
     def __repr__(self) -> str:
         return str(self)
@@ -91,8 +98,20 @@ class DES370K(Dataset):
         return self._atom_types
 
     @property
-    def num_molecules(self) -> int:
-        return self.df.shape[0]
+    def num_dimers(self) -> int:
+        """
+        Returns the number of 
+        dimers in the dataset.
+        """
+        return len(self.data)
+
+    @property
+    def num_unique_molecules(self) -> int:
+        """
+        Returns the number of unique
+        molecules in the dataset.
+        """
+        return len(self.smiles)
 
     @property
     def num_atoms(self) -> int:
