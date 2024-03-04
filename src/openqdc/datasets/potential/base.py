@@ -125,6 +125,10 @@ class BaseDataset:
         self._convert_data()
         self._set_isolated_atom_energies()
 
+    @classmethod
+    def no_init(cls):
+        return cls.__new__(cls)
+
     def _convert_data(self):
         logger.info(
             f"Converting {self.__name__} data to the following units:\n\
@@ -325,6 +329,7 @@ class BaseDataset:
 
     def collate_list(self, list_entries):
         # concatenate entries
+        logger.info(f"list entries: {type(list_entries)}")
         res = {key: np.concatenate([r[key] for r in list_entries if r is not None], axis=0) for key in list_entries[0]}
 
         csum = np.cumsum(res.get("n_atoms"))

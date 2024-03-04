@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from openqdc.datasets.base import BaseDataset
+from openqdc.datasets.potential.base import BaseDataset
 from openqdc.utils.molecule import get_atomic_number_and_charge
 
 
@@ -58,7 +58,6 @@ class DESS(BaseDataset):
         "nn_CCSD(T)_all",
         "sapt_all",
     ]
-    # ['qz_MP2_all', 'tz_MP2_all', 'cbs_MP2_all', 'sapt_all', 'nn_CCSD(T)_all']
 
     partitions = ["DES370K", "DES5M"]
 

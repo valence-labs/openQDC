@@ -29,3 +29,15 @@ class BaseInteractionDataset(BaseDataset):
             overwrite_local_cache=overwrite_local_cache,
             cache_dir=cache_dir
         )
+
+    def collate_list(self, list_entries: List[Dict]):
+        # concatenate entries
+        res = {key: np.concatenate([r[key] for r in list_entries if r is not None], axis=0) \
+               for key in list_entries[0] if not isinstance(list_entries[0][key], dict)}
+
+        csum = np.cumsum(res.get("n_atoms"))
+        x = np.zeros((csum.shape[0], 2), dtype=np.int32)
+        x[1:, 0], x[:, 1] = csum[:-1], csum
+        res["position_idx_range"] = x
+
+        return res

@@ -2,50 +2,12 @@ import os
 import numpy as np
 import pandas as pd
 
-from tqdm import tqdm
 from typing import Dict, List
 
+from tqdm import tqdm
 from loguru import logger
 from openqdc.datasets.interaction import BaseInteractionDataset
-
-class Dimer:
-    def __init__(
-        self,
-        smiles_0: str,
-        smiles_1: str,
-        charge_0: int,
-        charge_1: int,
-        n_atoms_0: int,
-        n_atoms_1: int,
-        pos: np.array,
-        sapt_energies: List[float],
-    ) -> None:
-        self.smiles_0 = smiles_0
-        self.smiles_1 = smiles_1
-        self.charge_1 = charge_0
-        self.charge_1 = charge_1
-        self.n_atoms_0 = n_atoms_0
-        self.n_atoms_1 = n_atoms_1
-        self.pos = pos
-        self.sapt_energies = sapt_energies
-        (
-            self.sapt_es,
-            self.sapt_ex,
-            self.sapt_exs2,
-            self.sapt_ind,
-            self.sapt_exind,
-            self.sapt_disp,
-            self.sapt_exdisp_os,
-            self.sapt_exdisp_ss,
-            self.sapt_delta_HF,
-            self.sapt_all
-        ) = tuple(sapt_energies)
-
-    def __str__(self) -> str:
-        return f"Dimer(smiles_0='{self.smiles_0}', smiles_1='{self.smiles_1}')"
-
-    def __repr__(self) -> str:
-        return str(self)
+from openqdc.utils.molecule import atom_table
 
 
 class DES370K(BaseInteractionDataset):
@@ -95,28 +57,54 @@ class DES370K(BaseInteractionDataset):
 
     def read_raw_entries(self) -> List[Dict]:
         self.filepath = os.path.join(self.root, "DES370K.csv")
-        logger.info(f"Reading data from {self.filepath}")
+        logger.info(f"Reading DES370K interaction data from {self.filepath}")
         df = pd.read_csv(self.filepath)
         data = []
         for idx, row in tqdm(df.iterrows(), total=df.shape[0]):
             smiles0, smiles1 = row["smiles0"], row["smiles1"]
+            charge0, charge1 = row["charge0"], row["charge1"]
             natoms0, natoms1 = row["natoms0"], row["natoms1"]
             pos = np.array(list(map(float, row["xyz"].split()))).reshape(-1, 3)
             pos0 = pos[:natoms0]
             pos1 = pos[natoms0:]
-            # sapt_components = {col: row[col] for col in df.columns if "sapt" in col}
+            
+            elements = row["elements"].split()
+            elements0 = np.array(elements[:natoms0])
+            elements1 = np.array(elements[natoms0:])
+
+            atomic_nums = np.expand_dims(np.array([atom_table.GetAtomicNumber(x) for x in elements]), axis=1)
+            atomic_nums0 = np.array(atomic_nums[:natoms0])
+            atomic_nums1 = np.array(atomic_nums[natoms0:])
+
+            charges = np.expand_dims(np.array([charge0] * natoms0 + [charge1] * natoms1), axis=1)
+
+            atomic_inputs = np.concatenate((atomic_nums, charges, pos), axis=-1, dtype=np.float32)
+            atomic_inputs0 = atomic_inputs[:natoms0, :]
+            atomic_inputs1 = atomic_inputs[natoms0:, :]
+
             item = dict(
                 mol0=dict(
                     smiles=smiles0,
-                    atomic_inputs=pos0,
+                    atomic_inputs=atomic_inputs0,
                     n_atoms=natoms0,
+                    charge=charge0,
+                    elements=elements0,
+                    atomic_nums=atomic_nums0,
+                    pos=pos0,
                 ),
                 mol1=dict(
                     smiles=smiles1,
-                    atomic_inputs=pos1,
+                    atomic_inputs=atomic_inputs1,
                     n_atoms=natoms1,
+                    charge=charge1,
+                    elements=elements1,
+                    atomic_nums=atomic_nums1,
+                    pos=pos1,
                 ),
                 targets=row[self.energy_target_names].values,
+                subset=np.array(["DES370K"]),
+                n_atoms=np.array([natoms0 + natoms1]),
+                atomic_inputs=atomic_inputs,
             )
             data.append(item)
         return data

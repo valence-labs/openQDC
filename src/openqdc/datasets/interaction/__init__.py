@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING  # noqa F401
 # Dictionary of objects to lazily import; maps the object's name to its module path
 
 _lazy_imports_obj = {
+    "BaseInteractionDataset": "openqdc.datasets.interaction.base",
     "DES370K": "openqdc.datasets.interaction.des370k",
 }
 
@@ -38,9 +39,10 @@ def __dir__():
 
 
 if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
-
+    from .base import BaseInteractionDataset
     from .des370k import DES370K
 
     __all__ = [
-        "DES370K"
+        "BaseInteractionDataset",
+        "DES370K",
     ]

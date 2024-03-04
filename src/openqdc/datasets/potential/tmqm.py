@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from openqdc.datasets.base import BaseDataset
+from openqdc.datasets.potential.base import BaseDataset
 from openqdc.utils.molecule import atom_table
 
 
