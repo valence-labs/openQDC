@@ -90,6 +90,13 @@ class DataConfigFactory:
         },
     )
 
+    des370k_interaction = dict(
+        dataset_name="des370k_interaction",
+        links={
+            "DES370K.zip": "https://zenodo.org/record/5676266/files/DES370K.zip",
+        }
+    )
+
     tmqm = dict(
         dataset_name="tmqm",
         links={
