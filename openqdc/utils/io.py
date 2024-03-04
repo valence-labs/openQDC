@@ -6,6 +6,7 @@ import pickle as pkl
 
 import fsspec
 import h5py
+from aiohttp import ClientTimeout
 from ase.atoms import Atoms
 from fsspec.callbacks import TqdmCallback
 from fsspec.implementations.local import LocalFileSystem
@@ -15,6 +16,8 @@ from rdkit.Chem import MolFromXYZFile
 gcp_filesys = fsspec.filesystem("gs")  # entry point for google bucket (need gsutil permission)
 gcp_filesys_public = fsspec.filesystem("https")  # public API for download
 local_filesys = LocalFileSystem()
+
+gcp_filesys_public.client_kwargs = {"timeout": ClientTimeout(total=3600, connect=1000)}
 
 _OPENQDC_CACHE_DIR = (
     "~/.cache/openqdc" if "OPENQDC_CACHE_DIR" not in os.environ else os.path.normpath(os.environ["OPENQDC_CACHE_DIR"])
