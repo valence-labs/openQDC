@@ -8,7 +8,7 @@ import pandas as pd
 from rdkit import Chem
 from tqdm import tqdm
 
-from openqdc.datasets.base import BaseDataset
+from openqdc.datasets.potential.base import BaseDataset
 from openqdc.utils.molecule import get_atomic_number_and_charge
 
 

@@ -6,7 +6,7 @@ import datamol as dm
 import numpy as np
 import pandas as pd
 
-from openqdc.datasets.base import BaseDataset
+from openqdc.datasets.potential.base import BaseDataset
 from openqdc.utils.molecule import z_to_formula
 from openqdc.utils.package_utils import requires_package
 

@@ -2,7 +2,7 @@ import numpy as np  # noqa
 from numpy import array
 from sklearn.utils import Bunch
 
-from openqdc.datasets.base import BaseDataset
+from openqdc.datasets.potential.base import BaseDataset
 from openqdc.utils.atomization_energies import IsolatedAtomEnergyFactory
 from openqdc.utils.constants import NOT_DEFINED
 

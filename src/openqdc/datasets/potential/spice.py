@@ -4,7 +4,7 @@ import datamol as dm
 import numpy as np
 from tqdm import tqdm
 
-from openqdc.datasets.base import BaseDataset
+from openqdc.datasets.potential.base import BaseDataset
 from openqdc.utils import load_hdf5_file
 from openqdc.utils.molecule import get_atomic_number_and_charge
 

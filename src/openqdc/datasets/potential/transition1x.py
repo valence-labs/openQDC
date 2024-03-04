@@ -3,7 +3,7 @@ from os.path import join as p_join
 import numpy as np
 from tqdm import tqdm
 
-from openqdc.datasets.base import BaseDataset
+from openqdc.datasets.potential.base import BaseDataset
 from openqdc.utils.constants import NB_ATOMIC_FEATURES
 from openqdc.utils.io import load_hdf5_file
 

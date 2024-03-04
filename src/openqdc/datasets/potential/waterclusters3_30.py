@@ -4,7 +4,7 @@ from os.path import join as p_join
 import numpy as np
 from tqdm import tqdm
 
-from openqdc.datasets.base import BaseDataset
+from openqdc.datasets.potential.base import BaseDataset
 from openqdc.utils.constants import MAX_ATOMIC_NUMBER
 from openqdc.utils.molecule import atom_table
 
