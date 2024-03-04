@@ -1,9 +1,10 @@
 from os.path import join as p_join
 
 import numpy as np
+from tqdm import tqdm
+
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils.io import load_hdf5_file
-from tqdm import tqdm
 
 
 def read_mol(mol_h5, mol_name, energy_target_names, force_target_names):

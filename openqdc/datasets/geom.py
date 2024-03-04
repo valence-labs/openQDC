@@ -3,10 +3,10 @@ from typing import Dict
 
 import datamol as dm
 import numpy as np
-from openqdc.datasets.base import BaseDataset
-from openqdc.utils.molecule import get_atomic_number_and_charge
 
+from openqdc.datasets.base import BaseDataset
 from openqdc.utils import load_json, load_pkl
+from openqdc.utils.molecule import get_atomic_number_and_charge
 
 
 def read_mol(mol_id: str, mol_dict, base_path: str, partition: str) -> Dict[str, np.ndarray]:

@@ -4,8 +4,9 @@ from typing import Any
 
 import numpy as np
 from numpy import ndarray
-from openqdc.utils.atomization_energies import chemical_symbols
 from rdkit import Chem
+
+from openqdc.utils.atomization_energies import chemical_symbols
 
 atom_table = Chem.GetPeriodicTable()
 

@@ -15,9 +15,10 @@ import gdown
 import requests
 import tqdm
 from loguru import logger
+from sklearn.utils import Bunch
+
 from openqdc.raws.config_factory import DataConfigFactory
 from openqdc.utils.io import get_local_cache
-from sklearn.utils import Bunch
 
 
 def download_url(url, local_filename):

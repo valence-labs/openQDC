@@ -3,9 +3,10 @@ from os.path import join as p_join
 
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
+
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils.molecule import atom_table
-from tqdm import tqdm
 
 
 def content_to_xyz(content, e_map):

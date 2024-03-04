@@ -10,6 +10,9 @@ import numpy as np
 import pandas as pd
 from ase.io.extxyz import write_extxyz
 from loguru import logger
+from sklearn.utils import Bunch
+from tqdm import tqdm
+
 from openqdc.utils.atomization_energies import (
     IsolatedAtomEnergyFactory,
     chemical_symbols,
@@ -37,8 +40,6 @@ from openqdc.utils.io import (
 from openqdc.utils.molecule import atom_table, z_to_formula
 from openqdc.utils.package_utils import requires_package
 from openqdc.utils.units import get_conversion
-from sklearn.utils import Bunch
-from tqdm import tqdm
 
 
 def _extract_entry(

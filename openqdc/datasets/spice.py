@@ -2,11 +2,11 @@ from os.path import join as p_join
 
 import datamol as dm
 import numpy as np
-from openqdc.datasets.base import BaseDataset
-from openqdc.utils.molecule import get_atomic_number_and_charge
 from tqdm import tqdm
 
+from openqdc.datasets.base import BaseDataset
 from openqdc.utils import load_hdf5_file
+from openqdc.utils.molecule import get_atomic_number_and_charge
 
 
 def read_record(r):

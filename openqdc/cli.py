@@ -2,12 +2,12 @@ from typing import List, Optional
 
 import typer
 from loguru import logger
-from openqdc.raws.config_factory import DataConfigFactory
-from openqdc.raws.fetch import DataDownloader
 from prettytable import PrettyTable
 from typing_extensions import Annotated
 
 from openqdc import AVAILABLE_DATASETS
+from openqdc.raws.config_factory import DataConfigFactory
+from openqdc.raws.fetch import DataDownloader
 
 app = typer.Typer(help="OpenQDC CLI")
 

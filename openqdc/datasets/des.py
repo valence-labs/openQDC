@@ -3,9 +3,10 @@ from os.path import join as p_join
 import datamol as dm
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
+
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils.molecule import get_atomic_number_and_charge
-from tqdm import tqdm
 
 
 def read_mol(mol_path, smiles, subset, targets):
