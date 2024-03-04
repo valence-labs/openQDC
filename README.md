@@ -52,7 +52,7 @@ openqdc download --datasets Spice QMugs
 
 We provide support for the following publicly available QM Datasets.
 
-# Potential Energy 
+# Potential Energy
 
 | Dataset | # Molecules | # Conformers | Average Conformers per Molecule | Force Labels | Atom Types | QM Level of Theory | Off-Equilibrium Conformations|
 | --- | --- | --- | --- | --- | --- | --- | --- |

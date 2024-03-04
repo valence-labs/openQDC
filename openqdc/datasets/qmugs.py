@@ -4,7 +4,6 @@ from os.path import join as p_join
 
 import datamol as dm
 import numpy as np
-
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils.molecule import get_atomic_number_and_charge
 

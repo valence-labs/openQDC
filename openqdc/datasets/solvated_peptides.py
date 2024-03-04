@@ -20,6 +20,7 @@ class SolvatedPeptides(BaseDataset):
     - https://doi.org/10.1021/acs.jctc.9b00181
     - https://zenodo.org/records/2605372
     """
+
     __name__ = "solvated_peptides"
 
     __energy_methods__ = [

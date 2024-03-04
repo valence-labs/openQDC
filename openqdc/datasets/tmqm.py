@@ -3,10 +3,9 @@ from os.path import join as p_join
 
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
-
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils.molecule import atom_table
+from tqdm import tqdm
 
 
 def content_to_xyz(content, e_map):
@@ -61,6 +60,7 @@ class TMQM(BaseDataset):
     - https://pubs.acs.org/doi/10.1021/acs.jcim.0c01041
     - https://github.com/bbskjelstad/tmqm
     """
+
     __name__ = "tmqm"
 
     __energy_methods__ = ["tpssh/def2-tzvp"]

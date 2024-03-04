@@ -7,6 +7,7 @@ Energy units:
 Distance units:
     ["ang", "nm", "bohr"]
 """
+
 from typing import Callable
 
 from openqdc.utils.exceptions import ConversionAlreadyDefined, ConversionNotDefinedError
@@ -22,9 +23,10 @@ class Conversion:
     ----------
     name
         A human-readable name for the conversion
-    fn: 
+    fn:
         The callable to compute the conversion
     """
+
     def __init__(self, in_unit: str, out_unit: str, func: Callable[[float], float]):
         """
 

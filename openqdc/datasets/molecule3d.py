@@ -5,11 +5,10 @@ from typing import Dict, List
 import datamol as dm
 import numpy as np
 import pandas as pd
-from rdkit import Chem
-from tqdm import tqdm
-
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils.molecule import get_atomic_number_and_charge
+from rdkit import Chem
+from tqdm import tqdm
 
 
 def read_mol(mol: Chem.rdchem.Mol, energy: float) -> Dict[str, np.ndarray]:

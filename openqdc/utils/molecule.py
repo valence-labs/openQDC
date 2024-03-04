@@ -1,11 +1,11 @@
 """Computations on molecular graphs."""
+
 from typing import Any
 
 import numpy as np
 from numpy import ndarray
-from rdkit import Chem
-
 from openqdc.utils.atomization_energies import chemical_symbols
+from rdkit import Chem
 
 atom_table = Chem.GetPeriodicTable()
 

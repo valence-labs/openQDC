@@ -1,10 +1,9 @@
 from os.path import join as p_join
 
 import numpy as np
-from tqdm import tqdm
-
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils.io import load_hdf5_file
+from tqdm import tqdm
 
 
 def read_mol(mol_h5, mol_name, energy_target_names, force_target_names):
@@ -37,7 +36,7 @@ class QM7X(BaseDataset):
     QM7X is a collection of almost 4.2 million conformers from 6,950 unique molecules. It contains DFT
     energy and force labels at the PBE0+MBD level of theory. It consists of structures for molecules with
     up to seven heavy (C, N, O, S, Cl) atoms from the GDB13 database. For each molecule, (meta-)stable
-    equilibrium structures including constitutional/structural isomers and stereoisomers are 
+    equilibrium structures including constitutional/structural isomers and stereoisomers are
     searched using density-functional tight binding (DFTB). Then, for each (meta-)stable structure, 100
     off-equilibrium structures are obtained and labeled with PBE0+MBD.
 
@@ -51,6 +50,7 @@ class QM7X(BaseDataset):
     - https://arxiv.org/abs/2006.15139
     - https://zenodo.org/records/4288677
     """
+
     __name__ = "qm7x"
 
     __energy_methods__ = ["pbe0/mbd", "dft3b"]

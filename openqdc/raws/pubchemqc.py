@@ -1,4 +1,5 @@
 """Download funtionalities for PubChemQC."""
+
 import hashlib
 import os
 import pickle as pkl
@@ -6,10 +7,9 @@ from glob import glob
 
 import click
 import numpy as np
-from tqdm import tqdm
-
 from openqdc.datasets.pcqm import read_archive
 from openqdc.utils.io import get_local_cache
+from tqdm import tqdm
 
 
 @click.group()

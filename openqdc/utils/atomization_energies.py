@@ -1,11 +1,11 @@
 """Look-up tables for isolated atom energies."""
+
 from typing import Dict, Tuple
 
 import numpy as np
 from loguru import logger
-from rdkit import Chem
-
 from openqdc.utils.constants import MAX_ATOMIC_NUMBER
+from rdkit import Chem
 
 atom_table = Chem.GetPeriodicTable()
 

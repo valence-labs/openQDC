@@ -5,8 +5,8 @@ from openqdc.datasets.base import BaseDataset, read_qc_archive_h5
 
 class SN2RXN(BaseDataset):
     """
-    This dataset probes chemical reactions of methyl halides with halide anions, i.e. 
-    X- + CH3Y -> CH3X +  Y-, and contains structures for all possible combinations of 
+    This dataset probes chemical reactions of methyl halides with halide anions, i.e.
+    X- + CH3Y -> CH3X +  Y-, and contains structures for all possible combinations of
     X,Y = F, Cl, Br, I. It contains energy and forces for 452709 conformations calculated
     at the DSD-BLYP-D3(BJ)/def2-TZVP level of theory.
 
@@ -20,6 +20,7 @@ class SN2RXN(BaseDataset):
     - https://doi.org/10.1021/acs.jctc.9b00181
     - https://zenodo.org/records/2605341
     """
+
     __name__ = "sn2_rxn"
 
     __energy_methods__ = [
