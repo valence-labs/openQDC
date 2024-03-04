@@ -1,11 +1,12 @@
-import torch
+import os
+import numpy as np
 import pandas as pd
 
+from tqdm import tqdm
 from typing import Dict, List
-from collections import defaultdict, Counter
 
 from loguru import logger
-from torch.utils.data import Dataset
+from openqdc.datasets.interaction import BaseInteractionDataset
 
 class Dimer:
     def __init__(
@@ -16,7 +17,7 @@ class Dimer:
         charge_1: int,
         n_atoms_0: int,
         n_atoms_1: int,
-        pos: torch.Tensor,
+        pos: np.array,
         sapt_energies: List[float],
     ) -> None:
         self.smiles_0 = smiles_0
@@ -47,99 +48,75 @@ class Dimer:
         return str(self)
 
 
-class DES370K(Dataset):
-    def __init__(self, filepath="data/des370k.csv") -> None:
-        self.filepath = filepath
-        self.df = pd.read_csv(filepath)
-        self._atom_types = defaultdict(int)
-        self.smiles = set()
-        self.data = []
-        self._preprocess()
-    
-    def _preprocess(self) -> None:
+class DES370K(BaseInteractionDataset):
+    __name__ = "des370k_interaction"
+    __energy_unit__ = "hartree"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "hartree/ang"
+    __energy_methods__ = [
+        "mp2/cc-pvdz",
+        "mp2/cc-pvqz",
+        "mp2/cc-pvtz",
+        "mp2/cbs",
+        "ccsd(t)/cc-pvdz",
+        "ccsd(t)/cbs",  # cbs
+        "ccsd(t)/nn",  # nn
+        "sapt0/aug-cc-pwcvxz",
+        "sapt0/aug-cc-pwcvxz",
+        "sapt0/aug-cc-pwcvxz",
+        "sapt0/aug-cc-pwcvxz",
+        "sapt0/aug-cc-pwcvxz",
+        "sapt0/aug-cc-pwcvxz",
+        "sapt0/aug-cc-pwcvxz",
+        "sapt0/aug-cc-pwcvxz",
+        "sapt0/aug-cc-pwcvxz",
+        "sapt0/aug-cc-pwcvxz",
+    ]
+
+    energy_target_names = [
+        "cc_MP2_all",
+        "qz_MP2_all",
+        "tz_MP2_all",
+        "cbs_MP2_all",
+        "cc_CCSD(T)_all",
+        "cbs_CCSD(T)_all",
+        "nn_CCSD(T)_all",
+        "sapt_all",
+        "sapt_es",
+        "sapt_ex",
+        "sapt_exs2",
+        "sapt_ind",
+        "sapt_exind",
+        "sapt_disp",
+        "sapt_exdisp_os",
+        "sapt_exdisp_ss",
+        "sapt_delta_HF",
+    ]
+
+    def read_raw_entries(self) -> List[Dict]:
+        self.filepath = os.path.join(self.root, "DES370K.csv")
         logger.info(f"Reading data from {self.filepath}")
-        for idx, row in self.df.iterrows():
+        df = pd.read_csv(self.filepath)
+        data = []
+        for idx, row in tqdm(df.iterrows(), total=df.shape[0]):
             smiles0, smiles1 = row["smiles0"], row["smiles1"]
-            charge0, charge1 = row["charge0"], row["charge1"]
             natoms0, natoms1 = row["natoms0"], row["natoms1"]
-            pos = torch.tensor(list(map(float, row["xyz"].split()))).view(-1, 3)
-            sapt_energies = [row[col] for col in self.df.columns if "sapt" in col]
-            dimer = Dimer(
-                smiles0, smiles1,
-                charge0, charge1,
-                natoms0, natoms1,
-                pos, sapt_energies
+            pos = np.array(list(map(float, row["xyz"].split()))).reshape(-1, 3)
+            pos0 = pos[:natoms0]
+            pos1 = pos[natoms0:]
+            # sapt_components = {col: row[col] for col in df.columns if "sapt" in col}
+            item = dict(
+                mol0=dict(
+                    smiles=smiles0,
+                    atomic_inputs=pos0,
+                    n_atoms=natoms0,
+                ),
+                mol1=dict(
+                    smiles=smiles1,
+                    atomic_inputs=pos1,
+                    n_atoms=natoms1,
+                ),
+                targets=row[self.energy_target_names].values,
             )
-            self.data.append(dimer)
-
-            # keep track of unique smiles strings
-            self.smiles.add(smiles0)
-            self.smiles.add(smiles1)
-
-            # get atom types
-            elems = row["elements"].split()
-            counts = Counter(set(elems))
-            for key in counts:
-                self._atom_types[key] += counts[key]
-
-        # convert defaultdict to regular dict
-        self._atom_types = dict(self._atom_types)
-
-    def __str__(self) -> str:
-        return f"DES370K(n_atoms={self.num_atoms},\
-               n_molecules={self.num_molecules},\
-               atom_types={self.species})"
-
-    def __repr__(self) -> str:
-        return str(self)
-
-    @property
-    def atom_types(self) -> Dict[str, int]:
-        """
-        Returns a dictionary of 
-        (element, count) pairs.
-        """
-        return self._atom_types
-
-    @property
-    def num_dimers(self) -> int:
-        """
-        Returns the number of 
-        dimers in the dataset.
-        """
-        return len(self.data)
-
-    @property
-    def num_unique_molecules(self) -> int:
-        """
-        Returns the number of unique
-        molecules in the dataset.
-        """
-        return len(self.smiles)
-
-    @property
-    def num_atoms(self) -> int:
-        """
-        Returns the total number of atoms in 
-        the dataset.
-        """
-        if not hasattr(self, "_num_atoms"):
-            self._num_atoms = sum(self.atom_types.values())
-        return self._num_atoms 
-
-    @property
-    def species(self) -> List[str]:
-        """
-        Returns a list of the unique atom
-        species contained in the dataset.
-        """
-        if not hasattr(self, "_species"):
-            self._species = list(self.atom_types.keys())
-        return self._species
-
-    def atom_count(self, element: str) -> int:
-        """
-        Returns the count of a given
-        element in the dataset.
-        """
-        return self.atom_types[element]
+            data.append(item)
+        return data
