@@ -82,6 +82,10 @@ class DES370K(BaseInteractionDataset):
             atomic_inputs0 = atomic_inputs[:natoms0, :]
             atomic_inputs1 = atomic_inputs[natoms0:, :]
 
+            energies = np.array(row[self.energy_target_names].values).astype(np.float32)[None, :]
+
+            name = np.array([smiles0 + "." + smiles1])
+
             item = dict(
                 mol0=dict(
                     smiles=smiles0,
@@ -101,10 +105,11 @@ class DES370K(BaseInteractionDataset):
                     atomic_nums=atomic_nums1,
                     pos=pos1,
                 ),
-                targets=row[self.energy_target_names].values,
+                energies=energies,
                 subset=np.array(["DES370K"]),
-                n_atoms=np.array([natoms0 + natoms1]),
+                n_atoms=np.array([natoms0 + natoms1], dtype=np.int32),
                 atomic_inputs=atomic_inputs,
+                name=name,
             )
             data.append(item)
         return data
