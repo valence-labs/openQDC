@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING  # noqa F401
 _lazy_imports_obj = {
     "BaseInteractionDataset": "openqdc.datasets.interaction.base",
     "DES370K": "openqdc.datasets.interaction.des370k",
+    "Metcalf": "openqdc.datasets.interaction.metcalf",
 }
 
 _lazy_imports_mod = {}
@@ -45,4 +46,5 @@ if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
     __all__ = [
         "BaseInteractionDataset",
         "DES370K",
+        "Metcalf",
     ]
