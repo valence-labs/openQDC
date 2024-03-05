@@ -47,6 +47,7 @@ fallback_version = "dev"
 
 [tool.isort]
 profile = "black"
+src_paths = ["openqdc"]
 
 [tool.setuptools.packages.find]
 where = ["."]

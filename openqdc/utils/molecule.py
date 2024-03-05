@@ -1,3 +1,5 @@
+"""Computations on molecular graphs."""
+
 from typing import Any
 
 import numpy as np
