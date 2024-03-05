@@ -16,7 +16,7 @@ molecule_groups = {
     "alkenes": set(["C=C", "CC=C", "CC=CC", "CC(=C)C", "CCC=C", "CC=C(C)C", "CCC=CC", "CCC(=C)C", "CC(=C(C)C)C", "CCC=C(C)C", "CCC(=CC)C", "CCC(=C(C)C)C"]),
     "amides": set(["CCCNC=O", "CCC(=O)N", "CCC(=O)NC", "CCC(=O)N(C)C", "CCC(=O)N(CC)C", "CCNC=O", "CCNC(=O)C", "CCN(C=O)CC", "CCN(C(=O)C)C", "CCNC(=O)CC", \
                    "CCN(C(=O)C)CC", "CC(=O)N", "CC(=O)N(C)C", "CNC=O", "CNC(=O)C", "CN(C=O)CC", "CNC(=O)CC(=O)N", "CNC(=O)CC(=O)NC", \
-                   "CNC(=O)CNC=O", "CNC(=O)CNC(=O)C", "CNC(=O)C(NC(=O)C)C", "NC=O, NC(=O)CC(=O)N", "O=CN(C)C", "O=CNCCC(=O)N", "O=CNCCC(=O)NC", "O=CNCCNC=O", "O=CNCC(=O)N"]),
+                   "CNC(=O)CNC=O", "CNC(=O)CNC(=O)C", "CNC(=O)C(NC(=O)C)C", "NC=O", "NC(=O)CC(=O)N", "O=CN(C)C", "O=CNCCC(=O)N", "O=CNCCC(=O)NC", "O=CNCCNC=O", "O=CNCC(=O)N"]),
     "amines": set(["C1CCCN1", "C1CCCNC1", "CCCN", "CCCNC", "CCCN(C)C", "CCN", "CCN(C)C", "CCNCC", "CCN(CC)C", "CN", "CNC", "CN(C)C", "CNCC", "CNCCCN", "CNCCCNC", "CNCCN", "CNCCNC", "N", "NCCCN", "NCCN"]),
     "ammoniums": set(["CC[NH3+]", "C[N+](C)(C)C", "C[NH2+]C", "C[NH3+]", "C[NH+](C)C", "[NH4+]"]),
     "benzene": set(["c1ccccc1", "Cc1ccccc1", "CCc1ccccc1"]),

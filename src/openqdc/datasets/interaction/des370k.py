@@ -5,9 +5,10 @@ import pandas as pd
 from typing import Dict, List
 
 from tqdm import tqdm
+from rdkit import Chem
 from loguru import logger
 from openqdc.datasets.interaction import BaseInteractionDataset
-from openqdc.utils.molecule import atom_table
+from openqdc.utils.molecule import atom_table, molecule_groups
 
 
 class DES370K(BaseInteractionDataset):
@@ -85,10 +86,24 @@ class DES370K(BaseInteractionDataset):
             energies = np.array(row[self.energy_target_names].values).astype(np.float32)[None, :]
 
             name = np.array([smiles0 + "." + smiles1])
+            canon_smiles0 = Chem.MolToSmiles(Chem.MolFromSmiles(smiles0))
+            canon_smiles1 = Chem.MolToSmiles(Chem.MolFromSmiles(smiles1))
+
+            subsets = []
+            # for smiles in [canon_smiles0, canon_smiles1]:
+            for smiles in [smiles0, smiles1]:
+                found = False
+                for functional_group, smiles_set in molecule_groups.items():
+                    if smiles in smiles_set:
+                        subsets.append(functional_group)
+                        found = True
+                if not found:
+                    logger.info(f"molecule group lookup failed for {smiles}")
+
 
             item = dict(
                 energies=energies,
-                subset=np.array(["DES370K"]),
+                subset=np.array([subsets]),
                 n_atoms=np.array([natoms0 + natoms1], dtype=np.int32),
                 n_atoms_first=np.array([natoms0], dtype=np.int32),
                 atomic_inputs=atomic_inputs,
