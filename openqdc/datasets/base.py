@@ -1,3 +1,5 @@
+"""The BaseDataset defining shared functionality between all datasets."""
+
 import os
 import pickle as pkl
 from copy import deepcopy
@@ -40,7 +42,7 @@ from openqdc.utils.package_utils import requires_package
 from openqdc.utils.units import get_conversion
 
 
-def extract_entry(
+def _extract_entry(
     df: pd.DataFrame,
     i: int,
     subset: str,
@@ -73,15 +75,20 @@ def extract_entry(
 def read_qc_archive_h5(
     raw_path: str, subset: str, energy_target_names: List[str], force_target_names: List[str]
 ) -> List[Dict[str, np.ndarray]]:
+    """Extracts data from the HDF5 archive file."""
     data = load_hdf5_file(raw_path)
     data_t = {k2: data[k1][k2][:] for k1 in data.keys() for k2 in data[k1].keys()}
 
     n = len(data_t["molecule_id"])
-    samples = [extract_entry(data_t, i, subset, energy_target_names, force_target_names) for i in tqdm(range(n))]
+    samples = [_extract_entry(data_t, i, subset, energy_target_names, force_target_names) for i in tqdm(range(n))]
     return samples
 
 
 class BaseDataset:
+    """
+    Base class for datasets in the openQDC package.
+    """
+
     __energy_methods__ = []
     __force_methods__ = []
     energy_target_names = []
@@ -104,6 +111,19 @@ class BaseDataset:
         overwrite_local_cache: bool = False,
         cache_dir: Optional[str] = None,
     ) -> None:
+        """
+
+        Parameters
+        ----------
+        energy_unit
+            Energy unit to convert dataset to. Supported units: ["kcal/mol", "kj/mol", "hartree", "ev"]
+        distance_unit
+            Distance unit to convert dataset to. Supported units: ["ang", "nm", "bohr"]
+        overwrite_local_cache
+            Whether to overwrite the locally cached dataset.
+        cache_dir
+            Cache directory location. Defaults to "~/.cache/openqdc"
+        """
         set_cache_dir(cache_dir)
         self.data = None
         if not self.is_preprocessed():
@@ -124,6 +144,14 @@ class BaseDataset:
         self._set_units(energy_unit, distance_unit)
         self._convert_data()
         self._set_isolated_atom_energies()
+
+    @classmethod
+    def no_init(cls):
+        """
+        Class method to avoid the __init__ method to be called when the class is instanciated.
+        Useful for debugging purposes or preprocessing data.
+        """
+        return cls.__new__(cls)
 
     def _convert_data(self):
         logger.info(
@@ -366,9 +394,9 @@ class BaseDataset:
             return x
 
     def read_preprocess(self, overwrite_local_cache=False):
-        logger.info("Reading preprocessed data")
+        logger.info("Reading preprocessed data.")
         logger.info(
-            f"{self.__name__} data with the following units:\n\
+            f"Dataset {self.__name__} with the following units:\n\
                      Energy: {self.energy_unit},\n\
                      Distance: {self.distance_unit},\n\
                      Forces: {self.force_unit if self.__force_methods__ else 'None'}"
@@ -396,6 +424,14 @@ class BaseDataset:
     def is_preprocessed(self):
         predicats = [copy_exists(p_join(self.preprocess_path, f"{key}.mmap")) for key in self.data_keys]
         predicats += [copy_exists(p_join(self.preprocess_path, "props.pkl"))]
+        return all(predicats)
+
+    def is_cached(self):
+        """
+        Check if the dataset is cached locally.
+        """
+        predicats = [os.path.exists(p_join(self.preprocess_path, f"{key}.mmap")) for key in self.data_keys]
+        predicats += [os.path.exists(p_join(self.preprocess_path, "props.pkl"))]
         return all(predicats)
 
     def is_preprocessed_statistics(self):
@@ -520,48 +556,18 @@ class BaseDataset:
             datum["idxs"] = idxs
         return datum
 
-    def __len__(self):
-        return self.data["energies"].shape[0]
-
-    def __smiles_converter__(self, x):
-        """util function to convert string to smiles: useful if the smiles is
-        encoded in a different format than its display format
+    def as_iter(self, atoms: bool = False):
         """
-        return x
+        Return the dataset as an iterator.
 
-    def __getitem__(self, idx: int):
-        shift = IsolatedAtomEnergyFactory.max_charge
-        p_start, p_end = self.data["position_idx_range"][idx]
-        input = self.data["atomic_inputs"][p_start:p_end]
-        z, c, positions, energies = (
-            np.array(input[:, 0], dtype=np.int32),
-            np.array(input[:, 1], dtype=np.int32),
-            np.array(input[:, -3:], dtype=np.float32),
-            np.array(self.data["energies"][idx], dtype=np.float32),
-        )
-        name = self.__smiles_converter__(self.data["name"][idx])
-        subset = self.data["subset"][idx]
-
-        if "forces" in self.data:
-            forces = np.array(self.data["forces"][p_start:p_end], dtype=np.float32)
-        else:
-            forces = None
-        return Bunch(
-            positions=positions,
-            atomic_numbers=z,
-            charges=c,
-            e0=self.__isolated_atom_energies__[..., z, c + shift].T,
-            energies=energies,
-            name=name,
-            subset=subset,
-            forces=forces,
-        )
-
-    def __str__(self):
-        return f"{self.__name__}"
-
-    def __repr__(self):
-        return f"{self.__name__}"
+        Parameters
+        ----------
+        atoms : bool, optional
+            Whether to return the items as ASE atoms object, by default False
+        """
+        func = self.get_ase_atoms if atoms else self.__getitem__
+        for i in range(len(self)):
+            yield func(i)
 
     @property
     def _stats(self):
@@ -620,3 +626,46 @@ class BaseDataset:
                 for key2 in selected_stats[key]:
                     selected_stats[key][key2] = self.convert_energy(selected_stats[key][key2])
         return selected_stats
+
+    def __str__(self):
+        return f"{self.__name__}"
+
+    def __repr__(self):
+        return f"{self.__name__}"
+
+    def __len__(self):
+        return self.data["energies"].shape[0]
+
+    def __smiles_converter__(self, x):
+        """util function to convert string to smiles: useful if the smiles is
+        encoded in a different format than its display format
+        """
+        return x
+
+    def __getitem__(self, idx: int):
+        shift = IsolatedAtomEnergyFactory.max_charge
+        p_start, p_end = self.data["position_idx_range"][idx]
+        input = self.data["atomic_inputs"][p_start:p_end]
+        z, c, positions, energies = (
+            np.array(input[:, 0], dtype=np.int32),
+            np.array(input[:, 1], dtype=np.int32),
+            np.array(input[:, -3:], dtype=np.float32),
+            np.array(self.data["energies"][idx], dtype=np.float32),
+        )
+        name = self.__smiles_converter__(self.data["name"][idx])
+        subset = self.data["subset"][idx]
+
+        if "forces" in self.data:
+            forces = np.array(self.data["forces"][p_start:p_end], dtype=np.float32)
+        else:
+            forces = None
+        return Bunch(
+            positions=positions,
+            atomic_numbers=z,
+            charges=c,
+            e0=self.__isolated_atom_energies__[..., z, c + shift].T,
+            energies=energies,
+            name=name,
+            subset=subset,
+            forces=forces,
+        )

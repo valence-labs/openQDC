@@ -67,7 +67,7 @@ def _read_sdf(sdf_path: str, properties_path: str) -> List[Dict[str, np.ndarray]
 class Molecule3D(BaseDataset):
     """
     Molecule3D dataset consists of 3,899,647 molecules with ground state geometries and energies
-    calculated at B3LYP/6-31G* level of theory. The molecules are extracted from the
+    calculated at the B3LYP/6-31G* level of theory. The molecules are extracted from the
     PubChem database and cleaned by removing invalid molecule files.
 
     Usage:

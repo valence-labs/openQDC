@@ -32,8 +32,8 @@ def read_mol(mol_path, smiles, subset, targets):
     return res
 
 
-class DESS(BaseDataset):
-    __name__ = "dess"
+class DES(BaseDataset):
+    __name__ = "des"
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"

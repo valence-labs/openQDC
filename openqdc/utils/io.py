@@ -1,4 +1,4 @@
-"""IO utilities for mlip package"""
+"""IO utilities."""
 
 import json
 import os
@@ -6,14 +6,18 @@ import pickle as pkl
 
 import fsspec
 import h5py
+from aiohttp import ClientTimeout
 from ase.atoms import Atoms
+from fsspec.callbacks import TqdmCallback
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from rdkit.Chem import MolFromXYZFile
 
-gcp_filesys = fsspec.filesystem("gs")
-gcp_filesys_public = fsspec.filesystem("https")
+gcp_filesys = fsspec.filesystem("gs")  # entry point for google bucket (need gsutil permission)
+gcp_filesys_public = fsspec.filesystem("https")  # public API for download
 local_filesys = LocalFileSystem()
+
+gcp_filesys_public.client_kwargs = {"timeout": ClientTimeout(total=3600, connect=1000)}
 
 _OPENQDC_CACHE_DIR = (
     "~/.cache/openqdc" if "OPENQDC_CACHE_DIR" not in os.environ else os.path.normpath(os.environ["OPENQDC_CACHE_DIR"])
@@ -46,6 +50,9 @@ def get_local_cache() -> str:
 
 
 def get_remote_cache(write_access=False) -> str:
+    """
+    Returns the entry point based on the write access.
+    """
     if write_access:
         remote_cache = "gs://qmdata-public/openqdc"
     else:
@@ -54,20 +61,45 @@ def get_remote_cache(write_access=False) -> str:
 
 
 def push_remote(local_path, overwrite=True):
+    """
+    Attempt to push file to remote gs path
+    """
     remote_path = local_path.replace(get_local_cache(), get_remote_cache(write_access=overwrite))
     gcp_filesys.mkdirs(os.path.dirname(remote_path), exist_ok=False)
-    print(f"Pushing {local_path} file to {remote_path}, ({gcp_filesys.exists(os.path.dirname(remote_path))})")
+    # print(f"Pushing {local_path} file to {remote_path}, ({gcp_filesys.exists(os.path.dirname(remote_path))})")
     if not gcp_filesys.exists(remote_path) or overwrite:
-        gcp_filesys.put_file(local_path, remote_path)
+        gcp_filesys.put_file(
+            local_path,
+            remote_path,
+            callback=TqdmCallback(
+                tqdm_kwargs={
+                    "ascii": " ▖▘▝▗▚▞-",
+                    "desc": f"Uploading {os.path.basename(remote_path)}",
+                    "unit": "B",
+                },
+            ),
+        )
     return remote_path
 
 
 def pull_locally(local_path, overwrite=False):
+    """
+    Retrieve file from remote gs path or local cache
+    """
     remote_path = local_path.replace(get_local_cache(), get_remote_cache())
     os.makedirs(os.path.dirname(local_path), exist_ok=True)
     if not os.path.exists(local_path) or overwrite:
-        # print(f"Pulling {remote_path} file to {local_path}")
-        gcp_filesys_public.get_file(remote_path, local_path)
+        gcp_filesys_public.get_file(
+            remote_path,
+            local_path,
+            callback=TqdmCallback(
+                tqdm_kwargs={
+                    "ascii": " ▖▘▝▗▚▞-",
+                    "desc": f"Downloading {os.path.basename(remote_path)}",
+                    "unit": "B",
+                },
+            ),
+        )
     return local_path
 
 
@@ -162,6 +194,9 @@ def load_json(path):
 
 
 def load_xyz(path):
+    """
+    Load XYZ file using RDKit
+    """
     return MolFromXYZFile(path)
 
 

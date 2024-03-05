@@ -1,4 +1,6 @@
-from typing import Dict, Tuple, TypeAlias
+"""Look-up tables for isolated atom energies."""
+
+from typing import Dict, Tuple
 
 import numpy as np
 from loguru import logger
@@ -11,9 +13,8 @@ atom_table = Chem.GetPeriodicTable()
 
 __all__ = ["chemical_symbols", "atomic_numbers", "IsolatedAtomEnergyFactory"]
 
-EF_KEY: TypeAlias = Tuple[str, int]
+EF_KEY = Tuple[str, int]
 
-# didn t calculate for Pd, Pt, Mo, Ni, Fe, Cu, see DESS
 atomic_numbers = {}
 chemical_symbols = np.array(
     [

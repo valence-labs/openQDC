@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING  # noqa F401
 # Dictionary of objects to lazily import; maps the object's name to its module path
 
 _lazy_imports_obj = {
+    "__version__": "openqdc._version",
+    "BaseDataset": "openqdc.datasets.base",
     "ANI1": "openqdc.datasets.ani",
     "ANI1CCX": "openqdc.datasets.ani",
     "ANI1X": "openqdc.datasets.ani",
@@ -21,7 +23,7 @@ _lazy_imports_obj = {
     "OrbnetDenali": "openqdc.datasets.orbnet_denali",
     "SN2RXN": "openqdc.datasets.sn2_rxn",
     "QM7X": "openqdc.datasets.qm7x",
-    "DESS": "openqdc.datasets.dess",
+    "DES": "openqdc.datasets.des",
     "NablaDFT": "openqdc.datasets.nabladft",
     "SolvatedPeptides": "openqdc.datasets.solvated_peptides",
     "WaterClusters": "openqdc.datasets.waterclusters3_30",
@@ -30,10 +32,10 @@ _lazy_imports_obj = {
     "PCQM_B3LYP": "openqdc.datasets.pcqm",
     "PCQM_PM6": "openqdc.datasets.pcqm",
     "Transition1X": "openqdc.datasets.transition1x",
-    "MultixcQM9": "openqdc.datasets.multixcqm9",
+    "AVAILABLE_DATASETS": "openqdc.datasets",
 }
 
-_lazy_imports_mod = {}
+_lazy_imports_mod = {"datasets": "openqdc.datasets", "utils": "openqdc.utils"}
 
 
 def __getattr__(name):
@@ -62,47 +64,25 @@ def __dir__():
 if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
     # These types are imported lazily at runtime, but we need to tell type
     # checkers what they are.
-    from .ani import ANI1, ANI1CCX, ANI1X  # noqa
-    from .comp6 import COMP6  # noqa
-    from .dess import DESS  # noqa
-    from .dummy import Dummy  # noqa
-    from .gdml import GDML  # noqa
-    from .geom import GEOM  # noqa
-    from .iso_17 import ISO17  # noqa
-    from .molecule3d import Molecule3D  # noqa
-    from .nabladft import NablaDFT  # noqa
-    from .orbnet_denali import OrbnetDenali  # noqa
-    from .pcqm import PCQM_B3LYP, PCQM_PM6  # noqa
-    from .qm7x import QM7X  # noqa
-    from .qmugs import QMugs  # noqa
-    from .sn2_rxn import SN2RXN  # noqa
-    from .solvated_peptides import SolvatedPeptides  # noqa
-    from .spice import Spice  # noqa
-    from .tmqm import TMQM  # noqa
-    from .transition1x import Transition1X  # noqa
-    from .waterclusters3_30 import WaterClusters  # noqa
-
-    __all__ = [
-        "ANI1",
-        "ANI1X",
-        "ANI1CCX",
-        "Spice",
-        "GEOM",
-        "QMugs",
-        "ISO17",
-        "COMP6",
-        "GDML",
-        "Molecule3D",
-        "OrbnetDenali",
-        "SN2RXN",
-        "QM7X",
-        "DESS",
-        "NablaDFT",
-        "SolvatedPeptides",
-        "WaterClusters",
-        "TMQM",
-        "PCQM_B3LYP",
-        "PCQM_PM6",
-        "Transition1X",
-        "Dummy",
-    ]
+    from ._version import __version__  # noqa
+    from .datasets import AVAILABLE_DATASETS  # noqa
+    from .datasets.ani import ANI1, ANI1CCX, ANI1X  # noqa
+    from .datasets.base import BaseDataset  # noqa
+    from .datasets.comp6 import COMP6  # noqa
+    from .datasets.des import DES  # noqa
+    from .datasets.dummy import Dummy  # noqa
+    from .datasets.gdml import GDML  # noqa
+    from .datasets.geom import GEOM  # noqa
+    from .datasets.iso_17 import ISO17  # noqa
+    from .datasets.molecule3d import Molecule3D  # noqa
+    from .datasets.nabladft import NablaDFT  # noqa
+    from .datasets.orbnet_denali import OrbnetDenali  # noqa
+    from .datasets.pcqm import PCQM_B3LYP, PCQM_PM6  # noqa
+    from .datasets.qm7x import QM7X  # noqa
+    from .datasets.qmugs import QMugs  # noqa
+    from .datasets.sn2_rxn import SN2RXN  # noqa
+    from .datasets.solvated_peptides import SolvatedPeptides  # noqa
+    from .datasets.spice import Spice  # noqa
+    from .datasets.tmqm import TMQM  # noqa
+    from .datasets.transition1x import Transition1X  # noqa
+    from .datasets.waterclusters3_30 import WaterClusters  # noqa

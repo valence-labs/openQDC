@@ -116,7 +116,6 @@ def get_dir():
 
     if _hub_dir is not None:
         return _hub_dir
-    # return os.path.join(_get_torch_home(), 'hub')
 
 
 def set_dir(d):
@@ -127,4 +126,3 @@ def set_dir(d):
         d (str): path to a local folder to save downloaded models & weights.
     """
     global _hub_dir
-    # _hub_dir = os.path.expanduser(d)
