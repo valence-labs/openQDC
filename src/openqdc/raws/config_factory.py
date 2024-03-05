@@ -97,6 +97,13 @@ class DataConfigFactory:
         }
     )
 
+    des5m_interaction = dict(
+        dataset_name="des5m_interaction",
+        links={
+            "DES5M.zip": "https://zenodo.org/records/5706002/files/DESS5M.zip?download=1",
+        }
+    )
+
     tmqm = dict(
         dataset_name="tmqm",
         links={
