@@ -1,23 +1,23 @@
-from .ani import ANI1, ANI1CCX, ANI1X  # noqa
 from .base import BaseDataset  # noqa
-from .comp6 import COMP6  # noqa
-from .des import DES  # noqa
-from .dummy import Dummy  # noqa
-from .gdml import GDML  # noqa
-from .geom import GEOM  # noqa
-from .iso_17 import ISO17  # noqa
-from .molecule3d import Molecule3D  # noqa
-from .nabladft import NablaDFT  # noqa
-from .orbnet_denali import OrbnetDenali  # noqa
-from .pcqm import PCQM_B3LYP, PCQM_PM6  # noqa
-from .qm7x import QM7X  # noqa
-from .qmugs import QMugs  # noqa
-from .sn2_rxn import SN2RXN  # noqa
-from .solvated_peptides import SolvatedPeptides  # noqa
-from .spice import Spice  # noqa
-from .tmqm import TMQM  # noqa
-from .transition1x import Transition1X  # noqa
-from .waterclusters3_30 import WaterClusters  # noqa
+from .interaction.des import DES  # noqa
+from .potential.ani import ANI1, ANI1CCX, ANI1X  # noqa
+from .potential.comp6 import COMP6  # noqa
+from .potential.dummy import Dummy  # noqa
+from .potential.gdml import GDML  # noqa
+from .potential.geom import GEOM  # noqa
+from .potential.iso_17 import ISO17  # noqa
+from .potential.molecule3d import Molecule3D  # noqa
+from .potential.nabladft import NablaDFT  # noqa
+from .potential.orbnet_denali import OrbnetDenali  # noqa
+from .potential.pcqm import PCQM_B3LYP, PCQM_PM6  # noqa
+from .potential.qm7x import QM7X  # noqa
+from .potential.qmugs import QMugs  # noqa
+from .potential.sn2_rxn import SN2RXN  # noqa
+from .potential.solvated_peptides import SolvatedPeptides  # noqa
+from .potential.spice import Spice  # noqa
+from .potential.tmqm import TMQM  # noqa
+from .potential.transition1x import Transition1X  # noqa
+from .potential.waterclusters3_30 import WaterClusters  # noqa
 
 AVAILABLE_DATASETS = {
     "ani1": ANI1,
