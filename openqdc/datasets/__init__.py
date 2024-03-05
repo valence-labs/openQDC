@@ -1,5 +1,5 @@
 from .base import BaseDataset  # noqa
-from .interaction.des import DES  # noqa
+from .interaction import DES  # noqa
 from .potential.ani import ANI1, ANI1CCX, ANI1X  # noqa
 from .potential.comp6 import COMP6  # noqa
 from .potential.dummy import Dummy  # noqa

@@ -1,6 +1,5 @@
 from .ani import ANI1, ANI1CCX, ANI1X  # noqa
 from .comp6 import COMP6  # noqa
-from .des import DES  # noqa
 from .dummy import Dummy  # noqa
 from .gdml import GDML  # noqa
 from .geom import GEOM  # noqa
@@ -23,7 +22,6 @@ AVAILABLE_DATASETS = {
     "ani1ccx": ANI1CCX,
     "ani1x": ANI1X,
     "comp6": COMP6,
-    "des": DES,
     "gdml": GDML,
     "geom": GEOM,
     "iso17": ISO17,
