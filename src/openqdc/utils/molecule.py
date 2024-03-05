@@ -50,6 +50,8 @@ molecule_groups = {
                      "CSCSCC", "CSCSC", "CSC", "CSSC", "S1CCSCC1", "S1CSCSC1"]),
     "thiols": set(["CCCSS", "CCCS", "CCSS", "CCS", "CSCCCS", "CSCCS", "CSCS", "CSS", "CS", "SCCCS", "SCCS", "SS", "S"]),
     "water": set(["O"]),
+    "flourane": set(["F"]),
+    "hydrogen chloride": set(["Cl"]),
 }
 
 def z_to_formula(z):
