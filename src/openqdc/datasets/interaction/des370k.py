@@ -24,15 +24,15 @@ class DES370K(BaseInteractionDataset):
         "ccsd(t)/cbs",  # cbs
         "ccsd(t)/nn",  # nn
         "sapt0/aug-cc-pwcvxz",
-        "sapt0/aug-cc-pwcvxz",
-        "sapt0/aug-cc-pwcvxz",
-        "sapt0/aug-cc-pwcvxz",
-        "sapt0/aug-cc-pwcvxz",
-        "sapt0/aug-cc-pwcvxz",
-        "sapt0/aug-cc-pwcvxz",
-        "sapt0/aug-cc-pwcvxz",
-        "sapt0/aug-cc-pwcvxz",
-        "sapt0/aug-cc-pwcvxz",
+        "sapt0/aug-cc-pwcvxz_es",
+        "sapt0/aug-cc-pwcvxz_ex",
+        "sapt0/aug-cc-pwcvxz_exs2",
+        "sapt0/aug-cc-pwcvxz_ind",
+        "sapt0/aug-cc-pwcvxz_exind",
+        "sapt0/aug-cc-pwcvxz_disp",
+        "sapt0/aug-cc-pwcvxz_exdisp_os",
+        "sapt0/aug-cc-pwcvxz_exdisp_ss",
+        "sapt0/aug-cc-pwcvxz_delta_HF",
     ]
 
     energy_target_names = [
@@ -87,27 +87,10 @@ class DES370K(BaseInteractionDataset):
             name = np.array([smiles0 + "." + smiles1])
 
             item = dict(
-                mol0=dict(
-                    smiles=smiles0,
-                    atomic_inputs=atomic_inputs0,
-                    n_atoms=natoms0,
-                    charge=charge0,
-                    elements=elements0,
-                    atomic_nums=atomic_nums0,
-                    pos=pos0,
-                ),
-                mol1=dict(
-                    smiles=smiles1,
-                    atomic_inputs=atomic_inputs1,
-                    n_atoms=natoms1,
-                    charge=charge1,
-                    elements=elements1,
-                    atomic_nums=atomic_nums1,
-                    pos=pos1,
-                ),
                 energies=energies,
                 subset=np.array(["DES370K"]),
                 n_atoms=np.array([natoms0 + natoms1], dtype=np.int32),
+                n_atoms_first=np.array([natoms0], dtype=np.int32),
                 atomic_inputs=atomic_inputs,
                 name=name,
             )
