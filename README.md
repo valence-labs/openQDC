@@ -30,7 +30,7 @@ pytest
 6. QM Level of Theory
  -->
 
-We provide support for the following publicly available QM Datasets.
+We provide support for the following publicly available QM Potential Energy Datasets.
 
 | Dataset | # Molecules | # Conformers | Average Conformers per Molecule | Force Labels | Atom Types | QM Level of Theory | Off-Equilibrium Conformations|
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -46,3 +46,11 @@ We provide support for the following publicly available QM Datasets.
 | [OrbNet Denali](https://arxiv.org/abs/2107.00299) | 212,905 | 2,300,000 | 11 | No | 16 | GFN1-xTB | Yes |
 | [SN2RXN](https://pubs.acs.org/doi/10.1021/acs.jctc.9b00181) | 39 | 452709 | 11,600 | Yes | 6 | DSD-BLYP-D3(BJ)/def2-TZVP | |
 | [QM7X](https://www.nature.com/articles/s41597-021-00812-2) |  6,950 | 4,195,237 | 603 | Yes | 7 | PBE0+MBD | Yes |
+
+We also provide support for the following publicly available QM Noncovalent Interaction Energy Datasets.
+
+| Dataset | 
+| --- | 
+| [DES370K](https://www.nature.com/articles/s41597-021-00833-x) |
+| [DES5M](https://www.nature.com/articles/s41597-021-00833-x)   |
+| [Metcalf](https://pubs.aip.org/aip/jcp/article/152/7/074103/1059677/Approaches-for-machine-learning-intermolecular) |
