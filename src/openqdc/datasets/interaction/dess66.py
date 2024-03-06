@@ -7,16 +7,22 @@ from typing import Dict, List
 from tqdm import tqdm
 from rdkit import Chem
 from loguru import logger
-from openqdc.datasets.interaction import DES370K
+from openqdc.datasets.interaction import BaseInteractionDataset
 from openqdc.utils.molecule import atom_table, molecule_groups
 
 
-class DES5M(DES370K):
-    __name__ = "des5m_interaction"
+class DESS66(BaseInteractionDataset):
+    __name__ = "des_s66"
+    __energy_unit__ = "hartree"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "hartree/ang"
     __energy_methods__ = [
+        "mp2/cc-pvdz",
         "mp2/cc-pvqz",
         "mp2/cc-pvtz",
         "mp2/cbs",
+        "ccsd(t)/cc-pvdz",
+        "ccsd(t)/cbs",  # cbs
         "ccsd(t)/nn",  # nn
         "sapt0/aug-cc-pwcvxz",
         "sapt0/aug-cc-pwcvxz_es",
@@ -31,9 +37,12 @@ class DES5M(DES370K):
     ]
 
     energy_target_names = [
+        "cc_MP2_all",
         "qz_MP2_all",
         "tz_MP2_all",
         "cbs_MP2_all",
+        "cc_CCSD(T)_all",
+        "cbs_CCSD(T)_all",
         "nn_CCSD(T)_all",
         "sapt_all",
         "sapt_es",
@@ -48,8 +57,8 @@ class DES5M(DES370K):
     ]
 
     def read_raw_entries(self) -> List[Dict]:
-        self.filepath = os.path.join(self.root, "DES5M.csv")
-        logger.info(f"Reading DES5M interaction data from {self.filepath}")
+        self.filepath = os.path.join(self.root, "DESS66.csv")
+        logger.info(f"Reading DESS66 interaction data from {self.filepath}")
         df = pd.read_csv(self.filepath)
         data = []
         for idx, row in tqdm(df.iterrows(), total=df.shape[0]):
@@ -78,21 +87,12 @@ class DES5M(DES370K):
 
             name = np.array([smiles0 + "." + smiles1])
 
-            subsets = []
-            # for smiles in [canon_smiles0, canon_smiles1]:
-            for smiles in [smiles0, smiles1]:
-                found = False
-                for functional_group, smiles_set in molecule_groups.items():
-                    if smiles in smiles_set:
-                        subsets.append(functional_group)
-                        found = True
-                if not found:
-                    logger.info(f"molecule group lookup failed for {smiles}")
 
+            subset = row["system_name"]
 
             item = dict(
                 energies=energies,
-                subset=np.array([subsets]),
+                subset=np.array([subset]),
                 n_atoms=np.array([natoms0 + natoms1], dtype=np.int32),
                 n_atoms_first=np.array([natoms0], dtype=np.int32),
                 atomic_inputs=atomic_inputs,
