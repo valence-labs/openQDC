@@ -86,8 +86,6 @@ class DES370K(BaseInteractionDataset):
             energies = np.array(row[self.energy_target_names].values).astype(np.float32)[None, :]
 
             name = np.array([smiles0 + "." + smiles1])
-            canon_smiles0 = Chem.MolToSmiles(Chem.MolFromSmiles(smiles0))
-            canon_smiles1 = Chem.MolToSmiles(Chem.MolFromSmiles(smiles1))
 
             subsets = []
             # for smiles in [canon_smiles0, canon_smiles1]:
