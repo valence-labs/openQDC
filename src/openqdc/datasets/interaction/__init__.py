@@ -14,6 +14,8 @@ _lazy_imports_obj = {
     "Metcalf": "openqdc.datasets.interaction.metcalf",
     "DESS66": "openqdc.datasets.interaction.dess66",
     "DESS66x8": "openqdc.datasets.interaction.dess66x8",
+    "L7": "openqdc.datasets.interaction.L7",
+    "X40": "openqdc.datasets.interaction.X40",
 }
 
 _lazy_imports_mod = {}
@@ -49,6 +51,8 @@ if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
     from .metcalf import Metcalf
     from .dess66 import DESS66
     from .dess66x8 import DESS66x8
+    from .L7 import L7
+    from .X40 import X40
 
     __all__ = [
         "BaseInteractionDataset",
@@ -57,4 +61,6 @@ if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
         "Metcalf",
         "DESS66",
         "DESS66x8",
+        "L7",
+        "X40",
     ]
