@@ -155,6 +155,11 @@ class DataConfigFactory:
         links={"DESS66.zip": "https://zenodo.org/records/5676284/files/DESS66.zip?download=1"},
     )
 
+    des_s66x8 = dict(
+        dataset_name="des_s66x8",
+        links={"DESS66x8.zip": "https://zenodo.org/records/5676284/files/DESS66x8.zip?download=1"}
+    )
+
     available_datasets = [k for k in locals().keys() if not k.startswith("__")]
 
     def __init__(self):

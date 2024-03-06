@@ -13,6 +13,7 @@ _lazy_imports_obj = {
     "DES5M": "openqdc.datasets.interaction.des5m",
     "Metcalf": "openqdc.datasets.interaction.metcalf",
     "DESS66": "openqdc.datasets.interaction.dess66",
+    "DESS66x8": "openqdc.datasets.interaction.dess66x8",
 }
 
 _lazy_imports_mod = {}
@@ -51,4 +52,5 @@ if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
         "DES5M",
         "Metcalf",
         "DESS66",
+        "DESS66x8",
     ]
