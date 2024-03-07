@@ -1,6 +1,6 @@
 """Path hack to make tests work."""
 
-from openqdc.datasets.dummy import Dummy  # noqa: E402
+from openqdc.datasets.potential.dummy import Dummy  # noqa: E402
 from openqdc.utils.atomization_energies import (
     ISOLATED_ATOM_ENERGIES,
     IsolatedAtomEnergyFactory,
