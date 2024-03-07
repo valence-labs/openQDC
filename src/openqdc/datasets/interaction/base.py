@@ -10,6 +10,9 @@ from openqdc.utils.io import (
     set_cache_dir,
 )
 from openqdc.datasets.potential.base import BaseDataset
+from openqdc.utils.constants import (
+    NB_ATOMIC_FEATURES
+)
 
 from loguru import logger
 
@@ -43,3 +46,12 @@ class BaseInteractionDataset(BaseDataset):
         res["position_idx_range"] = x
 
         return res
+
+    @property
+    def data_shapes(self):
+        return {
+            "atomic_inputs": (-1, NB_ATOMIC_FEATURES),
+            "position_idx_range": (-1, 2),
+            "energies": (-1, len(self.__energy_methods__)),
+            "forces": (-1, 3, len(self.force_target_names)),
+        }
