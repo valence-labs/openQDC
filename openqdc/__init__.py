@@ -10,28 +10,28 @@ from typing import TYPE_CHECKING  # noqa F401
 _lazy_imports_obj = {
     "__version__": "openqdc._version",
     "BaseDataset": "openqdc.datasets.base",
-    "ANI1": "openqdc.datasets.ani",
-    "ANI1CCX": "openqdc.datasets.ani",
-    "ANI1X": "openqdc.datasets.ani",
-    "Spice": "openqdc.datasets.spice",
-    "GEOM": "openqdc.datasets.geom",
-    "QMugs": "openqdc.datasets.qmugs",
-    "ISO17": "openqdc.datasets.iso_17",
-    "COMP6": "openqdc.datasets.comp6",
-    "GDML": "openqdc.datasets.gdml",
-    "Molecule3D": "openqdc.datasets.molecule3d",
-    "OrbnetDenali": "openqdc.datasets.orbnet_denali",
-    "SN2RXN": "openqdc.datasets.sn2_rxn",
-    "QM7X": "openqdc.datasets.qm7x",
-    "DES": "openqdc.datasets.des",
-    "NablaDFT": "openqdc.datasets.nabladft",
-    "SolvatedPeptides": "openqdc.datasets.solvated_peptides",
-    "WaterClusters": "openqdc.datasets.waterclusters3_30",
-    "TMQM": "openqdc.datasets.tmqm",
-    "Dummy": "openqdc.datasets.dummy",
-    "PCQM_B3LYP": "openqdc.datasets.pcqm",
-    "PCQM_PM6": "openqdc.datasets.pcqm",
-    "Transition1X": "openqdc.datasets.transition1x",
+    "ANI1": "openqdc.datasets.potential.ani",
+    "ANI1CCX": "openqdc.datasets.potential.ani",
+    "ANI1X": "openqdc.datasets.potential.ani",
+    "Spice": "openqdc.datasets.potential.spice",
+    "GEOM": "openqdc.datasets.potential.geom",
+    "QMugs": "openqdc.datasets.potential.qmugs",
+    "ISO17": "openqdc.datasets.potential.iso_17",
+    "COMP6": "openqdc.datasets.potential.comp6",
+    "GDML": "openqdc.datasets.potential.gdml",
+    "Molecule3D": "openqdc.datasets.potential.molecule3d",
+    "OrbnetDenali": "openqdc.datasets.potential.orbnet_denali",
+    "SN2RXN": "openqdc.datasets.potential.sn2_rxn",
+    "QM7X": "openqdc.datasets.potential.qm7x",
+    "DES": "openqdc.datasets.interaction.des",
+    "NablaDFT": "openqdc.datasets.potential.nabladft",
+    "SolvatedPeptides": "openqdc.datasets.potential.solvated_peptides",
+    "WaterClusters": "openqdc.datasets.potential.waterclusters3_30",
+    "TMQM": "openqdc.datasets.potential.tmqm",
+    "Dummy": "openqdc.datasets.potential.dummy",
+    "PCQM_B3LYP": "openqdc.datasets.potential.pcqm",
+    "PCQM_PM6": "openqdc.datasets.potential.pcqm",
+    "Transition1X": "openqdc.datasets.potential.transition1x",
     "AVAILABLE_DATASETS": "openqdc.datasets",
 }
 
@@ -66,23 +66,23 @@ if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
     # checkers what they are.
     from ._version import __version__  # noqa
     from .datasets import AVAILABLE_DATASETS  # noqa
-    from .datasets.ani import ANI1, ANI1CCX, ANI1X  # noqa
     from .datasets.base import BaseDataset  # noqa
-    from .datasets.comp6 import COMP6  # noqa
-    from .datasets.des import DES  # noqa
-    from .datasets.dummy import Dummy  # noqa
-    from .datasets.gdml import GDML  # noqa
-    from .datasets.geom import GEOM  # noqa
-    from .datasets.iso_17 import ISO17  # noqa
-    from .datasets.molecule3d import Molecule3D  # noqa
-    from .datasets.nabladft import NablaDFT  # noqa
-    from .datasets.orbnet_denali import OrbnetDenali  # noqa
-    from .datasets.pcqm import PCQM_B3LYP, PCQM_PM6  # noqa
-    from .datasets.qm7x import QM7X  # noqa
-    from .datasets.qmugs import QMugs  # noqa
-    from .datasets.sn2_rxn import SN2RXN  # noqa
-    from .datasets.solvated_peptides import SolvatedPeptides  # noqa
-    from .datasets.spice import Spice  # noqa
-    from .datasets.tmqm import TMQM  # noqa
-    from .datasets.transition1x import Transition1X  # noqa
-    from .datasets.waterclusters3_30 import WaterClusters  # noqa
+    from .datasets.interaction.des import DES  # noqa
+    from .datasets.potential.ani import ANI1, ANI1CCX, ANI1X  # noqa
+    from .datasets.potential.comp6 import COMP6  # noqa
+    from .datasets.potential.dummy import Dummy  # noqa
+    from .datasets.potential.gdml import GDML  # noqa
+    from .datasets.potential.geom import GEOM  # noqa
+    from .datasets.potential.iso_17 import ISO17  # noqa
+    from .datasets.potential.molecule3d import Molecule3D  # noqa
+    from .datasets.potential.nabladft import NablaDFT  # noqa
+    from .datasets.potential.orbnet_denali import OrbnetDenali  # noqa
+    from .datasets.potential.pcqm import PCQM_B3LYP, PCQM_PM6  # noqa
+    from .datasets.potential.qm7x import QM7X  # noqa
+    from .datasets.potential.qmugs import QMugs  # noqa
+    from .datasets.potential.sn2_rxn import SN2RXN  # noqa
+    from .datasets.potential.solvated_peptides import SolvatedPeptides  # noqa
+    from .datasets.potential.spice import Spice  # noqa
+    from .datasets.potential.tmqm import TMQM  # noqa
+    from .datasets.potential.transition1x import Transition1X  # noqa
+    from .datasets.potential.waterclusters3_30 import WaterClusters  # noqa
