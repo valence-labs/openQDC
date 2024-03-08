@@ -29,7 +29,13 @@ class Metcalf(BaseInteractionDataset):
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
     __forces_unit__ = None
-    __energy_methods__ = ["SAPT0/jun-cc-pVDZ"]
+    __energy_methods__ = [
+        "SAPT0/jun-cc-pVDZ",
+        "SAPT0/jun-cc-pVDZ_es",
+        "SAPT0/jun-cc-pVDZ_ex",
+        "SAPT0/jun-cc-pVDZ_ind",
+        "SAPT0/jun-cc-pVDZ_disp",
+    ]
     energy_target_names = [
         "total energy",
         "electrostatic energy",
