@@ -58,13 +58,13 @@ plugins:
   - search
   - mkdocstrings:
       watch:
-        - src/
+        - openqdc/
       handlers:
         python:
           setup_commands:
             - import sys
             - sys.path.append("docs")
-            - sys.path.append("src")
+            - sys.path.append("openqdc")
           selection:
             new_path_syntax: yes
           rendering:

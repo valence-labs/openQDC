@@ -7,7 +7,37 @@ name = "openqdc"
 dynamic = ["version"]
 description = "ML ready Quantum Mechanical datasets"
 authors = [{ name = "Nikhil Shenoy", email = "nikhilshenoy98@gmail.com" },
-          { name = "Prudencio Tossou", email = "tossouprudencio@gmail.com" }]
+          { name = "Prudencio Tossou", email = "tossouprudencio@gmail.com" },
+          { name = "Cristian Gabellini", email = "cris.gabellini@gmail.com" }]
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Healthcare Industry",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+
+[project.scripts]
+openqdc = "openqdc.cli:app"
+
+[project.urls]
+Website = "https://github.com/OpenDrugDiscovery"
+"Source Code" = "https://github.com/OpenDrugDiscovery/openQDC"
+"Bug Tracker" = "https://github.com/OpenDrugDiscovery/openQDC/issues"
+Documentation = "https://github.com/OpenDrugDiscovery/openQDC"
 
 [tool.setuptools]
 include-package-data = true
@@ -17,9 +47,10 @@ fallback_version = "dev"
 
 [tool.isort]
 profile = "black"
+src_paths = ["openqdc"]
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["."]
 include = ["openqdc", "openqdc.*"]
 exclude = []
 namespaces = true
