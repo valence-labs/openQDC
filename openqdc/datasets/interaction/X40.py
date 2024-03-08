@@ -15,7 +15,7 @@ class X40(BaseInteractionDataset):
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
     __energy_methods__ = [
-        "default",
+        "CCSD(T)/CBS",
         "MP2/CBS",
         "dCCSD(T)/haDZ",
         "dCCSD(T)/haTZ",

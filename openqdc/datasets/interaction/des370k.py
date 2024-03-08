@@ -79,7 +79,6 @@ class DES370K(BaseInteractionDataset):
             name = np.array([smiles0 + "." + smiles1])
 
             subsets = []
-            # for smiles in [canon_smiles0, canon_smiles1]:
             for smiles in [smiles0, smiles1]:
                 found = False
                 for functional_group, smiles_set in molecule_groups.items():
