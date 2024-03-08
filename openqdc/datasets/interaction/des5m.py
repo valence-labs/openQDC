@@ -11,6 +11,16 @@ from openqdc.utils.molecule import atom_table, molecule_groups
 
 
 class DES5M(DES370K):
+    """
+    DE Shaw Research interaction energy calculations for
+    over 5M small molecule dimers as described in the paper:
+
+    Quantum chemical benchmark databases of gold-standard dimer interaction energies.
+    Donchev, A.G., Taube, A.G., Decolvenaere, E. et al.
+    Sci Data 8, 55 (2021).
+    https://doi.org/10.1038/s41597-021-00833-x
+    """
+
     __name__ = "des5m_interaction"
     __energy_methods__ = [
         "mp2/cc-pvqz",

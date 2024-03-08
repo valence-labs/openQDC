@@ -10,6 +10,18 @@ from openqdc.utils.molecule import atom_table
 
 
 class L7(BaseInteractionDataset):
+    """
+    The L7 interaction energy dataset as described in:
+
+    Accuracy of Quantum Chemical Methods for Large Noncovalent Complexes
+    Robert Sedlak, Tomasz Janowski, Michal Pitoňák, Jan Řezáč, Peter Pulay, and Pavel Hobza
+    Journal of Chemical Theory and Computation 2013 9 (8), 3364-3374
+    DOI: 10.1021/ct400036b
+
+    Data was downloaded and extracted from:
+    http://cuby4.molecular.cz/dataset_l7.html
+    """
+
     __name__ = "L7"
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"

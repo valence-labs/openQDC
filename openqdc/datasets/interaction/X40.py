@@ -10,6 +10,19 @@ from openqdc.utils.molecule import atom_table
 
 
 class X40(BaseInteractionDataset):
+    """
+    X40 interaction dataset of 40 dimer pairs as
+    introduced in the following paper:
+
+    Benchmark Calculations of Noncovalent Interactions of Halogenated Molecules
+    Jan Řezáč, Kevin E. Riley, and Pavel Hobza
+    Journal of Chemical Theory and Computation 2012 8 (11), 4285-4292
+    DOI: 10.1021/ct300647k
+
+    Dataset retrieved and processed from:
+    http://cuby4.molecular.cz/dataset_x40.html
+    """
+
     __name__ = "X40"
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"

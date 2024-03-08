@@ -11,6 +11,21 @@ from openqdc.utils.molecule import atom_table
 
 
 class DESS66(BaseInteractionDataset):
+    """
+    DE Shaw Research interaction energy
+    estimates of all 66 conformers from
+    the original S66 dataset as described
+    in the paper:
+
+    Quantum chemical benchmark databases of gold-standard dimer interaction energies.
+    Donchev, A.G., Taube, A.G., Decolvenaere, E. et al.
+    Sci Data 8, 55 (2021).
+    https://doi.org/10.1038/s41597-021-00833-x
+
+    Data was downloaded from Zenodo:
+    https://zenodo.org/records/5676284
+    """
+
     __name__ = "des_s66"
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"

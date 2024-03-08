@@ -10,6 +10,16 @@ from openqdc.utils.molecule import atom_table
 
 
 class Splinter(BaseInteractionDataset):
+    """
+    A dataset of over 1.7 million protein-ligand
+    interactions as described in the paper:
+
+    A quantum chemical interaction energy dataset for accurately modeling protein-ligand interactions.
+    Spronk, S.A., Glick, Z.L., Metcalf, D.P. et al.
+    Sci Data 10, 619 (2023).
+    https://doi.org/10.1038/s41597-023-02443-1
+    """
+
     __name__ = "splinter"
     __energy_methods__ = [
         "sapt0/jun-cc-pV(D+d)Z_unscaled",

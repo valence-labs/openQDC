@@ -11,6 +11,16 @@ from openqdc.utils.molecule import atom_table, molecule_groups
 
 
 class DES370K(BaseInteractionDataset):
+    """
+    DE Shaw Research interaction energy of over 370K
+    small molecule dimers as described in the paper:
+
+    Quantum chemical benchmark databases of gold-standard dimer interaction energies.
+    Donchev, A.G., Taube, A.G., Decolvenaere, E. et al.
+    Sci Data 8, 55 (2021).
+    https://doi.org/10.1038/s41597-021-00833-x
+    """
+
     __name__ = "des370k_interaction"
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"

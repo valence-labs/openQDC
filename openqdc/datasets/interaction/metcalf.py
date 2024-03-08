@@ -8,6 +8,23 @@ from openqdc.utils.molecule import atom_table
 
 
 class Metcalf(BaseInteractionDataset):
+    """
+    Hydrogen-bonded dimers of NMA with 126 molecules as described in:
+
+    Approaches for machine learning intermolecular interaction energies and
+    application to energy components from symmetry adapted perturbation theory.
+    Derek P. Metcalf, Alexios Koutsoukas, Steven A. Spronk, Brian L. Claus,
+    Deborah A. Loughney, Stephen R. Johnson, Daniel L. Cheney, C. David Sherrill;
+    J. Chem. Phys. 21 February 2020; 152 (7): 074103.
+    https://doi.org/10.1063/1.5142636
+
+    Further details:
+    "Hydrogen-bonded dimers involving N-methylacetamide (NMA) and 126 molecules
+    (46 donors and 80 acceptors; Figs. 2 and 3) were used. Optimized geometries
+    for the 126 individual monomers were obtained and paired with NMA in broad
+    arrays of spatial configurations to generate thousands of complexes for training.
+    """
+
     __name__ = "metcalf"
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
@@ -22,14 +39,6 @@ class Metcalf(BaseInteractionDataset):
     ]
 
     def read_raw_entries(self) -> List[Dict]:
-        """
-        SMILES strings are inferred from the
-        .xyz files using the RDKit xyz2mol function.
-        More details here:
-
-        https://github.com/jensengroup/xyz2mol
-
-        """
         data = []
         for dirname in os.listdir(self.root):
             xyz_dir = os.path.join(self.root, dirname)
