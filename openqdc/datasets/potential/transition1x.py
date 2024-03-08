@@ -71,9 +71,9 @@ class Transition1X(BaseDataset):
         "wB97x_6-31G(d).forces",
     ]
 
-    __energy_unit__ = "hartree"
+    __energy_unit__ = "ev"
     __distance_unit__ = "ang"
-    __forces_unit__ = "hartree/ang"
+    __forces_unit__ = "ev/ang"
 
     def read_raw_entries(self):
         raw_path = p_join(self.root, "Transition1x.h5")
