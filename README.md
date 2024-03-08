@@ -78,11 +78,6 @@ We provide support for the following publicly available QM Potential Energy Data
 
 # Interaction energy
 
-| Dataset | # Molecules | # Conformers | Average Conformers per Molecule | Force Labels | Atom Types | QM Level of Theory | Off-Equilibrium Conformations|
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| [DES370K](https://www.nature.com/articles/s41597-021-00833-x) | 3,700 | 370,000 | 100 | No | 20 | CCSD(T) | Yes |
-| [DES5M](https://www.nature.com/articles/s41597-021-00833-x) | 3,700 | 5,000,000 | 1351 | No | 20 | SNS-MP2 | Yes |
-
 We also provide support for the following publicly available QM Noncovalent Interaction Energy Datasets.
 
 | Dataset |
@@ -90,3 +85,8 @@ We also provide support for the following publicly available QM Noncovalent Inte
 | [DES370K](https://www.nature.com/articles/s41597-021-00833-x) |
 | [DES5M](https://www.nature.com/articles/s41597-021-00833-x)   |
 | [Metcalf](https://pubs.aip.org/aip/jcp/article/152/7/074103/1059677/Approaches-for-machine-learning-intermolecular) |
+| [DESS66](https://www.nature.com/articles/s41597-021-00833-x) |
+| [DESS66x8](https://www.nature.com/articles/s41597-021-00833-x) |
+| [Splinter](https://www.nature.com/articles/s41597-023-02443-1) |
+| [X40](https://pubs.acs.org/doi/10.1021/ct300647k) |
+| [L7](https://pubs.acs.org/doi/10.1021/ct400036b)  |
