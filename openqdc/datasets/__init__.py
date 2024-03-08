@@ -24,7 +24,6 @@ AVAILABLE_DATASETS = {
     "ani1ccx": ANI1CCX,
     "ani1x": ANI1X,
     "comp6": COMP6,
-    "des": DES,
     "gdml": GDML,
     "geom": GEOM,
     "iso17": ISO17,
