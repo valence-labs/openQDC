@@ -312,6 +312,8 @@ class BaseDataset:
 
     @property
     def force_mask(self):
+        if len(self.__class__.__force_mask__) == 0:
+            self.__class__.__force_mask__ = [False] * len(self.energy_methods)
         return self.__class__.__force_mask__
 
     def _set_units(self, en, ds):

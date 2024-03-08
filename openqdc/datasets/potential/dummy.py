@@ -75,8 +75,8 @@ class Dummy(BaseDataset):
         )  # (sum(n_atoms), 5)
         name = [f"dummy_{i}" for i in range(len(self))]
         subset = ["dummy" for i in range(len(self))]
-        energies = np.random.rand(len(self), len(self.__energy_methods__))
-        forces = np.concatenate([np.random.randn(size, 3, len(self.__force_methods__)) * 100 for size in n_atoms])
+        energies = np.random.rand(len(self), len(self.energy_methods))
+        forces = np.concatenate([np.random.randn(size, 3, len(self.force_methods)) * 100 for size in n_atoms])
         self.data = dict(
             n_atoms=n_atoms,
             position_idx_range=position_idx_range,
