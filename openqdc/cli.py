@@ -31,7 +31,7 @@ def download(
     cache_dir: Annotated[
         Optional[str],
         typer.Option(
-            help="Path to cache directory. If not provided, the default cache directory (.cache/openqdc/) will be used.",
+            help="Path to the cache. If not provided, the default cache directory (.cache/openqdc/) will be used.",
         ),
     ] = None,
 ):
