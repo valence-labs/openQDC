@@ -85,8 +85,8 @@ We provide support for the following publicly available QM Potential Energy Data
 
 We also provide support for the following publicly available QM Noncovalent Interaction Energy Datasets.
 
-| Dataset | 
-| --- | 
+| Dataset |
+| --- |
 | [DES370K](https://www.nature.com/articles/s41597-021-00833-x) |
 | [DES5M](https://www.nature.com/articles/s41597-021-00833-x)   |
 | [Metcalf](https://pubs.aip.org/aip/jcp/article/152/7/074103/1059677/Approaches-for-machine-learning-intermolecular) |
