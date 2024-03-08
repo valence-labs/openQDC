@@ -1,22 +1,10 @@
-from typing import Dict, List, Optional, Union
-from openqdc.utils.io import (
-    copy_exists,
-    dict_to_atoms,
-    get_local_cache,
-    load_hdf5_file,
-    load_pkl,
-    pull_locally,
-    push_remote,
-    set_cache_dir,
-)
-from openqdc.datasets.potential.base import BaseDataset
-from openqdc.utils.constants import (
-    NB_ATOMIC_FEATURES
-)
-
-from loguru import logger
+from typing import Dict, List, Optional
 
 import numpy as np
+
+from openqdc.datasets.potential.base import BaseDataset
+from openqdc.utils.constants import NB_ATOMIC_FEATURES
+
 
 class BaseInteractionDataset(BaseDataset):
     def __init__(
@@ -30,14 +18,17 @@ class BaseInteractionDataset(BaseDataset):
             energy_unit=energy_unit,
             distance_unit=distance_unit,
             overwrite_local_cache=overwrite_local_cache,
-            cache_dir=cache_dir
+            cache_dir=cache_dir,
         )
 
     def collate_list(self, list_entries: List[Dict]):
         # concatenate entries
         print(list_entries[0])
-        res = {key: np.concatenate([r[key] for r in list_entries if r is not None], axis=0) \
-               for key in list_entries[0] if not isinstance(list_entries[0][key], dict)}
+        res = {
+            key: np.concatenate([r[key] for r in list_entries if r is not None], axis=0)
+            for key in list_entries[0]
+            if not isinstance(list_entries[0][key], dict)
+        }
 
         csum = np.cumsum(res.get("n_atoms"))
         print(csum)

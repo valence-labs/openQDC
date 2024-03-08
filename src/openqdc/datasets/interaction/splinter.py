@@ -1,14 +1,12 @@
 import os
-import numpy as np
-import pandas as pd
-
 from typing import Dict, List
 
-from tqdm import tqdm
-from rdkit import Chem
+import numpy as np
 from loguru import logger
+from tqdm import tqdm
+
 from openqdc.datasets.interaction import BaseInteractionDataset
-from openqdc.utils.molecule import atom_table, molecule_groups
+from openqdc.utils.molecule import atom_table
 
 
 class Splinter(BaseInteractionDataset):
@@ -43,33 +41,43 @@ class Splinter(BaseInteractionDataset):
         data = []
         i = 0
         with tqdm(total=1706343) as progress_bar:
-            for root, dirs, files in os.walk(self.root): # total is currently an approximation
+            for root, dirs, files in os.walk(self.root):  # total is currently an approximation
                 for filename in files:
                     if not filename.endswith(".xyz"):
                         continue
                     i += 1
                     filepath = os.path.join(root, filename)
-                    filein = open(filepath, "r")                
+                    filein = open(filepath, "r")
                     lines = list(map(lambda x: x.strip(), filein.readlines()))
                     n_atoms = np.array([int(lines[0])], dtype=np.int32)
                     metadata = lines[1].split(",")
                     try:
                         (
-                            protein_monomer_name, 
-                            protein_interaction_site_type, 
-                            ligand_monomer_name, 
+                            protein_monomer_name,
+                            protein_interaction_site_type,
+                            ligand_monomer_name,
                             ligand_interaction_site_type,
-                            index, r, theta_P, tau_P, theta_L,
-                            tau_L, tau_PL
+                            index,
+                            r,
+                            theta_P,
+                            tau_P,
+                            theta_L,
+                            tau_L,
+                            tau_PL,
                         ) = metadata[0].split("_")
-                        index, r, theta_P, tau_P, theta_L, tau_L, tau_PL = list(map(float, [index, r, theta_P, tau_P, theta_L, tau_L, tau_PL]))
-                    except:
-                            (protein_monomer_name, 
-                            protein_interaction_site_type, 
-                            ligand_monomer_name, 
+                        index, r, theta_P, tau_P, theta_L, tau_L, tau_PL = list(
+                            map(float, [index, r, theta_P, tau_P, theta_L, tau_L, tau_PL])
+                        )
+                    except ValueError:
+                        (
+                            protein_monomer_name,
+                            protein_interaction_site_type,
+                            ligand_monomer_name,
                             ligand_interaction_site_type,
-                            index, _) = metadata[0].split("_")
-                            r, theta_P, tau_P, theta_L, tau_L, tau_PL = [None] * 6
+                            index,
+                            _,
+                        ) = metadata[0].split("_")
+                        r, theta_P, tau_P, theta_L, tau_L, tau_PL = [None] * 6
                     energies = np.array([list(map(float, metadata[4:-1]))]).astype(np.float32)
                     n_atoms_first = np.array([int(metadata[-1])], dtype=np.int32)
                     total_charge, charge0, charge1 = list(map(int, metadata[1:4]))
@@ -89,18 +97,18 @@ class Splinter(BaseInteractionDataset):
                         n_atoms=n_atoms,
                         n_atoms_first=n_atoms_first,
                         atomic_inputs=atomic_inputs,
-                        protein_monomer_name= np.array([protein_monomer_name]),
+                        protein_monomer_name=np.array([protein_monomer_name]),
                         protein_interaction_site_type=np.array([protein_interaction_site_type]),
                         ligand_monomer_name=np.array([ligand_monomer_name]),
                         ligand_interaction_site_type=np.array([ligand_interaction_site_type]),
-                        index = np.array([index]),
+                        index=np.array([index]),
                         r=np.array([r]),
                         theta_P=np.array([theta_P]),
                         tau_P=np.array([tau_P]),
                         theta_L=np.array([theta_L]),
                         tau_L=np.array([tau_L]),
                         tau_PL=np.array([tau_PL]),
-                        name=np.array([protein_monomer_name + "." + ligand_monomer_name])
+                        name=np.array([protein_monomer_name + "." + ligand_monomer_name]),
                     )
                     data.append(item)
                     progress_bar.update(1)

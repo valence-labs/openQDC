@@ -1,12 +1,11 @@
 import os
-import numpy as np
-import pandas as pd
-
 from typing import Dict, List
 
-from tqdm import tqdm
-from rdkit import Chem
+import numpy as np
+import pandas as pd
 from loguru import logger
+from tqdm import tqdm
+
 from openqdc.datasets.interaction import BaseInteractionDataset
 from openqdc.utils.molecule import atom_table, molecule_groups
 
@@ -66,22 +65,14 @@ class DES370K(BaseInteractionDataset):
             charge0, charge1 = row["charge0"], row["charge1"]
             natoms0, natoms1 = row["natoms0"], row["natoms1"]
             pos = np.array(list(map(float, row["xyz"].split()))).reshape(-1, 3)
-            pos0 = pos[:natoms0]
-            pos1 = pos[natoms0:]
-            
+
             elements = row["elements"].split()
-            elements0 = np.array(elements[:natoms0])
-            elements1 = np.array(elements[natoms0:])
 
             atomic_nums = np.expand_dims(np.array([atom_table.GetAtomicNumber(x) for x in elements]), axis=1)
-            atomic_nums0 = np.array(atomic_nums[:natoms0])
-            atomic_nums1 = np.array(atomic_nums[natoms0:])
 
             charges = np.expand_dims(np.array([charge0] * natoms0 + [charge1] * natoms1), axis=1)
 
             atomic_inputs = np.concatenate((atomic_nums, charges, pos), axis=-1, dtype=np.float32)
-            atomic_inputs0 = atomic_inputs[:natoms0, :]
-            atomic_inputs1 = atomic_inputs[natoms0:, :]
 
             energies = np.array(row[self.energy_target_names].values).astype(np.float32)[None, :]
 
@@ -97,7 +88,6 @@ class DES370K(BaseInteractionDataset):
                         found = True
                 if not found:
                     logger.info(f"molecule group lookup failed for {smiles}")
-
 
             item = dict(
                 energies=energies,

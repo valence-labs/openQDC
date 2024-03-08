@@ -1,15 +1,12 @@
 import os
-import numpy as np
-import pandas as pd
-
 from typing import Dict, List
 
-from tqdm import tqdm
-from rdkit import Chem
-from ruamel.yaml import YAML
+import numpy as np
 from loguru import logger
+from ruamel.yaml import YAML
+
 from openqdc.datasets.interaction import BaseInteractionDataset
-from openqdc.utils.molecule import atom_table, molecule_groups
+from openqdc.utils.molecule import atom_table
 
 
 class X40(BaseInteractionDataset):
@@ -43,7 +40,7 @@ class X40(BaseInteractionDataset):
             energies.append(float(item["reference_value"]))
             xyz_file = open(os.path.join(self.root, f"{item['shortname']}.xyz"), "r")
             lines = list(map(lambda x: x.strip().split(), xyz_file.readlines()))
-            setup = lines.pop(1) 
+            setup = lines.pop(1)
             n_atoms = np.array([int(lines[0][0])], dtype=np.int32)
             n_atoms_first = setup[0].split("-")[1]
             n_atoms_first = np.array([int(n_atoms_first)], dtype=np.int32)

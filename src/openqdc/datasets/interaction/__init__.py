@@ -47,14 +47,14 @@ def __dir__():
 
 if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
     from .base import BaseInteractionDataset
-    from .des370k import DES370K
     from .des5m import DES5M
-    from .metcalf import Metcalf
+    from .des370k import DES370K
     from .dess66 import DESS66
     from .dess66x8 import DESS66x8
     from .L7 import L7
-    from .X40 import X40
+    from .metcalf import Metcalf
     from .splinter import Splinter
+    from .X40 import X40
 
     __all__ = [
         "BaseInteractionDataset",

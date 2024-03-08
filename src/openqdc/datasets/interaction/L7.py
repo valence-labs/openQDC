@@ -1,15 +1,12 @@
 import os
-import numpy as np
-import pandas as pd
-
 from typing import Dict, List
 
-from tqdm import tqdm
-from rdkit import Chem
-from ruamel.yaml import YAML
+import numpy as np
 from loguru import logger
+from ruamel.yaml import YAML
+
 from openqdc.datasets.interaction import BaseInteractionDataset
-from openqdc.utils.molecule import atom_table, molecule_groups
+from openqdc.utils.molecule import atom_table
 
 
 class L7(BaseInteractionDataset):
@@ -47,7 +44,7 @@ class L7(BaseInteractionDataset):
             energies.append(item["reference_value"])
             xyz_file = open(os.path.join(self.root, f"{fname}.xyz"), "r")
             lines = list(map(lambda x: x.strip().split(), xyz_file.readlines()))
-            lines.pop(1) 
+            lines.pop(1)
             n_atoms = np.array([int(lines[0][0])], dtype=np.int32)
             n_atoms_first = np.array([int(item["setup"]["molecule_a"]["selection"].split("-")[1])], dtype=np.int32)
             subset = np.array([item["group"]])
