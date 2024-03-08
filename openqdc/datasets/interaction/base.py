@@ -2,7 +2,7 @@ from typing import Dict, List, Optional
 
 import numpy as np
 
-from openqdc.datasets.potential.base import BaseDataset
+from openqdc.datasets.base import BaseDataset
 from openqdc.utils.constants import NB_ATOMIC_FEATURES
 
 
