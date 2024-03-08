@@ -11,14 +11,14 @@ class Dummy(BaseDataset):
 
     __name__ = "dummy"
     __energy_methods__ = ["I_solved_the_schrodinger_equation_by_hand", "PM6"]
-    __force_methods__ = ["I_made_up_random_forces", "writing_1_to_every_coordinate"]
+    __force_mask__ = [False, True]
     __energy_unit__ = "kcal/mol"
     __distance_unit__ = "ang"
     __forces_unit__ = "kcal/mol/ang"
 
     energy_target_names = [f"energy{i}" for i in range(len(__energy_methods__))]
 
-    force_target_names = [f"forces{i}" for i in range(len(__force_methods__))]
+    force_target_names = [f"forces{i}" for i in range(len(__force_mask__))]
     __isolated_atom_energies__ = []
     __average_n_atoms__ = None
 

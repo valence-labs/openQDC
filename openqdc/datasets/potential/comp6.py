@@ -50,10 +50,7 @@ class COMP6(BaseDataset):
         # "WB97M-D3(BJ):def2-tzvp",
         # "WB97M:def2-tzvp",
     ]
-
-    __force_methods__ = [
-        "wb97x/6-31g*",
-    ]
+    __force_mask__ = [True, False, False, False, False, False, False]
 
     force_target_names = [
         "Gradient",
