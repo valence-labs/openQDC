@@ -65,10 +65,14 @@ class DES370K(BaseInteractionDataset):
         "sapt_delta_HF",
     ]
 
-    def read_raw_entries(self) -> List[Dict]:
-        self.filepath = os.path.join(self.root, "DES370K.csv")
-        logger.info(f"Reading DES370K interaction data from {self.filepath}")
-        df = pd.read_csv(self.filepath)
+    _filename = "DES370K.csv"
+    _short_name = "DES370K"
+
+    @classmethod
+    def _read_raw_entries(cls) -> List[Dict]:
+        filepath = os.path.join(cls.root, cls._filename)
+        logger.info(f"Reading {cls._short_name} interaction data from {filepath}")
+        df = pd.read_csv(filepath)
         data = []
         for idx, row in tqdm(df.iterrows(), total=df.shape[0]):
             smiles0, smiles1 = row["smiles0"], row["smiles1"]
@@ -84,7 +88,7 @@ class DES370K(BaseInteractionDataset):
 
             atomic_inputs = np.concatenate((atomic_nums, charges, pos), axis=-1, dtype=np.float32)
 
-            energies = np.array(row[self.energy_target_names].values).astype(np.float32)[None, :]
+            energies = np.array(row[cls.energy_target_names].values).astype(np.float32)[None, :]
 
             name = np.array([smiles0 + "." + smiles1])
 
@@ -108,3 +112,6 @@ class DES370K(BaseInteractionDataset):
             )
             data.append(item)
         return data
+
+    def read_raw_entries(self) -> List[Dict]:
+        return DES370K._read_raw_entries()
