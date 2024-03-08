@@ -50,7 +50,7 @@ class DES5M(DES370K):
     ]
 
     _filename = "DES5M.csv"
-    _short_name = "DES5M"
+    _name = "des5m_interaction"
 
     def read_raw_entries(self) -> List[Dict]:
         return DES5M._read_raw_entries()

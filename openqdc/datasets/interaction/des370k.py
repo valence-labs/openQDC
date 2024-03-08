@@ -7,6 +7,7 @@ from loguru import logger
 from tqdm import tqdm
 
 from openqdc.datasets.interaction import BaseInteractionDataset
+from openqdc.utils.io import get_local_cache
 from openqdc.utils.molecule import atom_table, molecule_groups
 
 
@@ -66,12 +67,16 @@ class DES370K(BaseInteractionDataset):
     ]
 
     _filename = "DES370K.csv"
-    _short_name = "DES370K"
+    _name = "des370k_interaction"
+
+    @classmethod
+    def _root(cls):
+        return os.path.join(get_local_cache(), cls._name)
 
     @classmethod
     def _read_raw_entries(cls) -> List[Dict]:
-        filepath = os.path.join(cls.root, cls._filename)
-        logger.info(f"Reading {cls._short_name} interaction data from {filepath}")
+        filepath = os.path.join(cls._root(), cls._filename)
+        logger.info(f"Reading {cls._name} interaction data from {filepath}")
         df = pd.read_csv(filepath)
         data = []
         for idx, row in tqdm(df.iterrows(), total=df.shape[0]):

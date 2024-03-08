@@ -74,6 +74,7 @@ class Metcalf(BaseInteractionDataset):
                     positions=xyz,
                     atomic_inputs=atomic_inputs,
                     name=np.array([""]),
+                    n_atoms_first=np.array([-1]),
                 )
                 data.append(item)
         return data
