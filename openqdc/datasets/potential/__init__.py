@@ -18,7 +18,7 @@ from .tmqm import TMQM  # noqa
 from .transition1x import Transition1X  # noqa
 from .waterclusters3_30 import WaterClusters  # noqa
 
-AVAILABLE_DATASETS = {
+AVAILABLE_POTENTIAL_DATASETS = {
     "ani1": ANI1,
     "ani1ccx": ANI1CCX,
     "ani1x": ANI1X,

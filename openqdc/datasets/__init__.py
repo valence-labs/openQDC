@@ -1,5 +1,7 @@
 from .base import BaseDataset  # noqa
+from .interaction import AVAILABLE_INTERACTION_DATASETS  # noqa
 from .interaction import DES  # noqa
+from .potential import AVAILABLE_POTENTIAL_DATASETS  # noqa
 from .potential.ani import ANI1, ANI1CCX, ANI1X  # noqa
 from .potential.comp6 import COMP6  # noqa
 from .potential.dummy import Dummy  # noqa
@@ -20,27 +22,4 @@ from .potential.tmqm import TMQM  # noqa
 from .potential.transition1x import Transition1X  # noqa
 from .potential.waterclusters3_30 import WaterClusters  # noqa
 
-AVAILABLE_DATASETS = {
-    "ani1": ANI1,
-    "ani1ccx": ANI1CCX,
-    "ani1x": ANI1X,
-    "comp6": COMP6,
-    "des": DES,
-    "gdml": GDML,
-    "geom": GEOM,
-    "iso17": ISO17,
-    "molecule3d": Molecule3D,
-    "nabladft": NablaDFT,
-    "orbnetdenali": OrbnetDenali,
-    "pcqmb3lyp": PCQM_B3LYP,
-    "pcqmpm6": PCQM_PM6,
-    "qm7x": QM7X,
-    "qmugs": QMugs,
-    "sn2rxn": SN2RXN,
-    "solvatedpeptides": SolvatedPeptides,
-    "spice": Spice,
-    "tmqm": TMQM,
-    "transition1x": Transition1X,
-    "watercluster": WaterClusters,
-    "multixcqm9": MultixcQM9,
-}
+AVAILABLE_DATASETS = {**AVAILABLE_POTENTIAL_DATASETS, **AVAILABLE_INTERACTION_DATASETS}

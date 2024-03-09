@@ -34,6 +34,8 @@ _lazy_imports_obj = {
     "Transition1X": "openqdc.datasets.potential.transition1x",
     "MultixcQM9": "openqdc.datasets.potential.multixcqm9",
     "AVAILABLE_DATASETS": "openqdc.datasets",
+    "AVAILABLE_POTENTIAL_DATASETS": "openqdc.datasets.potential",
+    "AVAILABLE_INTERACTION_DATASETS": "openqdc.datasets.interaction",
 }
 
 _lazy_imports_mod = {"datasets": "openqdc.datasets", "utils": "openqdc.utils"}

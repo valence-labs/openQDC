@@ -1,3 +1,3 @@
 from .des import DES
 
-AVAILABLE_DATASETS = {"des": DES}
+AVAILABLE_INTERACTION_DATASETS = {"des": DES}
