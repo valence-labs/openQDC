@@ -25,18 +25,21 @@ def download(
     overwrite: Annotated[
         bool,
         typer.Option(
-            help="Whether to overwrite the datasets",
+            help="Whether to overwrite or force the re-download of the datasets.",
         ),
     ] = False,
     cache_dir: Annotated[
         Optional[str],
         typer.Option(
-            help="Path to cache directory",
+            help="Path to the cache. If not provided, the default cache directory (.cache/openqdc/) will be used.",
         ),
     ] = None,
 ):
     """
-    Download preprocessed datasets from openQDC.
+    Download preprocessed ml-ready datasets from the main openQDC hub.
+
+    Example:
+        openqdc download Spice QMugs
     """
     for dataset in list(map(lambda x: x.lower().replace("_", ""), datasets)):
         if exist_dataset(dataset):
@@ -49,7 +52,7 @@ def download(
 @app.command()
 def datasets():
     """
-    Print the available datasets.
+    Print a table of the available openQDC datasets and some informations.
     """
     table = PrettyTable(["Name", "Forces", "Level of theory"])
     for dataset in AVAILABLE_DATASETS:
@@ -63,10 +66,16 @@ def datasets():
 @app.command()
 def fetch(datasets: List[str]):
     """
-    Download the raw datasets files from openQDC.
+    Download the raw datasets files from the main openQDC hub.
+    Special case: if the dataset is "all", all available datasets will be downloaded.
+
+    Example:
+        openqdc fetch Spice
     """
     if datasets[0] == "all":
         dataset_names = DataConfigFactory.available_datasets
+    else:
+        dataset_names = datasets
 
     for dataset_name in dataset_names:
         dd = DataDownloader()

@@ -29,14 +29,17 @@ mkdocs serve
 
 # Downloading Datasets
 
-A command line interface is available to download datasets or see which dataset is available, please run openqdc --help.
+A command line interface is available to download datasets or see which dataset is available, for more information please run openqdc --help.
 
 ```bash
 # Display the available datasets
 openqdc datasets
 
+# Display the help message for the download command
+openqdc download --help
+
 # Download the Spice and QMugs dataset
-openqdc download --datasets Spice QMugs
+openqdc download Spice QMugs
 ```
 
 # Overview of Datasets

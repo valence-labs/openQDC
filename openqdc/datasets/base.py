@@ -443,16 +443,14 @@ class BaseDataset:
             res = self.collate_list(entries)
             self.save_preprocess(res)
 
-    def save_xyz(self, idx: int, path: Optional[str] = None, name=None):
+    def save_xyz(self, idx: int, path: Optional[str] = None, ext=True):
         """
         Save the entry at index idx as an extxyz file.
         """
         if path is None:
             path = os.getcwd()
-        at = self.get_ase_atoms(idx, ext=True)
-        if name is not None:
-            name = at.info["name"]
-        write_extxyz(p_join(path, f"{name}.xyz"), at)
+        at = self.get_ase_atoms(idx, ext=ext)
+        write_extxyz(p_join(path, f"mol_{idx}.xyz"), at)
 
     def get_ase_atoms(self, idx: int, ext=True):
         """
