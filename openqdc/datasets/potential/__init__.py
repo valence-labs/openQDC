@@ -5,6 +5,7 @@ from .gdml import GDML  # noqa
 from .geom import GEOM  # noqa
 from .iso_17 import ISO17  # noqa
 from .molecule3d import Molecule3D  # noqa
+from .multixcqm9 import MultixcQM9  # noqa
 from .nabladft import NablaDFT  # noqa
 from .orbnet_denali import OrbnetDenali  # noqa
 from .pcqm import PCQM_B3LYP, PCQM_PM6  # noqa
@@ -38,4 +39,5 @@ AVAILABLE_DATASETS = {
     "tmqm": TMQM,
     "transition1x": Transition1X,
     "watercluster": WaterClusters,
+    "multixcqm9": MultixcQM9,
 }
