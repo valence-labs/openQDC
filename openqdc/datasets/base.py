@@ -182,7 +182,7 @@ class BaseDataset:
         for key in self.data_keys:
             self.data[key] = self._convert_on_loading(self.data[key], key)
 
-    def _set_lin_atom_species_dict(self, E0s, zs):
+    def _set_lin_atom_species_dict(self, E0s, covs, zs):
         atomic_energies_dict = {}
         for i, z in enumerate(zs):
             atomic_energies_dict[z] = E0s[i]
@@ -195,7 +195,7 @@ class BaseDataset:
         except np.linalg.LinAlgError:
             logger.warning(f"Failed to compute E0s using {regressor.solver_type} regression.")
             raise np.linalg.LinAlgError
-        self._set_lin_atom_species_dict(E0s, regressor.numbers)
+        self._set_lin_atom_species_dict(E0s, cov, regressor.numbers)
 
     def _precompute_statistics(self, overwrite_local_cache: bool = False):
         local_path = p_join(self.preprocess_path, "stats.pkl")
