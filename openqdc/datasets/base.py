@@ -405,7 +405,7 @@ class BaseDataset:
         for key in self.data_keys:
             filename = p_join(self.preprocess_path, f"{key}.mmap")
             pull_locally(filename, overwrite=overwrite_local_cache)
-            self.data[key] = np.memmap(filename, mode="r", dtype=self.data_types[key]).reshape(self.data_shapes[key])
+            self.data[key] = np.memmap(filename, mode="r", dtype=self.data_types[key]).reshape(*self.data_shapes[key])
 
         filename = p_join(self.preprocess_path, "props.pkl")
         pull_locally(filename, overwrite=overwrite_local_cache)

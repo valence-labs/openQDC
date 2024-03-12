@@ -32,7 +32,10 @@ _lazy_imports_obj = {
     "PCQM_B3LYP": "openqdc.datasets.potential.pcqm",
     "PCQM_PM6": "openqdc.datasets.potential.pcqm",
     "Transition1X": "openqdc.datasets.potential.transition1x",
+    "MultixcQM9": "openqdc.datasets.potential.multixcqm9",
     "AVAILABLE_DATASETS": "openqdc.datasets",
+    "AVAILABLE_POTENTIAL_DATASETS": "openqdc.datasets.potential",
+    "AVAILABLE_INTERACTION_DATASETS": "openqdc.datasets.interaction",
 }
 
 _lazy_imports_mod = {"datasets": "openqdc.datasets", "utils": "openqdc.utils"}
@@ -75,6 +78,7 @@ if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
     from .datasets.potential.geom import GEOM  # noqa
     from .datasets.potential.iso_17 import ISO17  # noqa
     from .datasets.potential.molecule3d import Molecule3D  # noqa
+    from .datasets.potential.multixcqm9 import MultixcQM9  # noqa
     from .datasets.potential.nabladft import NablaDFT  # noqa
     from .datasets.potential.orbnet_denali import OrbnetDenali  # noqa
     from .datasets.potential.pcqm import PCQM_B3LYP, PCQM_PM6  # noqa
