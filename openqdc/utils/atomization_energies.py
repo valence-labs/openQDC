@@ -214,9 +214,6 @@ class IsolatedAtomEnergyFactory:
             try:
                 matrix[atomic_numbers[key[0]], key[1] + shift] = tuple_hashmap[key]
             except KeyError:
-                print(key, list(tuple_hashmap.items()))
-                print(key[0], "?", key[1], "?", shift)
-                print(matrix.shape, atomic_numbers[key[0]], key[1] + shift)
                 logger.warning(f"Isolated atom energies not found for {key} and level of theory {level_of_theory}")
                 matrix[atomic_numbers[key[0]], key[1] + shift] = 0
         return matrix

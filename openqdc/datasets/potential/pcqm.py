@@ -146,16 +146,9 @@ class PCQM_PM6(BaseDataset):
         with open(local_path, "wb") as f:
             pkl.dump(tmp, f)
         push_remote(local_path, overwrite=True)
-        # for key in ["name", "subset"]:
-        #     local_path = p_join(self.preprocess_path, f"{key}.npz")
-        #     x = [el for i in range(len(list_entries)) for el in list_entries[i].pop(key)]
-        #     uniques, inv_indices = np.unique(x, return_inverse=True)
-        #     with open(local_path, "wb") as f:
-        #         np.savez_compressed(f, uniques=uniques, inv_indices=inv_indices)
-        #     push_remote(local_path, overwrite=True)
 
 
 class PCQM_B3LYP(PCQM_PM6):
     __name__ = "pubchemqc_b3lyp"
-    __energy_methods__ = ["b3lyp"]
+    __energy_methods__ = ["b3lyp/6-31g*"]
     energy_target_names = ["b3lyp"]
