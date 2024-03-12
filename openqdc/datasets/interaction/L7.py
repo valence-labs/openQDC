@@ -2,11 +2,51 @@ import os
 from typing import Dict, List
 
 import numpy as np
+import yaml
 from loguru import logger
-from ruamel.yaml import YAML
 
 from openqdc.datasets.interaction import BaseInteractionDataset
 from openqdc.utils.molecule import atom_table
+
+
+class DataItemYAMLObj:
+    def __init__(self, name, shortname, geometry, reference_value, setup, group, tags):
+        self.name = name
+        self.shortname = shortname
+        self.geometry = geometry
+        self.reference_value = reference_value
+        self.setup = setup
+        self.group = group
+        self.tags = tags
+
+
+class DataSetYAMLObj:
+    def __init__(self, name, references, text, method_energy, groups_by, groups, global_setup):
+        self.name = name
+        self.references = references
+        self.text = text
+        self.method_energy = method_energy
+        self.groups_by = groups_by
+        self.groups = groups
+        self.global_setup = global_setup
+
+
+def data_item_constructor(loader: yaml.SafeLoader, node: yaml.nodes.MappingNode):
+    """Construct an employee."""
+    return DataItemYAMLObj(**loader.construct_mapping(node))
+
+
+def dataset_constructor(loader: yaml.SafeLoader, node: yaml.nodes.MappingNode):
+    """Construct an employee."""
+    return DataSetYAMLObj(**loader.construct_mapping(node))
+
+
+def get_loader():
+    """Add constructors to PyYAML loader."""
+    loader = yaml.SafeLoader
+    loader.add_constructor("!ruby/object:ProtocolDataset::DataSetItem", data_item_constructor)
+    loader.add_constructor("!ruby/object:ProtocolDataset::DataSetDescription", dataset_constructor)
+    return loader
 
 
 class L7(BaseInteractionDataset):
@@ -43,23 +83,22 @@ class L7(BaseInteractionDataset):
         yaml_fpath = os.path.join(self.root, "l7.yaml")
         logger.info(f"Reading L7 interaction data from {self.root}")
         yaml_file = open(yaml_fpath, "r")
-        yaml = YAML()
         data = []
-        data_dict = yaml.load(yaml_file)
-        charge0 = int(data_dict["description"]["global_setup"]["molecule_a"]["charge"])
-        charge1 = int(data_dict["description"]["global_setup"]["molecule_b"]["charge"])
+        data_dict = yaml.load(yaml_file, Loader=get_loader())
+        charge0 = int(data_dict["description"].global_setup["molecule_a"]["charge"])
+        charge1 = int(data_dict["description"].global_setup["molecule_b"]["charge"])
 
         for idx, item in enumerate(data_dict["items"]):
             energies = []
-            name = np.array([item["shortname"]])
-            fname = item["geometry"].split(":")[1]
-            energies.append(item["reference_value"])
+            name = np.array([item.shortname])
+            fname = item.geometry.split(":")[1]
+            energies.append(item.reference_value)
             xyz_file = open(os.path.join(self.root, f"{fname}.xyz"), "r")
             lines = list(map(lambda x: x.strip().split(), xyz_file.readlines()))
             lines.pop(1)
             n_atoms = np.array([int(lines[0][0])], dtype=np.int32)
-            n_atoms_first = np.array([int(item["setup"]["molecule_a"]["selection"].split("-")[1])], dtype=np.int32)
-            subset = np.array([item["group"]])
+            n_atoms_first = np.array([int(item.setup["molecule_a"]["selection"].split("-")[1])], dtype=np.int32)
+            subset = np.array([item.group])
             energies += [float(val[idx]) for val in list(data_dict["alternative_reference"].values())]
             energies = np.array([energies], dtype=np.float32)
             pos = np.array(lines[1:])[:, 1:].astype(np.float32)
