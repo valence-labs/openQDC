@@ -140,6 +140,18 @@ class DataConfigFactory:
         ],
     )
 
+    multixcqm9 = dict(
+        dataset_name="multixcqm9",
+        links={
+            "xyz.zip": "https://data.dtu.dk/ndownloader/files/35143624",
+            "xtb.zip": "https://data.dtu.dk/ndownloader/files/42444300",
+            "dzp.zip": "https://data.dtu.dk/ndownloader/files/42443925",
+            "tzp.zip": "https://data.dtu.dk/ndownloader/files/42444129",
+            "sz.zip": "https://data.dtu.dk/ndownloader/files/42441345",
+            "failed_indices.dat": "https://data.dtu.dk/ndownloader/files/37337677",
+        },
+    )
+
     transition1x = dict(
         dataset_name="transition1x",
         links={"Transition1x.h5": "https://figshare.com/ndownloader/files/36035789"},
