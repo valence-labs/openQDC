@@ -51,7 +51,6 @@ class BaseInteractionDataset(BaseDataset):
             "position_idx_range": (-1, 2),
             "energies": (-1, len(self.__energy_methods__)),
             "forces": (-1, 3, len(self.force_target_names)),
-            "n_atoms_first": (-1,),
         }
 
     @property
@@ -61,7 +60,6 @@ class BaseInteractionDataset(BaseDataset):
             "position_idx_range": np.int32,
             "energies": np.float32,
             "forces": np.float32,
-            "n_atoms_first": np.int32,
         }
 
     def __getitem__(self, idx: int):
@@ -108,7 +106,9 @@ class BaseInteractionDataset(BaseDataset):
         local_path = p_join(self.preprocess_path, "props.pkl")
         for key in data_dict:
             if key not in self.data_keys:
-                data_dict[key] = np.unique(data_dict[key], return_inverse=True)
+                x = data_dict[key]
+                x[np.where(x is None)] = np.inf
+                data_dict[key] = np.unique(x, return_inverse=True)
 
         with open(local_path, "wb") as f:
             pkl.dump(data_dict, f)
