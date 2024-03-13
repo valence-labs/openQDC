@@ -5,7 +5,7 @@ import numpy as np
 import yaml
 from loguru import logger
 
-from openqdc.datasets.interaction import BaseInteractionDataset
+from openqdc.datasets.interaction.base import BaseInteractionDataset
 from openqdc.datasets.interaction.L7 import get_loader
 from openqdc.utils.molecule import atom_table
 

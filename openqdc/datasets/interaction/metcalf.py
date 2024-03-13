@@ -3,7 +3,7 @@ from typing import Dict, List
 
 import numpy as np
 
-from openqdc.datasets.interaction import BaseInteractionDataset
+from openqdc.datasets.interaction.base import BaseInteractionDataset
 from openqdc.utils.molecule import atom_table
 
 

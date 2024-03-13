@@ -1,6 +1,6 @@
 from typing import Dict, List
 
-from openqdc.datasets.interaction import DES370K
+from openqdc.datasets.interaction.des370k import DES370K
 
 
 class DES5M(DES370K):

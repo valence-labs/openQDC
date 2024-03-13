@@ -6,7 +6,7 @@ import pandas as pd
 from loguru import logger
 from tqdm import tqdm
 
-from openqdc.datasets.interaction import BaseInteractionDataset
+from openqdc.datasets.interaction.base import BaseInteractionDataset
 from openqdc.utils.molecule import atom_table
 
 
