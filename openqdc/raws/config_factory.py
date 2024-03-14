@@ -90,6 +90,20 @@ class DataConfigFactory:
         },
     )
 
+    des370k_interaction = dict(
+        dataset_name="des370k_interaction",
+        links={
+            "DES370K.zip": "https://zenodo.org/record/5676266/files/DES370K.zip",
+        },
+    )
+
+    des5m_interaction = dict(
+        dataset_name="des5m_interaction",
+        links={
+            "DES5M.zip": "https://zenodo.org/records/5706002/files/DESS5M.zip?download=1",
+        },
+    )
+
     tmqm = dict(
         dataset_name="tmqm",
         links={
@@ -142,6 +156,22 @@ class DataConfigFactory:
         dataset_name="transition1x",
         links={"Transition1x.h5": "https://figshare.com/ndownloader/files/36035789"},
     )
+
+    # l7 = dict(
+    #     dataset_name="l7",
+    #     links={"l7.zip": "http://www.begdb.org/moldown.php?id=40"}
+    # )
+
+    des_s66 = dict(
+        dataset_name="des_s66",
+        links={"DESS66.zip": "https://zenodo.org/records/5676284/files/DESS66.zip?download=1"},
+    )
+
+    des_s66x8 = dict(
+        dataset_name="des_s66x8",
+        links={"DESS66x8.zip": "https://zenodo.org/records/5676284/files/DESS66x8.zip?download=1"},
+    )
+
     available_datasets = [k for k in locals().keys() if not k.startswith("__")]
 
     def __init__(self):
