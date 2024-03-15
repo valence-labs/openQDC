@@ -66,7 +66,6 @@ def push_remote(local_path, overwrite=True):
     """
     remote_path = local_path.replace(get_local_cache(), get_remote_cache(write_access=overwrite))
     gcp_filesys.mkdirs(os.path.dirname(remote_path), exist_ok=False)
-    print(f"Pushing {local_path} file to {remote_path}, ({gcp_filesys.exists(os.path.dirname(remote_path))})")
     if not gcp_filesys.exists(remote_path) or overwrite:
         gcp_filesys.put_file(
             local_path,

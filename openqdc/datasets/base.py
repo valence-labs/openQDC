@@ -262,7 +262,7 @@ class BaseDataset:
         total_E_std = np.nanstd(converted_energy_data, axis=0)
         statistics_dict = {
             "formation": {"energy": {"mean": np.atleast_2d(formation_E_mean), "std": np.atleast_2d(formation_E_std)}},
-            "inter": {"energy": {"mean": np.atleast_2d(inter_E_mean), "std": np.atleast_2d(inter_E_std)}},
+            "per_atom_formation": {"energy": {"mean": np.atleast_2d(inter_E_mean), "std": np.atleast_2d(inter_E_std)}},
             "total": {"energy": {"mean": np.atleast_2d(total_E_mean), "std": np.atleast_2d(total_E_std)}},
         }
         if REGRESSOR_SUCCESS:
@@ -270,13 +270,13 @@ class BaseDataset:
             linear_E_mean = np.nanmean(E_lin, axis=0)
             linear_E_std = np.nanstd(E_lin, axis=0)
             linear_inter_E_mean = np.nanmean(E_lin / self.data["n_atoms"][:, None], axis=0)
-            linear_inter_E_std = np.nanmean(E_lin / self.data["n_atoms"][:, None], axis=0)
+            linear_inter_E_std = np.nanstd(E_lin / self.data["n_atoms"][:, None], axis=0)
             statistics_dict.update(
                 {
                     "regression": {
                         "energy": {"mean": np.atleast_2d(linear_E_mean), "std": np.atleast_2d(linear_E_std)}
                     },
-                    "regression_inter": {
+                    "per_atom_regression": {
                         "energy": {"mean": np.atleast_2d(linear_inter_E_mean), "std": np.atleast_2d(linear_inter_E_std)}
                     },
                     "linear_regression_values": self.linear_e0s,
@@ -668,7 +668,8 @@ class BaseDataset:
         """
         Get the statistics of the dataset.
         normalization : str, optional
-            Type of energy, by default "formation", must be one of ["formation", "total", "inter"]
+            Type of energy, by default "formation", must be one of ["formation", "total",
+            "regression", "per_atom_formation", "per_atom_regression"]
         return_none : bool, optional
             Whether to return None if the statistics for the forces are not available, by default True
             Otherwise, the statistics for the forces are set to 0.0

@@ -1,4 +1,4 @@
-"""Isolated Atom Energies regression utilities."""
+"""Linear Atom Energies regression utilities."""
 
 from abc import ABC, abstractmethod
 from typing import Optional, Tuple, Union
