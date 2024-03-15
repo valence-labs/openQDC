@@ -12,8 +12,8 @@ POSSIBLE_NORMALIZATION: Final[List[str]] = [
     "formation",
     "total",
     "per_atom_formation",
-    "regression",
-    "per_atom_regression",
+    "residual_regression",
+    "per_atom_residual_regression",
 ]
 
 NOT_DEFINED = {

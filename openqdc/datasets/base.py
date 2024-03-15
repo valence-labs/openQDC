@@ -273,10 +273,10 @@ class BaseDataset:
             linear_inter_E_std = np.nanstd(E_lin / self.data["n_atoms"][:, None], axis=0)
             statistics_dict.update(
                 {
-                    "regression": {
+                    "residual_regression": {
                         "energy": {"mean": np.atleast_2d(linear_E_mean), "std": np.atleast_2d(linear_E_std)}
                     },
-                    "per_atom_regression": {
+                    "per_atom_residual_regression": {
                         "energy": {"mean": np.atleast_2d(linear_inter_E_mean), "std": np.atleast_2d(linear_inter_E_std)}
                     },
                     "linear_regression_values": self.linear_e0s,
@@ -669,7 +669,7 @@ class BaseDataset:
         Get the statistics of the dataset.
         normalization : str, optional
             Type of energy, by default "formation", must be one of ["formation", "total",
-            "regression", "per_atom_formation", "per_atom_regression"]
+            "residual_regression", "per_atom_formation", "per_atom_residual_regression"]
         return_none : bool, optional
             Whether to return None if the statistics for the forces are not available, by default True
             Otherwise, the statistics for the forces are set to 0.0
