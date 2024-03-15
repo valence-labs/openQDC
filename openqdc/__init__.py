@@ -23,7 +23,6 @@ _lazy_imports_obj = {
     "OrbnetDenali": "openqdc.datasets.potential.orbnet_denali",
     "SN2RXN": "openqdc.datasets.potential.sn2_rxn",
     "QM7X": "openqdc.datasets.potential.qm7x",
-    "DES": "openqdc.datasets.interaction.des",
     "NablaDFT": "openqdc.datasets.potential.nabladft",
     "SolvatedPeptides": "openqdc.datasets.potential.solvated_peptides",
     "WaterClusters": "openqdc.datasets.potential.waterclusters3_30",
@@ -31,6 +30,7 @@ _lazy_imports_obj = {
     "Dummy": "openqdc.datasets.potential.dummy",
     "PCQM_B3LYP": "openqdc.datasets.potential.pcqm",
     "PCQM_PM6": "openqdc.datasets.potential.pcqm",
+    "RevMD17": "openqdc.datasets.potential.revmd17",
     "Transition1X": "openqdc.datasets.potential.transition1x",
     "MultixcQM9": "openqdc.datasets.potential.multixcqm9",
     "AVAILABLE_DATASETS": "openqdc.datasets",
@@ -70,7 +70,6 @@ if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
     from ._version import __version__  # noqa
     from .datasets import AVAILABLE_DATASETS  # noqa
     from .datasets.base import BaseDataset  # noqa
-    from .datasets.interaction.des import DES  # noqa
     from .datasets.potential.ani import ANI1, ANI1CCX, ANI1X  # noqa
     from .datasets.potential.comp6 import COMP6  # noqa
     from .datasets.potential.dummy import Dummy  # noqa
@@ -84,6 +83,7 @@ if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
     from .datasets.potential.pcqm import PCQM_B3LYP, PCQM_PM6  # noqa
     from .datasets.potential.qm7x import QM7X  # noqa
     from .datasets.potential.qmugs import QMugs  # noqa
+    from .datasets.potential.revmd17 import RevMD17  # noqa
     from .datasets.potential.sn2_rxn import SN2RXN  # noqa
     from .datasets.potential.solvated_peptides import SolvatedPeptides  # noqa
     from .datasets.potential.spice import Spice  # noqa

@@ -11,6 +11,7 @@ from .orbnet_denali import OrbnetDenali  # noqa
 from .pcqm import PCQM_B3LYP, PCQM_PM6  # noqa
 from .qm7x import QM7X  # noqa
 from .qmugs import QMugs  # noqa
+from .revmd17 import RevMD17  # noqa
 from .sn2_rxn import SN2RXN  # noqa
 from .solvated_peptides import SolvatedPeptides  # noqa
 from .spice import Spice  # noqa
@@ -40,4 +41,5 @@ AVAILABLE_POTENTIAL_DATASETS = {
     "transition1x": Transition1X,
     "watercluster": WaterClusters,
     "multixcqm9": MultixcQM9,
+    "revmd17": RevMD17,
 }
