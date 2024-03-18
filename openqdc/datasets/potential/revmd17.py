@@ -3,6 +3,7 @@ from os.path import join as p_join
 import numpy as np
 
 from openqdc.datasets.base import BaseDataset
+from openqdc.raws.fetch import decompress_tar_gz
 
 trajectories = {
     "rmd17_aspirin": "CC(=O)OC1=CC=CC=C1C(=O)O",
@@ -74,7 +75,7 @@ class RevMD17(BaseDataset):
     __name__ = "revmd17"
 
     __energy_methods__ = [
-        "pbe/vdw-ts",  # MD17
+        "pbe/vdw-ts",
     ]
 
     energy_target_names = [
@@ -82,7 +83,7 @@ class RevMD17(BaseDataset):
     ]
 
     __force_methods__ = [
-        "pbe/vdw-ts",  # MD17
+        "pbe/vdw-ts",
     ]
 
     force_target_names = [
@@ -95,6 +96,7 @@ class RevMD17(BaseDataset):
 
     def read_raw_entries(self):
         entries_list = []
+        decompress_tar_gz(p_join(self.root, "rmd17.tar.bz2"))
         for trajectory in trajectories:
             entries_list.append(read_npz_entry(trajectory, self.root))
         return entries_list
