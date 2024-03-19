@@ -114,6 +114,7 @@ def makedirs_gcs(path, exist_ok=True):
 
 
 def makedirs(path, exist_ok=True):
+    """Creates directory"""
     os.makedirs(path, exist_ok=exist_ok)
 
 

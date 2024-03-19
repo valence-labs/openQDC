@@ -157,10 +157,6 @@ class BaseDataset:
         self._set_units(None, None)
         self._set_isolated_atom_energies()
         self._precompute_statistics(overwrite_local_cache=overwrite_local_cache)
-        try:
-            self._set_new_e0s_unit(energy_unit)
-        except:  # noqa
-            pass
         self._set_units(energy_unit, distance_unit)
         self._convert_data()
         self._set_isolated_atom_energies()
@@ -209,19 +205,23 @@ class BaseDataset:
         local_path = p_join(self.preprocess_path, "stats.pkl")
         if self.is_preprocessed_statistics() and not (overwrite_local_cache or self.recompute_statistics):
             stats = load_pkl(local_path)
-            try:
-                self.linear_e0s = stats.get("linear_regression_values")
-                self._set_linear_e0s()
-            except Exception:
-                logger.warning(f"Failed to load linear regression values for {self.__name__} dataset.")
             logger.info("Loaded precomputed statistics")
         else:
             logger.info("Precomputing relevant statistics")
-            stats = self._precompute_E()
+            (
+                inter_E_mean,
+                inter_E_std,
+                formation_E_mean,
+                formation_E_std,
+                total_E_mean,
+                total_E_std,
+            ) = self._precompute_E()
             forces_dict = self._precompute_F()
-            for key in stats:
-                if key != "linear_regression_values":
-                    stats[key].update({"forces": forces_dict})
+            stats = {
+                "formation": {"energy": {"mean": formation_E_mean, "std": formation_E_std}, "forces": forces_dict},
+                "inter": {"energy": {"mean": inter_E_mean, "std": inter_E_std}, "forces": forces_dict},
+                "total": {"energy": {"mean": total_E_mean, "std": total_E_std}, "forces": forces_dict},
+            }
             with open(local_path, "wb") as f:
                 pkl.dump(stats, f)
         self._compute_average_nb_atoms()
@@ -311,20 +311,6 @@ class BaseDataset:
             return self._numbers
         self._numbers = pd.unique(self.data["atomic_inputs"][..., 0]).astype(np.int32)
         return self._numbers
-
-    @property
-    def charges(self):
-        if hasattr(self, "_charges"):
-            return self._charges
-        self._charges = np.unique(self.data["atomic_inputs"][..., :2], axis=0).astype(np.int32)
-        return self._charges
-
-    @property
-    def min_max_charges(self):
-        if hasattr(self, "_min_max_charges"):
-            return self._min_max_charges
-        self._min_max_charges = np.min(self.charges[:, 1]), np.max(self.charges[:, 1])
-        return self._min_max_charges
 
     @property
     def chemical_species(self):
@@ -424,7 +410,6 @@ class BaseDataset:
         if self.energy_methods is None:
             logger.error("No energy methods defined for this dataset.")
         f = get_conversion("hartree", self.__energy_unit__)
-
         self.__isolated_atom_energies__ = f(
             np.array([IsolatedAtomEnergyFactory.get_matrix(en_method) for en_method in self.energy_methods])
         )
@@ -511,7 +496,7 @@ class BaseDataset:
         for key in self.data_keys:
             filename = p_join(self.preprocess_path, f"{key}.mmap")
             pull_locally(filename, overwrite=overwrite_local_cache)
-            self.data[key] = np.memmap(filename, mode="r", dtype=self.data_types[key]).reshape(self.data_shapes[key])
+            self.data[key] = np.memmap(filename, mode="r", dtype=self.data_types[key]).reshape(*self.data_shapes[key])
 
         filename = p_join(self.preprocess_path, "props.pkl")
         pull_locally(filename, overwrite=overwrite_local_cache)
