@@ -21,11 +21,12 @@ class DataItemYAMLObj:
 
 
 class DataSetYAMLObj:
-    def __init__(self, name, references, text, method_energy, groups_by, groups, global_setup):
+    def __init__(self, name, references, text, method_energy, groups_by, groups, global_setup, method_geometry=None):
         self.name = name
         self.references = references
         self.text = text
         self.method_energy = method_energy
+        self.method_geometry = method_geometry
         self.groups_by = groups_by
         self.groups = groups
         self.global_setup = global_setup
