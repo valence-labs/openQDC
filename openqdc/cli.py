@@ -57,7 +57,7 @@ def datasets():
     table = PrettyTable(["Name", "Forces", "Level of theory"])
     for dataset in AVAILABLE_DATASETS:
         empty_dataset = AVAILABLE_DATASETS[dataset].no_init()
-        has_forces = False if not empty_dataset.__force_methods__ else True
+        has_forces = False if not empty_dataset.force_methods else True
         table.add_row([dataset, has_forces, ",".join(empty_dataset.__energy_methods__)])
     table.align = "l"
     print(table)

@@ -63,10 +63,7 @@ class Transition1X(BaseDataset):
         "wB97x_6-31G(d).energy",
     ]
 
-    __force_methods__ = [
-        "wb97x/6-31G(d)",
-    ]
-
+    __force_mask__ = [True]
     force_target_names = [
         "wB97x_6-31G(d).forces",
     ]

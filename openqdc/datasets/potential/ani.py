@@ -91,8 +91,6 @@ class ANI1CCX(ANI1):
         "NPNO-CCSD(T):cc-pVTZ Correlation Energy",
         "TPNO-CCSD(T):cc-pVDZ Correlation Energy",
     ]
-
-    __force_methods__ = []
     force_target_names = []
 
     def __smiles_converter__(self, x):
@@ -150,10 +148,7 @@ class ANI1X(ANI1):
         "wB97x:def2-TZVPP Atomic Forces",
     ]
 
-    __force_methods__ = [
-        "wb97x/6-31g(d)",
-        "wb97x/cc-pvtz",
-    ]
+    __force_mask__ = [False, False, False, False, False, False, True, True]
 
     def convert_forces(self, x):
         return super().convert_forces(x) * 0.529177249  # correct the Dataset error

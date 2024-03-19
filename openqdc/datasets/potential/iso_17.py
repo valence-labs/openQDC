@@ -31,9 +31,7 @@ class ISO17(BaseDataset):
         "PBE-TS Energy",
     ]
 
-    __force_methods__ = [
-        "pbe/vdw-ts",
-    ]
+    __force_mask__ = [True]
 
     force_target_names = [
         "PBE-TS Gradient",

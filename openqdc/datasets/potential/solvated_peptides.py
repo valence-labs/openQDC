@@ -31,9 +31,7 @@ class SolvatedPeptides(BaseDataset):
         "revPBE-D3(BJ):def2-TZVP Atomization Energy",
     ]
 
-    __force_methods__ = [
-        "revpbe-d3(bj)/def2-tzvp",
-    ]
+    __force_mask__ = [True]
 
     force_target_names = [
         "revPBE-D3(BJ):def2-TZVP Gradient",

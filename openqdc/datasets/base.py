@@ -3,6 +3,7 @@
 import os
 import pickle as pkl
 from copy import deepcopy
+from itertools import compress
 from os.path import join as p_join
 from typing import Dict, List, Optional, Union
 
@@ -90,12 +91,12 @@ class BaseDataset:
     Base class for datasets in the openQDC package.
     """
 
-    __energy_methods__ = []
-    __force_methods__ = []
     energy_target_names = []
     force_target_names = []
-    __isolated_atom_energies__ = []
+    __energy_methods__ = []
+    __force_mask__ = []
 
+    __isolated_atom_energies__ = []
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
@@ -172,12 +173,19 @@ class BaseDataset:
         """
         return cls.__new__(cls)
 
+    @property
+    def __force_methods__(self):
+        """
+        For backward compatibility. To be removed in the future.
+        """
+        return self.force_methods
+
     def _convert_data(self):
         logger.info(
             f"Converting {self.__name__} data to the following units:\n\
                      Energy: {self.energy_unit},\n\
                      Distance: {self.distance_unit},\n\
-                     Forces: {self.force_unit if self.__force_methods__ else 'None'}"
+                     Forces: {self.force_unit if self.force_methods else 'None'}"
         )
         for key in self.data_keys:
             self.data[key] = self._convert_on_loading(self.data[key], key)
@@ -285,7 +293,7 @@ class BaseDataset:
         return statistics_dict
 
     def _precompute_F(self):
-        if len(self.__force_methods__) == 0:
+        if len(self.force_methods) == 0:
             return NOT_DEFINED
         converted_force_data = self.convert_forces(self.data["forces"])
         force_mean = np.nanmean(converted_force_data, axis=0)
@@ -347,7 +355,7 @@ class BaseDataset:
     @property
     def data_keys(self):
         keys = list(self.data_types.keys())
-        if len(self.__force_methods__) == 0:
+        if len(self.force_methods) == 0:
             keys.remove("forces")
         return keys
 
@@ -385,6 +393,20 @@ class BaseDataset:
         f = get_conversion(old_en, en)
         self.new_e0s = f(self.new_e0s)
 
+    @property
+    def energy_methods(self):
+        return self.__class__.__energy_methods__
+
+    @property
+    def force_methods(self):
+        return list(compress(self.energy_methods, self.force_mask))
+
+    @property
+    def force_mask(self):
+        if len(self.__class__.__force_mask__) == 0:
+            self.__class__.__force_mask__ = [False] * len(self.energy_methods)
+        return self.__class__.__force_mask__
+
     def _set_units(self, en, ds):
         old_en, old_ds = self.energy_unit, self.distance_unit
         en = en if en is not None else old_en
@@ -394,17 +416,17 @@ class BaseDataset:
         self.set_energy_unit(en)
         # if ds is not None:
         self.set_distance_unit(ds)
-        if self.__force_methods__:
+        if self.force_methods:
             self.__forces_unit__ = self.energy_unit + "/" + self.distance_unit
             self.__class__.__fn_forces__ = get_conversion(old_en + "/" + old_ds, self.__forces_unit__)
 
     def _set_isolated_atom_energies(self):
-        if self.__energy_methods__ is None:
+        if self.energy_methods is None:
             logger.error("No energy methods defined for this dataset.")
         f = get_conversion("hartree", self.__energy_unit__)
 
         self.__isolated_atom_energies__ = f(
-            np.array([IsolatedAtomEnergyFactory.get_matrix(en_method) for en_method in self.__energy_methods__])
+            np.array([IsolatedAtomEnergyFactory.get_matrix(en_method) for en_method in self.energy_methods])
         )
 
     def convert_energy(self, x):
@@ -483,7 +505,7 @@ class BaseDataset:
             f"Dataset {self.__name__} with the following units:\n\
                      Energy: {self.energy_unit},\n\
                      Distance: {self.distance_unit},\n\
-                     Forces: {self.force_unit if self.__force_methods__ else 'None'}"
+                     Forces: {self.force_unit if self.force_methods else 'None'}"
         )
         self.data = {}
         for key in self.data_keys:
@@ -680,7 +702,7 @@ class BaseDataset:
         if normalization not in POSSIBLE_NORMALIZATION:
             raise NormalizationNotAvailableError(normalization)
         selected_stats = stats[normalization]
-        if len(self.__force_methods__) == 0 and not return_none:
+        if len(self.force_methods) == 0 and not return_none:
             selected_stats.update(
                 {
                     "forces": {

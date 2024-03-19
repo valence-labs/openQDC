@@ -43,13 +43,7 @@ class GDML(BaseDataset):
         "PBE-TS Energy",
     ]
 
-    __force_methods__ = [
-        "ccsd/cc-pvdz",
-        "ccsd(t)/cc-pvdz",
-        # "pbe/mbd",  # MD22
-        # "pbe+mbd/tight", #MD22
-        "pbe/vdw-ts",  # MD17
-    ]
+    __force_mask__ = [True, True, True]
 
     force_target_names = [
         "CCSD Gradient",
