@@ -33,12 +33,10 @@ class DataSetYAMLObj:
 
 
 def data_item_constructor(loader: yaml.SafeLoader, node: yaml.nodes.MappingNode):
-    """Construct an employee."""
     return DataItemYAMLObj(**loader.construct_mapping(node))
 
 
 def dataset_constructor(loader: yaml.SafeLoader, node: yaml.nodes.MappingNode):
-    """Construct an employee."""
     return DataSetYAMLObj(**loader.construct_mapping(node))
 
 

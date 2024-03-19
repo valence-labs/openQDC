@@ -50,7 +50,7 @@ class Splinter(BaseInteractionDataset):
         logger.info(f"Reading Splinter interaction data from {self.root}")
         data = []
         i = 0
-        with tqdm(total=1706343) as progress_bar:
+        with tqdm(total=1680022) as progress_bar:
             for root, dirs, files in os.walk(self.root):  # total is currently an approximation
                 for filename in files:
                     if not filename.endswith(".xyz"):
