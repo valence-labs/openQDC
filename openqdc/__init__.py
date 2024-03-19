@@ -14,6 +14,7 @@ _lazy_imports_obj = {
     "ANI1CCX": "openqdc.datasets.potential.ani",
     "ANI1X": "openqdc.datasets.potential.ani",
     "Spice": "openqdc.datasets.potential.spice",
+    "SpiceV2": "openqdc.datasets.potential.spice",
     "GEOM": "openqdc.datasets.potential.geom",
     "QMugs": "openqdc.datasets.potential.qmugs",
     "ISO17": "openqdc.datasets.potential.iso_17",
@@ -84,7 +85,7 @@ if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
     from .datasets.potential.qmugs import QMugs  # noqa
     from .datasets.potential.sn2_rxn import SN2RXN  # noqa
     from .datasets.potential.solvated_peptides import SolvatedPeptides  # noqa
-    from .datasets.potential.spice import Spice  # noqa
+    from .datasets.potential.spice import Spice, SpiceV2  # noqa
     from .datasets.potential.tmqm import TMQM  # noqa
     from .datasets.potential.transition1x import Transition1X  # noqa
     from .datasets.potential.waterclusters3_30 import WaterClusters  # noqa

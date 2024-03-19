@@ -13,7 +13,7 @@ from .qm7x import QM7X  # noqa
 from .qmugs import QMugs  # noqa
 from .sn2_rxn import SN2RXN  # noqa
 from .solvated_peptides import SolvatedPeptides  # noqa
-from .spice import Spice  # noqa
+from .spice import Spice, SpiceV2  # noqa
 from .tmqm import TMQM  # noqa
 from .transition1x import Transition1X  # noqa
 from .waterclusters3_30 import WaterClusters  # noqa
@@ -36,6 +36,7 @@ AVAILABLE_POTENTIAL_DATASETS = {
     "sn2rxn": SN2RXN,
     "solvatedpeptides": SolvatedPeptides,
     "spice": Spice,
+    "spicev2": SpiceV2,
     "tmqm": TMQM,
     "transition1x": Transition1X,
     "watercluster": WaterClusters,
