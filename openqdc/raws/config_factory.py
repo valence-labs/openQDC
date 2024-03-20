@@ -81,6 +81,10 @@ class DataConfigFactory:
         dataset_name="spice",
         links={"SPICE-1.1.4.hdf5": "https://zenodo.org/record/8222043/files/SPICE-1.1.4.hdf5"},
     )
+    spicev2 = dict(
+        dataset_name="spicev2",
+        links={"spice-2.0.0.hdf5": "https://zenodo.org/records/10835749/files/SPICE-2.0.0.hdf5?download=1"},
+    )
 
     dess = dict(
         dataset_name="dess5m",
