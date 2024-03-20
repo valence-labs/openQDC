@@ -8,7 +8,13 @@ HAR2EV: Final[float] = 27.211386246
 
 BOHR2ANG: Final[float] = 0.52917721092
 
-POSSIBLE_NORMALIZATION: Final[List[str]] = ["formation", "total", "inter"]
+POSSIBLE_NORMALIZATION: Final[List[str]] = [
+    "formation",
+    "total",
+    "per_atom_formation",
+    "residual_regression",
+    "per_atom_residual_regression",
+]
 
 NOT_DEFINED = {
     "mean": None,

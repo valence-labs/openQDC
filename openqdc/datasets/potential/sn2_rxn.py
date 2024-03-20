@@ -34,9 +34,7 @@ class SN2RXN(BaseDataset):
         "DSD-BLYP-D3(BJ):def2-TZVP Atomization Energy",
     ]
 
-    __force_methods__ = [
-        "dsd-blyp-d3(bj)/def2-tzvp",
-    ]
+    __force_mask__ = [True]
 
     force_target_names = [
         "DSD-BLYP-D3(BJ):def2-TZVP Gradient",
