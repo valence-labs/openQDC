@@ -80,13 +80,13 @@ We provide support for the following publicly available QM Potential Energy Data
 
 We also provide support for the following publicly available QM Noncovalent Interaction Energy Datasets.
 
-| Dataset |
-| --- |
-| [DES370K](https://www.nature.com/articles/s41597-021-00833-x) |
-| [DES5M](https://www.nature.com/articles/s41597-021-00833-x)   |
-| [Metcalf](https://pubs.aip.org/aip/jcp/article/152/7/074103/1059677/Approaches-for-machine-learning-intermolecular) |
-| [DESS66](https://www.nature.com/articles/s41597-021-00833-x) |
-| [DESS66x8](https://www.nature.com/articles/s41597-021-00833-x) |
-| [Splinter](https://www.nature.com/articles/s41597-023-02443-1) |
-| [X40](https://pubs.acs.org/doi/10.1021/ct300647k) |
-| [L7](https://pubs.acs.org/doi/10.1021/ct400036b)  |
+| Dataset | # Molecules | # Conformers | Average Conformers per Molecule | Force Labels | Atom Types | QM Level of Theory | Off-Equilibrium Conformations|
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| [DES370K](https://www.nature.com/articles/s41597-021-00833-x)                                                       | | 370959  | | No | | |
+| [DES5M](https://www.nature.com/articles/s41597-021-00833-x)                                                         | | 4955938 | | No | | |
+| [Metcalf](https://pubs.aip.org/aip/jcp/article/152/7/074103/1059677/Approaches-for-machine-learning-intermolecular) | | 13536   | | No | | |
+| [DESS66](https://www.nature.com/articles/s41597-021-00833-x)                                                        | | 66      | | No | | |
+| [DESS66x8](https://www.nature.com/articles/s41597-021-00833-x)                                                      | | 528     | | No | | |
+| [Splinter](https://www.nature.com/articles/s41597-023-02443-1)                                                      | | 1680022 | | No | | |
+| [X40](https://pubs.acs.org/doi/10.1021/ct300647k)                                                                   | | 40      | | No | | |
+| [L7](https://pubs.acs.org/doi/10.1021/ct400036b)                                                                    | | 7       | | No | | |
