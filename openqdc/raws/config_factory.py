@@ -171,6 +171,10 @@ class DataConfigFactory:
         dataset_name="des_s66x8",
         links={"DESS66x8.zip": "https://zenodo.org/records/5676284/files/DESS66x8.zip?download=1"},
     )
+    revmd17 = dict(
+        dataset_name="revmd17",
+        links={"revmd17.zip": "https://figshare.com/ndownloader/articles/12672038/versions/3"},
+    )
 
     available_datasets = [k for k in locals().keys() if not k.startswith("__")]
 

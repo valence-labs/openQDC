@@ -30,6 +30,7 @@ _lazy_imports_obj = {
     "Dummy": "openqdc.datasets.potential.dummy",
     "PCQM_B3LYP": "openqdc.datasets.potential.pcqm",
     "PCQM_PM6": "openqdc.datasets.potential.pcqm",
+    "RevMD17": "openqdc.datasets.potential.revmd17",
     "Transition1X": "openqdc.datasets.potential.transition1x",
     "MultixcQM9": "openqdc.datasets.potential.multixcqm9",
     "AVAILABLE_DATASETS": "openqdc.datasets",
@@ -82,6 +83,7 @@ if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
     from .datasets.potential.pcqm import PCQM_B3LYP, PCQM_PM6  # noqa
     from .datasets.potential.qm7x import QM7X  # noqa
     from .datasets.potential.qmugs import QMugs  # noqa
+    from .datasets.potential.revmd17 import RevMD17  # noqa
     from .datasets.potential.sn2_rxn import SN2RXN  # noqa
     from .datasets.potential.solvated_peptides import SolvatedPeptides  # noqa
     from .datasets.potential.spice import Spice  # noqa

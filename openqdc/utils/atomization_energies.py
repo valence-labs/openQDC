@@ -2313,7 +2313,19 @@ TTM2 = {
 }
 
 
-ISOLATED_ATOM_ENERGIES = {
+def merge(a: dict, b: dict, path=[]):
+    for key in b:
+        if key in a:
+            if isinstance(a[key], dict) and isinstance(b[key], dict):
+                merge(a[key], b[key], path + [str(key)])
+            elif a[key] != b[key]:
+                raise Exception("Conflict at " + ".".join(path + [str(key)]))
+        else:
+            a[key] = b[key]
+    return a
+
+
+ISOLATED_ATOM_ENERGIES_ORIGINAL = {
     # DFT
     "wb97x": {
         "6-31g*": COMP6_1,
@@ -2386,7 +2398,6 @@ ISOLATED_ATOM_ENERGIES = {
     "pm6": PM6,
     # FF
     "ttm2.1-f": TTM2,
-    **ISOLATED_ATOM_ENERGIES_ADDON,
 }
-
-# TODO: Talk with ivan about cbs extrapolation from from av[TQ]z. For now this should be ok
+# update dictionary without overriding the dictionary inside
+ISOLATED_ATOM_ENERGIES = merge(ISOLATED_ATOM_ENERGIES_ORIGINAL, ISOLATED_ATOM_ENERGIES_ADDON)
