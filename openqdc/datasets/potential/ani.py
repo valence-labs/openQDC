@@ -1,8 +1,8 @@
 import os
 from os.path import join as p_join
 
-from openqdc.datasets.base import BaseDataset, read_qc_archive_h5
-from openqdc.utils.io import get_local_cache
+from openqdc.datasets.base import BaseDataset
+from openqdc.utils import get_local_cache, read_qc_archive_h5
 
 
 class ANI1(BaseDataset):
