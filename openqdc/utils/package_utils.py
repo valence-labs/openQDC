@@ -101,28 +101,3 @@ def requires_package(package_name: str) -> Callable[..., Any]:
         return wrapper
 
     return inner_decorator
-
-
-def get_dir():
-    r"""
-    Get the Torch Hub cache directory used for storing downloaded models & weights.
-
-    If :func:`~torch.hub.set_dir` is not called, default path is ``$TORCH_HOME/hub`` where
-    environment variable ``$TORCH_HOME`` defaults to ``$XDG_CACHE_HOME/torch``.
-    ``$XDG_CACHE_HOME`` follows the X Design Group specification of the Linux
-    filesystem layout, with a default value ``~/.cache`` if the environment
-    variable is not set.
-    """
-
-    if _hub_dir is not None:
-        return _hub_dir
-
-
-def set_dir(d):
-    r"""
-    Optionally set the Torch Hub directory used to save downloaded models & weights.
-
-    Args:
-        d (str): path to a local folder to save downloaded models & weights.
-    """
-    global _hub_dir
