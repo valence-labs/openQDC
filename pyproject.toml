@@ -66,13 +66,17 @@ dev = [
   "mdx_truly_sane_lists",
   "mkdocstrings-python",
 ]
+soap = [
+    "dscribe",
+]
 torch = [
     "torch_geometric",
     "torch",
     "dscribe"
 ]
 jax = [
-  "jax"
+  "jax",
+  "dscribe"
 ]
 
 [project.scripts]
