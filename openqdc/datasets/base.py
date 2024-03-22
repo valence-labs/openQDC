@@ -7,22 +7,14 @@ from os.path import join as p_join
 from typing import Dict, List, Optional, Union
 
 import numpy as np
-import pandas as pd
 from ase.io.extxyz import write_extxyz
 from loguru import logger
 from sklearn.utils import Bunch
-from tqdm import tqdm
 
 from openqdc.datasets._preprocess import DatasetPropertyMixIn
-from openqdc.utils.atomization_energies import (
-    IsolatedAtomEnergyFactory,
-    chemical_symbols,
-)
-from openqdc.utils.constants import (
-    NB_ATOMIC_FEATURES,
-    NOT_DEFINED,
-    POSSIBLE_NORMALIZATION,
-)
+from openqdc.utils.atomization_energies import IsolatedAtomEnergyFactory
+from openqdc.utils.constants import NB_ATOMIC_FEATURES, POSSIBLE_NORMALIZATION
+from openqdc.utils.descriptors import get_descriptor
 from openqdc.utils.exceptions import (
     DatasetNotAvailableError,
     NormalizationNotAvailableError,
@@ -32,59 +24,13 @@ from openqdc.utils.io import (
     copy_exists,
     dict_to_atoms,
     get_local_cache,
-    load_hdf5_file,
-    load_pkl,
     pull_locally,
     push_remote,
-    read_qc_archive_h5,
     set_cache_dir,
 )
-from openqdc.utils.molecule import atom_table, z_to_formula
 from openqdc.utils.package_utils import requires_package
-from openqdc.utils.regressor import Regressor
+from openqdc.utils.regressor import Regressor  # noqa
 from openqdc.utils.units import get_conversion
-
-
-def _extract_entry(
-    df: pd.DataFrame,
-    i: int,
-    subset: str,
-    energy_target_names: List[str],
-    force_target_names: Optional[List[str]] = None,
-) -> Dict[str, np.ndarray]:
-    x = np.array([atom_table.GetAtomicNumber(s) for s in df["symbols"][i]])
-    xs = np.stack((x, np.zeros_like(x)), axis=-1)
-    positions = df["geometry"][i].reshape((-1, 3))
-    energies = np.array([df[k][i] for k in energy_target_names])
-
-    res = dict(
-        name=np.array([df["name"][i]]),
-        subset=np.array([subset if subset is not None else z_to_formula(x)]),
-        energies=energies.reshape((1, -1)).astype(np.float32),
-        atomic_inputs=np.concatenate((xs, positions), axis=-1, dtype=np.float32),
-        n_atoms=np.array([x.shape[0]], dtype=np.int32),
-    )
-    if force_target_names is not None and len(force_target_names) > 0:
-        forces = np.zeros((positions.shape[0], 3, len(force_target_names)), dtype=np.float32)
-        forces += np.nan
-        for j, k in enumerate(force_target_names):
-            if len(df[k][i]) != 0:
-                forces[:, :, j] = df[k][i].reshape((-1, 3))
-        res["forces"] = forces
-
-    return res
-
-
-def read_qc_archive_h5(
-    raw_path: str, subset: str, energy_target_names: List[str], force_target_names: List[str]
-) -> List[Dict[str, np.ndarray]]:
-    """Extracts data from the HDF5 archive file."""
-    data = load_hdf5_file(raw_path)
-    data_t = {k2: data[k1][k2][:] for k1 in data.keys() for k2 in data[k1].keys()}
-
-    n = len(data_t["molecule_id"])
-    samples = [_extract_entry(data_t, i, subset, energy_target_names, force_target_names) for i in tqdm(range(n))]
-    return samples
 
 
 class BaseDataset(DatasetPropertyMixIn):
@@ -404,91 +350,63 @@ class BaseDataset(DatasetPropertyMixIn):
         at = dict_to_atoms(entry, ext=ext)
         return at
 
-    @requires_package("dscribe")
-    @requires_package("datamol")
-    def soap_descriptors(
-        self,
-        n_samples: Optional[Union[List[int], int]] = None,
-        return_idxs: bool = True,
-        progress: bool = True,
-        **soap_kwargs,
-    ) -> Dict[str, np.ndarray]:
-        """
-        Compute the SOAP descriptors for the dataset.
-
-        Parameters
-        ----------
-        n_samples : Optional[Union[List[int],int]], optional
-            Number of samples to use for the computation, by default None. If None, all the dataset is used.
-            If a list of integers is provided, the descriptors are computed for each of the specified idx of samples.
-        return_idxs : bool, optional
-            Whether to return the indices of the samples used, by default True.
-        progress : bool, optional
-            Whether to show a progress bar, by default True.
-        **soap_kwargs : dict
-            Keyword arguments to pass to the SOAP descriptor.
-            By defaut, the following values are used:
-                - r_cut : 5.0
-                - n_max : 8
-                - l_max : 6
-                - average : "inner"
-                - periodic : False
-                - compression : {"mode" : "mu1nu1"}
-
-        Returns
-        -------
-        Dict[str, np.ndarray]
-            Dictionary containing the following keys:
-                - soap : np.ndarray of shape (N, M) containing the SOAP descriptors for the dataset
-                - soap_kwargs : dict containing the keyword arguments used for the SOAP descriptor
-                - idxs : np.ndarray of shape (N,) containing the indices of the samples used
-
-        """
-        import datamol as dm
-        from dscribe.descriptors import SOAP
-
+    def subsample(self, n_samples: Optional[Union[List[int], int]] = None):
         if n_samples is None:
             idxs = list(range(len(self)))
         elif isinstance(n_samples, int):
             idxs = np.random.choice(len(self), size=n_samples, replace=False)
         else:  # list, set, np.ndarray
             idxs = n_samples
-        datum = {}
-        r_cut = soap_kwargs.pop("r_cut", 5.0)
-        n_max = soap_kwargs.pop("n_max", 8)
-        l_max = soap_kwargs.pop("l_max", 6)
-        average = soap_kwargs.pop("average", "inner")
-        periodic = soap_kwargs.pop("periodic", False)
-        compression = soap_kwargs.pop("compression", {"mode": "mu1nu1"})
-        soap = SOAP(
-            species=self.chemical_species,
-            periodic=periodic,
-            r_cut=r_cut,
-            n_max=n_max,
-            l_max=l_max,
-            average=average,
-            compression=compression,
+        return idxs
+
+    @requires_package("datamol")
+    def calculate_descriptors(
+        self,
+        model: str = "soap",
+        chemical_species: Optional[List[str]] = None,
+        n_samples: Optional[Union[List[int], int]] = None,
+        progress: bool = True,
+        **descriptor_kwargs,
+    ) -> Dict[str, np.ndarray]:
+        """
+        Compute the descriptors for the dataset.
+
+        Parameters
+        ----------
+        model : str
+            Name of the descriptor to use. Supported descriptors are ["soap"]
+        chemical_species : Optional[List[str]], optional
+            List of chemical species to use for the descriptor computation, by default None.
+            If None, the chemical species of the dataset are used.
+        n_samples : Optional[Union[List[int],int]], optional
+            Number of samples to use for the computation, by default None. If None, all the dataset is used.
+            If a list of integers is provided, the descriptors are computed for each of the specified idx of samples.
+        progress : bool, optional
+            Whether to show a progress bar, by default True.
+        **descriptor_kwargs : dict
+            Keyword arguments to pass to the descriptor instantiation of the model.
+
+        Returns
+        -------
+        Dict[str, np.ndarray]
+            Dictionary containing the following keys:
+                - values : np.ndarray of shape (N, M) containing the SOAP descriptors for the dataset
+                - idxs : np.ndarray of shape (N,) containing the indices of the samples used
+
+        """
+        import datamol as dm
+
+        idxs = self.subsample(n_samples)
+        model = get_descriptor(model.lower())(
+            species=self.chemical_species if chemical_species is None else chemical_species, **descriptor_kwargs
         )
-        datum["soap_kwargs"] = {
-            "r_cut": r_cut,
-            "n_max": n_max,
-            "l_max": l_max,
-            "average": average,
-            "compression": compression,
-            "species": self.chemical_species,
-            "periodic": periodic,
-            **soap_kwargs,
-        }
 
         def wrapper(idx):
             entry = self.get_ase_atoms(idx, ext=False)
-            return soap.create(entry, centers=entry.positions)
+            return model.calculate(entry)
 
-        descr = dm.parallelized(wrapper, idxs, progress=progress, scheduler="threads", n_jobs=-1)
-        datum["soap"] = np.vstack(descr)
-        if return_idxs:
-            datum["idxs"] = idxs
-        return datum
+        descr_values = dm.parallelized(wrapper, idxs, progress=progress, scheduler="threads", n_jobs=-1)
+        return {"values": np.vstack(descr_values), "idxs": idxs}
 
     def as_iter(self, atoms: bool = False):
         """

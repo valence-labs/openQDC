@@ -1,1 +1,1 @@
-from .config_factory import DataConfigFactory, DataDownloader
+from .config_factory import DataConfigFactory, DataDownloader  # noqa

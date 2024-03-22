@@ -3,7 +3,7 @@
 import json
 import os
 import pickle as pkl
-from typing import List, Optional, Dict 
+from typing import Dict, List, Optional
 
 import fsspec
 import h5py
@@ -220,6 +220,17 @@ def dict_to_atoms(d: dict, ext: bool = False) -> Atoms:
     if ext:
         at.info = d
     return at
+
+
+def to_atoms(positions: np.ndarray, atomic_nums: np.ndarray):
+    """
+    Converts numpy arrays to ase atoms object
+
+    Args:
+        positions (np.ndarray): positions of atoms
+        atomic_nums (np.ndarray): atomic numbers of atoms
+    """
+    return Atoms(positions=positions, numbers=atomic_nums)
 
 
 def print_h5_tree(val, pre=""):
