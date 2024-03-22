@@ -6,8 +6,7 @@ from prettytable import PrettyTable
 from typing_extensions import Annotated
 
 from openqdc import AVAILABLE_DATASETS, AVAILABLE_POTENTIAL_DATASETS
-from openqdc.raws.config_factory import DataConfigFactory
-from openqdc.raws.fetch import DataDownloader
+from openqdc.raws.config_factory import DataConfigFactory, DataDownloader
 
 app = typer.Typer(help="OpenQDC CLI")
 

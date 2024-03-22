@@ -3,7 +3,7 @@ from os.path import join as p_join
 import numpy as np
 
 from openqdc.datasets.base import BaseDataset
-from openqdc.raws.fetch import decompress_tar_gz
+from openqdc.raws.config_factory import decompress_tar_gz
 
 trajectories = {
     "rmd17_aspirin": "CC(=O)OC1=CC=CC=C1C(=O)O",
