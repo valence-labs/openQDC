@@ -62,9 +62,9 @@ class L7(BaseInteractionDataset):
     """
 
     __name__ = "L7"
-    __energy_unit__ = "hartree"
+    __energy_unit__ = "kcal/mol"
     __distance_unit__ = "ang"
-    __forces_unit__ = "hartree/ang"
+    __forces_unit__ = "kcal/mol/ang"
     __energy_methods__ = [
         "CSD(T) | QCISD(T)",
         "DLPNO-CCSD(T)",

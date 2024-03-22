@@ -3,7 +3,6 @@
 import os
 import pickle as pkl
 from copy import deepcopy
-from itertools import compress
 from os.path import join as p_join
 from typing import Dict, List, Optional, Union
 
@@ -91,12 +90,12 @@ class BaseDataset:
     Base class for datasets in the openQDC package.
     """
 
+    __energy_methods__ = []
+    __force_methods__ = []
     energy_target_names = []
     force_target_names = []
-    __energy_methods__ = []
-    __force_mask__ = []
-
     __isolated_atom_energies__ = []
+
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
@@ -157,6 +156,10 @@ class BaseDataset:
         self._set_units(None, None)
         self._set_isolated_atom_energies()
         self._precompute_statistics(overwrite_local_cache=overwrite_local_cache)
+        try:
+            self._set_new_e0s_unit(energy_unit)
+        except:  # noqa
+            pass
         self._set_units(energy_unit, distance_unit)
         self._convert_data()
         self._set_isolated_atom_energies()
@@ -169,19 +172,32 @@ class BaseDataset:
         """
         return cls.__new__(cls)
 
-    @property
-    def __force_methods__(self):
-        """
-        For backward compatibility. To be removed in the future.
-        """
-        return self.force_methods
+    def get_torch_tensor(self, idx):
+        return convert(self[idx], idx)
+
+    # def as_dataloader(self, batch_size=32):
+    #    """
+    #    Return dataset as a simple dataloader
+    #    """
+    #    class TmpDataset(Dataset):
+    #        def __init__(self, dataset):
+    #            super().__init__()
+    #            self.ds=dataset
+    #
+    #        def len(self):
+    #            return len(self.ds)
+    #
+    #        def get(self, idx) -> Data:
+    #            return convert(self.ds[idx], idx)
+    #
+    #    return DataLoader(TmpDataset(self), batch_size=batch_size)
 
     def _convert_data(self):
         logger.info(
             f"Converting {self.__name__} data to the following units:\n\
                      Energy: {self.energy_unit},\n\
                      Distance: {self.distance_unit},\n\
-                     Forces: {self.force_unit if self.force_methods else 'None'}"
+                     Forces: {self.force_unit if self.__force_methods__ else 'None'}"
         )
         for key in self.data_keys:
             self.data[key] = self._convert_on_loading(self.data[key], key)
@@ -205,23 +221,19 @@ class BaseDataset:
         local_path = p_join(self.preprocess_path, "stats.pkl")
         if self.is_preprocessed_statistics() and not (overwrite_local_cache or self.recompute_statistics):
             stats = load_pkl(local_path)
+            try:
+                self.linear_e0s = stats.get("linear_regression_values")
+                self._set_linear_e0s()
+            except Exception:
+                logger.warning(f"Failed to load linear regression values for {self.__name__} dataset.")
             logger.info("Loaded precomputed statistics")
         else:
             logger.info("Precomputing relevant statistics")
-            (
-                inter_E_mean,
-                inter_E_std,
-                formation_E_mean,
-                formation_E_std,
-                total_E_mean,
-                total_E_std,
-            ) = self._precompute_E()
+            stats = self._precompute_E()
             forces_dict = self._precompute_F()
-            stats = {
-                "formation": {"energy": {"mean": formation_E_mean, "std": formation_E_std}, "forces": forces_dict},
-                "inter": {"energy": {"mean": inter_E_mean, "std": inter_E_std}, "forces": forces_dict},
-                "total": {"energy": {"mean": total_E_mean, "std": total_E_std}, "forces": forces_dict},
-            }
+            for key in stats:
+                if key != "linear_regression_values":
+                    stats[key].update({"forces": forces_dict})
             with open(local_path, "wb") as f:
                 pkl.dump(stats, f)
         self._compute_average_nb_atoms()
@@ -270,7 +282,7 @@ class BaseDataset:
         total_E_std = np.nanstd(converted_energy_data, axis=0)
         statistics_dict = {
             "formation": {"energy": {"mean": np.atleast_2d(formation_E_mean), "std": np.atleast_2d(formation_E_std)}},
-            "per_atom_formation": {"energy": {"mean": np.atleast_2d(inter_E_mean), "std": np.atleast_2d(inter_E_std)}},
+            "inter": {"energy": {"mean": np.atleast_2d(inter_E_mean), "std": np.atleast_2d(inter_E_std)}},
             "total": {"energy": {"mean": np.atleast_2d(total_E_mean), "std": np.atleast_2d(total_E_std)}},
         }
         if REGRESSOR_SUCCESS:
@@ -278,13 +290,13 @@ class BaseDataset:
             linear_E_mean = np.nanmean(E_lin, axis=0)
             linear_E_std = np.nanstd(E_lin, axis=0)
             linear_inter_E_mean = np.nanmean(E_lin / self.data["n_atoms"][:, None], axis=0)
-            linear_inter_E_std = np.nanstd(E_lin / self.data["n_atoms"][:, None], axis=0)
+            linear_inter_E_std = np.nanmean(E_lin / self.data["n_atoms"][:, None], axis=0)
             statistics_dict.update(
                 {
-                    "residual_regression": {
+                    "regression": {
                         "energy": {"mean": np.atleast_2d(linear_E_mean), "std": np.atleast_2d(linear_E_std)}
                     },
-                    "per_atom_residual_regression": {
+                    "regression_inter": {
                         "energy": {"mean": np.atleast_2d(linear_inter_E_mean), "std": np.atleast_2d(linear_inter_E_std)}
                     },
                     "linear_regression_values": self.linear_e0s,
@@ -293,7 +305,7 @@ class BaseDataset:
         return statistics_dict
 
     def _precompute_F(self):
-        if len(self.force_methods) == 0:
+        if len(self.__force_methods__) == 0:
             return NOT_DEFINED
         converted_force_data = self.convert_forces(self.data["forces"])
         force_mean = np.nanmean(converted_force_data, axis=0)
@@ -311,6 +323,20 @@ class BaseDataset:
             return self._numbers
         self._numbers = pd.unique(self.data["atomic_inputs"][..., 0]).astype(np.int32)
         return self._numbers
+
+    @property
+    def charges(self):
+        if hasattr(self, "_charges"):
+            return self._charges
+        self._charges = np.unique(self.data["atomic_inputs"][..., :2], axis=0).astype(np.int32)
+        return self._charges
+
+    @property
+    def min_max_charges(self):
+        if hasattr(self, "_min_max_charges"):
+            return self._min_max_charges
+        self._min_max_charges = np.min(self.charges[:, 1]), np.max(self.charges[:, 1])
+        return self._min_max_charges
 
     @property
     def chemical_species(self):
@@ -341,7 +367,7 @@ class BaseDataset:
     @property
     def data_keys(self):
         keys = list(self.data_types.keys())
-        if len(self.force_methods) == 0:
+        if len(self.__force_methods__) == 0:
             keys.remove("forces")
         return keys
 
@@ -379,20 +405,6 @@ class BaseDataset:
         f = get_conversion(old_en, en)
         self.new_e0s = f(self.new_e0s)
 
-    @property
-    def energy_methods(self):
-        return self.__class__.__energy_methods__
-
-    @property
-    def force_methods(self):
-        return list(compress(self.energy_methods, self.force_mask))
-
-    @property
-    def force_mask(self):
-        if len(self.__class__.__force_mask__) == 0:
-            self.__class__.__force_mask__ = [False] * len(self.energy_methods)
-        return self.__class__.__force_mask__
-
     def _set_units(self, en, ds):
         old_en, old_ds = self.energy_unit, self.distance_unit
         en = en if en is not None else old_en
@@ -402,16 +414,17 @@ class BaseDataset:
         self.set_energy_unit(en)
         # if ds is not None:
         self.set_distance_unit(ds)
-        if self.force_methods:
+        if self.__force_methods__:
             self.__forces_unit__ = self.energy_unit + "/" + self.distance_unit
             self.__class__.__fn_forces__ = get_conversion(old_en + "/" + old_ds, self.__forces_unit__)
 
     def _set_isolated_atom_energies(self):
-        if self.energy_methods is None:
+        if self.__energy_methods__ is None:
             logger.error("No energy methods defined for this dataset.")
         f = get_conversion("hartree", self.__energy_unit__)
+
         self.__isolated_atom_energies__ = f(
-            np.array([IsolatedAtomEnergyFactory.get_matrix(en_method) for en_method in self.energy_methods])
+            np.array([IsolatedAtomEnergyFactory.get_matrix(en_method) for en_method in self.__energy_methods__])
         )
 
     def convert_energy(self, x):
@@ -490,13 +503,13 @@ class BaseDataset:
             f"Dataset {self.__name__} with the following units:\n\
                      Energy: {self.energy_unit},\n\
                      Distance: {self.distance_unit},\n\
-                     Forces: {self.force_unit if self.force_methods else 'None'}"
+                     Forces: {self.force_unit if self.__force_methods__ else 'None'}"
         )
         self.data = {}
         for key in self.data_keys:
             filename = p_join(self.preprocess_path, f"{key}.mmap")
             pull_locally(filename, overwrite=overwrite_local_cache)
-            self.data[key] = np.memmap(filename, mode="r", dtype=self.data_types[key]).reshape(*self.data_shapes[key])
+            self.data[key] = np.memmap(filename, mode="r", dtype=self.data_types[key]).reshape(self.data_shapes[key])
 
         filename = p_join(self.preprocess_path, "props.pkl")
         pull_locally(filename, overwrite=overwrite_local_cache)
@@ -675,8 +688,7 @@ class BaseDataset:
         """
         Get the statistics of the dataset.
         normalization : str, optional
-            Type of energy, by default "formation", must be one of ["formation", "total",
-            "residual_regression", "per_atom_formation", "per_atom_residual_regression"]
+            Type of energy, by default "formation", must be one of ["formation", "total", "inter"]
         return_none : bool, optional
             Whether to return None if the statistics for the forces are not available, by default True
             Otherwise, the statistics for the forces are set to 0.0
@@ -687,7 +699,7 @@ class BaseDataset:
         if normalization not in POSSIBLE_NORMALIZATION:
             raise NormalizationNotAvailableError(normalization)
         selected_stats = stats[normalization]
-        if len(self.force_methods) == 0 and not return_none:
+        if len(self.__force_methods__) == 0 and not return_none:
             selected_stats.update(
                 {
                     "forces": {

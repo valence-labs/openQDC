@@ -9,7 +9,6 @@ from .splinter import Splinter
 from .X40 import X40
 
 AVAILABLE_INTERACTION_DATASETS = {
-    "base": BaseInteractionDataset,
     "des5m": DES5M,
     "des370k": DES370K,
     "dess66": DESS66,

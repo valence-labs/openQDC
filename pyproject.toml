@@ -29,6 +29,51 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
 ]
+dependencies = [
+  "tqdm" ,
+  "pyyaml" ,
+  "loguru" ,
+  "fsspec <= 2023.12.2" ,
+  "gcsfs" ,
+  "typer" ,
+  "prettytable" ,
+  "pandas" ,
+  "numpy" ,
+  "datamol" ,
+  "rdkit" ,
+  "ase" ,
+  "gdown",
+  "h5py >= 3.8.0" ,
+]
+
+
+[project.optional-dependencies]
+dev = [
+  "pytest >= 6.0",
+  "pytest-cov",
+  "nbconvert",
+  "black >= 24",
+  "jupyterlab",
+  "pre-commit",
+  "ruff",
+  "mkdocs",
+  "mkdocs-material",
+  "mkdocs-material-extensions",
+  "mkdocstrings",
+  "mkdocs-click",
+  "mkdocs-jupyter",
+  "markdown-include",
+  "mdx_truly_sane_lists",
+  "mkdocstrings-python",
+]
+torch = [
+    "torch_geometric",
+    "torch",
+    "dscribe"
+]
+jax = [
+  "jax"
+]
 
 [project.scripts]
 openqdc = "openqdc.cli:app"

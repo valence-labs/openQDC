@@ -20,6 +20,10 @@ class Splinter(BaseInteractionDataset):
     https://doi.org/10.1038/s41597-023-02443-1
     """
 
+    __energy_unit__ = "kcal/mol"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "kcal/mol/ang"
+
     __name__ = "splinter"
     __energy_methods__ = [
         "sapt0/jun-cc-pV(D+d)Z_unscaled",

@@ -23,9 +23,9 @@ class DES370K(BaseInteractionDataset):
     """
 
     __name__ = "des370k_interaction"
-    __energy_unit__ = "hartree"
+    __energy_unit__ = "kcal/mol"
     __distance_unit__ = "ang"
-    __forces_unit__ = "hartree/ang"
+    __forces_unit__ = "kcal/mol/ang"
     __energy_methods__ = [
         "mp2/cc-pvdz",
         "mp2/cc-pvqz",
