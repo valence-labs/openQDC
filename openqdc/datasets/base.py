@@ -169,6 +169,7 @@ class BaseDataset:
         array_format: Optional[str] = None,
     ) -> None:
         self._set_units(None, None)
+        self._set_isolated_atom_energies()
         self._precompute_statistics(overwrite_local_cache=overwrite_local_cache)
         self._set_units(energy_unit, distance_unit)
         self._set_array_format(array_format)
