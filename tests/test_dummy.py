@@ -1,7 +1,8 @@
 """Path hack to make tests work."""
 
-import pytest
 import numpy as np
+import pytest
+
 from openqdc.datasets.potential.dummy import Dummy  # noqa: E402
 from openqdc.utils.atomization_energies import (
     ISOLATED_ATOM_ENERGIES,
@@ -40,12 +41,10 @@ def test_is_at_factory():
 def test_array_format(format):
     if not has_package(format):
         pytest.skip(f"{format} is not installed, skipping test")
-    
+
     ds = Dummy(array_format=format)
 
-    keys = [
-        'positions', 'atomic_numbers', 'charges', 'energies', 'forces'
-    ]
+    keys = ["positions", "atomic_numbers", "charges", "energies", "forces"]
 
     data = ds[0]
     for key in keys:

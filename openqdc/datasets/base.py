@@ -5,7 +5,7 @@ import pickle as pkl
 from copy import deepcopy
 from itertools import compress
 from os.path import join as p_join
-from typing import Dict, List, Optional, Union, Callable
+from typing import Callable, Dict, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -39,7 +39,7 @@ from openqdc.utils.io import (
     set_cache_dir,
 )
 from openqdc.utils.molecule import atom_table, z_to_formula
-from openqdc.utils.package_utils import requires_package, has_package
+from openqdc.utils.package_utils import has_package, requires_package
 from openqdc.utils.regressor import Regressor
 from openqdc.utils.units import get_conversion
 
@@ -48,7 +48,6 @@ if has_package("torch"):
 
 if has_package("jax"):
     import jax.numpy as jnp
-
 
 
 def _extract_entry(
@@ -407,7 +406,7 @@ class BaseDataset:
         if len(self.__class__.__force_mask__) == 0:
             self.__class__.__force_mask__ = [False] * len(self.energy_methods)
         return self.__class__.__force_mask__
-    
+
     def _set_array_format(self, format: str):
         assert format in ["numpy", "torch", "jax"], f"Format {format} not supported."
         self.array_format = format
@@ -750,11 +749,11 @@ class BaseDataset:
         encoded in a different format than its display format
         """
         return x
-    
+
     @requires_package("torch")
     def _convert_to_torch(self, x: np.ndarray):
         return torch.from_numpy(x)
-    
+
     @requires_package("jax")
     def _convert_to_jax(self, x: np.ndarray):
         return jnp.array(x)
@@ -765,7 +764,7 @@ class BaseDataset:
         elif self.array_format == "jax":
             return self._convert_to_jax(x)
         return x
-    
+
     def __getitem__(self, idx: int):
         shift = IsolatedAtomEnergyFactory.max_charge
         p_start, p_end = self.data["position_idx_range"][idx]
@@ -783,7 +782,7 @@ class BaseDataset:
             forces = self._convert_array(np.array(self.data["forces"][p_start:p_end], dtype=np.float32))
         else:
             forces = None
-        
+
         e0 = self._convert_array(self.__isolated_atom_energies__[..., z, c + shift].T)
         linear_e0 = self._convert_array(self.new_e0s[..., z, c + shift].T) if hasattr(self, "new_e0s") else None
 
@@ -801,5 +800,5 @@ class BaseDataset:
 
         if self.transform is not None:
             bunch = self.transform(bunch)
-        
+
         return bunch

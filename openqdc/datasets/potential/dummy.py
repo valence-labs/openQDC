@@ -1,4 +1,3 @@
-from typing import Optional
 import numpy as np
 
 from openqdc.datasets.base import BaseDataset
