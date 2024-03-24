@@ -49,3 +49,17 @@ def test_array_format(format):
     data = ds[0]
     for key in keys:
         assert isinstance(data[key], format_to_type[format])
+
+
+def test_transform():
+    def custom_fn(bunch):
+        # create new name
+        bunch.new_key = bunch.name + bunch.subset
+        return bunch
+
+    ds = Dummy(transform=custom_fn)
+
+    data = ds[0]
+
+    assert "new_key" in data
+    assert data["new_key"] == data["name"] + data["subset"]
