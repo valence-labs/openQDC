@@ -1,10 +1,25 @@
 """Path hack to make tests work."""
 
+import pytest
+import numpy as np
 from openqdc.datasets.potential.dummy import Dummy  # noqa: E402
 from openqdc.utils.atomization_energies import (
     ISOLATED_ATOM_ENERGIES,
     IsolatedAtomEnergyFactory,
 )
+from openqdc.utils.package_utils import has_package
+
+if has_package("torch"):
+    import torch
+
+if has_package("jax"):
+    import jax
+
+format_to_type = {
+    "numpy": np.ndarray,
+    "torch": torch.Tensor if torch else None,
+    "jax": jax.numpy.ndarray if jax else None,
+}
 
 
 def test_dummy():
@@ -19,3 +34,19 @@ def test_is_at_factory():
     res = IsolatedAtomEnergyFactory.get("PM6")
     assert len(res) == len(ISOLATED_ATOM_ENERGIES["pm6"])
     assert isinstance(res[("H", 0)], float)
+
+
+@pytest.mark.parametrize("format", ["numpy", "torch", "jax"])
+def test_array_format(format):
+    if not has_package(format):
+        pytest.skip(f"{format} is not installed, skipping test")
+    
+    ds = Dummy(array_format=format)
+
+    keys = [
+        'positions', 'atomic_numbers', 'charges', 'energies', 'forces'
+    ]
+
+    data = ds[0]
+    for key in keys:
+        assert isinstance(data[key], format_to_type[format])

@@ -1,3 +1,4 @@
+from typing import Optional
 import numpy as np
 
 from openqdc.datasets.base import BaseDataset
@@ -41,19 +42,15 @@ class Dummy(BaseDataset):
             },
         }
 
-    def __init__(
-        self,
-        energy_unit=None,
-        distance_unit=None,
-        cache_dir=None,
-    ) -> None:
-        try:
-            super().__init__(energy_unit=energy_unit, distance_unit=distance_unit, cache_dir=cache_dir)
-
-        except:  # noqa
-            pass
-        self._set_isolated_atom_energies()
+    def _post_init(self, overwrite_local_cache, energy_unit, distance_unit, array_format) -> None:
         self.setup_dummy()
+        return super()._post_init(overwrite_local_cache, energy_unit, distance_unit, array_format)
+
+    def read_preprocess(self, overwrite_local_cache=False):
+        return
+
+    def _precompute_statistics(self, overwrite_local_cache=False):
+        return
 
     def setup_dummy(self):
         n_atoms = np.array([np.random.randint(1, 100) for _ in range(len(self))])

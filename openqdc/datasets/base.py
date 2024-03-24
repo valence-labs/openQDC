@@ -5,7 +5,7 @@ import pickle as pkl
 from copy import deepcopy
 from itertools import compress
 from os.path import join as p_join
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Callable
 
 import numpy as np
 import pandas as pd
@@ -39,9 +39,16 @@ from openqdc.utils.io import (
     set_cache_dir,
 )
 from openqdc.utils.molecule import atom_table, z_to_formula
-from openqdc.utils.package_utils import requires_package
+from openqdc.utils.package_utils import requires_package, has_package
 from openqdc.utils.regressor import Regressor
 from openqdc.utils.units import get_conversion
+
+if has_package("torch"):
+    import torch
+
+if has_package("jax"):
+    import jax.numpy as jnp
+
 
 
 def _extract_entry(
@@ -110,9 +117,11 @@ class BaseDataset:
         self,
         energy_unit: Optional[str] = None,
         distance_unit: Optional[str] = None,
+        array_format: str = "numpy",
         overwrite_local_cache: bool = False,
         cache_dir: Optional[str] = None,
         recompute_statistics: bool = False,
+        transform: Optional[Callable] = None,
         regressor_kwargs={
             "solver_type": "linear",
             "sub_sample": None,
@@ -127,12 +136,16 @@ class BaseDataset:
             Energy unit to convert dataset to. Supported units: ["kcal/mol", "kj/mol", "hartree", "ev"]
         distance_unit
             Distance unit to convert dataset to. Supported units: ["ang", "nm", "bohr"]
+        array_format
+            Format to return arrays in. Supported formats: ["numpy", "torch", "jax"]
         overwrite_local_cache
             Whether to overwrite the locally cached dataset.
         cache_dir
             Cache directory location. Defaults to "~/.cache/openqdc"
         recompute_statistics
             Whether to recompute the statistics of the dataset.
+        transform, optional
+            transformation to apply to the __getitem__ calls
         regressor_kwargs
             Dictionary of keyword arguments to pass to the regressor.
             Default: {"solver_type": "linear", "sub_sample": None, "stride": 1}
@@ -142,22 +155,24 @@ class BaseDataset:
         self.data = None
         self.recompute_statistics = recompute_statistics
         self.regressor_kwargs = regressor_kwargs
+        self.transform = transform
         if not self.is_preprocessed():
             raise DatasetNotAvailableError(self.__name__)
         else:
             self.read_preprocess(overwrite_local_cache=overwrite_local_cache)
-        self._post_init(overwrite_local_cache, energy_unit, distance_unit)
+        self._post_init(overwrite_local_cache, energy_unit, distance_unit, array_format)
 
     def _post_init(
         self,
         overwrite_local_cache: bool = False,
         energy_unit: Optional[str] = None,
         distance_unit: Optional[str] = None,
+        array_format: Optional[str] = None,
     ) -> None:
         self._set_units(None, None)
-        self._set_isolated_atom_energies()
         self._precompute_statistics(overwrite_local_cache=overwrite_local_cache)
         self._set_units(energy_unit, distance_unit)
+        self._set_array_format(array_format)
         self._convert_data()
         self._set_isolated_atom_energies()
 
@@ -392,6 +407,10 @@ class BaseDataset:
         if len(self.__class__.__force_mask__) == 0:
             self.__class__.__force_mask__ = [False] * len(self.energy_methods)
         return self.__class__.__force_mask__
+    
+    def _set_array_format(self, format: str):
+        assert format in ["numpy", "torch", "jax"], f"Format {format} not supported."
+        self.array_format = format
 
     def _set_units(self, en, ds):
         old_en, old_ds = self.energy_unit, self.distance_unit
@@ -731,32 +750,56 @@ class BaseDataset:
         encoded in a different format than its display format
         """
         return x
+    
+    @requires_package("torch")
+    def _convert_to_torch(self, x: np.ndarray):
+        return torch.from_numpy(x)
+    
+    @requires_package("jax")
+    def _convert_to_jax(self, x: np.ndarray):
+        return jnp.array(x)
 
+    def _convert_array(self, x: np.ndarray):
+        if self.array_format == "torch":
+            return self._convert_to_torch(x)
+        elif self.array_format == "jax":
+            return self._convert_to_jax(x)
+        return x
+    
     def __getitem__(self, idx: int):
         shift = IsolatedAtomEnergyFactory.max_charge
         p_start, p_end = self.data["position_idx_range"][idx]
         input = self.data["atomic_inputs"][p_start:p_end]
         z, c, positions, energies = (
-            np.array(input[:, 0], dtype=np.int32),
-            np.array(input[:, 1], dtype=np.int32),
-            np.array(input[:, -3:], dtype=np.float32),
-            np.array(self.data["energies"][idx], dtype=np.float32),
+            self._convert_array(np.array(input[:, 0], dtype=np.int32)),
+            self._convert_array(np.array(input[:, 1], dtype=np.int32)),
+            self._convert_array(np.array(input[:, -3:], dtype=np.float32)),
+            self._convert_array(np.array(self.data["energies"][idx], dtype=np.float32)),
         )
         name = self.__smiles_converter__(self.data["name"][idx])
         subset = self.data["subset"][idx]
 
         if "forces" in self.data:
-            forces = np.array(self.data["forces"][p_start:p_end], dtype=np.float32)
+            forces = self._convert_array(np.array(self.data["forces"][p_start:p_end], dtype=np.float32))
         else:
             forces = None
-        return Bunch(
+        
+        e0 = self._convert_array(self.__isolated_atom_energies__[..., z, c + shift].T)
+        linear_e0 = self._convert_array(self.new_e0s[..., z, c + shift].T) if hasattr(self, "new_e0s") else None
+
+        bunch = Bunch(
             positions=positions,
             atomic_numbers=z,
             charges=c,
-            e0=self.__isolated_atom_energies__[..., z, c + shift].T,
-            linear_e0=self.new_e0s[..., z, c + shift].T if hasattr(self, "new_e0s") else None,
+            e0=e0,
+            linear_e0=linear_e0,
             energies=energies,
             name=name,
             subset=subset,
             forces=forces,
         )
+
+        if self.transform is not None:
+            bunch = self.transform(bunch)
+        
+        return bunch
