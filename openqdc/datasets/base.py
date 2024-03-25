@@ -50,6 +50,19 @@ if has_package("jax"):
     import jax.numpy as jnp
 
 
+@requires_package("torch")
+def to_torch(x: np.ndarray):
+    return torch.from_numpy(x)
+
+
+@requires_package("jax")
+def to_jax(x: np.ndarray):
+    return jnp.array(x)
+
+
+_CONVERT_DICT = {"torch": to_torch, "jax": to_jax, "numpy": lambda x: x}
+
+
 def _extract_entry(
     df: pd.DataFrame,
     i: int,
@@ -159,20 +172,19 @@ class BaseDataset:
             raise DatasetNotAvailableError(self.__name__)
         else:
             self.read_preprocess(overwrite_local_cache=overwrite_local_cache)
-        self._post_init(overwrite_local_cache, energy_unit, distance_unit, array_format)
+        self.set_array_format(array_format)
+        self._post_init(overwrite_local_cache, energy_unit, distance_unit)
 
     def _post_init(
         self,
         overwrite_local_cache: bool = False,
         energy_unit: Optional[str] = None,
         distance_unit: Optional[str] = None,
-        array_format: Optional[str] = None,
     ) -> None:
         self._set_units(None, None)
         self._set_isolated_atom_energies()
         self._precompute_statistics(overwrite_local_cache=overwrite_local_cache)
         self._set_units(energy_unit, distance_unit)
-        self._set_array_format(array_format)
         self._convert_data()
         self._set_isolated_atom_energies()
 
@@ -408,7 +420,8 @@ class BaseDataset:
             self.__class__.__force_mask__ = [False] * len(self.energy_methods)
         return self.__class__.__force_mask__
 
-    def _set_array_format(self, format: str):
+    def set_array_format(self, format: str):
+        format = format.lower()
         assert format in ["numpy", "torch", "jax"], f"Format {format} not supported."
         self.array_format = format
 
@@ -751,20 +764,8 @@ class BaseDataset:
         """
         return x
 
-    @requires_package("torch")
-    def _convert_to_torch(self, x: np.ndarray):
-        return torch.from_numpy(x)
-
-    @requires_package("jax")
-    def _convert_to_jax(self, x: np.ndarray):
-        return jnp.array(x)
-
     def _convert_array(self, x: np.ndarray):
-        if self.array_format == "torch":
-            return self._convert_to_torch(x)
-        elif self.array_format == "jax":
-            return self._convert_to_jax(x)
-        return x
+        return _CONVERT_DICT.get(self.array_format)(x)
 
     def __getitem__(self, idx: int):
         shift = IsolatedAtomEnergyFactory.max_charge

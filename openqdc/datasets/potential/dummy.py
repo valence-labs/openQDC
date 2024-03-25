@@ -41,9 +41,9 @@ class Dummy(BaseDataset):
             },
         }
 
-    def _post_init(self, overwrite_local_cache, energy_unit, distance_unit, array_format) -> None:
+    def _post_init(self, overwrite_local_cache, energy_unit, distance_unit) -> None:
         self.setup_dummy()
-        return super()._post_init(overwrite_local_cache, energy_unit, distance_unit, array_format)
+        return super()._post_init(overwrite_local_cache, energy_unit, distance_unit)
 
     def read_preprocess(self, overwrite_local_cache=False):
         return
