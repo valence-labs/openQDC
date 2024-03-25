@@ -346,7 +346,6 @@ class BaseDataset(DatasetPropertyMixIn):
             Whether to include additional informations
         """
         entry = self[idx]
-        # _ = entry.pop("forces")
         at = dict_to_atoms(entry, ext=ext)
         return at
 

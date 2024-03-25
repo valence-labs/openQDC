@@ -65,6 +65,29 @@ class SOAP(Descriptor):
         return self.model.create(atoms, centers=atoms.positions)
 
 
+class ACSF(SOAP):
+    @requires_package("dscribe")
+    def instantiate_model(self, **kwargs):
+        from dscribe.descriptors import ACSF as ACSFModel
+
+        r_cut = kwargs.pop("r_cut", 5.0)
+        g2_params = kwargs.pop("g2_params", [[1, 1], [1, 2], [1, 3]])
+        g3_params = kwargs.pop("g3_params", [[1], [1], [1], [2]])
+        g4_params = kwargs.pop("g4_params", [[1, 1, 1], [1, 2, 1], [1, 1, -1], [1, 2, -1]])
+        g5_params = kwargs.pop("g5_params", [[1, 2, -1], [1, 1, 1], [-1, 1, 1], [1, 2, 1]])
+        periodic = kwargs.pop("periodic", False)
+
+        return ACSFModel(
+            species=self.chemical_species,
+            periodic=periodic,
+            r_cut=r_cut,
+            g2_params=g2_params,
+            g3_params=g3_params,
+            g4_params=g4_params,
+            g5_params=g5_params,
+        )
+
+
 AVAILABLE_DESCRIPTORS = {
     str_name.lower(): cls
     for str_name, cls in globals().items()
