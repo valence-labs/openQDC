@@ -422,7 +422,7 @@ class BaseDataset:
 
     def set_array_format(self, format: str):
         format = format.lower()
-        assert format in ["numpy", "torch", "jax"], f"Format {format} not supported."
+        assert format in _CONVERT_DICT, f"Format {format} not supported."
         self.array_format = format
 
     def _set_units(self, en, ds):
