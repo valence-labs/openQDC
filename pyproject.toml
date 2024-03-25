@@ -44,6 +44,7 @@ dependencies = [
   "ase" ,
   "gdown",
   "h5py >= 3.8.0" ,
+  "dscribe"
 ]
 
 
@@ -65,18 +66,6 @@ dev = [
   "markdown-include",
   "mdx_truly_sane_lists",
   "mkdocstrings-python",
-]
-soap = [
-    "dscribe",
-]
-torch = [
-    "torch_geometric",
-    "torch",
-    "dscribe"
-]
-jax = [
-  "jax",
-  "dscribe"
 ]
 
 [project.scripts]
