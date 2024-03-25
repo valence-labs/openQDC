@@ -32,7 +32,6 @@ from openqdc.utils.package_utils import requires_package
 from openqdc.utils.regressor import Regressor  # noqa
 from openqdc.utils.units import get_conversion
 
-
 class BaseDataset(DatasetPropertyMixIn):
     """
     Base class for datasets in the openQDC package.
