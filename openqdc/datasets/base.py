@@ -3,6 +3,7 @@
 import os
 import pickle as pkl
 from copy import deepcopy
+from itertools import compress
 from os.path import join as p_join
 from typing import Dict, List, Optional, Union
 
@@ -32,15 +33,16 @@ from openqdc.utils.package_utils import requires_package
 from openqdc.utils.regressor import Regressor  # noqa
 from openqdc.utils.units import get_conversion
 
+
 class BaseDataset(DatasetPropertyMixIn):
     """
     Base class for datasets in the openQDC package.
     """
 
-    __energy_methods__ = []
-    __force_methods__ = []
     energy_target_names = []
     force_target_names = []
+    __energy_methods__ = []
+    __force_mask__ = []
     __isolated_atom_energies__ = []
 
     __energy_unit__ = "hartree"
@@ -130,6 +132,27 @@ class BaseDataset(DatasetPropertyMixIn):
             self.data[key] = self._convert_on_loading(self.data[key], key)
 
     @property
+    def __force_methods__(self):
+        """
+        For backward compatibility. To be removed in the future.
+        """
+        return self.force_methods
+
+    @property
+    def energy_methods(self):
+        return self.__energy_methods__
+
+    @property
+    def force_methods(self):
+        return list(compress(self.energy_methods, self.force_mask))
+
+    @property
+    def force_mask(self):
+        if len(self.__class__.__force_mask__) == 0:
+            self.__class__.__force_mask__ = [False] * len(self.energy_methods)
+        return self.__class__.__force_mask__
+
+    @property
     def energy_unit(self):
         return self.__energy_unit__
 
@@ -196,12 +219,11 @@ class BaseDataset(DatasetPropertyMixIn):
             self.__class__.__fn_forces__ = get_conversion(old_en + "/" + old_ds, self.__forces_unit__)
 
     def _set_isolated_atom_energies(self):
-        if self.__energy_methods__ is None:
+        if self.energy_methods is None:
             logger.error("No energy methods defined for this dataset.")
         f = get_conversion("hartree", self.__energy_unit__)
-
         self.__isolated_atom_energies__ = f(
-            np.array([IsolatedAtomEnergyFactory.get_matrix(en_method) for en_method in self.__energy_methods__])
+            np.array([IsolatedAtomEnergyFactory.get_matrix(en_method) for en_method in self.energy_methods])
         )
 
     def convert_energy(self, x):
@@ -280,13 +302,13 @@ class BaseDataset(DatasetPropertyMixIn):
             f"Dataset {self.__name__} with the following units:\n\
                      Energy: {self.energy_unit},\n\
                      Distance: {self.distance_unit},\n\
-                     Forces: {self.force_unit if self.__force_methods__ else 'None'}"
+                     Forces: {self.force_unit if self.force_methods else 'None'}"
         )
         self.data = {}
         for key in self.data_keys:
             filename = p_join(self.preprocess_path, f"{key}.mmap")
             pull_locally(filename, overwrite=overwrite_local_cache)
-            self.data[key] = np.memmap(filename, mode="r", dtype=self.data_types[key]).reshape(self.data_shapes[key])
+            self.data[key] = np.memmap(filename, mode="r", dtype=self.data_types[key]).reshape(*self.data_shapes[key])
 
         filename = p_join(self.preprocess_path, "props.pkl")
         pull_locally(filename, overwrite=overwrite_local_cache)
@@ -423,7 +445,8 @@ class BaseDataset(DatasetPropertyMixIn):
         """
         Get the statistics of the dataset.
         normalization : str, optional
-            Type of energy, by default "formation", must be one of ["formation", "total", "inter"]
+            Type of energy, by default "formation", must be one of ["formation", "total",
+            "residual_regression", "per_atom_formation", "per_atom_residual_regression"]
         return_none : bool, optional
             Whether to return None if the statistics for the forces are not available, by default True
             Otherwise, the statistics for the forces are set to 0.0
@@ -434,7 +457,7 @@ class BaseDataset(DatasetPropertyMixIn):
         if normalization not in POSSIBLE_NORMALIZATION:
             raise NormalizationNotAvailableError(normalization)
         selected_stats = stats[normalization]
-        if len(self.__force_methods__) == 0 and not return_none:
+        if len(self.force_methods) == 0 and not return_none:
             selected_stats.update(
                 {
                     "forces": {
