@@ -1,3 +1,4 @@
+import os
 import pickle as pkl
 from os.path import join as p_join
 from typing import Dict, List, Optional
@@ -5,11 +6,13 @@ from typing import Dict, List, Optional
 import numpy as np
 from loguru import logger
 from sklearn.utils import Bunch
+from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils.atomization_energies import IsolatedAtomEnergyFactory
 from openqdc.utils.constants import NB_ATOMIC_FEATURES
 from openqdc.utils.io import pull_locally, push_remote
+from openqdc.utils.molecule import atom_table
 
 
 class BaseInteractionDataset(BaseDataset):
@@ -72,6 +75,7 @@ class BaseInteractionDataset(BaseDataset):
         )
         name = self.__smiles_converter__(self.data["name"][idx])
         subset = self.data["subset"][idx]
+        n_atoms = self.data["n_atoms"][idx]
         n_atoms_first = self.data["n_atoms_first"][idx]
 
         if "forces" in self.data:
@@ -87,8 +91,28 @@ class BaseInteractionDataset(BaseDataset):
             name=name,
             subset=subset,
             forces=forces,
+            n_atoms=n_atoms,
             n_atoms_first=n_atoms_first,
         )
+    
+    def to_xyz(self, path: Optional[str] = None, ext=True):
+        path = p_join(path, self.__name__)
+        os.makedirs(path, exist_ok=True)
+        for idx in tqdm(range(len(self))):
+            self.save_xyz(idx, path, ext)
+
+    def save_xyz(self, idx: int, path: Optional[str] = None, ext=True):
+        if path is None:
+            path = os.getcwd()
+        entry = self[idx]
+        pos, atomic_numbers = entry.pop("positions"), entry.pop("atomic_numbers")
+        elements = [atom_table.GetElementSymbol(x) for x in atomic_numbers.tolist()]
+        with open(p_join(path, f"mol_{idx}.xyz"), "w") as outfile:
+            outfile.write(f"{entry['n_atoms']}\n")
+            outfile.write(f"{entry['name']},{entry['n_atoms_first']}\n")
+            for i, row in enumerate(pos):
+                xyz = "\t".join([elements[i]] + list(map(lambda x: str(x), row.tolist())))
+                outfile.write(xyz + "\n")
 
     def save_preprocess(self, data_dict):
         # save memmaps
