@@ -18,8 +18,8 @@ if has_package("jax"):
 
 format_to_type = {
     "numpy": np.ndarray,
-    "torch": torch.Tensor if torch else None,
-    "jax": jax.numpy.ndarray if jax else None,
+    "torch": torch.Tensor if has_package("torch") else None,
+    "jax": jax.numpy.ndarray if has_package("jax") else None,
 }
 
 
