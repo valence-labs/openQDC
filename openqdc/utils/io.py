@@ -3,9 +3,12 @@
 import json
 import os
 import pickle as pkl
+from typing import Dict, List, Optional
 
 import fsspec
 import h5py
+import numpy as np
+import pandas as pd
 from aiohttp import ClientTimeout
 from ase.atoms import Atoms
 from ase.calculators.calculator import Calculator
@@ -13,6 +16,9 @@ from fsspec.callbacks import TqdmCallback
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
 from rdkit.Chem import MolFromXYZFile
+from tqdm import tqdm
+
+from openqdc.utils.molecule import atom_table, z_to_formula
 
 gcp_filesys = fsspec.filesystem("gs")  # entry point for google bucket (need gsutil permission)
 gcp_filesys_public = fsspec.filesystem("https")  # public API for download
@@ -228,6 +234,10 @@ def dict_to_atoms(d: dict, ext: bool = False, en_method: int = 0) -> Atoms:
     return at
 
 
+def to_atoms(pos, atom_species):
+    return Atoms(positions=pos, numbers=atom_species)
+
+
 def print_h5_tree(val, pre=""):
     items = len(val)
     for key, val in val.items():
@@ -246,3 +256,45 @@ def print_h5_tree(val, pre=""):
             else:
                 # pass
                 print(pre + "├── " + key + " (%d)" % len(val))
+
+
+def extract_entry(
+    df: pd.DataFrame,
+    i: int,
+    subset: str,
+    energy_target_names: List[str],
+    force_target_names: Optional[List[str]] = None,
+) -> Dict[str, np.ndarray]:
+    x = np.array([atom_table.GetAtomicNumber(s) for s in df["symbols"][i]])
+    xs = np.stack((x, np.zeros_like(x)), axis=-1)
+    positions = df["geometry"][i].reshape((-1, 3))
+    energies = np.array([df[k][i] for k in energy_target_names])
+
+    res = dict(
+        name=np.array([df["name"][i]]),
+        subset=np.array([subset if subset is not None else z_to_formula(x)]),
+        energies=energies.reshape((1, -1)).astype(np.float32),
+        atomic_inputs=np.concatenate((xs, positions), axis=-1, dtype=np.float32),
+        n_atoms=np.array([x.shape[0]], dtype=np.int32),
+    )
+    if force_target_names is not None and len(force_target_names) > 0:
+        forces = np.zeros((positions.shape[0], 3, len(force_target_names)), dtype=np.float32)
+        forces += np.nan
+        for j, k in enumerate(force_target_names):
+            if len(df[k][i]) != 0:
+                forces[:, :, j] = df[k][i].reshape((-1, 3))
+        res["forces"] = forces
+
+    return res
+
+
+def read_qc_archive_h5(
+    raw_path: str, subset: str, energy_target_names: List[str], force_target_names: Optional[List[str]] = None
+) -> List[Dict[str, np.ndarray]]:
+    """Extracts data from the HDF5 archive file."""
+    data = load_hdf5_file(raw_path)
+    data_t = {k2: data[k1][k2][:] for k1 in data.keys() for k2 in data[k1].keys()}
+
+    n = len(data_t["molecule_id"])
+    samples = [extract_entry(data_t, i, subset, energy_target_names, force_target_names) for i in tqdm(range(n))]
+    return samples

@@ -1,4 +1,4 @@
-from .interaction import AVAILABLE_INTERACTION_DATASETS  # noqa
-from .potential import AVAILABLE_POTENTIAL_DATASETS  # noqa
+from .interaction import *  # noqa
+from .potential import *  # noqa
 
-AVAILABLE_DATASETS = {**AVAILABLE_POTENTIAL_DATASETS, **AVAILABLE_INTERACTION_DATASETS}
+AVAILABLE_DATASETS = {**AVAILABLE_POTENTIAL_DATASETS, **AVAILABLE_INTERACTION_DATASETS}  # noqa

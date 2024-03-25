@@ -32,58 +32,14 @@ from openqdc.utils.io import (
     copy_exists,
     dict_to_atoms,
     get_local_cache,
-    load_hdf5_file,
     load_pkl,
     pull_locally,
     push_remote,
     set_cache_dir,
 )
-from openqdc.utils.molecule import atom_table, z_to_formula
 from openqdc.utils.package_utils import requires_package
 from openqdc.utils.regressor import Regressor
 from openqdc.utils.units import get_conversion
-
-
-def _extract_entry(
-    df: pd.DataFrame,
-    i: int,
-    subset: str,
-    energy_target_names: List[str],
-    force_target_names: Optional[List[str]] = None,
-) -> Dict[str, np.ndarray]:
-    x = np.array([atom_table.GetAtomicNumber(s) for s in df["symbols"][i]])
-    xs = np.stack((x, np.zeros_like(x)), axis=-1)
-    positions = df["geometry"][i].reshape((-1, 3))
-    energies = np.array([df[k][i] for k in energy_target_names])
-
-    res = dict(
-        name=np.array([df["name"][i]]),
-        subset=np.array([subset if subset is not None else z_to_formula(x)]),
-        energies=energies.reshape((1, -1)).astype(np.float32),
-        atomic_inputs=np.concatenate((xs, positions), axis=-1, dtype=np.float32),
-        n_atoms=np.array([x.shape[0]], dtype=np.int32),
-    )
-    if force_target_names is not None and len(force_target_names) > 0:
-        forces = np.zeros((positions.shape[0], 3, len(force_target_names)), dtype=np.float32)
-        forces += np.nan
-        for j, k in enumerate(force_target_names):
-            if len(df[k][i]) != 0:
-                forces[:, :, j] = df[k][i].reshape((-1, 3))
-        res["forces"] = forces
-
-    return res
-
-
-def read_qc_archive_h5(
-    raw_path: str, subset: str, energy_target_names: List[str], force_target_names: List[str]
-) -> List[Dict[str, np.ndarray]]:
-    """Extracts data from the HDF5 archive file."""
-    data = load_hdf5_file(raw_path)
-    data_t = {k2: data[k1][k2][:] for k1 in data.keys() for k2 in data[k1].keys()}
-
-    n = len(data_t["molecule_id"])
-    samples = [_extract_entry(data_t, i, subset, energy_target_names, force_target_names) for i in tqdm(range(n))]
-    return samples
 
 
 class BaseDataset:
@@ -175,6 +131,14 @@ class BaseDataset:
         For backward compatibility. To be removed in the future.
         """
         return self.force_methods
+
+    @property
+    def energy_methods(self):
+        return self.__energy_methods__
+
+    @property
+    def force_methods(self):
+        return list(compress(self.energy_methods, self.force_mask))
 
     def _convert_data(self):
         logger.info(
@@ -378,14 +342,6 @@ class BaseDataset:
         en = en if en is not None else old_en
         f = get_conversion(old_en, en)
         self.new_e0s = f(self.new_e0s)
-
-    @property
-    def energy_methods(self):
-        return self.__class__.__energy_methods__
-
-    @property
-    def force_methods(self):
-        return list(compress(self.energy_methods, self.force_mask))
 
     @property
     def force_mask(self):
