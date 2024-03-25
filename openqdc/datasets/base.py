@@ -534,16 +534,28 @@ class BaseDataset:
             res = self.collate_list(entries)
             self.save_preprocess(res)
 
-    def save_xyz(self, idx: int, path: Optional[str] = None, ext=True):
+    def save_xyz(self, idx: int, en_method: int = 0, path: Optional[str] = None, ext=True):
         """
         Save the entry at index idx as an extxyz file.
         """
         if path is None:
             path = os.getcwd()
-        at = self.get_ase_atoms(idx, ext=ext)
-        write_extxyz(p_join(path, f"mol_{idx}.xyz"), at)
+        at = self.get_ase_atoms(idx, ext=ext, en_method=en_method)
+        write_extxyz(p_join(path, f"mol_{idx}.xyz"), at, plain=not ext)
 
-    def get_ase_atoms(self, idx: int, ext=True):
+    def to_xyz(self, en_method: int = 0, path: Optional[str] = None):
+        """
+        Save dataset as single xyz file (extended xyz format).
+        """
+        with open(p_join(path if path else os.getcwd(), f"{self.__name__}.xyz"), "w") as f:
+            for atoms in tqdm(
+                self.as_iter(atoms=True, en_method=en_method),
+                total=len(self),
+                desc=f"Saving {self.__name__} as xyz file",
+            ):
+                write_extxyz(f, atoms, append=True)
+
+    def get_ase_atoms(self, idx: int, en_method: int = 0, ext=True):
         """
         Get the ASE atoms object for the entry at index idx.
 
@@ -555,8 +567,7 @@ class BaseDataset:
             Whether to include additional informations
         """
         entry = self[idx]
-        # _ = entry.pop("forces")
-        at = dict_to_atoms(entry, ext=ext)
+        at = dict_to_atoms(entry, ext=ext, en_method=en_method)
         return at
 
     @requires_package("dscribe")
@@ -645,7 +656,7 @@ class BaseDataset:
             datum["idxs"] = idxs
         return datum
 
-    def as_iter(self, atoms: bool = False):
+    def as_iter(self, atoms: bool = False, en_method: int = 0):
         """
         Return the dataset as an iterator.
 
@@ -654,7 +665,10 @@ class BaseDataset:
         atoms : bool, optional
             Whether to return the items as ASE atoms object, by default False
         """
-        func = self.get_ase_atoms if atoms else self.__getitem__
+        from functools import partial
+
+        func = partial(self.get_ase_atoms, en_method=en_method) if atoms else self.__getitem__
+
         for i in range(len(self)):
             yield func(i)
 

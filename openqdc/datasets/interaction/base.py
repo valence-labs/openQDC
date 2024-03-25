@@ -105,7 +105,7 @@ class BaseInteractionDataset(BaseDataset):
         for key in data_dict:
             if key not in self.data_keys:
                 x = data_dict[key]
-                x[x == None] = -1
+                x[x == None] = -1  # noqa
                 data_dict[key] = np.unique(x, return_inverse=True)
 
         with open(local_path, "wb") as f:

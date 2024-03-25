@@ -8,6 +8,7 @@ import fsspec
 import h5py
 from aiohttp import ClientTimeout
 from ase.atoms import Atoms
+from ase.calculators.calculator import Calculator
 from fsspec.callbacks import TqdmCallback
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
@@ -200,7 +201,7 @@ def load_xyz(path):
     return MolFromXYZFile(path)
 
 
-def dict_to_atoms(d: dict, ext: bool = False) -> Atoms:
+def dict_to_atoms(d: dict, ext: bool = False, en_method: int = 0) -> Atoms:
     """
     Converts dictionary to ase atoms object
 
@@ -212,6 +213,17 @@ def dict_to_atoms(d: dict, ext: bool = False) -> Atoms:
     pos, atomic_numbers, charges = d.pop("positions"), d.pop("atomic_numbers"), d.pop("charges")
     at = Atoms(positions=pos, numbers=atomic_numbers, charges=charges)
     if ext:
+        # Attach calculator for correct extxyz formatting
+        at.set_calculator(Calculator())
+        forces = d.pop("forces", None)
+        if forces.any():
+            # convert to (n_atoms, 3) shape, extxyz can only store 1 label
+            n_atoms, _, _ = forces.shape
+            forces = forces[..., en_method].reshape(n_atoms, 3)
+        at.calc.results = {
+            "energy": d.pop("energies")[en_method],
+            "forces": forces,
+        }
         at.info = d
     return at
 
