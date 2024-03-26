@@ -70,20 +70,20 @@ class MBTR(SOAP):
     def instantiate_model(self, **kwargs):
         from dscribe.descriptors import MBTR as MBTRModel
 
-        r_cut = kwargs.pop("r_cut", 5.0)
         geometry = kwargs.pop("geometry", {"function": "inverse_distance"})
         grid = kwargs.pop("grid", {"min": 0, "max": 1, "n": 100, "sigma": 0.1})
-        weighting = kwargs.pop("weighting", {"function": "exp", "scale": 0.5, "threshold": 1e-3})
+        weighting = kwargs.pop("weighting", {"function": "exp", "r_cut": 5, "threshold": 1e-3})
         normalization = kwargs.pop("normalization", "l2")
+        normalize_gaussians = kwargs.pop("normalize_gaussians", True)
         periodic = kwargs.pop("periodic", False)
 
         return MBTRModel(
             species=self.chemical_species,
             periodic=periodic,
-            r_cut=r_cut,
             geometry=geometry,
             grid=grid,
             weighting=weighting,
+            normalize_gaussians=normalize_gaussians,
             normalization=normalization,
         )
 
