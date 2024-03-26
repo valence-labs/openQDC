@@ -1,5 +1,3 @@
-from typing import Optional
-
 import numpy as np
 
 from openqdc.datasets.base import BaseDataset
@@ -43,31 +41,9 @@ class Dummy(BaseDataset):
             },
         }
 
-    def __init__(
-        self,
-        energy_unit: Optional[str] = None,
-        distance_unit: Optional[str] = None,
-        overwrite_local_cache: bool = False,
-        cache_dir: Optional[str] = None,
-        recompute_statistics: bool = False,
-        regressor_kwargs={
-            "solver_type": "linear",
-            "sub_sample": None,
-            "stride": 1,
-        },
-    ) -> None:
-        try:
-            super().__init__(
-                energy_unit=energy_unit,
-                distance_unit=distance_unit,
-                cache_dir=cache_dir,
-                recompute_statistics=recompute_statistics,
-            )
-
-        except:  # noqa
-            pass
-        self._set_isolated_atom_energies()
+    def _post_init(self, overwrite_local_cache, energy_unit, distance_unit) -> None:
         self.setup_dummy()
+        return super()._post_init(overwrite_local_cache, energy_unit, distance_unit)
 
     def setup_dummy(self):
         n_atoms = np.array([np.random.randint(1, 100) for _ in range(len(self))])
@@ -101,6 +77,9 @@ class Dummy(BaseDataset):
             forces=forces,
         )
         self.__average_nb_atoms__ = self.data["n_atoms"].mean()
+
+    def read_preprocess(self, overwrite_local_cache=False):
+        return
 
     def is_preprocessed(self):
         return True
