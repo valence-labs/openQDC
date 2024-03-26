@@ -1,6 +1,6 @@
 import pickle as pkl
 from os.path import join as p_join
-from typing import Dict, List, Optional
+from typing import Callable, Dict, List, Optional
 
 import numpy as np
 from loguru import logger
@@ -17,14 +17,18 @@ class BaseInteractionDataset(BaseDataset):
         self,
         energy_unit: Optional[str] = None,
         distance_unit: Optional[str] = None,
+        array_format: str = "numpy",
         overwrite_local_cache: bool = False,
         cache_dir: Optional[str] = None,
+        transform: Optional[Callable] = None,
     ) -> None:
         super().__init__(
             energy_unit=energy_unit,
             distance_unit=distance_unit,
+            array_format=array_format,
             overwrite_local_cache=overwrite_local_cache,
             cache_dir=cache_dir,
+            transform=transform,
         )
 
     def collate_list(self, list_entries: List[Dict]):
@@ -65,30 +69,38 @@ class BaseInteractionDataset(BaseDataset):
         p_start, p_end = self.data["position_idx_range"][idx]
         input = self.data["atomic_inputs"][p_start:p_end]
         z, c, positions, energies = (
-            np.array(input[:, 0], dtype=np.int32),
-            np.array(input[:, 1], dtype=np.int32),
-            np.array(input[:, -3:], dtype=np.float32),
-            np.array(self.data["energies"][idx], dtype=np.float32),
+            self._convert_array(np.array(input[:, 0], dtype=np.int32)),
+            self._convert_array(np.array(input[:, 1], dtype=np.int32)),
+            self._convert_array(np.array(input[:, -3:], dtype=np.float32)),
+            self._convert_array(np.array(self.data["energies"][idx], dtype=np.float32)),
         )
         name = self.__smiles_converter__(self.data["name"][idx])
         subset = self.data["subset"][idx]
         n_atoms_first = self.data["n_atoms_first"][idx]
 
         if "forces" in self.data:
-            forces = np.array(self.data["forces"][p_start:p_end], dtype=np.float32)
+            forces = self._convert_array(np.array(self.data["forces"][p_start:p_end]), dtype=np.float32)
         else:
             forces = None
-        return Bunch(
+
+        e0 = self._convert_array(self.__isolated_atom_energies__[..., z, c + shift].T, dtype=np.float32)
+
+        bunch = Bunch(
             positions=positions,
             atomic_numbers=z,
             charges=c,
-            e0=self.__isolated_atom_energies__[..., z, c + shift].T,
+            e0=e0,
             energies=energies,
             name=name,
             subset=subset,
             forces=forces,
             n_atoms_first=n_atoms_first,
         )
+
+        if self.transform is not None:
+            bunch = self.transform(bunch)
+
+        return bunch
 
     def save_preprocess(self, data_dict):
         # save memmaps
