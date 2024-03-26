@@ -44,7 +44,7 @@ class Splinter(BaseInteractionDataset):
         "sapt0/aug-cc-pV(D+d)Z_disp_scaled",
     ]
 
-    energy_target_names = []
+    energy_target_names = __energy_methods__
 
     def read_raw_entries(self) -> List[Dict]:
         logger.info(f"Reading Splinter interaction data from {self.root}")

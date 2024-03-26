@@ -76,7 +76,7 @@ class L7(BaseInteractionDataset):
         "FN-DMC",
     ]
 
-    energy_target_names = []
+    energy_target_names = __energy_methods__
 
     def read_raw_entries(self) -> List[Dict]:
         yaml_fpath = os.path.join(self.root, "l7.yaml")

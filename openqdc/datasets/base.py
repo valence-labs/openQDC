@@ -346,6 +346,10 @@ class BaseDataset:
         return keys
 
     @property
+    def pkl_data_keys(self):
+        return ["name", "subset", "n_atoms"]
+
+    @property
     def data_types(self):
         return {
             "atomic_inputs": np.float32,
@@ -465,7 +469,7 @@ class BaseDataset:
 
         # save smiles and subset
         local_path = p_join(self.preprocess_path, "props.pkl")
-        for key in ["name", "subset"]:
+        for key in self.pkl_data_keys:
             data_dict[key] = np.unique(data_dict[key], return_inverse=True)
 
         with open(local_path, "wb") as f:
@@ -502,7 +506,7 @@ class BaseDataset:
         pull_locally(filename, overwrite=overwrite_local_cache)
         with open(filename, "rb") as f:
             tmp = pkl.load(f)
-            for key in ["name", "subset", "n_atoms"]:
+            for key in self.pkl_data_keys:
                 x = tmp.pop(key)
                 if len(x) == 2:
                     self.data[key] = x[0][x[1]]
