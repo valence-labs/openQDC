@@ -48,9 +48,6 @@ class Dummy(BaseDataset):
     def read_preprocess(self, overwrite_local_cache=False):
         return
 
-    def _precompute_statistics(self, overwrite_local_cache=False):
-        return
-
     def setup_dummy(self):
         n_atoms = np.array([np.random.randint(1, 100) for _ in range(len(self))])
         position_idx_range = np.concatenate([[0], np.cumsum(n_atoms)]).repeat(2)[1:-1].reshape(-1, 2)
