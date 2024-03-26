@@ -1,3 +1,5 @@
+from typing import Optional
+
 import numpy as np
 
 from openqdc.datasets.interaction.base import BaseDataset
@@ -24,9 +26,16 @@ class DummyInteraction(BaseDataset):
 
     def __init__(
         self,
-        energy_unit=None,
-        distance_unit=None,
-        cache_dir=None,
+        energy_unit: Optional[str] = None,
+        distance_unit: Optional[str] = None,
+        overwrite_local_cache: bool = False,
+        cache_dir: Optional[str] = None,
+        recompute_statistics: bool = False,
+        regressor_kwargs={
+            "solver_type": "linear",
+            "sub_sample": None,
+            "stride": 1,
+        },
     ) -> None:
         try:
             super().__init__(energy_unit=energy_unit, distance_unit=distance_unit, cache_dir=cache_dir)
