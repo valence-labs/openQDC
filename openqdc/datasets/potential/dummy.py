@@ -45,9 +45,6 @@ class Dummy(BaseDataset):
         self.setup_dummy()
         return super()._post_init(overwrite_local_cache, energy_unit, distance_unit)
 
-    def read_preprocess(self, overwrite_local_cache=False):
-        return
-
     def setup_dummy(self):
         n_atoms = np.array([np.random.randint(1, 100) for _ in range(len(self))])
         position_idx_range = np.concatenate([[0], np.cumsum(n_atoms)]).repeat(2)[1:-1].reshape(-1, 2)
@@ -80,6 +77,9 @@ class Dummy(BaseDataset):
             forces=forces,
         )
         self.__average_nb_atoms__ = self.data["n_atoms"].mean()
+
+    def read_preprocess(self, overwrite_local_cache=False):
+        return
 
     def is_preprocessed(self):
         return True
