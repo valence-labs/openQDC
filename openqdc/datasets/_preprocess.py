@@ -208,7 +208,7 @@ class ForceStatistics(StatisticsResults):
     
 class CalculatorHandler(ABC):
     @abstractmethod
-    def set_next_calculator(self, calculator: CalculatorHandler) -> CalculatorHandler:
+    def set_next_calculator(self, calculator: "CalculatorHandler") -> "CalculatorHandler":
         pass
     
     @abstractmethod
@@ -219,7 +219,7 @@ class AbstractStatsCalculator(CalculatorHandler):
     deps = []
     provided_deps = []
     avoid_calculations = []
-    _next_calculator: Optional[CalculatorHandler] = None
+    _next_calculator : CalculatorHandler = None
     
     def __init__(self, energies : Optional[np.ndarray] = None,
                  n_atoms : Optional[np.ndarray] = None,
@@ -241,18 +241,24 @@ class AbstractStatsCalculator(CalculatorHandler):
     def has_forces(self):
         return self.forces is not None
     
-    def set_next_calculator(self, calculator: AbstractStatsCalculator) -> AbstractStatsCalculator:
+    def set_next_calculator(self, calculator: "AbstractStatsCalculator") -> "AbstractStatsCalculator":
         self._next_calculator = calculator
         
         if set(self.provided_deps) & set(self._next_calculator.deps):
-            [setattr(self._next_calculator, attr, getattr(self, attr) ) for attr in set(self.provided_deps) & set(self._next_calculator.deps)]
+            from functools import partial 
+            for attr in set(self.provided_deps) & set(self._next_calculator.deps):
+                
+                # set a callback to the attribute 
+                self._next_calculator.__setattr__(attr,
+                                                  partial(self.__getattribute__, 
+                                                          )
+                                                  )
         return calculator 
 
     def run_calculator(self):
-        self.compute()
-        if self._next_handler:
-            return self._next_calculator.compute()
-        return None
+        self.result = self.compute()
+        if self._next_calculator:
+            self._next_calculator.run_calculator()
     
     @classmethod
     def from_openqdc_dataset(cls, dataset):
@@ -269,27 +275,38 @@ class AbstractStatsCalculator(CalculatorHandler):
     def compute(self)->StatisticsResults:
         pass
     
-class StatisticsOrderHandler(Handler):
-    strategies = []
-    def __init__(self, *strategies)
-        pass 
+#class StatisticsOrderHandler(Handler):
+#    strategies = []
+#    def __init__(self, *strategies):
+#        pass 
+#        
+#    def set_strategy(self):
+#        pass 
+
+class CalculatorManager:
+    def __init__(self, *calculators):
+        self._calculators = calculators
         
-    def set_strategy(self):
-        pass 
+    def run_calculators(self):
+        for i in range(len(self._calculators), 2):
+            self._calculators[i-2].set_next_calculator(self._calculators[i-1])
+            self._calculators[i-2].run_calculator()
     
-    
+    def get_calculator(self, idx):
+        return self._calculators[idx]
+
 class ForcesCalculator(AbstractStatsCalculator):
     deps = []
     provided_deps = []
     avoid_calculations = []
     
-    def compute_forces_statistics(self)->ForceStatistics:
+    def compute(self)->ForceStatistics:
         if not self.has_forces:
             return ForceStatistics(mean=None,
                                std=None,
                                components=ForceComponentsStatistics(rms=None,
                                                                     std=None,
-                                                                    mean=None)
+                                                                    mean=None))
         converted_force_data = self.forces
         force_mean = np.nanmean(converted_force_data, axis=0)
         force_std = np.nanstd(converted_force_data, axis=0)
@@ -306,8 +323,8 @@ class TotalEnergyStats(AbstractStatsCalculator):
     provided_deps = []
     avoid_calculations = []
     
-    def compute_energy_statistics(self):
-        converted_energy_data = self.data["energies"]
+    def compute(self):
+        converted_energy_data = self.energies
         total_E_mean = np.nanmean(converted_energy_data, axis=0)
         total_E_std = np.nanstd(converted_energy_data, axis=0)
         return EnergyStatistics(mean=total_E_mean, std=total_E_std)
@@ -324,7 +341,7 @@ class FormationEnergyInterface(AbstractStatsCalculator, ABC):
             s = np.array(self.atom_species_charges_tuple, dtype=int)
             s[:, 1] += IsolatedAtomEnergyFactory.max_charge
             matrixs = [matrix[s[:, 0], s[:, 1]] for matrix in self.e0_matrix]
-            converted_energy_data = self.energy
+            converted_energy_data = self.energies
             # calculation per molecule formation energy statistics
             E = []
             for i, matrix in enumerate(matrixs):
@@ -332,7 +349,8 @@ class FormationEnergyInterface(AbstractStatsCalculator, ABC):
                 c[1:] = c[1:] - c[:-1]
                 E.append(converted_energy_data[:, i] - c)
         else:
-            E = self.formation_energy
+            E = getattr(self, "formation_energy")("formation_energy")
+        self.formation_energy = E
         E = np.array(E).T
         return self._compute(E)
    
@@ -341,9 +359,6 @@ class FormationEnergyInterface(AbstractStatsCalculator, ABC):
         raise NotImplementedError
     
 class FormationStats(FormationEnergyInterface):
-    deps = ["formation_energy"]
-    provided_deps = ["formation_energy"]
-    avoid_calculations = []
     
     def _compute(self, energy)->EnergyStatistics:
         formation_E_mean = np.nanmean(energy, axis=0)
@@ -351,13 +366,10 @@ class FormationStats(FormationEnergyInterface):
         return EnergyStatistics(mean=formation_E_mean, std=formation_E_std)
         
 class PerAtomFormationEnergyStats(FormationEnergyInterface):
-    deps = ["formation_energy"]
-    provided_deps = ["formation_energy"]
-    avoid_calculations = []
     
     def _compute(self, energy)->EnergyStatistics:
-        inter_E_mean = np.nanmean(energy / self.n_atoms][:, None]), axis=0)
-        inter_E_std = np.nanstd(energy / self,n_atoms][:, None]), axis=0)
+        inter_E_mean = np.nanmean((energy / self.n_atoms[:, None]), axis=0)
+        inter_E_std = np.nanstd((energy / self.n_atoms[:, None]), axis=0)
         return EnergyStatistics(mean=inter_E_mean, std=inter_E_std)
         
     
@@ -385,5 +397,3 @@ class RegressionStats(AbstractStatsCalculator):
             for i in range(len(self.__energy_methods__)):
                 new_e0s[i][z, :] = e0[i]
         self.new_e0s = np.array(new_e0s)
-    
-    
