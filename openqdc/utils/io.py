@@ -207,7 +207,7 @@ def load_xyz(path):
     return MolFromXYZFile(path)
 
 
-def dict_to_atoms(d: dict, ext: bool = False, en_method: int = 0) -> Atoms:
+def dict_to_atoms(d: dict, ext: bool = False, energy_method: int = 0) -> Atoms:
     """
     Converts dictionary to ase atoms object
 
@@ -225,9 +225,9 @@ def dict_to_atoms(d: dict, ext: bool = False, en_method: int = 0) -> Atoms:
         if forces.any():
             # convert to (n_atoms, 3) shape, extxyz can only store 1 label
             n_atoms, _, _ = forces.shape
-            forces = forces[..., en_method].reshape(n_atoms, 3)
+            forces = forces[..., energy_method].reshape(n_atoms, 3)
         at.calc.results = {
-            "energy": d.pop("energies")[en_method],
+            "energy": d.pop("energies")[energy_method],
             "forces": forces,
         }
         at.info = d

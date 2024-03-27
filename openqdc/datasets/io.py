@@ -35,11 +35,11 @@ class FromFileDataset(BaseDataset, ABC):
 
         Parameters
         ----------
-        file_path : str
-            The path to the file.
+        path : List[str]
+            The path to the file or a list of paths.
         """
         self.path = [path] if isinstance(path, str) else path
-        self.__name__ = str(self) if dataset_name is None else dataset_name
+        self.__name__ = self.__class__.__name__ if dataset_name is None else dataset_name
         self.__energy_unit__ = energy_unit
         self.__distance_unit__ = distance_unit
         self.__energy_methods__ = [level_of_theory if level_of_theory else "default"]
@@ -48,20 +48,19 @@ class FromFileDataset(BaseDataset, ABC):
         self._post_init(True, energy_unit, distance_unit)
 
     def __str__(self):
-        return str(self.__class__.__name__).lower()
+        return self.__name__.lower()
 
     def __repr__(self):
         return str(self)
 
     @abstractmethod
-    def read_as_atoms(self, path: str):
+    def read_as_atoms(self, path: str) -> List[Atoms]:
         """
         Method that reads a path and return a list of Atoms objects.
         """
         raise NotImplementedError
 
     def collate_list(self, list_entries):
-        # concatenate entries
         res = {key: np.concatenate([r[key] for r in list_entries if r is not None], axis=0) for key in list_entries[0]}
         csum = np.cumsum(res.get("n_atoms"))
         x = np.zeros((csum.shape[0], 2), dtype=np.int32)
@@ -89,7 +88,7 @@ class FromFileDataset(BaseDataset, ABC):
         forces = try_retrieve(obj, lambda x: x.get_forces(), None)
         if forces is not None:
             self.__force_mask__ = [True]
-        fall_back_charges = np.zeros(len(positions)) if name else dm.to_mol(name, remove_hs=False, ordered=True)
+        fall_back_charges = np.zeros(len(positions)) if not name else dm.to_mol(name, remove_hs=False, ordered=True)
         charges = try_retrieve(obj, lambda x: x.get_initial_charges(), fall_back_charges)
         return dict(
             name=np.array([name]) if name else np.array([str(obj.symbols)]),

@@ -3,6 +3,7 @@
 import os
 import pickle as pkl
 from copy import deepcopy
+from functools import partial
 from itertools import compress
 from os.path import join as p_join
 from typing import Dict, List, Optional, Union
@@ -367,7 +368,7 @@ class BaseDataset:
             logger.error("No energy methods defined for this dataset.")
         f = get_conversion("hartree", self.__energy_unit__)
         self.__isolated_atom_energies__ = f(
-            np.array([IsolatedAtomEnergyFactory.get_matrix(en_method) for en_method in self.energy_methods])
+            np.array([IsolatedAtomEnergyFactory.get_matrix(energy_method) for energy_method in self.energy_methods])
         )
 
     def convert_energy(self, x):
@@ -490,28 +491,28 @@ class BaseDataset:
             res = self.collate_list(entries)
             self.save_preprocess(res)
 
-    def save_xyz(self, idx: int, en_method: int = 0, path: Optional[str] = None, ext=True):
+    def save_xyz(self, idx: int, energy_method: int = 0, path: Optional[str] = None, ext=True):
         """
         Save the entry at index idx as an extxyz file.
         """
         if path is None:
             path = os.getcwd()
-        at = self.get_ase_atoms(idx, ext=ext, en_method=en_method)
+        at = self.get_ase_atoms(idx, ext=ext, energy_method=energy_method)
         write_extxyz(p_join(path, f"mol_{idx}.xyz"), at, plain=not ext)
 
-    def to_xyz(self, en_method: int = 0, path: Optional[str] = None):
+    def to_xyz(self, energy_method: int = 0, path: Optional[str] = None):
         """
         Save dataset as single xyz file (extended xyz format).
         """
         with open(p_join(path if path else os.getcwd(), f"{self.__name__}.xyz"), "w") as f:
             for atoms in tqdm(
-                self.as_iter(atoms=True, en_method=en_method),
+                self.as_iter(atoms=True, energy_method=energy_method),
                 total=len(self),
                 desc=f"Saving {self.__name__} as xyz file",
             ):
                 write_extxyz(f, atoms, append=True)
 
-    def get_ase_atoms(self, idx: int, en_method: int = 0, ext=True):
+    def get_ase_atoms(self, idx: int, energy_method: int = 0, ext=True):
         """
         Get the ASE atoms object for the entry at index idx.
 
@@ -523,7 +524,7 @@ class BaseDataset:
             Whether to include additional informations
         """
         entry = self[idx]
-        at = dict_to_atoms(entry, ext=ext, en_method=en_method)
+        at = dict_to_atoms(entry, ext=ext, energy_method=energy_method)
         return at
 
     @requires_package("dscribe")
@@ -612,7 +613,7 @@ class BaseDataset:
             datum["idxs"] = idxs
         return datum
 
-    def as_iter(self, atoms: bool = False, en_method: int = 0):
+    def as_iter(self, atoms: bool = False, energy_method: int = 0):
         """
         Return the dataset as an iterator.
 
@@ -621,9 +622,8 @@ class BaseDataset:
         atoms : bool, optional
             Whether to return the items as ASE atoms object, by default False
         """
-        from functools import partial
 
-        func = partial(self.get_ase_atoms, en_method=en_method) if atoms else self.__getitem__
+        func = partial(self.get_ase_atoms, energy_method=energy_method) if atoms else self.__getitem__
 
         for i in range(len(self)):
             yield func(i)
