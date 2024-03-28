@@ -14,9 +14,9 @@ from loguru import logger
 from sklearn.utils import Bunch
 from tqdm import tqdm
 
-from openqdc.utils.atomization_energies import atom_symbols
 from openqdc.utils.constants import (
     NB_ATOMIC_FEATURES,
+    ATOM_SYMBOLS,
     MAX_CHARGE,
     NOT_DEFINED,
     POSSIBLE_NORMALIZATION,
@@ -312,7 +312,7 @@ class BaseDataset:
 
     @property
     def chemical_species(self):
-        return np.array(atom_symbols)[self.numbers]
+        return np.array(ATOM_SYMBOLS)[self.numbers]
 
     @property
     def energy_unit(self):
