@@ -1,29 +1,12 @@
-import pickle as pkl
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass
 from os.path import join as p_join
 from typing import Optional
 
 import numpy as np
-import pandas as pd
 from loguru import logger
 
-from openqdc.utils.atomization_energies import (
-    IsolatedAtomEnergyFactory,
-    chemical_symbols,
-)
-from openqdc.utils.constants import NOT_DEFINED
-from openqdc.utils.exceptions import StatisticsNotAvailableError
-from openqdc.utils.io import (
-    copy_exists,
-    dict_to_atoms,
-    get_local_cache,
-    load_pkl,
-    pull_locally,
-    push_remote,
-    save_pkl,
-    set_cache_dir,
-)
+from openqdc.utils.io import get_local_cache, load_pkl, save_pkl
 from openqdc.utils.regressor import Regressor
 
 
@@ -71,9 +54,10 @@ class StatisticManager:
     _state = {}
     _results = {}
 
-    def __init__(self, dataset, *statistic_calculators):
+    def __init__(self, dataset, recompute: bool = False, *statistic_calculators):
         self._statistic_calculators = [
-            statistic_calculators.from_openqdc_dataset(dataset) for statistic_calculators in statistic_calculators
+            statistic_calculators.from_openqdc_dataset(dataset, recompute)
+            for statistic_calculators in statistic_calculators
         ]
 
     @property
@@ -96,7 +80,6 @@ class StatisticManager:
 
     def run_calculators(self):
         for calculator in self._statistic_calculators:
-
             calculator.run(self.state)
             self._results[calculator.__class__.__name__] = calculator.result
 
@@ -108,6 +91,7 @@ class AbstractStatsCalculator(ABC):
     def __init__(
         self,
         name: str,
+        force_recompute: bool = False,
         energies: Optional[np.ndarray] = None,
         n_atoms: Optional[np.ndarray] = None,
         atom_species: Optional[np.ndarray] = None,
@@ -117,6 +101,7 @@ class AbstractStatsCalculator(ABC):
         forces: Optional[np.ndarray] = None,
     ):
         self.name = name
+        self.force_recompute = force_recompute
         self.energies = energies
         self.forces = forces
         self.position_idx_range = position_idx_range
@@ -141,9 +126,10 @@ class AbstractStatsCalculator(ABC):
         return p_join(get_local_cache(), self.name)
 
     @classmethod
-    def from_openqdc_dataset(cls, dataset):
+    def from_openqdc_dataset(cls, dataset, recompute: bool = False):
         return cls(
             name=dataset.__name__,
+            force_recompute=recompute,
             energies=dataset.data["energies"],
             forces=dataset.data["forces"],
             n_atoms=dataset.data["n_atoms"],
@@ -180,7 +166,7 @@ class AbstractStatsCalculator(ABC):
 
     def run(self, state) -> None:
         self._setup_deps(state)
-        if not self.attempt_load():
+        if self.force_recompute or not self.attempt_load():
             self.result = self.compute()
             self.save_statistics()
 
@@ -189,7 +175,6 @@ class AbstractStatsCalculator(ABC):
 
 
 class ForcesCalculatorStats(AbstractStatsCalculator):
-
     def compute(self) -> ForceStatistics:
         if not self.has_forces:
             return ForceStatistics(
@@ -207,7 +192,6 @@ class ForcesCalculatorStats(AbstractStatsCalculator):
 
 
 class TotalEnergyStats(AbstractStatsCalculator):
-
     def compute(self):
         converted_energy_data = self.energies
         total_E_mean = np.nanmean(converted_energy_data, axis=0)
@@ -244,7 +228,6 @@ class FormationEnergyInterface(AbstractStatsCalculator, ABC):
 
 
 class FormationStats(FormationEnergyInterface):
-
     def _compute(self, energy) -> EnergyStatistics:
         formation_E_mean = np.nanmean(energy, axis=0)
         formation_E_std = np.nanstd(energy, axis=0)
@@ -252,7 +235,6 @@ class FormationStats(FormationEnergyInterface):
 
 
 class PerAtomFormationEnergyStats(FormationEnergyInterface):
-
     def _compute(self, energy) -> EnergyStatistics:
         inter_E_mean = np.nanmean((energy / self.n_atoms[:, None]), axis=0)
         inter_E_std = np.nanstd((energy / self.n_atoms[:, None]), axis=0)
@@ -260,7 +242,6 @@ class PerAtomFormationEnergyStats(FormationEnergyInterface):
 
 
 class RegressionStats(AbstractStatsCalculator):
-
     def _compute_linear_e0s(self):
         try:
             regressor = Regressor.from_openqdc_dataset(self, **self.regressor_kwargs)

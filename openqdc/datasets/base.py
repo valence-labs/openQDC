@@ -12,15 +12,20 @@ from ase.io.extxyz import write_extxyz
 from loguru import logger
 from sklearn.utils import Bunch
 
-from openqdc.datasets._preprocess import DatasetPropertyMixIn
-from openqdc.datasets._state import *
 from openqdc.datasets.energies import AtomEnergies
+from openqdc.datasets.properties import DatasetPropertyMixIn
+from openqdc.datasets.statistics import (
+    ForcesCalculatorStats,
+    FormationStats,
+    PerAtomFormationEnergyStats,
+    StatisticManager,
+    TotalEnergyStats,
+)
 from openqdc.utils.atomization_energies import IsolatedAtomEnergyFactory
-from openqdc.utils.constants import NB_ATOMIC_FEATURES, POSSIBLE_NORMALIZATION
+from openqdc.utils.constants import NB_ATOMIC_FEATURES
 from openqdc.utils.descriptors import get_descriptor
 from openqdc.utils.exceptions import (
     DatasetNotAvailableError,
-    NormalizationNotAvailableError,
     StatisticsNotAvailableError,
 )
 from openqdc.utils.io import (
@@ -54,7 +59,6 @@ class BaseDataset(DatasetPropertyMixIn):
     __fn_distance__ = lambda x: x
     __fn_forces__ = lambda x: x
     __average_nb_atoms__ = None
-    __stats__ = {}
 
     def __init__(
         self,
@@ -109,21 +113,20 @@ class BaseDataset(DatasetPropertyMixIn):
         self._set_units(None, None)
         self._set_isolated_atom_energies()
         self._precompute_statistics(overwrite_local_cache=overwrite_local_cache)
-        try:
-            self._set_new_e0s_unit(energy_unit)
-        except:  # noqa
-            pass
         self._set_units(energy_unit, distance_unit)
         self._convert_data()
         self._set_isolated_atom_energies()
 
     def _precompute_statistics(self, overwrite_local_cache: bool = False):
         # if self.recompute_statistics or overwrite_local_cache:
-        
         self.statistics = StatisticManager(
-            self, ForcesCalculatorStats, TotalEnergyStats, FormationStats, PerAtomFormationEnergyStats
+            self,
+            self.recompute_statistics or overwrite_local_cache,
+            ForcesCalculatorStats,
+            TotalEnergyStats,
+            FormationStats,
+            PerAtomFormationEnergyStats,
         )
-
         self.statistics.run_calculators()
 
     @classmethod
@@ -212,20 +215,11 @@ class BaseDataset(DatasetPropertyMixIn):
             "forces": (-1, 3, len(self.force_target_names)),
         }
 
-    def _set_new_e0s_unit(self, en):
-        old_en = self.energy_unit
-        en = en if en is not None else old_en
-        f = get_conversion(old_en, en)
-        self.new_e0s = f(self.new_e0s)
-
     def _set_units(self, en, ds):
         old_en, old_ds = self.energy_unit, self.distance_unit
         en = en if en is not None else old_en
         ds = ds if ds is not None else old_ds
-
-        # if en is None:
         self.set_energy_unit(en)
-        # if ds is not None:
         self.set_distance_unit(ds)
         if self.__force_methods__:
             self.__forces_unit__ = self.energy_unit + "/" + self.distance_unit
@@ -455,7 +449,7 @@ class BaseDataset(DatasetPropertyMixIn):
         descr_values = dm.parallelized(wrapper, idxs, progress=progress, scheduler="threads", n_jobs=-1)
         return {"values": np.vstack(descr_values), "idxs": idxs}
 
-    def get_statistics(self, normalization: str = "formation", return_none: bool = True):
+    def get_statistics(self, return_none: bool = True):
         """
         Get the statistics of the dataset.
         normalization : str, optional
@@ -465,16 +459,14 @@ class BaseDataset(DatasetPropertyMixIn):
             Whether to return None if the statistics for the forces are not available, by default True
             Otherwise, the statistics for the forces are set to 0.0
         """
-        stats = deepcopy(self._stats)
+        stats = deepcopy(self.statistics.get_results())
         if len(stats) == 0:
             raise StatisticsNotAvailableError(self.__name__)
-        if normalization not in POSSIBLE_NORMALIZATION:
-            raise NormalizationNotAvailableError(normalization)
-        selected_stats = stats[normalization]
-        if len(self.force_methods) == 0 and not return_none:
+        selected_stats = stats
+        if not return_none:
             selected_stats.update(
                 {
-                    "forces": {
+                    "ForceStatistics": {
                         "mean": np.array([0.0]),
                         "std": np.array([0.0]),
                         "components": {

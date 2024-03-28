@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from os.path import join as p_join
 
 import numpy as np
@@ -63,19 +62,16 @@ class IsolatedEnInterface(ABC):
 
 
 class NullEnergy(IsolatedEnInterface):
-
     def _post_init(self):
         self._e0_matrixs = [np.zeros((max(chemical_symbols) + 1, MAX_CHARGE_NUMBER)) for _ in range(len(self))]
 
 
 class PhysicalEnergy(IsolatedEnInterface):
-
     def _post_init(self):
         self._e0_matrixs = [IsolatedAtomEnergyFactory.get_matrix(en_method) for en_method in self.data.energy_methods]
 
 
 class RegressionEnergy(IsolatedEnInterface):
-
     def _post_init(self):
         if not self.attempt_load():
             self.regressor = Regressor.from_openqdc_dataset(self.data, **self.kwargs)
@@ -85,7 +81,6 @@ class RegressionEnergy(IsolatedEnInterface):
 
     def _compute_regression_e0s(self):
         try:
-
             E0s, cov = self.regressor.solve()
         except np.linalg.LinAlgError:
             logger.warning(f"Failed to compute E0s using {self.regressor.solver_type} regression.")
@@ -122,4 +117,3 @@ class RegressionEnergy(IsolatedEnInterface):
     def preprocess_path(self):
         path = p_join(self.data.root, "preprocessed", str(self) + ".pkl")
         return path
- 
