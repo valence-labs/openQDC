@@ -1,5 +1,8 @@
 import pickle as pkl
+from abc import ABC, abstractmethod
+from dataclasses import asdict, dataclass
 from os.path import join as p_join
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -11,44 +14,52 @@ from openqdc.utils.atomization_energies import (
 )
 from openqdc.utils.constants import NOT_DEFINED
 from openqdc.utils.exceptions import StatisticsNotAvailableError
-from openqdc.utils.io import load_pkl
+from openqdc.utils.io import (
+    copy_exists,
+    dict_to_atoms,
+    get_local_cache,
+    load_pkl,
+    pull_locally,
+    push_remote,
+    save_pkl,
+    set_cache_dir,
+)
 from openqdc.utils.regressor import Regressor
 
 
-from abc import ABC, abstractmethod
-from dataclasses import dataclass , asdict
-from typing import Optional
-
 class StatisticsResults:
-    pass 
+    pass
 
     def to_dict(self):
         return asdict(self)
-    
+
     def convert(self, func):
         for k, v in self.to_dict().items():
-            if isinstance(v, StatisticsResults):
+            if isinstance(v, dict):
                 self.convert(func)
             else:
                 setattr(self, k, func(v))
+
 
 @dataclass
 class EnergyStatistics(StatisticsResults):
     mean: Optional[np.ndarray]
     std: Optional[np.ndarray]
 
+
 @dataclass
 class ForceComponentsStatistics(StatisticsResults):
     mean: Optional[np.ndarray]
     std: Optional[np.ndarray]
     rms: Optional[np.ndarray]
-    
+
+
 @dataclass
 class ForceStatistics(StatisticsResults):
     mean: Optional[np.ndarray]
     std: Optional[np.ndarray]
-    components: ForceComponentsStatistics 
-    
+    components: ForceComponentsStatistics
+
 
 class StatisticManager:
     """
@@ -59,122 +70,158 @@ class StatisticManager:
 
     _state = {}
     _results = {}
-    
+
     def __init__(self, dataset, *statistic_calculators):
-        self._statistic_calculators = [statistic_calculators.from_openqdc_dataset(dataset) for statistic_calculators in statistic_calculators]
-    
+        self._statistic_calculators = [
+            statistic_calculators.from_openqdc_dataset(dataset) for statistic_calculators in statistic_calculators
+        ]
+
     @property
     def state(self):
         return self._state
-        
+
     def get_state(self, key):
         if key is None:
             return self._state
         return self._state.get(key, None)
-    
+
     def has_state(self, key):
         return key in self._state
-    
+
     def get_results(self, as_dict=False):
         results = self._results
         if as_dict:
             results = {k: v.to_dict() for k, v in results.items()}
         return results
-    
+
     def run_calculators(self):
         for calculator in self._statistic_calculators:
-            
+
             calculator.run(self.state)
             self._results[calculator.__class__.__name__] = calculator.result
-    
 
-    
+
 class AbstractStatsCalculator(ABC):
     deps = []
-    
-    def __init__(self, energies : Optional[np.ndarray] = None,
-                 n_atoms : Optional[np.ndarray] = None,
-                 atom_species : Optional[np.ndarray] = None,
-                 position_idx_range : Optional[np.ndarray] = None,
-                 e0_matrix:  Optional[np.ndarray] = None,
-                 atom_charges: Optional[np.ndarray] = None,
-                 forces: Optional[np.ndarray] = None):
-        self.energies=energies
-        self.forces=forces
-        self.position_idx_range=position_idx_range
-        self.e0_matrix=e0_matrix
-        self.n_atoms=n_atoms
+    name = None
+
+    def __init__(
+        self,
+        name: str,
+        energies: Optional[np.ndarray] = None,
+        n_atoms: Optional[np.ndarray] = None,
+        atom_species: Optional[np.ndarray] = None,
+        position_idx_range: Optional[np.ndarray] = None,
+        e0_matrix: Optional[np.ndarray] = None,
+        atom_charges: Optional[np.ndarray] = None,
+        forces: Optional[np.ndarray] = None,
+    ):
+        self.name = name
+        self.energies = energies
+        self.forces = forces
+        self.position_idx_range = position_idx_range
+        self.e0_matrix = e0_matrix
+        self.n_atoms = n_atoms
         self.atom_species_charges_tuple = (atom_species, atom_charges)
         if atom_species is not None and atom_charges is not None:
-            self.atom_species_charges_tuple = np.concatenate((atom_species[:,None], atom_charges[:,None]), axis=-1)
-    
+            # by value not reference
+            self.atom_species_charges_tuple = np.concatenate((atom_species[:, None], atom_charges[:, None]), axis=-1)
+
     @property
-    def has_forces(self):
+    def has_forces(self) -> bool:
         return self.forces is not None
-    
+
+    @property
+    def preprocess_path(self):
+        path = p_join(self.root, "preprocessed", str(self) + ".pkl")
+        return path
+
+    @property
+    def root(self):
+        return p_join(get_local_cache(), self.name)
+
     @classmethod
     def from_openqdc_dataset(cls, dataset):
-        return cls(energies=dataset.data["energies"],
-                   forces=dataset.data["forces"],
-                   n_atoms=dataset.data["n_atoms"],
-                   position_idx_range=dataset.data["position_idx_range"],
-                   atom_species=dataset.data["atomic_inputs"][:,0].ravel(),
-                   atom_charges=dataset.data["atomic_inputs"][:,1].ravel(),
-                   e0_matrix=dataset.__isolated_atom_energies__)
-    
-    
+        return cls(
+            name=dataset.__name__,
+            energies=dataset.data["energies"],
+            forces=dataset.data["forces"],
+            n_atoms=dataset.data["n_atoms"],
+            position_idx_range=dataset.data["position_idx_range"],
+            atom_species=dataset.data["atomic_inputs"][:, 0].ravel(),
+            atom_charges=dataset.data["atomic_inputs"][:, 1].ravel(),
+            e0_matrix=dataset.__isolated_atom_energies__,
+        )
+
     @abstractmethod
-    def compute(self)->StatisticsResults:
+    def compute(self) -> StatisticsResults:
         raise NotImplementedError
-    
-    def _setup_deps(self, state):
+
+    def save_statistics(self) -> None:
+        save_pkl(self.result.to_dict(), self.preprocess_path)
+
+    def attempt_load(self) -> bool:
+        try:
+            self.result = load_pkl(self.preprocess_path)
+            return True
+        except FileNotFoundError:
+            logger.warning(f"Statistics for {str(self)} not found. Computing...")
+            return False
+
+    def _setup_deps(self, state) -> None:
         self.state = state
         self.deps_satisfied = all([dep in state for dep in self.deps])
         if self.deps_satisfied:
             for dep in self.deps:
                 setattr(self, dep, state[dep])
-                
-    def write_state(self, update):
+
+    def write_state(self, update) -> None:
         self.state.update(update)
-        
-    def run(self, state):
+
+    def run(self, state) -> None:
         self._setup_deps(state)
-        self.result = self.compute()
+        if not self.attempt_load():
+            self.result = self.compute()
+            self.save_statistics()
+
+    def __str__(self) -> str:
+        return self.__class__.__name__.lower()
+
 
 class ForcesCalculatorStats(AbstractStatsCalculator):
-    
-    def compute(self)->ForceStatistics:
+
+    def compute(self) -> ForceStatistics:
         if not self.has_forces:
-            return ForceStatistics(mean=None,
-                               std=None,
-                               components=ForceComponentsStatistics(rms=None,
-                                                                    std=None,
-                                                                    mean=None))
+            return ForceStatistics(
+                mean=None, std=None, components=ForceComponentsStatistics(rms=None, std=None, mean=None)
+            )
         converted_force_data = self.forces
         force_mean = np.nanmean(converted_force_data, axis=0)
         force_std = np.nanstd(converted_force_data, axis=0)
         force_rms = np.sqrt(np.nanmean(converted_force_data**2, axis=0))
-        return ForceStatistics(mean=force_mean,
-                               std=force_std,
-                               components=ForceComponentsStatistics(rms=force_rms,
-                                                                    std=force_std,
-                                                                    mean=force_mean)
+        return ForceStatistics(
+            mean=force_mean,
+            std=force_std,
+            components=ForceComponentsStatistics(rms=force_rms, std=force_std, mean=force_mean),
         )
-       
+
+
 class TotalEnergyStats(AbstractStatsCalculator):
-    
+
     def compute(self):
         converted_energy_data = self.energies
         total_E_mean = np.nanmean(converted_energy_data, axis=0)
         total_E_std = np.nanstd(converted_energy_data, axis=0)
         return EnergyStatistics(mean=total_E_mean, std=total_E_std)
-         
+
+
 class FormationEnergyInterface(AbstractStatsCalculator, ABC):
     deps = ["formation_energy"]
-    
-    def compute(self)->EnergyStatistics:
+
+    def compute(self) -> EnergyStatistics:
         if not self.deps_satisfied:
             from openqdc.utils.atomization_energies import IsolatedAtomEnergyFactory
+
             splits_idx = self.position_idx_range[:, 1]
             s = np.array(self.atom_species_charges_tuple, dtype=int)
             s[:, 1] += IsolatedAtomEnergyFactory.max_charge
@@ -190,29 +237,30 @@ class FormationEnergyInterface(AbstractStatsCalculator, ABC):
         self.write_state({self.deps[0]: E})
         E = np.array(E).T
         return self._compute(E)
-   
+
     @abstractmethod
-    def _compute(self, energy)->EnergyStatistics:
+    def _compute(self, energy) -> EnergyStatistics:
         raise NotImplementedError
-    
+
+
 class FormationStats(FormationEnergyInterface):
-    
-    def _compute(self, energy)->EnergyStatistics:
+
+    def _compute(self, energy) -> EnergyStatistics:
         formation_E_mean = np.nanmean(energy, axis=0)
         formation_E_std = np.nanstd(energy, axis=0)
         return EnergyStatistics(mean=formation_E_mean, std=formation_E_std)
-        
+
+
 class PerAtomFormationEnergyStats(FormationEnergyInterface):
-    
-    def _compute(self, energy)->EnergyStatistics:
+
+    def _compute(self, energy) -> EnergyStatistics:
         inter_E_mean = np.nanmean((energy / self.n_atoms[:, None]), axis=0)
         inter_E_std = np.nanstd((energy / self.n_atoms[:, None]), axis=0)
         return EnergyStatistics(mean=inter_E_mean, std=inter_E_std)
-        
-    
+
+
 class RegressionStats(AbstractStatsCalculator):
-        
-    
+
     def _compute_linear_e0s(self):
         try:
             regressor = Regressor.from_openqdc_dataset(self, **self.regressor_kwargs)
@@ -221,13 +269,13 @@ class RegressionStats(AbstractStatsCalculator):
             logger.warning(f"Failed to compute E0s using {regressor.solver_type} regression.")
             raise np.linalg.LinAlgError
         self._set_lin_atom_species_dict(E0s, cov, regressor.numbers)
-        
+
     def _set_lin_atom_species_dict(self, E0s, covs, zs):
         atomic_energies_dict = {}
         for i, z in enumerate(zs):
             atomic_energies_dict[z] = E0s[i]
         self.linear_e0s = atomic_energies_dict
-        
+
     def _set_linear_e0s(self):
         new_e0s = [np.zeros((max(self.numbers) + 1, 21)) for _ in range(len(self.__energy_methods__))]
         for z, e0 in self.linear_e0s.items():

@@ -13,6 +13,8 @@ from loguru import logger
 from sklearn.utils import Bunch
 
 from openqdc.datasets._preprocess import DatasetPropertyMixIn
+from openqdc.datasets._state import *
+from openqdc.datasets.energies import AtomEnergies
 from openqdc.utils.atomization_energies import IsolatedAtomEnergyFactory
 from openqdc.utils.constants import NB_ATOMIC_FEATURES, POSSIBLE_NORMALIZATION
 from openqdc.utils.descriptors import get_descriptor
@@ -58,6 +60,7 @@ class BaseDataset(DatasetPropertyMixIn):
         self,
         energy_unit: Optional[str] = None,
         distance_unit: Optional[str] = None,
+        energy_type: str = "formation",
         overwrite_local_cache: bool = False,
         cache_dir: Optional[str] = None,
         recompute_statistics: bool = False,
@@ -90,6 +93,7 @@ class BaseDataset(DatasetPropertyMixIn):
         self.data = None
         self.recompute_statistics = recompute_statistics
         self.regressor_kwargs = regressor_kwargs
+        self.energy_type = energy_type
         if not self.is_preprocessed():
             raise DatasetNotAvailableError(self.__name__)
         else:
@@ -112,6 +116,15 @@ class BaseDataset(DatasetPropertyMixIn):
         self._set_units(energy_unit, distance_unit)
         self._convert_data()
         self._set_isolated_atom_energies()
+
+    def _precompute_statistics(self, overwrite_local_cache: bool = False):
+        # if self.recompute_statistics or overwrite_local_cache:
+        
+        self.statistics = StatisticManager(
+            self, ForcesCalculatorStats, TotalEnergyStats, FormationStats, PerAtomFormationEnergyStats
+        )
+
+        self.statistics.run_calculators()
 
     @classmethod
     def no_init(cls):
@@ -222,9 +235,13 @@ class BaseDataset(DatasetPropertyMixIn):
         if self.energy_methods is None:
             logger.error("No energy methods defined for this dataset.")
         f = get_conversion("hartree", self.__energy_unit__)
-        self.__isolated_atom_energies__ = f(
-            np.array([IsolatedAtomEnergyFactory.get_matrix(en_method) for en_method in self.energy_methods])
-        )
+        self.__isolated_atom_energies__ = f(self.e0s_dispatcher.e0s_matrix)
+
+    @property
+    def e0s_dispatcher(self):
+        if not hasattr(self, "_e0s_dispatcher"):
+            self._e0s_dispatcher = AtomEnergies(self, **self.regressor_kwargs)
+        return self._e0s_dispatcher
 
     def convert_energy(self, x):
         return self.__class__.__fn_energy__(x)
@@ -250,6 +267,19 @@ class BaseDataset(DatasetPropertyMixIn):
         old_unit = self.distance_unit
         self.__distance_unit__ = value
         self.__class__.__fn_distance__ = get_conversion(old_unit, value)
+
+    def as_iter(self, atoms: bool = False):
+        """
+        Return the dataset as an iterator.
+
+        Parameters
+        ----------
+        atoms : bool, optional
+            Whether to return the items as ASE atoms object, by default False
+        """
+        func = self.get_ase_atoms if atoms else self.__getitem__
+        for i in range(len(self)):
+            yield func(i)
 
     def read_raw_entries(self):
         raise NotImplementedError
@@ -336,9 +366,6 @@ class BaseDataset(DatasetPropertyMixIn):
         predicats = [os.path.exists(p_join(self.preprocess_path, f"{key}.mmap")) for key in self.data_keys]
         predicats += [os.path.exists(p_join(self.preprocess_path, "props.pkl"))]
         return all(predicats)
-
-    def is_preprocessed_statistics(self):
-        return bool(copy_exists(p_join(self.preprocess_path, "stats.pkl")))
 
     def preprocess(self, overwrite=False):
         if overwrite or not self.is_preprocessed():
@@ -428,19 +455,6 @@ class BaseDataset(DatasetPropertyMixIn):
         descr_values = dm.parallelized(wrapper, idxs, progress=progress, scheduler="threads", n_jobs=-1)
         return {"values": np.vstack(descr_values), "idxs": idxs}
 
-    def as_iter(self, atoms: bool = False):
-        """
-        Return the dataset as an iterator.
-
-        Parameters
-        ----------
-        atoms : bool, optional
-            Whether to return the items as ASE atoms object, by default False
-        """
-        func = self.get_ase_atoms if atoms else self.__getitem__
-        for i in range(len(self)):
-            yield func(i)
-
     def get_statistics(self, normalization: str = "formation", return_none: bool = True):
         """
         Get the statistics of the dataset.
@@ -514,7 +528,8 @@ class BaseDataset(DatasetPropertyMixIn):
         )
         name = self.__smiles_converter__(self.data["name"][idx])
         subset = self.data["subset"][idx]
-
+        e0s = self.__isolated_atom_energies__[..., z, c + shift].T
+        formation_energies = energies - e0s.sum(axis=0)
         if "forces" in self.data:
             forces = np.array(self.data["forces"][p_start:p_end], dtype=np.float32)
         else:
@@ -523,9 +538,10 @@ class BaseDataset(DatasetPropertyMixIn):
             positions=positions,
             atomic_numbers=z,
             charges=c,
-            e0=self.__isolated_atom_energies__[..., z, c + shift].T,
-            linear_e0=self.new_e0s[..., z, c + shift].T if hasattr(self, "new_e0s") else None,
+            e0=e0s,
             energies=energies,
+            formation_energies=formation_energies,
+            per_atom_formation_energies=formation_energies / len(z),
             name=name,
             subset=subset,
             forces=forces,

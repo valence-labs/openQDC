@@ -183,160 +183,176 @@ class DatasetPropertyMixIn(StatisticsMixIn):
 
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass 
+from dataclasses import dataclass
 from typing import Optional
 
+
 class StatisticsResults:
-    pass 
+    pass
+
 
 @dataclass
 class EnergyStatistics(StatisticsResults):
     mean: Optional[np.ndarray]
     std: Optional[np.ndarray]
 
+
 @dataclass
 class ForceComponentsStatistics:
     mean: Optional[np.ndarray]
     std: Optional[np.ndarray]
     rms: Optional[np.ndarray]
-    
+
+
 @dataclass
 class ForceStatistics(StatisticsResults):
     mean: Optional[np.ndarray]
     std: Optional[np.ndarray]
-    components: ForceComponentsStatistics 
-    
+    components: ForceComponentsStatistics
+
+
 class CalculatorHandler(ABC):
     @abstractmethod
     def set_next_calculator(self, calculator: "CalculatorHandler") -> "CalculatorHandler":
         pass
-    
+
     @abstractmethod
     def run_calculator(self):
         pass
-    
+
+
 class AbstractStatsCalculator(CalculatorHandler):
     deps = []
     provided_deps = []
     avoid_calculations = []
-    _next_calculator : CalculatorHandler = None
-    
-    def __init__(self, energies : Optional[np.ndarray] = None,
-                 n_atoms : Optional[np.ndarray] = None,
-                 atom_species : Optional[np.ndarray] = None,
-                 position_idx_range : Optional[np.ndarray] = None,
-                 e0_matrix:  Optional[np.ndarray] = None,
-                 atom_charges: Optional[np.ndarray] = None,
-                 forces: Optional[np.ndarray] = None):
-        self.energies=energies
-        self.forces=forces
-        self.position_idx_range=position_idx_range
-        self.e0_matrix=e0_matrix
-        self.n_atoms=n_atoms
+    _next_calculator: CalculatorHandler = None
+
+    def __init__(
+        self,
+        energies: Optional[np.ndarray] = None,
+        n_atoms: Optional[np.ndarray] = None,
+        atom_species: Optional[np.ndarray] = None,
+        position_idx_range: Optional[np.ndarray] = None,
+        e0_matrix: Optional[np.ndarray] = None,
+        atom_charges: Optional[np.ndarray] = None,
+        forces: Optional[np.ndarray] = None,
+    ):
+        self.energies = energies
+        self.forces = forces
+        self.position_idx_range = position_idx_range
+        self.e0_matrix = e0_matrix
+        self.n_atoms = n_atoms
         self.atom_species_charges_tuple = (atom_species, atom_charges)
         if atom_species is not None and atom_charges is not None:
-            self.atom_species_charges_tuple = np.concatenate((atom_species[:,None], atom_charges[:,None]), axis=-1)
-    
+            self.atom_species_charges_tuple = np.concatenate((atom_species[:, None], atom_charges[:, None]), axis=-1)
+
     @property
     def has_forces(self):
         return self.forces is not None
-    
+
     def set_next_calculator(self, calculator: "AbstractStatsCalculator") -> "AbstractStatsCalculator":
         self._next_calculator = calculator
-        
+
         if set(self.provided_deps) & set(self._next_calculator.deps):
-            from functools import partial 
+            from functools import partial
+
             for attr in set(self.provided_deps) & set(self._next_calculator.deps):
-                
-                # set a callback to the attribute 
-                self._next_calculator.__setattr__(attr,
-                                                  partial(self.__getattribute__, 
-                                                          )
-                                                  )
-        return calculator 
+
+                # set a callback to the attribute
+                self._next_calculator.__setattr__(
+                    attr,
+                    partial(
+                        self.__getattribute__,
+                    ),
+                )
+        return calculator
 
     def run_calculator(self):
         self.result = self.compute()
         if self._next_calculator:
             self._next_calculator.run_calculator()
-    
+
     @classmethod
     def from_openqdc_dataset(cls, dataset):
-        return cls(energies=dataset.data["energies"],
-                   forces=dataset.data["forces"],
-                   n_atoms=dataset.data["n_atoms"],
-                   position_idx_range=dataset.data["position_idx_range"],
-                   atom_species=dataset.data["atomic_inputs"][:,0].ravel(),
-                   atom_charges=dataset.data["atomic_inputs"][:,1].ravel(),
-                   e0_matrix=dataset.__isolated_atom_energies__)
-    
-    
+        return cls(
+            energies=dataset.data["energies"],
+            forces=dataset.data["forces"],
+            n_atoms=dataset.data["n_atoms"],
+            position_idx_range=dataset.data["position_idx_range"],
+            atom_species=dataset.data["atomic_inputs"][:, 0].ravel(),
+            atom_charges=dataset.data["atomic_inputs"][:, 1].ravel(),
+            e0_matrix=dataset.__isolated_atom_energies__,
+        )
+
     @abstractmethod
-    def compute(self)->StatisticsResults:
+    def compute(self) -> StatisticsResults:
         pass
-    
-#class StatisticsOrderHandler(Handler):
+
+
+# class StatisticsOrderHandler(Handler):
 #    strategies = []
 #    def __init__(self, *strategies):
-#        pass 
-#        
+#        pass
+#
 #    def set_strategy(self):
-#        pass 
+#        pass
+
 
 class CalculatorManager:
     def __init__(self, *calculators):
         self._calculators = calculators
-        
+
     def run_calculators(self):
         for i in range(len(self._calculators), 2):
-            self._calculators[i-2].set_next_calculator(self._calculators[i-1])
-            self._calculators[i-2].run_calculator()
-    
+            self._calculators[i - 2].set_next_calculator(self._calculators[i - 1])
+            self._calculators[i - 2].run_calculator()
+
     def get_calculator(self, idx):
         return self._calculators[idx]
+
 
 class ForcesCalculator(AbstractStatsCalculator):
     deps = []
     provided_deps = []
     avoid_calculations = []
-    
-    def compute(self)->ForceStatistics:
+
+    def compute(self) -> ForceStatistics:
         if not self.has_forces:
-            return ForceStatistics(mean=None,
-                               std=None,
-                               components=ForceComponentsStatistics(rms=None,
-                                                                    std=None,
-                                                                    mean=None))
+            return ForceStatistics(
+                mean=None, std=None, components=ForceComponentsStatistics(rms=None, std=None, mean=None)
+            )
         converted_force_data = self.forces
         force_mean = np.nanmean(converted_force_data, axis=0)
         force_std = np.nanstd(converted_force_data, axis=0)
         force_rms = np.sqrt(np.nanmean(converted_force_data**2, axis=0))
-        return ForceStatistics(mean=force_mean,
-                               std=force_std,
-                               components=ForceComponentsStatistics(rms=force_rms,
-                                                                    std=force_std,
-                                                                    mean=force_mean)
+        return ForceStatistics(
+            mean=force_mean,
+            std=force_std,
+            components=ForceComponentsStatistics(rms=force_rms, std=force_std, mean=force_mean),
         )
-       
+
+
 class TotalEnergyStats(AbstractStatsCalculator):
     deps = []
     provided_deps = []
     avoid_calculations = []
-    
+
     def compute(self):
         converted_energy_data = self.energies
         total_E_mean = np.nanmean(converted_energy_data, axis=0)
         total_E_std = np.nanstd(converted_energy_data, axis=0)
         return EnergyStatistics(mean=total_E_mean, std=total_E_std)
-         
+
+
 class FormationEnergyInterface(AbstractStatsCalculator, ABC):
     deps = ["formation_energy"]
     provided_deps = ["formation_energy"]
     avoid_calculations = []
-    
-    def compute(self)->EnergyStatistics:
+
+    def compute(self) -> EnergyStatistics:
         if not hasattr(self, "formation_energy"):
             from openqdc.utils.atomization_energies import IsolatedAtomEnergyFactory
+
             splits_idx = self.position_idx_range[:, 1]
             s = np.array(self.atom_species_charges_tuple, dtype=int)
             s[:, 1] += IsolatedAtomEnergyFactory.max_charge
@@ -353,47 +369,30 @@ class FormationEnergyInterface(AbstractStatsCalculator, ABC):
         self.formation_energy = E
         E = np.array(E).T
         return self._compute(E)
-   
+
     @abstractmethod
-    def _compute(self, energy)->EnergyStatistics:
+    def _compute(self, energy) -> EnergyStatistics:
         raise NotImplementedError
-    
+
+
 class FormationStats(FormationEnergyInterface):
-    
-    def _compute(self, energy)->EnergyStatistics:
+
+    def _compute(self, energy) -> EnergyStatistics:
         formation_E_mean = np.nanmean(energy, axis=0)
         formation_E_std = np.nanstd(energy, axis=0)
         return EnergyStatistics(mean=formation_E_mean, std=formation_E_std)
-        
+
+
 class PerAtomFormationEnergyStats(FormationEnergyInterface):
-    
-    def _compute(self, energy)->EnergyStatistics:
+
+    def _compute(self, energy) -> EnergyStatistics:
         inter_E_mean = np.nanmean((energy / self.n_atoms[:, None]), axis=0)
         inter_E_std = np.nanstd((energy / self.n_atoms[:, None]), axis=0)
         return EnergyStatistics(mean=inter_E_mean, std=inter_E_std)
-        
-    
-class RegressionStats(AbstractStatsCalculator):
-        
-    
-    def _compute_linear_e0s(self):
-        try:
-            regressor = Regressor.from_openqdc_dataset(self, **self.regressor_kwargs)
-            E0s, cov = regressor.solve()
-        except np.linalg.LinAlgError:
-            logger.warning(f"Failed to compute E0s using {regressor.solver_type} regression.")
-            raise np.linalg.LinAlgError
-        self._set_lin_atom_species_dict(E0s, cov, regressor.numbers)
-        
-    def _set_lin_atom_species_dict(self, E0s, covs, zs):
-        atomic_energies_dict = {}
-        for i, z in enumerate(zs):
-            atomic_energies_dict[z] = E0s[i]
-        self.linear_e0s = atomic_energies_dict
-        
-    def _set_linear_e0s(self):
-        new_e0s = [np.zeros((max(self.numbers) + 1, 21)) for _ in range(len(self.__energy_methods__))]
-        for z, e0 in self.linear_e0s.items():
-            for i in range(len(self.__energy_methods__)):
-                new_e0s[i][z, :] = e0[i]
-        self.new_e0s = np.array(new_e0s)
+
+
+class RegressionFormationStats(FormationStats):
+    pass 
+
+class PerAtomRegressionFormationStats(PerAtomFormationEnergyStats):
+    pass 
