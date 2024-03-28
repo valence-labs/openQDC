@@ -6,7 +6,7 @@ import pandas as pd
 from tqdm import tqdm
 from openqdc.methods import QmMethod
 from openqdc.datasets.base import BaseDataset
-from openqdc.utils.molecule import atom_table
+from openqdc.utils.constants import ATOM_TABLE
 
 
 def content_to_xyz(content, e_map):
@@ -21,7 +21,7 @@ def content_to_xyz(content, e_map):
     s = StringIO(content)
     d = np.loadtxt(s, skiprows=2, dtype="str")
     z, positions = d[:, 0], d[:, 1:].astype(np.float32)
-    z = np.array([atom_table.GetAtomicNumber(s) for s in z])
+    z = np.array([ATOM_TABLE.GetAtomicNumber(s) for s in z])
     xs = np.stack((z, np.zeros_like(z)), axis=-1)
     e = e_map[code]
 

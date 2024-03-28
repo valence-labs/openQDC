@@ -4,7 +4,7 @@ from typing import Dict, List
 import numpy as np
 from openqdc.methods import QmMethod, InterEnergyType
 from openqdc.datasets.interaction.base import BaseInteractionDataset
-from openqdc.utils.molecule import atom_table
+from openqdc.utils.constants import ATOM_TABLE
 
 
 class Metcalf(BaseInteractionDataset):
@@ -69,7 +69,7 @@ class Metcalf(BaseInteractionDataset):
                 elem_xyz = np.array([x.split() for x in lines[2:]])
                 elements = elem_xyz[:, 0]
                 xyz = elem_xyz[:, 1:].astype(np.float32)
-                atomic_nums = np.expand_dims(np.array([atom_table.GetAtomicNumber(x) for x in elements]), axis=1)
+                atomic_nums = np.expand_dims(np.array([ATOM_TABLE.GetAtomicNumber(x) for x in elements]), axis=1)
                 charges = np.expand_dims(np.array([0] * num_atoms[0]), axis=1)
 
                 atomic_inputs = np.concatenate((atomic_nums, charges, xyz), axis=-1, dtype=np.float32)

@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from openqdc.methods import QmMethod
 from openqdc.datasets.base import BaseDataset
-from openqdc.utils.molecule import atom_table
+from openqdc.utils.constants import ATOM_TABLE
 
 
 def read_xyz_and_get_content(fname):
@@ -16,7 +16,7 @@ def read_xyz_and_get_content(fname):
     s = StringIO(content)
     d = np.loadtxt(s, skiprows=2, dtype="str")
     z, positions = d[:, 0], d[:, 1:].astype(np.float32)
-    z = np.array([atom_table.GetAtomicNumber(s) for s in z])
+    z = np.array([ATOM_TABLE.GetAtomicNumber(s) for s in z])
     xs = np.stack((z, np.zeros_like(z)), axis=-1)
     conf = dict(
         atomic_inputs=np.concatenate((xs, positions), axis=-1, dtype=np.float32),

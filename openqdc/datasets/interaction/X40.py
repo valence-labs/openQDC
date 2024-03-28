@@ -7,7 +7,7 @@ from loguru import logger
 from openqdc.methods import QmMethod, InterEnergyType
 from openqdc.datasets.interaction.base import BaseInteractionDataset
 from openqdc.datasets.interaction.L7 import get_loader
-from openqdc.utils.molecule import atom_table
+from openqdc.utils.constants import ATOM_TABLE
 
 
 class X40(BaseInteractionDataset):
@@ -65,7 +65,7 @@ class X40(BaseInteractionDataset):
             energies = np.array([energies], dtype=np.float32)
             pos = np.array(lines[1:])[:, 1:].astype(np.float32)
             elems = np.array(lines[1:])[:, 0]
-            atomic_nums = np.expand_dims(np.array([atom_table.GetAtomicNumber(x) for x in elems]), axis=1)
+            atomic_nums = np.expand_dims(np.array([ATOM_TABLE.GetAtomicNumber(x) for x in elems]), axis=1)
             natoms0 = n_atoms_first[0]
             natoms1 = n_atoms[0] - natoms0
             charges = np.expand_dims(np.array([charge0] * natoms0 + [charge1] * natoms1), axis=1)

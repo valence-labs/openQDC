@@ -7,7 +7,7 @@ from loguru import logger
 from tqdm import tqdm
 from openqdc.methods import QmMethod, InterEnergyType
 from openqdc.datasets.interaction.base import BaseInteractionDataset
-from openqdc.utils.molecule import atom_table
+from openqdc.utils.constants import ATOM_TABLE
 
 
 class DESS66x8(BaseInteractionDataset):
@@ -104,7 +104,7 @@ class DESS66x8(BaseInteractionDataset):
 
             elements = row["elements"].split()
 
-            atomic_nums = np.expand_dims(np.array([atom_table.GetAtomicNumber(x) for x in elements]), axis=1)
+            atomic_nums = np.expand_dims(np.array([ATOM_TABLE.GetAtomicNumber(x) for x in elements]), axis=1)
 
             charges = np.expand_dims(np.array([charge0] * natoms0 + [charge1] * natoms1), axis=1)
 

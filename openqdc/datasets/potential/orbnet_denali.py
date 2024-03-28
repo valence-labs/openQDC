@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from openqdc.methods import QmMethod
 from openqdc.datasets.base import BaseDataset
-from openqdc.utils.molecule import atom_table
+from openqdc.utils.constants import ATOM_TABLE
 
 
 def read_archive(mol_id, conf_dict, base_path, energy_target_names: List[str]) -> Dict[str, np.ndarray]:
@@ -16,7 +16,7 @@ def read_archive(mol_id, conf_dict, base_path, energy_target_names: List[str]) -
             cf_name = p_join(base_path, "xyz_files", mol_id, f"{conf_id}.xyz")
             d = np.loadtxt(cf_name, skiprows=2, dtype="str")
             z, positions = d[:, 0], d[:, 1:].astype(np.float32)
-            z = np.array([atom_table.GetAtomicNumber(s) for s in z])
+            z = np.array([ATOM_TABLE.GetAtomicNumber(s) for s in z])
             xs = np.stack((z, np.zeros_like(z)), axis=-1)
 
             conf = dict(

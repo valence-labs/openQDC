@@ -36,10 +36,11 @@ from openqdc.utils.io import (
     push_remote,
     set_cache_dir,
 )
-from openqdc.utils.molecule import atom_table, z_to_formula
+from openqdc.utils.molecule import z_to_formula
 from openqdc.utils.package_utils import requires_package
 from openqdc.utils.regressor import Regressor
 from openqdc.utils.units import get_conversion
+from openqdc.utils.constants import ATOM_TABLE
 
 
 def _extract_entry(
@@ -49,7 +50,7 @@ def _extract_entry(
     energy_target_names: List[str],
     force_target_names: Optional[List[str]] = None,
 ) -> Dict[str, np.ndarray]:
-    x = np.array([atom_table.GetAtomicNumber(s) for s in df["symbols"][i]])
+    x = np.array([ATOM_TABLE.GetAtomicNumber(s) for s in df["symbols"][i]])
     xs = np.stack((x, np.zeros_like(x)), axis=-1)
     positions = df["geometry"][i].reshape((-1, 3))
     energies = np.array([df[k][i] for k in energy_target_names])
