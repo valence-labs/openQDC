@@ -1,5 +1,5 @@
 from os.path import join as p_join
-
+from openqdc.methods import QmMethod
 from openqdc.datasets.base import BaseDataset, read_qc_archive_h5
 
 
@@ -28,15 +28,13 @@ class COMP6(BaseDataset):
     __forces_unit__ = "kcal/mol/bohr"
 
     __energy_methods__ = [
-        "wb97x/6-31g*",
-        "b3lyp-d3mbj/def2-tzvp",
-        "b3lyp/def2-tzvp",
-        "hf/def2-tzvp",
-        "pbe-d3bj/def2-tzvp",
-        "pbe/def2-tzvp",
-        "svwn/def2-tzvp",
-        # "wb97m-d3bj/def2-tzvp",
-        # "wb97m/def2-tzvp",
+        QmMethod.WB97X_6_31G_D, # "wb97x/6-31g*",
+        QmMethod.B3LYP_D3_BJ_DEF2_TZVP, # "b3lyp-d3(bj)/def2-tzvp",
+        QmMethod.B3LYP_DEF2_TZVP, # "b3lyp/def2-tzvp",
+        QmMethod.HF_DEF2_TZVP, # "hf/def2-tzvp",
+        QmMethod.PBE_D3_BJ_DEF2_TZVP, # "pbe-d3(bj)/def2-tzvp",
+        QmMethod.PBE_DEF2_TZVP, # "pbe/def2-tzvp",
+        QmMethod.SVWN_DEF2_TZVP  # "svwn/def2-tzvp",
     ]
 
     energy_target_names = [
@@ -47,8 +45,6 @@ class COMP6(BaseDataset):
         "PBE-D3M(BJ):def2-tzvp",
         "PBE:def2-tzvp",
         "SVWN:def2-tzvp",
-        # "WB97M-D3(BJ):def2-tzvp",
-        # "WB97M:def2-tzvp",
     ]
     __force_mask__ = [True, False, False, False, False, False, False]
 

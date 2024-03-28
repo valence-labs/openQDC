@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 from tqdm import tqdm
-
+from openqdc.methods import QmMethod, InterEnergyType
 from openqdc.datasets.interaction.base import BaseInteractionDataset
 from openqdc.utils.io import get_local_cache
 from openqdc.utils.molecule import atom_table, molecule_groups
@@ -27,23 +27,43 @@ class DES370K(BaseInteractionDataset):
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
     __energy_methods__ = [
-        "mp2/cc-pvdz",
-        "mp2/cc-pvqz",
-        "mp2/cc-pvtz",
-        "mp2/cbs",
-        "ccsd(t)/cc-pvdz",
-        "ccsd(t)/cbs",  # cbs
-        "ccsd(t)/nn",  # nn
-        "sapt0/aug-cc-pwcvxz",
-        "sapt0/aug-cc-pwcvxz_es",
-        "sapt0/aug-cc-pwcvxz_ex",
-        "sapt0/aug-cc-pwcvxz_exs2",
-        "sapt0/aug-cc-pwcvxz_ind",
-        "sapt0/aug-cc-pwcvxz_exind",
-        "sapt0/aug-cc-pwcvxz_disp",
-        "sapt0/aug-cc-pwcvxz_exdisp_os",
-        "sapt0/aug-cc-pwcvxz_exdisp_ss",
-        "sapt0/aug-cc-pwcvxz_delta_HF",
+        QmMethod.MP2_CC_PVDZ,
+        QmMethod.MP2_CC_PVQZ,
+        QmMethod.MP2_CC_PVTZ,
+        QmMethod.MP2_CBS,
+        QmMethod.CCSD_T_CC_PVDZ,
+        QmMethod.CCSD_T_CBS,
+        QmMethod.CCSD_T_NN,
+        QmMethod.SAPT0_AUG_CC_PWCVXZ,
+        QmMethod.SAPT0_AUG_CC_PWCVXZ,
+        QmMethod.SAPT0_AUG_CC_PWCVXZ,
+        QmMethod.SAPT0_AUG_CC_PWCVXZ,
+        QmMethod.SAPT0_AUG_CC_PWCVXZ,
+        QmMethod.SAPT0_AUG_CC_PWCVXZ,
+        QmMethod.SAPT0_AUG_CC_PWCVXZ,
+        QmMethod.SAPT0_AUG_CC_PWCVXZ,
+        QmMethod.SAPT0_AUG_CC_PWCVXZ,
+        QmMethod.SAPT0_AUG_CC_PWCVXZ
+    ]
+
+    __energy_type__ = [
+        InterEnergyType.TOTAL,
+        InterEnergyType.TOTAL,
+        InterEnergyType.TOTAL,
+        InterEnergyType.TOTAL,
+        InterEnergyType.TOTAL,
+        InterEnergyType.TOTAL,
+        InterEnergyType.TOTAL,
+        InterEnergyType.TOTAL,
+        InterEnergyType.ES,
+        InterEnergyType.EX,
+        InterEnergyType.EX_S2,
+        InterEnergyType.IND,
+        InterEnergyType.EX_IND,
+        InterEnergyType.DISP,
+        InterEnergyType.EX_DISP_OS,
+        InterEnergyType.EX_DISP_SS,
+        InterEnergyType.DELTA_HF,
     ]
 
     energy_target_names = [

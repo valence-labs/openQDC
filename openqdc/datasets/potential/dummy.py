@@ -1,5 +1,5 @@
 import numpy as np
-
+from openqdc.methods import QmMethod
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils.constants import NOT_DEFINED
 
@@ -10,7 +10,7 @@ class Dummy(BaseDataset):
     """
 
     __name__ = "dummy"
-    __energy_methods__ = ["I_solved_the_schrodinger_equation_by_hand", "PM6"]
+    __energy_methods__ = [QmMethod.SVWN_DEF2_TZVP, QmMethod.PM6]
     __force_mask__ = [False, True]
     __energy_unit__ = "kcal/mol"
     __distance_unit__ = "ang"

@@ -4,7 +4,7 @@ from typing import Dict, List
 import numpy as np
 from loguru import logger
 from tqdm import tqdm
-
+from openqdc.methods import QmMethod, InterEnergyType
 from openqdc.datasets.interaction.base import BaseInteractionDataset
 from openqdc.utils.molecule import atom_table
 
@@ -22,28 +22,70 @@ class Splinter(BaseInteractionDataset):
 
     __name__ = "splinter"
     __energy_methods__ = [
-        "sapt0/jun-cc-pV(D+d)Z_unscaled",
-        "sapt0/jun-cc-pV(D+d)Z_es_unscaled",
-        "sapt0/jun-cc-pV(D+d)Z_ex_unscaled",
-        "sapt0/jun-cc-pV(D+d)Z_ind_unscaled",
-        "sapt0/jun-cc-pV(D+d)Z_disp_unscaled",
-        "sapt0/jun-cc-pV(D+d)Z_scaled",
-        "sapt0/jun-cc-pV(D+d)Z_es_scaled",
-        "sapt0/jun-cc-pV(D+d)Z_ex_scaled",
-        "sapt0/jun-cc-pV(D+d)Z_ind_scaled",
-        "sapt0/jun-cc-pV(D+d)Z_disp_scaled",
-        "sapt0/aug-cc-pV(D+d)Z_unscaled",
-        "sapt0/aug-cc-pV(D+d)Z_es_unscaled",
-        "sapt0/aug-cc-pV(D+d)Z_ex_unscaled",
-        "sapt0/aug-cc-pV(D+d)Z_ind_unscaled",
-        "sapt0/aug-cc-pV(D+d)Z_disp_unscaled",
-        "sapt0/aug-cc-pV(D+d)Z_scaled",
-        "sapt0/aug-cc-pV(D+d)Z_es_scaled",
-        "sapt0/aug-cc-pV(D+d)Z_ex_scaled",
-        "sapt0/aug-cc-pV(D+d)Z_ind_scaled",
-        "sapt0/aug-cc-pV(D+d)Z_disp_scaled",
+        QmMethod.SAPT0_JUN_CC_PVDDZ,
+        QmMethod.SAPT0_JUN_CC_PVDDZ,
+        QmMethod.SAPT0_JUN_CC_PVDDZ,
+        QmMethod.SAPT0_JUN_CC_PVDDZ,
+        QmMethod.SAPT0_JUN_CC_PVDDZ,
+        QmMethod.SAPT0_JUN_CC_PVDDZ,
+        QmMethod.SAPT0_JUN_CC_PVDDZ,
+        QmMethod.SAPT0_JUN_CC_PVDDZ,
+        QmMethod.SAPT0_JUN_CC_PVDDZ,
+        QmMethod.SAPT0_JUN_CC_PVDDZ,
+        QmMethod.SAPT0_AUG_CC_PVDDZ,
+        QmMethod.SAPT0_AUG_CC_PVDDZ,
+        QmMethod.SAPT0_AUG_CC_PVDDZ,
+        QmMethod.SAPT0_AUG_CC_PVDDZ,
+        QmMethod.SAPT0_AUG_CC_PVDDZ,
+        QmMethod.SAPT0_AUG_CC_PVDDZ,
+        QmMethod.SAPT0_AUG_CC_PVDDZ,
+        QmMethod.SAPT0_AUG_CC_PVDDZ,
+        QmMethod.SAPT0_AUG_CC_PVDDZ,
+        QmMethod.SAPT0_AUG_CC_PVDDZ,
+        # "sapt0/jun-cc-pV(D+d)Z_unscaled", #TODO: we need to pick the unscaled version only here
+        # "sapt0/jun-cc-pV(D+d)Z_es_unscaled",
+        # "sapt0/jun-cc-pV(D+d)Z_ex_unscaled",
+        # "sapt0/jun-cc-pV(D+d)Z_ind_unscaled",
+        # "sapt0/jun-cc-pV(D+d)Z_disp_unscaled",
+        # "sapt0/jun-cc-pV(D+d)Z_scaled",
+        # "sapt0/jun-cc-pV(D+d)Z_es_scaled",
+        # "sapt0/jun-cc-pV(D+d)Z_ex_scaled",
+        # "sapt0/jun-cc-pV(D+d)Z_ind_scaled",
+        # "sapt0/jun-cc-pV(D+d)Z_disp_scaled",
+        # "sapt0/aug-cc-pV(D+d)Z_unscaled",
+        # "sapt0/aug-cc-pV(D+d)Z_es_unscaled",
+        # "sapt0/aug-cc-pV(D+d)Z_ex_unscaled",
+        # "sapt0/aug-cc-pV(D+d)Z_ind_unscaled",
+        # "sapt0/aug-cc-pV(D+d)Z_disp_unscaled",
+        # "sapt0/aug-cc-pV(D+d)Z_scaled",
+        # "sapt0/aug-cc-pV(D+d)Z_es_scaled",
+        # "sapt0/aug-cc-pV(D+d)Z_ex_scaled",
+        # "sapt0/aug-cc-pV(D+d)Z_ind_scaled",
+        # "sapt0/aug-cc-pV(D+d)Z_disp_scaled",
     ]
 
+    __energy_type__ = [
+        InterEnergyType.TOTAL,
+        InterEnergyType.ES,
+        InterEnergyType.EX,
+        InterEnergyType.IND,
+        InterEnergyType.DISP,
+        InterEnergyType.TOTAL,
+        InterEnergyType.ES,
+        InterEnergyType.EX,
+        InterEnergyType.IND,
+        InterEnergyType.DISP,
+        InterEnergyType.TOTAL,
+        InterEnergyType.ES,
+        InterEnergyType.EX,
+        InterEnergyType.IND,
+        InterEnergyType.DISP,
+        InterEnergyType.TOTAL,
+        InterEnergyType.ES,
+        InterEnergyType.EX,
+        InterEnergyType.IND,
+        InterEnergyType.DISP
+    ]
     energy_target_names = []
 
     def read_raw_entries(self) -> List[Dict]:

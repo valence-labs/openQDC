@@ -4,7 +4,7 @@ from typing import Dict, List
 import numpy as np
 import yaml
 from loguru import logger
-
+from openqdc.methods import QmMethod, InterEnergyType
 from openqdc.datasets.interaction.base import BaseInteractionDataset
 from openqdc.datasets.interaction.L7 import get_loader
 from openqdc.utils.molecule import atom_table
@@ -29,12 +29,15 @@ class X40(BaseInteractionDataset):
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
     __energy_methods__ = [
-        "CCSD(T)/CBS",
-        "MP2/CBS",
-        "dCCSD(T)/haDZ",
-        "dCCSD(T)/haTZ",
-        "MP2.5/CBS(aDZ)",
+        QmMethod.CCSD_T_CBS, # "CCSD(T)/CBS",
+        QmMethod.MP2_CBS, # "MP2/CBS",
+        QmMethod.DCCSDT_HA_DZ, # "dCCSD(T)/haDZ",
+        QmMethod.DCCSDT_HA_TZ, # "dCCSD(T)/haTZ",
+        QmMethod.MP2_5_CBS_ADZ, # "MP2.5/CBS(aDZ)",
     ]
+    __energy_type__ = [
+        InterEnergyType.TOTAL,
+    ] * 5
 
     energy_target_names = []
 

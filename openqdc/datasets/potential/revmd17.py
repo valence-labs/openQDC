@@ -1,7 +1,7 @@
 from os.path import join as p_join
 
 import numpy as np
-
+from openqdc.methods import QmMethod
 from openqdc.datasets.base import BaseDataset
 from openqdc.raws.fetch import decompress_tar_gz
 
@@ -75,7 +75,8 @@ class RevMD17(BaseDataset):
     __name__ = "revmd17"
 
     __energy_methods__ = [
-        "pbe/vdw-ts",
+        QmMethod.PBE_DEF2_TZVP
+        # "pbe/def2-tzvp",
     ]
 
     energy_target_names = [
@@ -83,7 +84,7 @@ class RevMD17(BaseDataset):
     ]
 
     __force_methods__ = [
-        "pbe/vdw-ts",
+        "pbe/def2-tzvp",
     ]
 
     force_target_names = [

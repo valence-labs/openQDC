@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from rdkit import Chem
 from tqdm import tqdm
-
+from openqdc.methods import QmMethod
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils.molecule import get_atomic_number_and_charge
 
@@ -82,7 +82,7 @@ class Molecule3D(BaseDataset):
     """
 
     __name__ = "molecule3d"
-    __energy_methods__ = ["b3lyp/6-31g*"]
+    __energy_methods__ = [QmMethod.B3LYP_6_31G_D] # "b3lyp/6-31g*", 
     # UNITS MOST LIKELY WRONG, MUST CHECK THEM MANUALLY
     __energy_unit__ = "ev"  # CALCULATED
     __distance_unit__ = "ang"

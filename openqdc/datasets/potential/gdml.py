@@ -1,5 +1,5 @@
 from os.path import join as p_join
-
+from openqdc.methods import QmMethod
 from openqdc.datasets.base import BaseDataset, read_qc_archive_h5
 
 
@@ -30,11 +30,9 @@ class GDML(BaseDataset):
     __name__ = "gdml"
 
     __energy_methods__ = [
-        "ccsd/cc-pvdz",
-        "ccsd(t)/cc-pvdz",
-        # "pbe/mbd",  # MD22
-        # "pbe+mbd/tight", #MD22
-        "pbe/vdw-ts",  # MD17
+        QmMethod.CCSD_CC_PVDZ,   # "ccsd/cc-pvdz",
+        QmMethod.CCSD_T_CC_PVDZ, # "ccsd(t)/cc-pvdz",
+        QmMethod.PBE_DEF2_TZVP,  # "pbe/def2-tzvp",  # MD17 # TODO: verify if basis set vdw-ts == def2-tzvp and it is the same in ISO17 and revmd17
     ]
 
     energy_target_names = [

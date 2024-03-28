@@ -4,7 +4,7 @@ from typing import Dict, List
 import numpy as np
 import yaml
 from loguru import logger
-
+from openqdc.methods import QmMethod, InterEnergyType
 from openqdc.datasets.interaction.base import BaseInteractionDataset
 from openqdc.utils.molecule import atom_table
 
@@ -66,15 +66,17 @@ class L7(BaseInteractionDataset):
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
     __energy_methods__ = [
-        "CSD(T) | QCISD(T)",
-        "DLPNO-CCSD(T)",
-        "MP2/CBS",
-        "MP2C/CBS",
-        "fixed",
-        "DLPNO-CCSD(T0)",
-        "LNO-CCSD(T)",
-        "FN-DMC",
+        QmMethod.QCISDT_CBS,    # "QCISD(T)/CBS",
+        QmMethod.DLPNO_CCSDT,   # "DLPNO-CCSD(T)",
+        QmMethod.MP2_CBS,       # "MP2/CBS",
+        QmMethod.MP2C_CBS,      # "MP2C/CBS",
+        QmMethod.FIXED,         # "fixed", TODO: we should remove this level of theory because unless we have a pro
+        QmMethod.DLPNO_CCSDT0,  # "DLPNO-CCSD(T0)",
+        QmMethod.LNO_CCSDT,     # "LNO-CCSD(T)",
+        QmMethod.FN_DMC,        # "FN-DMC",
     ]
+
+    __energy_type__ = [InterEnergyType.TOTAL] * 8
 
     energy_target_names = []
 

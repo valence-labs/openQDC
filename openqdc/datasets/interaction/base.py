@@ -7,25 +7,12 @@ from loguru import logger
 from sklearn.utils import Bunch
 
 from openqdc.datasets.base import BaseDataset
-from openqdc.utils.atomization_energies import IsolatedAtomEnergyFactory
-from openqdc.utils.constants import NB_ATOMIC_FEATURES
+from openqdc.utils.constants import NB_ATOMIC_FEATURES, MAX_CHARGE
 from openqdc.utils.io import pull_locally, push_remote
 
 
 class BaseInteractionDataset(BaseDataset):
-    def __init__(
-        self,
-        energy_unit: Optional[str] = None,
-        distance_unit: Optional[str] = None,
-        overwrite_local_cache: bool = False,
-        cache_dir: Optional[str] = None,
-    ) -> None:
-        super().__init__(
-            energy_unit=energy_unit,
-            distance_unit=distance_unit,
-            overwrite_local_cache=overwrite_local_cache,
-            cache_dir=cache_dir,
-        )
+    __energy_type__ = []
 
     def collate_list(self, list_entries: List[Dict]):
         # concatenate entries
@@ -61,7 +48,7 @@ class BaseInteractionDataset(BaseDataset):
         }
 
     def __getitem__(self, idx: int):
-        shift = IsolatedAtomEnergyFactory.max_charge
+        shift = MAX_CHARGE
         p_start, p_end = self.data["position_idx_range"][idx]
         input = self.data["atomic_inputs"][p_start:p_end]
         z, c, positions, energies = (

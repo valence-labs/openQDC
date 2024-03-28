@@ -1,5 +1,5 @@
 from os.path import join as p_join
-
+from openqdc.methods import QmMethod
 from openqdc.datasets.base import BaseDataset, read_qc_archive_h5
 
 
@@ -24,7 +24,7 @@ class ISO17(BaseDataset):
     __name__ = "iso_17"
 
     __energy_methods__ = [
-        "pbe/vdw-ts",
+        QmMethod.PBE_DEF2_TZVP, # "pbe/def2-tzvp", 
     ]
 
     energy_target_names = [

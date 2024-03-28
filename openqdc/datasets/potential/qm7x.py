@@ -2,7 +2,7 @@ from os.path import join as p_join
 
 import numpy as np
 from tqdm import tqdm
-
+from openqdc.methods import QmMethod
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils.io import load_hdf5_file
 
@@ -54,7 +54,7 @@ class QM7X(BaseDataset):
 
     __name__ = "qm7x"
 
-    __energy_methods__ = ["pbe0/mbd", "dft3b"]
+    __energy_methods__ = [QmMethod.PBE0_DEF2_TZVP, QmMethod.DFT3B] # "pbe0/def2-tzvp", "dft3b"]
 
     energy_target_names = ["ePBE0", "eMBD"]
 

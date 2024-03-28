@@ -90,3 +90,8 @@ We also provide support for the following publicly available QM Noncovalent Inte
 | [Splinter](https://www.nature.com/articles/s41597-023-02443-1) |
 | [X40](https://pubs.acs.org/doi/10.1021/ct300647k) |
 | [L7](https://pubs.acs.org/doi/10.1021/ct400036b)  |
+
+# How to cite
+All data presented in the OpenQDC are already published in scientific journals, full reference to the respective paper is attached to each dataset class. When citing data obtained from OpenQDC, you should cite both the original paper(s) the data come from and our paper on OpenQDC itself. The reference is:
+
+ADD REF HERE LATER

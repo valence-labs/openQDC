@@ -14,12 +14,10 @@ from loguru import logger
 from sklearn.utils import Bunch
 from tqdm import tqdm
 
-from openqdc.utils.atomization_energies import (
-    IsolatedAtomEnergyFactory,
-    chemical_symbols,
-)
+from openqdc.utils.atomization_energies import atom_symbols
 from openqdc.utils.constants import (
     NB_ATOMIC_FEATURES,
+    MAX_CHARGE,
     NOT_DEFINED,
     POSSIBLE_NORMALIZATION,
 )
@@ -240,7 +238,7 @@ class BaseDataset:
     def _precompute_E(self):
         splits_idx = self.data["position_idx_range"][:, 1]
         s = np.array(self.data["atomic_inputs"][:, :2], dtype=int)
-        s[:, 1] += IsolatedAtomEnergyFactory.max_charge
+        s[:, 1] += MAX_CHARGE
         matrixs = [matrix[s[:, 0], s[:, 1]] for matrix in self.__isolated_atom_energies__]
         REGRESSOR_SUCCESS = False
         try:
@@ -314,7 +312,7 @@ class BaseDataset:
 
     @property
     def chemical_species(self):
-        return np.array(chemical_symbols)[self.numbers]
+        return np.array(atom_symbols)[self.numbers]
 
     @property
     def energy_unit(self):
@@ -411,7 +409,7 @@ class BaseDataset:
             logger.error("No energy methods defined for this dataset.")
         f = get_conversion("hartree", self.__energy_unit__)
         self.__isolated_atom_energies__ = f(
-            np.array([IsolatedAtomEnergyFactory.get_matrix(en_method) for en_method in self.energy_methods])
+            np.array([en_method.atom_energies_matrix for en_method in self.energy_methods])
         )
 
     def convert_energy(self, x):
@@ -733,7 +731,7 @@ class BaseDataset:
         return x
 
     def __getitem__(self, idx: int):
-        shift = IsolatedAtomEnergyFactory.max_charge
+        shift = MAX_CHARGE
         p_start, p_end = self.data["position_idx_range"][idx]
         input = self.data["atomic_inputs"][p_start:p_end]
         z, c, positions, energies = (
