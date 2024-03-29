@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 from tqdm import tqdm
-from openqdc.methods import QmMethod, InterEnergyType
+from openqdc.methods import QmInteractionMethod, InterEnergyType
 from openqdc.datasets.interaction.base import BaseInteractionDataset
 from openqdc.utils.io import get_local_cache
 from openqdc.utils.molecule import molecule_groups
@@ -28,23 +28,23 @@ class DES370K(BaseInteractionDataset):
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
     __energy_methods__ = [
-        QmMethod.MP2_CC_PVDZ,
-        QmMethod.MP2_CC_PVQZ,
-        QmMethod.MP2_CC_PVTZ,
-        QmMethod.MP2_CBS,
-        QmMethod.CCSD_T_CC_PVDZ,
-        QmMethod.CCSD_T_CBS,
-        QmMethod.CCSD_T_NN,
-        QmMethod.SAPT0_AUG_CC_PWCVXZ,
-        QmMethod.SAPT0_AUG_CC_PWCVXZ,
-        QmMethod.SAPT0_AUG_CC_PWCVXZ,
-        QmMethod.SAPT0_AUG_CC_PWCVXZ,
-        QmMethod.SAPT0_AUG_CC_PWCVXZ,
-        QmMethod.SAPT0_AUG_CC_PWCVXZ,
-        QmMethod.SAPT0_AUG_CC_PWCVXZ,
-        QmMethod.SAPT0_AUG_CC_PWCVXZ,
-        QmMethod.SAPT0_AUG_CC_PWCVXZ,
-        QmMethod.SAPT0_AUG_CC_PWCVXZ
+        QmInteractionMethod.MP2_CC_PVDZ,
+        QmInteractionMethod.MP2_CC_PVQZ,
+        QmInteractionMethod.MP2_CC_PVTZ,
+        QmInteractionMethod.MP2_CBS,
+        QmInteractionMethod.CCSD_T_CC_PVDZ,
+        QmInteractionMethod.CCSD_T_CBS,
+        QmInteractionMethod.CCSD_T_NN,
+        QmInteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        QmInteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        QmInteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        QmInteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        QmInteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        QmInteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        QmInteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        QmInteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        QmInteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        QmInteractionMethod.SAPT0_AUG_CC_PWCVXZ
     ]
 
     __energy_type__ = [

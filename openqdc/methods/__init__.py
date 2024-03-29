@@ -159,6 +159,33 @@ class Functional(StrEnum):
 
 
 class QmMethod(Enum):
+    def __init__(self, functional: Functional, basis_set: BasisSet, cost: float = 0):
+        self.functional = functional
+        self.basis_set = basis_set
+        self.cost = cost
+
+    def __str__(self):
+        if self.basis_set != "":
+            s = "/".join([str(self.functional), str(self.basis_set)])
+        else:
+            s = str(self.functional)
+        return s
+    
+    @property
+    def atom_energies_matrix(self):
+        """ Get the atomization energy matrix"""
+        energies = self.atom_energies_dict
+        mat = to_e_matrix(energies)
+        
+        return mat
+    
+    @property
+    def atom_energies_dict(self):
+        """ Get the atomization energy dictionary"""
+        raise NotImplementedError()
+
+
+class QmPotentialMethod(QmMethod): #SPLIT FOR INTERACTIO ENERGIES AND FIX MD17
     B1LYP_VWN5_DZP                      = Functional.B1LYP_VWN5, BasisSet.DZP, 0
     B1LYP_VWN5_SZ                       = Functional.B1LYP_VWN5, BasisSet.SZ, 0
     B1LYP_VWN5_TZP                      = Functional.B1LYP_VWN5, BasisSet.TZP, 0
@@ -233,13 +260,7 @@ class QmMethod(Enum):
     CCSD_T_CC_PVDZ                      = Functional.CCSDT, BasisSet.CC_PVDZ, 0
     CCSD_CC_PVDZ                        = Functional.CCSD, BasisSet.CC_PVDZ, 0
     DFT3B                               = Functional.DFT3B, BasisSet.NONE, 0
-    DCCSDT_HA_DZ                        = Functional.DCCSDT, BasisSet.HA_DZ, 0
-    DCCSDT_HA_TZ                        = Functional.DCCSDT, BasisSet.HA_TZ, 0
-    DSD_BLYP_D3_BJ_DEF2_TZVP            = Functional.DSD_BLYP_D3_BJ, BasisSet.DEF2_TZVP, 0
-    DLPNO_CCSDT                         = Functional.DLPNO_CCSDT, BasisSet.NONE, 0
-    DLPNO_CCSDT0                        = Functional.DLPNO_CCSDT0, BasisSet.NONE, 0
-    FN_DMC                              = Functional.FN_DMC, BasisSet.NONE, 0  
-    FIXED                               = Functional.FIXED, BasisSet.NONE, 0        
+    DSD_BLYP_D3_BJ_DEF2_TZVP            = Functional.DSD_BLYP_D3_BJ, BasisSet.DEF2_TZVP, 0     
     FT97_DZP                            = Functional.FT97, BasisSet.DZP, 0
     FT97_SZ                             = Functional.FT97, BasisSet.SZ, 0
     FT97_TZP                            = Functional.FT97, BasisSet.TZP, 0
@@ -368,7 +389,6 @@ class QmMethod(Enum):
     PW91_DZP                            = Functional.PW91, BasisSet.DZP, 0
     PW91_SZ                             = Functional.PW91, BasisSet.SZ, 0
     PW91_TZP                            = Functional.PW91, BasisSet.TZP, 0
-    QCISDT_CBS                          = Functional.QCISDT, BasisSet.CBS, 0
     REVPBE_D3_BJ_DEF2_TZVP              = Functional.REVPBE_D3_BJ, BasisSet.DEF2_TZVP, 0
     REVPBE_DZP                          = Functional.REVPBE, BasisSet.DZP, 0
     REVPBE_SZ                           = Functional.REVPBE, BasisSet.SZ, 0
@@ -382,10 +402,6 @@ class QmMethod(Enum):
     RPBE_DZP                            = Functional.RPBE, BasisSet.DZP, 0
     RPBE_SZ                             = Functional.RPBE, BasisSet.SZ, 0
     RPBE_TZP                            = Functional.RPBE, BasisSet.TZP, 0
-    SAPT0_AUG_CC_PWCVXZ                 = Functional.SAPT0, BasisSet.AUG_CC_PWCVXZ, 0
-    SAPT0_JUN_CC_PVDZ                   = Functional.SAPT0, BasisSet.JUN_CC_PVDZ, 0
-    SAPT0_JUN_CC_PVDDZ                  = Functional.SAPT0, BasisSet.JUN_CC_PVDDZ, 0
-    SAPT0_AUG_CC_PVDDZ                  = Functional.SAPT0, BasisSet.AUG_CC_PVDDZ, 0
     SSB_D_DZP                           = Functional.SSB_D, BasisSet.DZP, 0
     SSB_D_SZ                            = Functional.SSB_D, BasisSet.SZ, 0
     SSB_D_TZP                           = Functional.SSB_D, BasisSet.TZP, 0
@@ -431,26 +447,6 @@ class QmMethod(Enum):
     XLYP_TZP                            = Functional.XLYP, BasisSet.TZP, 0
 
     
-    def __init__(self, functional: Functional, basis_set: BasisSet, cost: float = 0):
-        self.functional = functional
-        self.basis_set = basis_set
-        self.cost = cost
-
-    def __str__(self):
-        if self.basis_set != "":
-            s = "/".join([str(self.functional), str(self.basis_set)])
-        else:
-            s = str(self.functional)
-        return s
-    
-    @property
-    def atom_energies_matrix(self):
-        """ Get the atomization energy matrix"""
-        energies = self.atom_energies_dict
-        mat = to_e_matrix(energies)
-        
-        return mat
-    
     @property
     def atom_energies_dict(self):
         """ Get the atomization energy dictionary"""
@@ -465,7 +461,33 @@ class QmMethod(Enum):
         return energies
     
 
+class QmInteractionMethod(QmMethod):
+    CCSD_T_NN                           = Functional.CCSDT, BasisSet.NN, 0
+    CCSD_T_CBS                          = Functional.CCSDT, BasisSet.CBS, 0
+    CCSD_T_CC_PVDZ                      = Functional.CCSDT, BasisSet.CC_PVDZ, 0
+    DCCSDT_HA_DZ                        = Functional.DCCSDT, BasisSet.HA_DZ, 0
+    DCCSDT_HA_TZ                        = Functional.DCCSDT, BasisSet.HA_TZ, 0
+    DLPNO_CCSDT                         = Functional.DLPNO_CCSDT, BasisSet.NONE, 0
+    DLPNO_CCSDT0                        = Functional.DLPNO_CCSDT0, BasisSet.NONE, 
+    FN_DMC                              = Functional.FN_DMC, BasisSet.NONE, 0  
+    FIXED                               = Functional.FIXED, BasisSet.NONE, 0   
+    LNO_CCSDT                           = Functional.LNO_CCSDT, BasisSet.NONE, 0
+    MP2_CBS                             = Functional.MP2, BasisSet.CBS, 0
+    MP2_CC_PVDZ                         = Functional.MP2, BasisSet.CC_PVDZ, 0
+    MP2_CC_PVQZ                         = Functional.MP2, BasisSet.CC_PVQZ, 0
+    MP2_CC_PVTZ                         = Functional.MP2, BasisSet.CC_PVTZ, 0
+    MP2_5_CBS_ADZ                       = Functional.MP2_5, BasisSet.CBS_ADZ, 0
+    MP2C_CBS                            = Functional.MP2C, BasisSet.CBS, 0
+    QCISDT_CBS                          = Functional.QCISDT, BasisSet.CBS, 0
+    SAPT0_AUG_CC_PWCVXZ                 = Functional.SAPT0, BasisSet.AUG_CC_PWCVXZ, 0
+    SAPT0_JUN_CC_PVDZ                   = Functional.SAPT0, BasisSet.JUN_CC_PVDZ, 0
+    SAPT0_JUN_CC_PVDDZ                  = Functional.SAPT0, BasisSet.JUN_CC_PVDDZ, 0
+    SAPT0_AUG_CC_PVDDZ                  = Functional.SAPT0, BasisSet.AUG_CC_PVDDZ, 0
 
+    @property
+    def atom_energies_dict(self):
+        """ Get an empty atomization energy dictionary because Interaction methods don't require this"""
+        return {}
 
 # if __name__ ==  "__main__":
 #     for method in QmMethod:

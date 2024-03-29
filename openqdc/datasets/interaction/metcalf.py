@@ -2,7 +2,7 @@ import os
 from typing import Dict, List
 
 import numpy as np
-from openqdc.methods import QmMethod, InterEnergyType
+from openqdc.methods import QmInteractionMethod, InterEnergyType
 from openqdc.datasets.interaction.base import BaseInteractionDataset
 from openqdc.utils.constants import ATOM_TABLE
 
@@ -30,11 +30,11 @@ class Metcalf(BaseInteractionDataset):
     __distance_unit__ = "ang"
     __forces_unit__ = None
     __energy_methods__ = [
-        QmMethod.SAPT0_JUN_CC_PVDZ,
-        QmMethod.SAPT0_JUN_CC_PVDZ,
-        QmMethod.SAPT0_JUN_CC_PVDZ,
-        QmMethod.SAPT0_JUN_CC_PVDZ,
-        QmMethod.SAPT0_JUN_CC_PVDZ,
+        QmInteractionMethod.SAPT0_JUN_CC_PVDZ,
+        QmInteractionMethod.SAPT0_JUN_CC_PVDZ,
+        QmInteractionMethod.SAPT0_JUN_CC_PVDZ,
+        QmInteractionMethod.SAPT0_JUN_CC_PVDZ,
+        QmInteractionMethod.SAPT0_JUN_CC_PVDZ,
     ]
     __energy_type__ = [
         InterEnergyType.TOTAL,

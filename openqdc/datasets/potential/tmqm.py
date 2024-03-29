@@ -4,7 +4,7 @@ from os.path import join as p_join
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-from openqdc.methods import QmMethod
+from openqdc.methods import QmPotentialMethod
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils.constants import ATOM_TABLE
 
@@ -64,7 +64,7 @@ class TMQM(BaseDataset):
 
     __name__ = "tmqm"
 
-    __energy_methods__ = [QmMethod.TPSSH_DEF2_TZVP] # "tpssh/def2-tzvp"]
+    __energy_methods__ = [QmPotentialMethod.TPSSH_DEF2_TZVP] # "tpssh/def2-tzvp"]
 
     energy_target_names = ["TPSSh/def2TZVP level"]
 

@@ -1,5 +1,5 @@
 from os.path import join as p_join
-from openqdc.methods import QmMethod
+from openqdc.methods import QmPotentialMethod
 from openqdc.datasets.base import BaseDataset, read_qc_archive_h5
 
 
@@ -24,7 +24,7 @@ class SN2RXN(BaseDataset):
     __name__ = "sn2_rxn"
 
     __energy_methods__ = [
-        QmMethod.DSD_BLYP_D3_BJ_DEF2_TZVP
+        QmPotentialMethod.DSD_BLYP_D3_BJ_DEF2_TZVP
         # "dsd-blyp-d3(bj)/def2-tzvp",
     ]
     __energy_unit__ = "ev"

@@ -4,7 +4,7 @@ from os.path import join as p_join
 
 import datamol as dm
 import numpy as np
-from openqdc.methods import QmMethod
+from openqdc.methods import QmPotentialMethod
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils.molecule import get_atomic_number_and_charge
 
@@ -52,7 +52,7 @@ class QMugs(BaseDataset):
     """
 
     __name__ = "qmugs"
-    __energy_methods__ = [QmMethod.GFN2_XTB, QmMethod.WB97X_D_DEF2_SVP] # "gfn2_xtb", "wb97x-d/def2-svp"
+    __energy_methods__ = [QmPotentialMethod.GFN2_XTB, QmPotentialMethod.WB97X_D_DEF2_SVP] # "gfn2_xtb", "wb97x-d/def2-svp"
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"

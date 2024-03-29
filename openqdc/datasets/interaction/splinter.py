@@ -4,7 +4,7 @@ from typing import Dict, List
 import numpy as np
 from loguru import logger
 from tqdm import tqdm
-from openqdc.methods import QmMethod, InterEnergyType
+from openqdc.methods import QmInteractionMethod, InterEnergyType
 from openqdc.datasets.interaction.base import BaseInteractionDataset
 from openqdc.utils.constants import ATOM_TABLE
 
@@ -22,26 +22,26 @@ class Splinter(BaseInteractionDataset):
 
     __name__ = "splinter"
     __energy_methods__ = [
-        QmMethod.SAPT0_JUN_CC_PVDDZ,
-        QmMethod.SAPT0_JUN_CC_PVDDZ,
-        QmMethod.SAPT0_JUN_CC_PVDDZ,
-        QmMethod.SAPT0_JUN_CC_PVDDZ,
-        QmMethod.SAPT0_JUN_CC_PVDDZ,
-        QmMethod.SAPT0_JUN_CC_PVDDZ,
-        QmMethod.SAPT0_JUN_CC_PVDDZ,
-        QmMethod.SAPT0_JUN_CC_PVDDZ,
-        QmMethod.SAPT0_JUN_CC_PVDDZ,
-        QmMethod.SAPT0_JUN_CC_PVDDZ,
-        QmMethod.SAPT0_AUG_CC_PVDDZ,
-        QmMethod.SAPT0_AUG_CC_PVDDZ,
-        QmMethod.SAPT0_AUG_CC_PVDDZ,
-        QmMethod.SAPT0_AUG_CC_PVDDZ,
-        QmMethod.SAPT0_AUG_CC_PVDDZ,
-        QmMethod.SAPT0_AUG_CC_PVDDZ,
-        QmMethod.SAPT0_AUG_CC_PVDDZ,
-        QmMethod.SAPT0_AUG_CC_PVDDZ,
-        QmMethod.SAPT0_AUG_CC_PVDDZ,
-        QmMethod.SAPT0_AUG_CC_PVDDZ,
+        QmInteractionMethod.SAPT0_JUN_CC_PVDDZ,
+        QmInteractionMethod.SAPT0_JUN_CC_PVDDZ,
+        QmInteractionMethod.SAPT0_JUN_CC_PVDDZ,
+        QmInteractionMethod.SAPT0_JUN_CC_PVDDZ,
+        QmInteractionMethod.SAPT0_JUN_CC_PVDDZ,
+        QmInteractionMethod.SAPT0_JUN_CC_PVDDZ,
+        QmInteractionMethod.SAPT0_JUN_CC_PVDDZ,
+        QmInteractionMethod.SAPT0_JUN_CC_PVDDZ,
+        QmInteractionMethod.SAPT0_JUN_CC_PVDDZ,
+        QmInteractionMethod.SAPT0_JUN_CC_PVDDZ,
+        QmInteractionMethod.SAPT0_AUG_CC_PVDDZ,
+        QmInteractionMethod.SAPT0_AUG_CC_PVDDZ,
+        QmInteractionMethod.SAPT0_AUG_CC_PVDDZ,
+        QmInteractionMethod.SAPT0_AUG_CC_PVDDZ,
+        QmInteractionMethod.SAPT0_AUG_CC_PVDDZ,
+        QmInteractionMethod.SAPT0_AUG_CC_PVDDZ,
+        QmInteractionMethod.SAPT0_AUG_CC_PVDDZ,
+        QmInteractionMethod.SAPT0_AUG_CC_PVDDZ,
+        QmInteractionMethod.SAPT0_AUG_CC_PVDDZ,
+        QmInteractionMethod.SAPT0_AUG_CC_PVDDZ,
         # "sapt0/jun-cc-pV(D+d)Z_unscaled", #TODO: we need to pick the unscaled version only here
         # "sapt0/jun-cc-pV(D+d)Z_es_unscaled",
         # "sapt0/jun-cc-pV(D+d)Z_ex_unscaled",

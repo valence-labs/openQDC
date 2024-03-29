@@ -3,7 +3,7 @@ from os.path import join as p_join
 
 import numpy as np
 from tqdm import tqdm
-from openqdc.methods import QmMethod
+from openqdc.methods import QmPotentialMethod
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils.constants import MAX_ATOMIC_NUMBER, ATOM_TABLE
 
@@ -73,7 +73,7 @@ class WaterClusters(BaseDataset):
     __distance_unit__ = "ang"
     __forces_unit__ = "kcal/mol/ang"
 
-    __energy_methods__ = [QmMethod.TTM2_1_F] # "ttm2.1-f"
+    __energy_methods__ = [QmPotentialMethod.TTM2_1_F] # "ttm2.1-f"
     energy_target_names = ["TTM2.1-F Potential"]
 
     def read_raw_entries(self):
