@@ -185,7 +185,7 @@ class QmMethod(Enum):
         raise NotImplementedError()
 
 
-class QmPotentialMethod(QmMethod): #SPLIT FOR INTERACTIO ENERGIES AND FIX MD17
+class PotentialMethod(QmMethod): #SPLIT FOR INTERACTIO ENERGIES AND FIX MD17
     B1LYP_VWN5_DZP                      = Functional.B1LYP_VWN5, BasisSet.DZP, 0
     B1LYP_VWN5_SZ                       = Functional.B1LYP_VWN5, BasisSet.SZ, 0
     B1LYP_VWN5_TZP                      = Functional.B1LYP_VWN5, BasisSet.TZP, 0
@@ -255,8 +255,6 @@ class QmPotentialMethod(QmMethod): #SPLIT FOR INTERACTIO ENERGIES AND FIX MD17
     BP86_D_DZP                          = Functional.BP86_D, BasisSet.DZP, 0
     BP86_D_SZ                           = Functional.BP86_D, BasisSet.SZ, 0
     BP86_D_TZP                          = Functional.BP86_D, BasisSet.TZP, 0
-    CCSD_T_NN                           = Functional.CCSDT, BasisSet.NN, 0
-    CCSD_T_CBS                          = Functional.CCSDT, BasisSet.CBS, 0
     CCSD_T_CC_PVDZ                      = Functional.CCSDT, BasisSet.CC_PVDZ, 0
     CCSD_CC_PVDZ                        = Functional.CCSD, BasisSet.CC_PVDZ, 0
     DFT3B                               = Functional.DFT3B, BasisSet.NONE, 0
@@ -297,7 +295,6 @@ class QmPotentialMethod(QmMethod): #SPLIT FOR INTERACTIO ENERGIES AND FIX MD17
     LDA_VWN_DZP                         = Functional.LDA_VWN, BasisSet.DZP, 0
     LDA_VWN_SZ                          = Functional.LDA_VWN, BasisSet.SZ, 0
     LDA_VWN_TZP                         = Functional.LDA_VWN, BasisSet.TZP, 0
-    LNO_CCSDT                           = Functional.LNO_CCSDT, BasisSet.NONE, 0
     M05_2X_DZP                          = Functional.M05_2X, BasisSet.DZP, 0
     M05_2X_SZ                           = Functional.M05_2X, BasisSet.SZ, 0
     M05_2X_TZP                          = Functional.M05_2X, BasisSet.TZP, 0
@@ -313,12 +310,6 @@ class QmPotentialMethod(QmMethod): #SPLIT FOR INTERACTIO ENERGIES AND FIX MD17
     M06_DZP                             = Functional.M06, BasisSet.DZP, 0
     M06_SZ                              = Functional.M06, BasisSet.SZ, 0
     M06_TZP                             = Functional.M06, BasisSet.TZP, 0
-    MP2_CBS                             = Functional.MP2, BasisSet.CBS, 0
-    MP2_CC_PVDZ                         = Functional.MP2, BasisSet.CC_PVDZ, 0
-    MP2_CC_PVQZ                         = Functional.MP2, BasisSet.CC_PVQZ, 0
-    MP2_CC_PVTZ                         = Functional.MP2, BasisSet.CC_PVTZ, 0
-    MP2_5_CBS_ADZ                       = Functional.MP2_5, BasisSet.CBS_ADZ, 0
-    MP2C_CBS                            = Functional.MP2C, BasisSet.CBS, 0
     MPBE_DZP                            = Functional.MPBE, BasisSet.DZP, 0
     MPBE_SZ                             = Functional.MPBE, BasisSet.SZ, 0
     MPBE_TZP                            = Functional.MPBE, BasisSet.TZP, 0
@@ -446,7 +437,6 @@ class QmPotentialMethod(QmMethod): #SPLIT FOR INTERACTIO ENERGIES AND FIX MD17
     XLYP_SZ                             = Functional.XLYP, BasisSet.SZ, 0
     XLYP_TZP                            = Functional.XLYP, BasisSet.TZP, 0
 
-    
     @property
     def atom_energies_dict(self):
         """ Get the atomization energy dictionary"""
@@ -461,7 +451,7 @@ class QmPotentialMethod(QmMethod): #SPLIT FOR INTERACTIO ENERGIES AND FIX MD17
         return energies
     
 
-class QmInteractionMethod(QmMethod):
+class InteractionMethod(QmMethod):
     CCSD_T_NN                           = Functional.CCSDT, BasisSet.NN, 0
     CCSD_T_CBS                          = Functional.CCSDT, BasisSet.CBS, 0
     CCSD_T_CC_PVDZ                      = Functional.CCSDT, BasisSet.CC_PVDZ, 0
@@ -489,6 +479,6 @@ class QmInteractionMethod(QmMethod):
         """ Get an empty atomization energy dictionary because Interaction methods don't require this"""
         return {}
 
-# if __name__ ==  "__main__":
-#     for method in QmMethod:
-#         (str(method), len(method.atom_energies))
+if __name__ ==  "__main__":
+    for method in PotentialMethod:
+        (str(method), len(method.atom_energies_dict))

@@ -1,7 +1,7 @@
 from os.path import join as p_join
 
 import numpy as np
-from openqdc.methods import QmPotentialMethod
+from openqdc.methods import PotentialMethod
 from openqdc.datasets.base import BaseDataset
 from openqdc.raws.fetch import decompress_tar_gz
 
@@ -75,7 +75,7 @@ class RevMD17(BaseDataset):
     __name__ = "revmd17"
 
     __energy_methods__ = [
-        QmPotentialMethod.PBE_DEF2_TZVP
+        PotentialMethod.PBE_DEF2_TZVP
         # "pbe/def2-tzvp",
     ]
 

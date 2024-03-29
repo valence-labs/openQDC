@@ -3,7 +3,7 @@ from os.path import join as p_join
 import datamol as dm
 import numpy as np
 from tqdm import tqdm
-from openqdc.methods import QmPotentialMethod
+from openqdc.methods import PotentialMethod
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils import load_hdf5_file
 from openqdc.utils.molecule import get_atomic_number_and_charge
@@ -55,7 +55,7 @@ class Spice(BaseDataset):
     """
 
     __name__ = "spice"
-    __energy_methods__ = [QmPotentialMethod.WB97M_D3BJ_DEF2_TZVPPD] # "wb97m-d3bj/def2-tzvppd"]
+    __energy_methods__ = [PotentialMethod.WB97M_D3BJ_DEF2_TZVPPD] # "wb97m-d3bj/def2-tzvppd"]
     __force_mask__ = [True]
     __energy_unit__ = "hartree"
     __distance_unit__ = "bohr"

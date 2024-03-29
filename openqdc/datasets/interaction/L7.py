@@ -4,7 +4,7 @@ from typing import Dict, List
 import numpy as np
 import yaml
 from loguru import logger
-from openqdc.methods import QmInteractionMethod, InterEnergyType
+from openqdc.methods import InteractionMethod, InterEnergyType
 from openqdc.datasets.interaction.base import BaseInteractionDataset
 from openqdc.utils.constants import ATOM_TABLE
 
@@ -66,14 +66,14 @@ class L7(BaseInteractionDataset):
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
     __energy_methods__ = [
-        QmInteractionMethod.QCISDT_CBS,    # "QCISD(T)/CBS",
-        QmInteractionMethod.DLPNO_CCSDT,   # "DLPNO-CCSD(T)",
-        QmInteractionMethod.MP2_CBS,       # "MP2/CBS",
-        QmInteractionMethod.MP2C_CBS,      # "MP2C/CBS",
-        QmInteractionMethod.FIXED,         # "fixed", TODO: we should remove this level of theory because unless we have a pro
-        QmInteractionMethod.DLPNO_CCSDT0,  # "DLPNO-CCSD(T0)",
-        QmInteractionMethod.LNO_CCSDT,     # "LNO-CCSD(T)",
-        QmInteractionMethod.FN_DMC,        # "FN-DMC",
+        InteractionMethod.QCISDT_CBS,    # "QCISD(T)/CBS",
+        InteractionMethod.DLPNO_CCSDT,   # "DLPNO-CCSD(T)",
+        InteractionMethod.MP2_CBS,       # "MP2/CBS",
+        InteractionMethod.MP2C_CBS,      # "MP2C/CBS",
+        InteractionMethod.FIXED,         # "fixed", TODO: we should remove this level of theory because unless we have a pro
+        InteractionMethod.DLPNO_CCSDT0,  # "DLPNO-CCSD(T0)",
+        InteractionMethod.LNO_CCSDT,     # "LNO-CCSD(T)",
+        InteractionMethod.FN_DMC,        # "FN-DMC",
     ]
 
     __energy_type__ = [InterEnergyType.TOTAL] * 8

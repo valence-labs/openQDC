@@ -4,7 +4,7 @@ from typing import Dict, List
 import datamol as dm
 import numpy as np
 import pandas as pd
-from openqdc.methods import QmPotentialMethod
+from openqdc.methods import PotentialMethod
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils.constants import ATOM_TABLE
 
@@ -52,7 +52,7 @@ class OrbnetDenali(BaseDataset):
     """
 
     __name__ = "orbnet_denali"
-    __energy_methods__ = [QmPotentialMethod.WB97X_D3_DEF2_TZVP, QmPotentialMethod.GFN1_XTB] # ["wb97x-d3/def2-tzvp", "gfn1_xtb"]
+    __energy_methods__ = [PotentialMethod.WB97X_D3_DEF2_TZVP, PotentialMethod.GFN1_XTB] # ["wb97x-d3/def2-tzvp", "gfn1_xtb"]
     energy_target_names = ["dft_energy", "xtb1_energy"]
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"

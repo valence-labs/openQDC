@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 from tqdm import tqdm
-from openqdc.methods import QmInteractionMethod, InterEnergyType
+from openqdc.methods import InteractionMethod, InterEnergyType
 from openqdc.datasets.interaction.base import BaseInteractionDataset
 from openqdc.utils.constants import ATOM_TABLE
 
@@ -31,23 +31,23 @@ class DESS66(BaseInteractionDataset):
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
     __energy_methods__ = [
-        QmInteractionMethod.MP2_CC_PVDZ,
-        QmInteractionMethod.MP2_CC_PVQZ,
-        QmInteractionMethod.MP2_CC_PVTZ,
-        QmInteractionMethod.MP2_CBS,
-        QmInteractionMethod.CCSD_T_CC_PVDZ,
-        QmInteractionMethod.CCSD_T_CBS,
-        QmInteractionMethod.CCSD_T_NN,
-        QmInteractionMethod.SAPT0_AUG_CC_PWCVXZ,
-        QmInteractionMethod.SAPT0_AUG_CC_PWCVXZ,
-        QmInteractionMethod.SAPT0_AUG_CC_PWCVXZ,
-        QmInteractionMethod.SAPT0_AUG_CC_PWCVXZ,
-        QmInteractionMethod.SAPT0_AUG_CC_PWCVXZ,
-        QmInteractionMethod.SAPT0_AUG_CC_PWCVXZ,
-        QmInteractionMethod.SAPT0_AUG_CC_PWCVXZ,
-        QmInteractionMethod.SAPT0_AUG_CC_PWCVXZ,
-        QmInteractionMethod.SAPT0_AUG_CC_PWCVXZ,
-        QmInteractionMethod.SAPT0_AUG_CC_PWCVXZ
+        InteractionMethod.MP2_CC_PVDZ,
+        InteractionMethod.MP2_CC_PVQZ,
+        InteractionMethod.MP2_CC_PVTZ,
+        InteractionMethod.MP2_CBS,
+        InteractionMethod.CCSD_T_CC_PVDZ,
+        InteractionMethod.CCSD_T_CBS,
+        InteractionMethod.CCSD_T_NN,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ
     ]
 
     __energy_type__ = [

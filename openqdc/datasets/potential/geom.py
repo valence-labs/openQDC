@@ -3,7 +3,7 @@ from typing import Dict
 
 import datamol as dm
 import numpy as np
-from openqdc.methods import QmPotentialMethod
+from openqdc.methods import PotentialMethod
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils import load_json, load_pkl
 from openqdc.utils.molecule import get_atomic_number_and_charge
@@ -76,7 +76,7 @@ class GEOM(BaseDataset):
     """
 
     __name__ = "geom"
-    __energy_methods__ = [QmPotentialMethod.GFN2_XTB]
+    __energy_methods__ = [PotentialMethod.GFN2_XTB]
 
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"

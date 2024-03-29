@@ -1,5 +1,5 @@
 import numpy as np
-from openqdc.methods import QmPotentialMethod
+from openqdc.methods import PotentialMethod
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils.constants import NOT_DEFINED
 
@@ -10,7 +10,7 @@ class Dummy(BaseDataset):
     """
 
     __name__ = "dummy"
-    __energy_methods__ = [QmPotentialMethod.SVWN_DEF2_TZVP, QmPotentialMethod.PM6]
+    __energy_methods__ = [PotentialMethod.SVWN_DEF2_TZVP, PotentialMethod.PM6]
     __force_mask__ = [False, True]
     __energy_unit__ = "kcal/mol"
     __distance_unit__ = "ang"
