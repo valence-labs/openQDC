@@ -363,8 +363,8 @@ class BaseDataset:
         return {
             "atomic_inputs": (-1, NB_ATOMIC_FEATURES),
             "position_idx_range": (-1, 2),
-            "energies": (-1, len(self.energy_target_names)),
-            "forces": (-1, 3, len(self.force_target_names)),
+            "energies": (-1, len(self.energy_methods)),
+            "forces": (-1, 3, len(self.force_methods)),
         }
 
     @property

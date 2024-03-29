@@ -36,7 +36,7 @@ class X40(BaseInteractionDataset):
         "MP2.5/CBS(aDZ)",
     ]
 
-    energy_target_names = __energy_methods__
+    energy_target_names = []
 
     def read_raw_entries(self) -> List[Dict]:
         yaml_fpath = os.path.join(self.root, "x40.yaml")
