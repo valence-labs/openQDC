@@ -82,6 +82,9 @@ class BaseDataset(DatasetPropertyMixIn):
             Energy unit to convert dataset to. Supported units: ["kcal/mol", "kj/mol", "hartree", "ev"]
         distance_unit
             Distance unit to convert dataset to. Supported units: ["ang", "nm", "bohr"]
+        energy_type
+            Type of isolated atom energy to use for the dataset. Default: "formation"
+            Supported types: ["formation", "regression"]
         overwrite_local_cache
             Whether to overwrite the locally cached dataset.
         cache_dir
