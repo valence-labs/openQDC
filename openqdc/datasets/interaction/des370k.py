@@ -5,11 +5,12 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 from tqdm import tqdm
-from openqdc.methods import InteractionMethod, InterEnergyType
+
 from openqdc.datasets.interaction.base import BaseInteractionDataset
+from openqdc.methods import InteractionMethod, InterEnergyType
+from openqdc.utils.constants import ATOM_TABLE
 from openqdc.utils.io import get_local_cache
 from openqdc.utils.molecule import molecule_groups
-from openqdc.utils.constants import ATOM_TABLE
 
 
 class DES370K(BaseInteractionDataset):
@@ -44,7 +45,7 @@ class DES370K(BaseInteractionDataset):
         InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
         InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
         InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
-        InteractionMethod.SAPT0_AUG_CC_PWCVXZ
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
     ]
 
     __energy_type__ = [

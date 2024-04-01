@@ -8,7 +8,6 @@ from rdkit import Chem
 
 from openqdc.utils.constants import ATOM_SYMBOLS
 
-
 # molecule group classification for DES datasets
 molecule_groups = {
     "acids": set(["CCC(=O)O", "CC(=O)O", "OC=O", "OC(=O)CC(=O)O"]),

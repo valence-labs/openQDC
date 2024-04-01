@@ -1,6 +1,7 @@
 from os.path import join as p_join
-from openqdc.methods import PotentialMethod
+
 from openqdc.datasets.base import BaseDataset, read_qc_archive_h5
+from openqdc.methods import PotentialMethod
 
 
 class SN2RXN(BaseDataset):
@@ -32,7 +33,8 @@ class SN2RXN(BaseDataset):
     __forces_unit__ = "ev/bohr"
 
     energy_target_names = [
-        "DSD-BLYP-D3(BJ):def2-TZVP Atomization Energy", #TODO: We need to revalidate this to make sure that is not atomization energies.
+        # TODO: We need to revalidate this to make sure that is not atomization energies.
+        "DSD-BLYP-D3(BJ):def2-TZVP Atomization Energy",
     ]
 
     __force_mask__ = [True]

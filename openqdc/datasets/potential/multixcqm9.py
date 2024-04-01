@@ -5,8 +5,9 @@ from os.path import join as p_join
 
 import numpy as np
 import pandas as pd
-from openqdc.methods import PotentialMethod
+
 from openqdc.datasets.base import BaseDataset
+from openqdc.methods import PotentialMethod
 from openqdc.utils.constants import ATOM_TABLE
 
 
@@ -283,7 +284,7 @@ class MultixcQM9(BaseDataset):
         PotentialMethod.M06_SZ,
         PotentialMethod.M06_2X_SZ,
         PotentialMethod.B3LYP_D_SZ,
-        PotentialMethod.GFN2_XTB
+        PotentialMethod.GFN2_XTB,
     ]
 
     energy_target_names = [
@@ -508,7 +509,7 @@ class MultixcQM9(BaseDataset):
         "MPW1PW/SZ",
         "MPW1K/SZ",
         "TAU-HCTH-HYBRID/SZ",
-        "X3LYP(VWN5)/SZ",  
+        "X3LYP(VWN5)/SZ",
         "OPBE0/SZ",
         "M05/SZ",
         "M05-2X/SZ",

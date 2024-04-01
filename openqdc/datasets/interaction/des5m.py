@@ -1,6 +1,7 @@
 from typing import Dict, List
-from openqdc.methods import InteractionMethod, InterEnergyType
+
 from openqdc.datasets.interaction.des370k import DES370K
+from openqdc.methods import InteractionMethod, InterEnergyType
 
 
 class DES5M(DES370K):
@@ -48,7 +49,7 @@ class DES5M(DES370K):
         InterEnergyType.EX_DISP_SS,
         InterEnergyType.DELTA_HF,
     ]
-    
+
     energy_target_names = [
         "qz_MP2_all",
         "tz_MP2_all",

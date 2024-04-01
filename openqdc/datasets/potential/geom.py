@@ -3,8 +3,9 @@ from typing import Dict
 
 import datamol as dm
 import numpy as np
-from openqdc.methods import PotentialMethod
+
 from openqdc.datasets.base import BaseDataset
+from openqdc.methods import PotentialMethod
 from openqdc.utils import load_json, load_pkl
 from openqdc.utils.molecule import get_atomic_number_and_charge
 

@@ -1,13 +1,13 @@
 import pickle as pkl
 from os.path import join as p_join
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import numpy as np
 from loguru import logger
 from sklearn.utils import Bunch
 
 from openqdc.datasets.base import BaseDataset
-from openqdc.utils.constants import NB_ATOMIC_FEATURES, MAX_CHARGE
+from openqdc.utils.constants import MAX_CHARGE, NB_ATOMIC_FEATURES
 from openqdc.utils.io import pull_locally, push_remote
 
 
@@ -92,7 +92,7 @@ class BaseInteractionDataset(BaseDataset):
         for key in data_dict:
             if key not in self.data_keys:
                 x = data_dict[key]
-                x[x == None] = -1
+                x[x == None] = -1  # noqa
                 data_dict[key] = np.unique(x, return_inverse=True)
 
         with open(local_path, "wb") as f:

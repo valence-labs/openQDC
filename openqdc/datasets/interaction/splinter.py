@@ -4,8 +4,9 @@ from typing import Dict, List
 import numpy as np
 from loguru import logger
 from tqdm import tqdm
-from openqdc.methods import InteractionMethod, InterEnergyType
+
 from openqdc.datasets.interaction.base import BaseInteractionDataset
+from openqdc.methods import InteractionMethod, InterEnergyType
 from openqdc.utils.constants import ATOM_TABLE
 
 
@@ -84,7 +85,7 @@ class Splinter(BaseInteractionDataset):
         InterEnergyType.ES,
         InterEnergyType.EX,
         InterEnergyType.IND,
-        InterEnergyType.DISP
+        InterEnergyType.DISP,
     ]
     energy_target_names = []
 
