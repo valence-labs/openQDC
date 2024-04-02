@@ -15,9 +15,10 @@ from sklearn.utils import Bunch
 from tqdm import tqdm
 
 from openqdc.utils.constants import (
-    NB_ATOMIC_FEATURES,
     ATOM_SYMBOLS,
+    ATOM_TABLE,
     MAX_CHARGE,
+    NB_ATOMIC_FEATURES,
     NOT_DEFINED,
     POSSIBLE_NORMALIZATION,
 )
@@ -40,7 +41,6 @@ from openqdc.utils.molecule import z_to_formula
 from openqdc.utils.package_utils import requires_package
 from openqdc.utils.regressor import Regressor
 from openqdc.utils.units import get_conversion
-from openqdc.utils.constants import ATOM_TABLE
 
 
 def _extract_entry(

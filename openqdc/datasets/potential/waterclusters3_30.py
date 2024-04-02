@@ -3,9 +3,10 @@ from os.path import join as p_join
 
 import numpy as np
 from tqdm import tqdm
-from openqdc.methods import PotentialMethod
+
 from openqdc.datasets.base import BaseDataset
-from openqdc.utils.constants import MAX_ATOMIC_NUMBER, ATOM_TABLE
+from openqdc.methods import PotentialMethod
+from openqdc.utils.constants import ATOM_TABLE, MAX_ATOMIC_NUMBER
 
 # we could use ase.io.read to read extxyz files
 
@@ -73,7 +74,7 @@ class WaterClusters(BaseDataset):
     __distance_unit__ = "ang"
     __forces_unit__ = "kcal/mol/ang"
 
-    __energy_methods__ = [PotentialMethod.TTM2_1_F] # "ttm2.1-f"
+    __energy_methods__ = [PotentialMethod.TTM2_1_F]  # "ttm2.1-f"
     energy_target_names = ["TTM2.1-F Potential"]
 
     def read_raw_entries(self):

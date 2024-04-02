@@ -1,17 +1,18 @@
-import os
 import ast
+import os
+from typing import Tuple
+
 import numpy as np
 from loguru import logger
-from typing import Dict, Tuple
-from openqdc.utils.constants import MAX_ATOMIC_NUMBER, MAX_CHARGE, ATOMIC_NUMBERS
 
+from openqdc.utils.constants import ATOMIC_NUMBERS, MAX_ATOMIC_NUMBER, MAX_CHARGE
 
 EF_KEY = Tuple[str, int]
 
 
 with open(os.path.join(os.path.dirname(__file__), "atom_energies.txt")) as fd:
     atom_energy_collection = ast.literal_eval(fd.read())
-    atom_energy_collection = {k.lower():v for k, v in atom_energy_collection.items()}
+    atom_energy_collection = {k.lower(): v for k, v in atom_energy_collection.items()}
 
 
 def to_e_matrix(atom_energies: dict) -> np.ndarray:
@@ -21,7 +22,7 @@ def to_e_matrix(atom_energies: dict) -> np.ndarray:
     Parameters
     ----------
     atom_energies: dict
-        Dict of energies computed for a given QM method. 
+        Dict of energies computed for a given QM method.
         Keys are pairs of (atom, charge) and values are energy values
 
     Returns

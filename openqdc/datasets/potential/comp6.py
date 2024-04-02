@@ -1,6 +1,7 @@
 from os.path import join as p_join
-from openqdc.methods import PotentialMethod
+
 from openqdc.datasets.base import BaseDataset, read_qc_archive_h5
+from openqdc.methods import PotentialMethod
 
 
 class COMP6(BaseDataset):
@@ -28,13 +29,13 @@ class COMP6(BaseDataset):
     __forces_unit__ = "kcal/mol/bohr"
 
     __energy_methods__ = [
-        PotentialMethod.WB97X_6_31G_D, # "wb97x/6-31g*",
-        PotentialMethod.B3LYP_D3_BJ_DEF2_TZVP, # "b3lyp-d3(bj)/def2-tzvp",
-        PotentialMethod.B3LYP_DEF2_TZVP, # "b3lyp/def2-tzvp",
-        PotentialMethod.HF_DEF2_TZVP, # "hf/def2-tzvp",
-        PotentialMethod.PBE_D3_BJ_DEF2_TZVP, # "pbe-d3(bj)/def2-tzvp",
-        PotentialMethod.PBE_DEF2_TZVP, # "pbe/def2-tzvp",
-        PotentialMethod.SVWN_DEF2_TZVP  # "svwn/def2-tzvp",
+        PotentialMethod.WB97X_6_31G_D,  # "wb97x/6-31g*",
+        PotentialMethod.B3LYP_D3_BJ_DEF2_TZVP,  # "b3lyp-d3(bj)/def2-tzvp",
+        PotentialMethod.B3LYP_DEF2_TZVP,  # "b3lyp/def2-tzvp",
+        PotentialMethod.HF_DEF2_TZVP,  # "hf/def2-tzvp",
+        PotentialMethod.PBE_D3_BJ_DEF2_TZVP,  # "pbe-d3(bj)/def2-tzvp",
+        PotentialMethod.PBE_DEF2_TZVP,  # "pbe/def2-tzvp",
+        PotentialMethod.SVWN_DEF2_TZVP,  # "svwn/def2-tzvp",
     ]
 
     energy_target_names = [

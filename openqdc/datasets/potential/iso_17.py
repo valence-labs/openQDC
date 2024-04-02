@@ -1,6 +1,7 @@
 from os.path import join as p_join
-from openqdc.methods import PotentialMethod
+
 from openqdc.datasets.base import BaseDataset, read_qc_archive_h5
+from openqdc.methods import PotentialMethod
 
 
 class ISO17(BaseDataset):
@@ -24,7 +25,7 @@ class ISO17(BaseDataset):
     __name__ = "iso_17"
 
     __energy_methods__ = [
-        PotentialMethod.PBE_DEF2_TZVP, # "pbe/def2-tzvp", 
+        PotentialMethod.PBE_DEF2_TZVP,  # "pbe/def2-tzvp",
     ]
 
     energy_target_names = [

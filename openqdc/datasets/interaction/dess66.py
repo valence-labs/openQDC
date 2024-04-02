@@ -5,8 +5,9 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 from tqdm import tqdm
-from openqdc.methods import InteractionMethod, InterEnergyType
+
 from openqdc.datasets.interaction.base import BaseInteractionDataset
+from openqdc.methods import InteractionMethod, InterEnergyType
 from openqdc.utils.constants import ATOM_TABLE
 
 
@@ -47,7 +48,7 @@ class DESS66(BaseInteractionDataset):
         InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
         InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
         InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
-        InteractionMethod.SAPT0_AUG_CC_PWCVXZ
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
     ]
 
     __energy_type__ = [

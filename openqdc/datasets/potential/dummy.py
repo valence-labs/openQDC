@@ -1,6 +1,7 @@
 import numpy as np
-from openqdc.methods import PotentialMethod
+
 from openqdc.datasets.base import BaseDataset
+from openqdc.methods import PotentialMethod
 from openqdc.utils.constants import NOT_DEFINED
 
 

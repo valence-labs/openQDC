@@ -1,8 +1,9 @@
 from os.path import join as p_join
 
 import numpy as np
-from openqdc.methods import PotentialMethod
+
 from openqdc.datasets.base import BaseDataset
+from openqdc.methods import PotentialMethod
 from openqdc.raws.fetch import decompress_tar_gz
 
 trajectories = {

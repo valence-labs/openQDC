@@ -2,8 +2,9 @@ import os
 from typing import Dict, List
 
 import numpy as np
-from openqdc.methods import InteractionMethod, InterEnergyType
+
 from openqdc.datasets.interaction.base import BaseInteractionDataset
+from openqdc.methods import InteractionMethod, InterEnergyType
 from openqdc.utils.constants import ATOM_TABLE
 
 

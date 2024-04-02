@@ -1,6 +1,7 @@
 from os.path import join as p_join
-from openqdc.methods import PotentialMethod
+
 from openqdc.datasets.base import BaseDataset, read_qc_archive_h5
+from openqdc.methods import PotentialMethod
 
 
 class SolvatedPeptides(BaseDataset):

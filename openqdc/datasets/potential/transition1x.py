@@ -2,8 +2,9 @@ from os.path import join as p_join
 
 import numpy as np
 from tqdm import tqdm
-from openqdc.methods import PotentialMethod
+
 from openqdc.datasets.base import BaseDataset
+from openqdc.methods import PotentialMethod
 from openqdc.utils.constants import NB_ATOMIC_FEATURES
 from openqdc.utils.io import load_hdf5_file
 
