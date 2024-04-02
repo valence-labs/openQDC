@@ -7,7 +7,6 @@ import numpy as np
 from loguru import logger
 
 from openqdc.utils.io import get_local_cache, load_pkl, save_pkl
-from openqdc.utils.regressor import Regressor
 
 
 class StatisticsResults:
@@ -91,6 +90,7 @@ class AbstractStatsCalculator(ABC):
     def __init__(
         self,
         name: str,
+        energy_type: Optional[str] = None,
         force_recompute: bool = False,
         energies: Optional[np.ndarray] = None,
         n_atoms: Optional[np.ndarray] = None,
@@ -101,6 +101,7 @@ class AbstractStatsCalculator(ABC):
         forces: Optional[np.ndarray] = None,
     ):
         self.name = name
+        self.energy_type = energy_type
         self.force_recompute = force_recompute
         self.energies = energies
         self.forces = forces
@@ -130,6 +131,7 @@ class AbstractStatsCalculator(ABC):
         return cls(
             name=dataset.__name__,
             force_recompute=recompute,
+            energy_type=dataset.energy_type,
             energies=dataset.data["energies"],
             forces=dataset.data["forces"],
             n_atoms=dataset.data["n_atoms"],
@@ -226,8 +228,11 @@ class FormationEnergyInterface(AbstractStatsCalculator, ABC):
     def _compute(self, energy) -> EnergyStatistics:
         raise NotImplementedError
 
+    def __str__(self) -> str:
+        return f"{self.__class__.__name__.lower()}_{self.energy_type.lower()}"
 
-class FormationStats(FormationEnergyInterface):
+
+class FormationEnergyStats(FormationEnergyInterface):
     def _compute(self, energy) -> EnergyStatistics:
         formation_E_mean = np.nanmean(energy, axis=0)
         formation_E_std = np.nanstd(energy, axis=0)
@@ -239,27 +244,3 @@ class PerAtomFormationEnergyStats(FormationEnergyInterface):
         inter_E_mean = np.nanmean((energy / self.n_atoms[:, None]), axis=0)
         inter_E_std = np.nanstd((energy / self.n_atoms[:, None]), axis=0)
         return EnergyStatistics(mean=inter_E_mean, std=inter_E_std)
-
-
-class RegressionStats(AbstractStatsCalculator):
-    def _compute_linear_e0s(self):
-        try:
-            regressor = Regressor.from_openqdc_dataset(self, **self.regressor_kwargs)
-            E0s, cov = regressor.solve()
-        except np.linalg.LinAlgError:
-            logger.warning(f"Failed to compute E0s using {regressor.solver_type} regression.")
-            raise np.linalg.LinAlgError
-        self._set_lin_atom_species_dict(E0s, cov, regressor.numbers)
-
-    def _set_lin_atom_species_dict(self, E0s, covs, zs):
-        atomic_energies_dict = {}
-        for i, z in enumerate(zs):
-            atomic_energies_dict[z] = E0s[i]
-        self.linear_e0s = atomic_energies_dict
-
-    def _set_linear_e0s(self):
-        new_e0s = [np.zeros((max(self.numbers) + 1, 21)) for _ in range(len(self.__energy_methods__))]
-        for z, e0 in self.linear_e0s.items():
-            for i in range(len(self.__energy_methods__)):
-                new_e0s[i][z, :] = e0[i]
-        self.new_e0s = np.array(new_e0s)

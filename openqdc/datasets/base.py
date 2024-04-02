@@ -16,7 +16,7 @@ from openqdc.datasets.energies import AtomEnergies
 from openqdc.datasets.properties import DatasetPropertyMixIn
 from openqdc.datasets.statistics import (
     ForcesCalculatorStats,
-    FormationStats,
+    FormationEnergyStats,
     PerAtomFormationEnergyStats,
     StatisticManager,
     TotalEnergyStats,
@@ -101,6 +101,7 @@ class BaseDataset(DatasetPropertyMixIn):
         self.recompute_statistics = recompute_statistics
         self.regressor_kwargs = regressor_kwargs
         self.energy_type = energy_type
+        self.refit_e0s = recompute_statistics or overwrite_local_cache
         if not self.is_preprocessed():
             raise DatasetNotAvailableError(self.__name__)
         else:
@@ -127,7 +128,7 @@ class BaseDataset(DatasetPropertyMixIn):
             self.recompute_statistics or overwrite_local_cache,
             ForcesCalculatorStats,
             TotalEnergyStats,
-            FormationStats,
+            FormationEnergyStats,
             PerAtomFormationEnergyStats,
         )
         self.statistics.run_calculators()

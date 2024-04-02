@@ -46,6 +46,10 @@ class IsolatedEnInterface(ABC):
         self.data = data
         self._post_init()
 
+    @property
+    def refit(self):
+        return self.data.refit_e0s
+
     @abstractmethod
     def _post_init(self):
         pass
@@ -73,7 +77,7 @@ class PhysicalEnergy(IsolatedEnInterface):
 
 class RegressionEnergy(IsolatedEnInterface):
     def _post_init(self):
-        if not self.attempt_load():
+        if not self.attempt_load() or self.refit:
             self.regressor = Regressor.from_openqdc_dataset(self.data, **self.kwargs)
             E0s, cov = self._compute_regression_e0s()
             self._set_lin_atom_species_dict(E0s, cov)

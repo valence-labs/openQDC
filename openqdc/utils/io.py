@@ -14,6 +14,7 @@ from ase.atoms import Atoms
 from fsspec.callbacks import TqdmCallback
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
+from loguru import logger
 from rdkit.Chem import MolFromXYZFile
 from tqdm import tqdm
 
@@ -138,10 +139,9 @@ def check_file_gcs(path) -> bool:
 
 def save_pkl(file, path):
     """Saves pkl file"""
-    print(f"Saving file at {path}")
+    logger.info(f"Saving file at {path}")
     with fsspec.open(path, "wb") as fp:  # Pickling
         pkl.dump(file, fp)
-    print("Done")
 
 
 def load_pkl_gcs(path, check=True):
