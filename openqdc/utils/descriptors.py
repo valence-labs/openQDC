@@ -1,31 +1,32 @@
 from abc import ABC, abstractmethod
 from typing import Any, List
 
+import datamol as dm
 import numpy as np
 from ase.atoms import Atoms
 from numpy import ndarray
 
 from openqdc.utils.io import to_atoms
 from openqdc.utils.package_utils import requires_package
-import datamol as dm 
+
 
 class Descriptor(ABC):
     """
-    Base class for all descriptors. 
+    Base class for all descriptors.
     Descriptors are used to transform 3D atomic structures into feature vectors.
     """
-    
+
     _model: Any
 
     def __init__(self, *, species: List[str], **kwargs) -> None:
-        """ 
+        """
         Parameters
         ----------
         species : List[str]
             List of chemical species for the descriptor embedding.
         kwargs : dict
             Additional keyword arguments to be passed to the descriptor model.
-        """ 
+        """
         self.chemical_species = species
         self._model = self.instantiate_model(**kwargs)
 
@@ -37,11 +38,11 @@ class Descriptor(ABC):
     @abstractmethod
     def instantiate_model(self, **kwargs) -> Any:
         """
-        Instantiate the descriptor model with the provided kwargs parameters 
+        Instantiate the descriptor model with the provided kwargs parameters
         and return it. The model will be stored in the _model attribute.
         If a package is required to instantiate the model, it should be checked
         using the requires_package decorator or in the method itself.
-        
+
         Parameters
         ----------
         kwargs : dict
@@ -53,19 +54,18 @@ class Descriptor(ABC):
     def calculate(self, atoms: Atoms, **kwargs) -> ndarray:
         """
         Calculate the descriptor for a single given Atoms object.
-        
+
         Parameters
         ----------
         atoms : Atoms
             Ase Atoms object to calculate the descriptor for.
-            
+
         Returns
         -------
         ndarray
             ndarray containing the descriptor values
         """
         raise NotImplementedError
-    
 
     def fit_transform(self, atoms: List[Atoms], **kwargs) -> List[ndarray]:
         """Parallelized version of the calculate method.
@@ -75,32 +75,27 @@ class Descriptor(ABC):
             List of Ase Atoms object to calculate the descriptor for.
         kwargs : dict
             Additional keyword arguments to be passed to the datamol parallelized model.
-            
+
         Returns
         -------
         List[ndarray]
             List of ndarray containing the descriptor values
         """
 
-        descr_values = dm.parallelized(self.calculate,
-                                       atoms,
-                                       scheduler="threads",
-                                       **kwargs)
+        descr_values = dm.parallelized(self.calculate, atoms, scheduler="threads", **kwargs)
         return descr_values
-        
-        
 
     def from_xyz(self, positions: np.ndarray, atomic_numbers: np.ndarray) -> ndarray:
         """
         Calculate the descriptor from positions and atomic numbers of a single structure.
-        
+
         Parameters
         ----------
         positions : np.ndarray (n_atoms, 3)
             Positions of the chemical structure.
         atomic_numbers : np.ndarray (n_atoms,)
             Atomic numbers of the chemical structure.
-            
+
         Returns
         -------
         ndarray
@@ -117,7 +112,6 @@ class Descriptor(ABC):
 
 
 class SOAP(Descriptor):
-
     @requires_package("dscribe")
     def instantiate_model(self, **kwargs):
         from dscribe.descriptors import SOAP as SOAPModel
@@ -154,7 +148,7 @@ class ACSF(SOAP):
 
         r_cut = kwargs.pop("r_cut", 5.0)
         g2_params = kwargs.pop("g2_params", [[1, 1], [1, 2], [1, 3]])
-        g3_params = kwargs.pop("g3_params", [1,1,2,-1])
+        g3_params = kwargs.pop("g3_params", [1, 1, 2, -1])
         g4_params = kwargs.pop("g4_params", [[1, 1, 1], [1, 2, 1], [1, 1, -1], [1, 2, -1]])
         g5_params = kwargs.pop("g5_params", [[1, 2, -1], [1, 1, 1], [-1, 1, 1], [1, 2, 1]])
         periodic = kwargs.pop("periodic", False)
@@ -191,15 +185,16 @@ class MBTR(SOAP):
             normalize_gaussians=normalize_gaussians,
             normalization=normalization,
         )
-        
+
     def calculate(self, atoms: Atoms, **kwargs) -> ndarray:
         return self.model.create(atoms, **kwargs)
+
 
 # Dynamic mapping of available descriptors
 AVAILABLE_DESCRIPTORS = {
     str_name.lower(): cls
     for str_name, cls in globals().items()
-    if isinstance(cls, type) and issubclass(cls, Descriptor) and str_name != "Descriptor" # Exclude the base class 
+    if isinstance(cls, type) and issubclass(cls, Descriptor) and str_name != "Descriptor"  # Exclude the base class
 }
 
 
