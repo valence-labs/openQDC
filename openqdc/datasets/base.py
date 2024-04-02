@@ -482,8 +482,7 @@ class BaseDataset(DatasetPropertyMixIn):
             )
         # cycle trough dict to convert units
         for key in selected_stats:
-            print(key)
-            if key == "ForcesCalculatorStats":
+            if key.lower() == str(ForcesCalculatorStats):
                 for key2 in selected_stats[key]:
                     if key2 != "components":
                         selected_stats[key][key2] = self.convert_forces(selected_stats[key][key2])
@@ -526,10 +525,9 @@ class BaseDataset(DatasetPropertyMixIn):
         subset = self.data["subset"][idx]
         e0s = self.__isolated_atom_energies__[..., z, c + shift].T
         formation_energies = energies - e0s.sum(axis=0)
+        forces = None
         if "forces" in self.data:
             forces = np.array(self.data["forces"][p_start:p_end], dtype=np.float32)
-        else:
-            forces = None
         return Bunch(
             positions=positions,
             atomic_numbers=z,
