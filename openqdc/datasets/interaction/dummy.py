@@ -112,11 +112,3 @@ class NBodyDummy(DummyInteraction):
             }
         )
         self.data = data  # update data
-
-
-if __name__ == "__main__":
-    dataset = NBodyDummy()
-    print(dataset[0])
-    import ipdb
-
-    ipdb.set_trace()
