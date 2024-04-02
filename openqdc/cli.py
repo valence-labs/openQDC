@@ -20,10 +20,11 @@ def exist_dataset(dataset):
 
 
 def format_entry(empty_dataset):
-    if len(empty_dataset.__energy_methods__) > 10:
-        entry = ",".join(empty_dataset.__energy_methods__[:10]) + "..."
+    energy_methods = [str(x) for x in empty_dataset.__energy_methods__]
+    if len(energy_methods) > 10:
+        entry = ",".join(energy_methods[:10]) + "..."
     else:
-        entry = ",".join(empty_dataset.__energy_methods__[:10])
+        entry = ",".join(energy_methods[:10])
     return entry
 
 
