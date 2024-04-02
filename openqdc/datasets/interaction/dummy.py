@@ -1,10 +1,10 @@
 import numpy as np
 
-from openqdc.datasets.interaction.base import BaseDataset
+from openqdc.datasets.interaction.base import BaseInteractionDataset
 from openqdc.utils.constants import NOT_DEFINED
 
 
-class DummyInteraction(BaseDataset):
+class DummyInteraction(BaseInteractionDataset):
     """
     Dummy Interaction Dataset for Testing
     """
