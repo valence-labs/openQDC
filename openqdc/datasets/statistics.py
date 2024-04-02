@@ -10,7 +10,10 @@ from openqdc.utils.io import get_local_cache, load_pkl, save_pkl
 
 
 class StatisticsResults:
-    pass
+    """
+    Parent class to statistics results
+    to provide general methods.
+    """
 
     def to_dict(self):
         return asdict(self)
@@ -25,12 +28,22 @@ class StatisticsResults:
 
 @dataclass
 class EnergyStatistics(StatisticsResults):
+    """
+    Dataclass for energy related statistics
+    """
+
     mean: Optional[np.ndarray]
     std: Optional[np.ndarray]
 
 
 @dataclass
 class ForceComponentsStatistics(StatisticsResults):
+    """
+    Dataclass for force statistics related to the x,y,z components
+    mean,std,rms are supposed to be 2d arrays related to the x,y,z components
+    of the forces
+    """
+
     mean: Optional[np.ndarray]
     std: Optional[np.ndarray]
     rms: Optional[np.ndarray]
@@ -38,6 +51,10 @@ class ForceComponentsStatistics(StatisticsResults):
 
 @dataclass
 class ForceStatistics(StatisticsResults):
+    """
+    Dataclass for force statistics
+    """
+
     mean: Optional[np.ndarray]
     std: Optional[np.ndarray]
     components: ForceComponentsStatistics
@@ -45,46 +62,66 @@ class ForceStatistics(StatisticsResults):
 
 class StatisticManager:
     """
-    The Context defines the interface of interest to clients. It also maintains
-    a reference to an instance of a State subclass, which represents the current
-    state of the Context.
+    Manager class to share the state between all
+    the statistic calculators
     """
 
     _state = {}
     _results = {}
 
-    def __init__(self, dataset, recompute: bool = False, *statistic_calculators):
+    def __init__(self, dataset, recompute: bool = False, *statistic_calculators: "AbstractStatsCalculator"):
         self._statistic_calculators = [
             statistic_calculators.from_openqdc_dataset(dataset, recompute)
             for statistic_calculators in statistic_calculators
         ]
 
     @property
-    def state(self):
+    def state(self) -> dict:
+        """
+        Return the dictionary state of the manager
+        """
         return self._state
 
-    def get_state(self, key):
+    def get_state(self, key: Optional[str] = None):
+        """
+        key : str, default = None
+        Return the value of the key in the state dictionary
+            or the whole state dictionary if key is None
+        """
         if key is None:
             return self._state
         return self._state.get(key, None)
 
-    def has_state(self, key):
+    def has_state(self, key: str):
+        """
+        Check is state has key
+        """
         return key in self._state
 
-    def get_results(self, as_dict=False):
-        results = self._results
-        if as_dict:
-            results = {k: v.to_dict() for k, v in results.items()}
-        return results
+    def get_results(self):
+        """
+        Aggregate results from all the calculators
+        """
+        return self._results
 
     def run_calculators(self):
+        """
+        Run the saved calculators and save the results in the manager
+        """
         for calculator in self._statistic_calculators:
             calculator.run(self.state)
             self._results[calculator.__class__.__name__] = calculator.result
 
 
 class AbstractStatsCalculator(ABC):
-    deps = []
+    """
+    Abstract class that defines the interface for all
+    the calculators object and the methods to
+    compute the statistics
+    """
+
+    # State Dependencies of the calculator to skip part of the calculation
+    state_dependency = []
     name = None
 
     def __init__(
@@ -124,10 +161,16 @@ class AbstractStatsCalculator(ABC):
 
     @property
     def root(self):
+        """
+        Path to the dataset folder
+        """
         return p_join(get_local_cache(), self.name)
 
     @classmethod
     def from_openqdc_dataset(cls, dataset, recompute: bool = False):
+        """
+        Create a calculator object from a dataset object
+        """
         return cls(
             name=dataset.__name__,
             force_recompute=recompute,
@@ -143,12 +186,23 @@ class AbstractStatsCalculator(ABC):
 
     @abstractmethod
     def compute(self) -> StatisticsResults:
+        """
+        Abstract method to compute the statistics.
+        Must return a StatisticsResults object and be implemented
+        in all the childs
+        """
         raise NotImplementedError
 
     def save_statistics(self) -> None:
+        """
+        Save statistics file to the dataset folder as a pkl file
+        """
         save_pkl(self.result.to_dict(), self.preprocess_path)
 
     def attempt_load(self) -> bool:
+        """
+        Load precomputed statistics file and return the success of the operation
+        """
         try:
             self.result = load_pkl(self.preprocess_path)
             return True
@@ -156,17 +210,38 @@ class AbstractStatsCalculator(ABC):
             logger.warning(f"Statistics for {str(self)} not found. Computing...")
             return False
 
-    def _setup_deps(self, state) -> None:
+    def _setup_deps(self, state: dict) -> None:
+        """
+        Check if the dependencies of calculators are satisfied
+        from the state object and set the attributes of the calculator
+        to skip part of the calculation
+        """
         self.state = state
-        self.deps_satisfied = all([dep in state for dep in self.deps])
+        self.deps_satisfied = all([dep in state for dep in self.state_dependency])
         if self.deps_satisfied:
-            for dep in self.deps:
+            for dep in self.state_dependency:
                 setattr(self, dep, state[dep])
 
-    def write_state(self, update) -> None:
+    def write_state(self, update: dict) -> None:
+        """
+        Write/update the state dictionary with the update dictionary
+
+        update:
+            dictionary containing the update to the state
+        """
         self.state.update(update)
 
-    def run(self, state) -> None:
+    def run(self, state: dict) -> None:
+        """
+        Main method to run the calculator.
+        Setup the dependencies from the state dictionary
+        Check if the statistics are already computed and load them or
+        recompute them
+        Save the statistics in the correct folder
+
+        state:
+            dictionary containing the state of the calculator
+        """
         self._setup_deps(state)
         if self.force_recompute or not self.attempt_load():
             self.result = self.compute()
@@ -177,6 +252,10 @@ class AbstractStatsCalculator(ABC):
 
 
 class ForcesCalculatorStats(AbstractStatsCalculator):
+    """
+    Forces statistics calculator class
+    """
+
     def compute(self) -> ForceStatistics:
         if not self.has_forces:
             return ForceStatistics(
@@ -194,6 +273,10 @@ class ForcesCalculatorStats(AbstractStatsCalculator):
 
 
 class TotalEnergyStats(AbstractStatsCalculator):
+    """
+    Total Energy statistics calculator class
+    """
+
     def compute(self):
         converted_energy_data = self.energies
         total_E_mean = np.nanmean(converted_energy_data, axis=0)
@@ -202,10 +285,18 @@ class TotalEnergyStats(AbstractStatsCalculator):
 
 
 class FormationEnergyInterface(AbstractStatsCalculator, ABC):
-    deps = ["formation_energy"]
+    """
+    Formation Energy interface calculator class.
+    Define the use of the dependency formation_energy in the
+    compute method
+    """
+
+    state_dependency = ["formation_energy"]
 
     def compute(self) -> EnergyStatistics:
+        # if the state has not the dependency satisfied
         if not self.deps_satisfied:
+            # run the main computation
             from openqdc.utils.atomization_energies import IsolatedAtomEnergyFactory
 
             splits_idx = self.position_idx_range[:, 1]
@@ -219,8 +310,9 @@ class FormationEnergyInterface(AbstractStatsCalculator, ABC):
                 c[1:] = c[1:] - c[:-1]
                 E.append(converted_energy_data[:, i] - c)
         else:
-            E = getattr(self, self.deps[0])
-        self.write_state({self.deps[0]: E})
+            # if the dependency is satisfied get the dependency
+            E = getattr(self, self.state_dependency[0])
+        self.write_state({self.state_dependency[0]: E})
         E = np.array(E).T
         return self._compute(E)
 
@@ -229,10 +321,16 @@ class FormationEnergyInterface(AbstractStatsCalculator, ABC):
         raise NotImplementedError
 
     def __str__(self) -> str:
+        # override the __str__ method to add the energy type to the name
+        # to differentiate between formation and regression type
         return f"{self.__class__.__name__.lower()}_{self.energy_type.lower()}"
 
 
 class FormationEnergyStats(FormationEnergyInterface):
+    """
+    Formation Energy  calculator class.
+    """
+
     def _compute(self, energy) -> EnergyStatistics:
         formation_E_mean = np.nanmean(energy, axis=0)
         formation_E_std = np.nanstd(energy, axis=0)
@@ -240,6 +338,10 @@ class FormationEnergyStats(FormationEnergyInterface):
 
 
 class PerAtomFormationEnergyStats(FormationEnergyInterface):
+    """
+    Per atom Formation Energy  calculator class.
+    """
+
     def _compute(self, energy) -> EnergyStatistics:
         inter_E_mean = np.nanmean((energy / self.n_atoms[:, None]), axis=0)
         inter_E_std = np.nanstd((energy / self.n_atoms[:, None]), axis=0)

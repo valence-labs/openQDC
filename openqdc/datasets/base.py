@@ -84,7 +84,7 @@ class BaseDataset(DatasetPropertyMixIn):
             Distance unit to convert dataset to. Supported units: ["ang", "nm", "bohr"]
         energy_type
             Type of isolated atom energy to use for the dataset. Default: "formation"
-            Supported types: ["formation", "regression"]
+            Supported types: ["formation", "regression", "null"]
         overwrite_local_cache
             Whether to overwrite the locally cached dataset.
         cache_dir
@@ -125,13 +125,14 @@ class BaseDataset(DatasetPropertyMixIn):
         # if self.recompute_statistics or overwrite_local_cache:
         self.statistics = StatisticManager(
             self,
-            self.recompute_statistics or overwrite_local_cache,
+            self.recompute_statistics or overwrite_local_cache,  # check if we need to recompute
+            # Add the common statistics (Forces, TotalE, FormE, PerAtomE)
             ForcesCalculatorStats,
             TotalEnergyStats,
             FormationEnergyStats,
             PerAtomFormationEnergyStats,
         )
-        self.statistics.run_calculators()
+        self.statistics.run_calculators()  # run the calculators
 
     @classmethod
     def no_init(cls):
@@ -238,6 +239,7 @@ class BaseDataset(DatasetPropertyMixIn):
     @property
     def e0s_dispatcher(self):
         if not hasattr(self, "_e0s_dispatcher"):
+            # Automatically fetch/compute formation or regression energies
             self._e0s_dispatcher = AtomEnergies(self, **self.regressor_kwargs)
         return self._e0s_dispatcher
 
@@ -455,10 +457,7 @@ class BaseDataset(DatasetPropertyMixIn):
 
     def get_statistics(self, return_none: bool = True):
         """
-        Get the statistics of the dataset.
-        normalization : str, optional
-            Type of energy, by default "formation", must be one of ["formation", "total",
-            "residual_regression", "per_atom_formation", "per_atom_residual_regression"]
+        Get the converted statistics of the dataset.
         return_none : bool, optional
             Whether to return None if the statistics for the forces are not available, by default True
             Otherwise, the statistics for the forces are set to 0.0
@@ -470,7 +469,7 @@ class BaseDataset(DatasetPropertyMixIn):
         if not return_none:
             selected_stats.update(
                 {
-                    "ForceStatistics": {
+                    "ForcesCalculatorStats": {
                         "mean": np.array([0.0]),
                         "std": np.array([0.0]),
                         "components": {
@@ -483,7 +482,8 @@ class BaseDataset(DatasetPropertyMixIn):
             )
         # cycle trough dict to convert units
         for key in selected_stats:
-            if key == "forces":
+            print(key)
+            if key == "ForcesCalculatorStats":
                 for key2 in selected_stats[key]:
                     if key2 != "components":
                         selected_stats[key][key2] = self.convert_forces(selected_stats[key][key2])

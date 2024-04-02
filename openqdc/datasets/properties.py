@@ -6,6 +6,11 @@ from openqdc.utils.exceptions import StatisticsNotAvailableError
 
 
 class DatasetPropertyMixIn:
+    """
+    Mixin class for BaseDataset class to add
+    properties that are common to all datasets.
+    """
+
     @property
     def atoms_per_molecules(self):
         try:
