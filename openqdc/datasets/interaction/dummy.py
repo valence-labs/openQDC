@@ -1,10 +1,10 @@
 import numpy as np
 
-from openqdc.datasets.interaction.base import BaseDataset
+from openqdc.datasets.interaction.base import BaseInteractionDataset
 from openqdc.utils.constants import NOT_DEFINED
 
 
-class DummyInteraction(BaseDataset):
+class DummyInteraction(BaseInteractionDataset):
     """
     Dummy Interaction Dataset for Testing
     """
@@ -91,3 +91,32 @@ class DummyInteraction(BaseDataset):
 
     def __len__(self):
         return 9999
+
+
+class NBodyDummy(DummyInteraction):
+    """Dummy Interaction Dataset with N-body interactions
+
+    Note: we sample N for N-body from 3 to 5 randomly.
+    """
+
+    def setup_dummy(self):
+        super().setup_dummy()
+        data = self.data
+        n_body = np.random.randint(3, 5)  # choose > 2 since default assumes 2
+        n_atoms = data["n_atoms"]
+        data.update(
+            {
+                "n_atoms_first": np.array(
+                    [[np.linspace(0, n_atoms[i], n_body + 1).astype(np.int32)[1:-1]] for i in range(len(self))]
+                )
+            }
+        )
+        self.data = data  # update data
+
+
+if __name__ == "__main__":
+    dataset = NBodyDummy()
+    print(dataset[0])
+    import ipdb
+
+    ipdb.set_trace()
