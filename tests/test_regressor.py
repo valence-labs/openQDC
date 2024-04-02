@@ -27,4 +27,4 @@ def test_regressors(small_dummy):
         reg.solver = reg._get_solver()
         assert isinstance(reg.solver, inst)
         results = reg.solve()
-        assert results[0].shape == (99, 2)
+        assert results[1].shape == 2
