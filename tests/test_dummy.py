@@ -2,7 +2,10 @@
 
 import pytest
 
-from openqdc.datasets.interaction.dummy import DummyInteraction  # noqa: E402
+from openqdc.datasets.interaction.dummy import (  # noqa: E402
+    DummyInteraction,
+    NBodyDummyInteraction,
+)
 from openqdc.datasets.potential.dummy import Dummy  # noqa: E402
 from openqdc.utils.atomization_energies import (
     ISOLATED_ATOM_ENERGIES,
@@ -20,7 +23,12 @@ def dummy_interaction():
     return DummyInteraction()
 
 
-@pytest.mark.parametrize("cls", ["dummy", "dummy_interaction"])
+@pytest.fixture
+def n_body_dummy_interaction():
+    return NBodyDummyInteraction()
+
+
+@pytest.mark.parametrize("cls", ["dummy", "dummy_interaction", "n_body_dummy_interaction"])
 def test_basic(cls, request):
     # init
     ds = request.getfixturevalue(cls)
@@ -32,7 +40,7 @@ def test_basic(cls, request):
     assert ds[0]
 
 
-@pytest.mark.parametrize("cls", ["dummy", "dummy_interaction"])
+@pytest.mark.parametrize("cls", ["dummy", "dummy_interaction", "n_body_dummy_interaction"])
 @pytest.mark.parametrize(
     "normalization",
     [
@@ -48,6 +56,12 @@ def test_stats(cls, normalization, request):
 
     stats = ds.get_statistics(normalization=normalization)
     assert stats is not None
+
+
+def test_n_atoms_first(n_body_dummy_interaction):
+    item = n_body_dummy_interaction[0]
+    # shaped (1, n_body - 1)
+    assert item["n_atoms_first"].shape[1] == 4
 
 
 def test_isolated_atom_factory():

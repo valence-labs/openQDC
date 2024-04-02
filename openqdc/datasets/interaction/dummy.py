@@ -93,7 +93,7 @@ class DummyInteraction(BaseInteractionDataset):
         return 9999
 
 
-class NBodyDummy(DummyInteraction):
+class NBodyDummyInteraction(DummyInteraction):
     """Dummy Interaction Dataset with N-body interactions
 
     Note: we sample N for N-body from 3 to 5 randomly.
@@ -102,7 +102,7 @@ class NBodyDummy(DummyInteraction):
     def setup_dummy(self):
         super().setup_dummy()
         data = self.data
-        n_body = np.random.randint(3, 5)  # choose > 2 since default assumes 2
+        n_body = 5  # random value
         n_atoms = data["n_atoms"]
         data.update(
             {
