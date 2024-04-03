@@ -1,5 +1,5 @@
 import ast
-import os
+import pkgutil
 from typing import Tuple
 
 import numpy as np
@@ -9,10 +9,8 @@ from openqdc.utils.constants import ATOMIC_NUMBERS, MAX_ATOMIC_NUMBER, MAX_CHARG
 
 EF_KEY = Tuple[str, int]
 
-
-with open(os.path.join(os.path.dirname(__file__), "atom_energies.txt")) as fd:
-    atom_energy_collection = ast.literal_eval(fd.read())
-    atom_energy_collection = {k.lower(): v for k, v in atom_energy_collection.items()}
+atom_energy_collection = ast.literal_eval(pkgutil.get_data(__name__, "atom_energies.txt").decode("utf-8"))
+atom_energy_collection = {k.lower(): v for k, v in atom_energy_collection.items()}
 
 
 def to_e_matrix(atom_energies: dict) -> np.ndarray:
