@@ -1,0 +1,3 @@
+# QM Methods
+
+::: openqdc.methods

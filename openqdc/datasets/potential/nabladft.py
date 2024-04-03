@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 from openqdc.datasets.base import BaseDataset
+from openqdc.methods import PotentialMethod
 from openqdc.utils.molecule import z_to_formula
 from openqdc.utils.package_utils import requires_package
 
@@ -65,7 +66,9 @@ class NablaDFT(BaseDataset):
     """
 
     __name__ = "nabladft"
-    __energy_methods__ = ["wb97x-d/def2-svp"]
+    __energy_methods__ = [
+        PotentialMethod.WB97X_D_DEF2_SVP,
+    ]  # "wb97x-d/def2-svp"
 
     energy_target_names = ["wb97x-d/def2-svp"]
     __energy_unit__ = "hartree"

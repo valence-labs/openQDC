@@ -1,6 +1,7 @@
 from typing import Dict, List
 
 from openqdc.datasets.interaction.des370k import DES370K
+from openqdc.methods import InteractionMethod, InterEnergyType
 
 
 class DES5M(DES370K):
@@ -16,20 +17,37 @@ class DES5M(DES370K):
 
     __name__ = "des5m_interaction"
     __energy_methods__ = [
-        "mp2/cc-pvqz",
-        "mp2/cc-pvtz",
-        "mp2/cbs",
-        "ccsd(t)/nn",  # nn
-        "sapt0/aug-cc-pwcvxz",
-        "sapt0/aug-cc-pwcvxz_es",
-        "sapt0/aug-cc-pwcvxz_ex",
-        "sapt0/aug-cc-pwcvxz_exs2",
-        "sapt0/aug-cc-pwcvxz_ind",
-        "sapt0/aug-cc-pwcvxz_exind",
-        "sapt0/aug-cc-pwcvxz_disp",
-        "sapt0/aug-cc-pwcvxz_exdisp_os",
-        "sapt0/aug-cc-pwcvxz_exdisp_ss",
-        "sapt0/aug-cc-pwcvxz_delta_HF",
+        InteractionMethod.MP2_CC_PVQZ,
+        InteractionMethod.MP2_CC_PVTZ,
+        InteractionMethod.MP2_CBS,
+        InteractionMethod.CCSD_T_NN,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+    ]
+
+    __energy_type__ = [
+        InterEnergyType.TOTAL,
+        InterEnergyType.TOTAL,
+        InterEnergyType.TOTAL,
+        InterEnergyType.TOTAL,
+        InterEnergyType.TOTAL,
+        InterEnergyType.ES,
+        InterEnergyType.EX,
+        InterEnergyType.EX_S2,
+        InterEnergyType.IND,
+        InterEnergyType.EX_IND,
+        InterEnergyType.DISP,
+        InterEnergyType.EX_DISP_OS,
+        InterEnergyType.EX_DISP_SS,
+        InterEnergyType.DELTA_HF,
     ]
 
     energy_target_names = [

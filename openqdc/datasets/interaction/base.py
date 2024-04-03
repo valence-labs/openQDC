@@ -1,17 +1,21 @@
+import os
 import pickle as pkl
 from os.path import join as p_join
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import numpy as np
+from ase.io.extxyz import write_extxyz
 from loguru import logger
 from sklearn.utils import Bunch
 
 from openqdc.datasets.base import BaseDataset
-from openqdc.utils.atomization_energies import IsolatedAtomEnergyFactory
-from openqdc.utils.io import push_remote
+from openqdc.utils.constants import MAX_CHARGE
+from openqdc.utils.io import push_remote, to_atoms
 
 
 class BaseInteractionDataset(BaseDataset):
+    __energy_type__ = []
+
     @property
     def pkl_data_keys(self):
         return ["name", "subset", "n_atoms", "n_atoms_first"]
@@ -32,7 +36,7 @@ class BaseInteractionDataset(BaseDataset):
         return res
 
     def __getitem__(self, idx: int):
-        shift = IsolatedAtomEnergyFactory.max_charge
+        shift = MAX_CHARGE
         p_start, p_end = self.data["position_idx_range"][idx]
         input = self.data["atomic_inputs"][p_start:p_end]
         z, c, positions, energies = (
@@ -81,3 +85,19 @@ class BaseInteractionDataset(BaseDataset):
         with open(local_path, "wb") as f:
             pkl.dump(data_dict, f)
         push_remote(local_path, overwrite=True)
+
+    def get_ase_atoms(self, idx: int):
+        entry = self[idx]
+        at = to_atoms(entry["positions"], entry["atomic_numbers"])
+        at.info["n_atoms"] = entry["n_atoms_first"]
+        return at
+
+    def save_xyz(self, idx: int, path: Optional[str] = None):
+        """
+        Save the entry at index idx as an extxyz file.
+        """
+        if path is None:
+            path = os.getcwd()
+        at = self.get_ase_atoms(idx)
+        n_atoms = at.info.pop("n_atoms")
+        write_extxyz(p_join(path, f"mol_{idx}.xyz"), at, plain=True, comment=str(n_atoms))

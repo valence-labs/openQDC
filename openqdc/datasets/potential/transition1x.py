@@ -4,6 +4,7 @@ import numpy as np
 from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
+from openqdc.methods import PotentialMethod
 from openqdc.utils.constants import NB_ATOMIC_FEATURES
 from openqdc.utils.io import load_hdf5_file
 
@@ -56,7 +57,8 @@ class Transition1X(BaseDataset):
     __name__ = "transition1x"
 
     __energy_methods__ = [
-        "wb97x/6-31G(d)",
+        PotentialMethod.WB97X_6_31G_D
+        # "wb97x/6-31G(d)",
     ]
 
     energy_target_names = [

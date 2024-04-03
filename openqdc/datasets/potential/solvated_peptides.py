@@ -1,6 +1,8 @@
 from os.path import join as p_join
 
-from openqdc.datasets.base import BaseDataset, read_qc_archive_h5
+from openqdc.datasets.base import BaseDataset
+from openqdc.methods import PotentialMethod
+from openqdc.utils import read_qc_archive_h5
 
 
 class SolvatedPeptides(BaseDataset):
@@ -24,7 +26,8 @@ class SolvatedPeptides(BaseDataset):
     __name__ = "solvated_peptides"
 
     __energy_methods__ = [
-        "revpbe-d3(bj)/def2-tzvp",
+        PotentialMethod.REVPBE_D3_BJ_DEF2_TZVP
+        # "revpbe-d3(bj)/def2-tzvp",
     ]
 
     energy_target_names = [

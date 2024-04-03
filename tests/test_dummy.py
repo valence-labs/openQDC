@@ -4,10 +4,6 @@ import pytest
 
 from openqdc.datasets.interaction.dummy import DummyInteraction  # noqa: E402
 from openqdc.datasets.potential.dummy import Dummy  # noqa: E402
-from openqdc.utils.atomization_energies import (
-    ISOLATED_ATOM_ENERGIES,
-    IsolatedAtomEnergyFactory,
-)
 
 
 @pytest.fixture
@@ -50,9 +46,9 @@ def test_stats(cls, normalization, request):
     assert stats is not None
 
 
-def test_isolated_atom_factory():
-    res = IsolatedAtomEnergyFactory.get("mp2/cc-pvdz")
-    assert len(res) == len(ISOLATED_ATOM_ENERGIES["mp2"]["cc-pvdz"])
-    res = IsolatedAtomEnergyFactory.get("PM6")
-    assert len(res) == len(ISOLATED_ATOM_ENERGIES["pm6"])
-    assert isinstance(res[("H", 0)], float)
+# def test_is_at_factory():
+#     res = IsolatedAtomEnergyFactory.get("mp2/cc-pvdz")
+#     assert len(res) == len(ISOLATED_ATOM_ENERGIES["mp2"]["cc-pvdz"])
+#     res = IsolatedAtomEnergyFactory.get("PM6")
+#     assert len(res) == len(ISOLATED_ATOM_ENERGIES["pm6"])
+#     assert isinstance(res[("H", 0)], float)
