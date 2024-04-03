@@ -18,7 +18,8 @@ from gcsfs import GCSFileSystem
 from rdkit.Chem import MolFromXYZFile
 from tqdm import tqdm
 
-from openqdc.utils.molecule import atom_table, z_to_formula
+from openqdc.utils.constants import ATOM_TABLE
+from openqdc.utils.molecule import z_to_formula
 
 gcp_filesys = fsspec.filesystem("gs")  # entry point for google bucket (need gsutil permission)
 gcp_filesys_public = fsspec.filesystem("https")  # public API for download
@@ -265,7 +266,7 @@ def extract_entry(
     energy_target_names: List[str],
     force_target_names: Optional[List[str]] = None,
 ) -> Dict[str, np.ndarray]:
-    x = np.array([atom_table.GetAtomicNumber(s) for s in df["symbols"][i]])
+    x = np.array([ATOM_TABLE.GetAtomicNumber(s) for s in df["symbols"][i]])
     xs = np.stack((x, np.zeros_like(x)), axis=-1)
     positions = df["geometry"][i].reshape((-1, 3))
     energies = np.array([df[k][i] for k in energy_target_names])

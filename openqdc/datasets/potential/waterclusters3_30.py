@@ -5,8 +5,8 @@ import numpy as np
 from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
-from openqdc.utils.constants import MAX_ATOMIC_NUMBER
-from openqdc.utils.molecule import atom_table
+from openqdc.methods import PotentialMethod
+from openqdc.utils.constants import ATOM_TABLE, MAX_ATOMIC_NUMBER
 
 # we could use ase.io.read to read extxyz files
 
@@ -19,7 +19,7 @@ def content_to_xyz(content, n_waters):
         s = StringIO(content)
         d = np.loadtxt(s, skiprows=2, dtype="str")
         z, positions = d[:, 0], d[:, 1:].astype(np.float32)
-        z = np.array([atom_table.GetAtomicNumber(s) for s in z])
+        z = np.array([ATOM_TABLE.GetAtomicNumber(s) for s in z])
         xs = np.stack((z, np.zeros_like(z)), axis=-1)
         e = float(tmp[1].strip().split(" ")[-1])
     except Exception:
@@ -74,7 +74,7 @@ class WaterClusters(BaseDataset):
     __distance_unit__ = "ang"
     __forces_unit__ = "kcal/mol/ang"
 
-    __energy_methods__ = ["ttm2.1-f"]
+    __energy_methods__ = [PotentialMethod.TTM2_1_F]  # "ttm2.1-f"
     energy_target_names = ["TTM2.1-F Potential"]
 
     def read_raw_entries(self):

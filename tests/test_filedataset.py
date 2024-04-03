@@ -3,6 +3,7 @@ from io import StringIO
 import pytest
 
 from openqdc.datasets.io import XYZDataset
+from openqdc.methods.enums import PotentialMethod
 
 
 @pytest.fixture
@@ -21,7 +22,7 @@ C      0.11595206       5.01309919      -0.78672481       0.00000000       0.057
 
 
 def test_xyz_dataset(xyz_filelike):
-    ds = XYZDataset(path=[xyz_filelike], level_of_theory="b3lyp/6-31g*")
+    ds = XYZDataset(path=[xyz_filelike], level_of_theory=PotentialMethod.B3LYP_6_31G_D)
     assert len(ds) == 2
     assert len(ds.numbers) == 3
     assert ds[1].energies == -20.0

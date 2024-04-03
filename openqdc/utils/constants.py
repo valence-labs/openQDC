@@ -1,5 +1,10 @@
 from typing import Final, List
 
+import numpy as np
+from rdkit import Chem
+
+MAX_CHARGE: Final[int] = 6
+
 NB_ATOMIC_FEATURES: Final[int] = 5
 
 MAX_ATOMIC_NUMBER: Final[int] = 119
@@ -25,3 +30,7 @@ NOT_DEFINED = {
         "rms": None,
     },
 }
+
+ATOM_TABLE = Chem.GetPeriodicTable()
+ATOM_SYMBOLS = np.array(["X"] + [ATOM_TABLE.GetElementSymbol(z) for z in range(1, 118)])
+ATOMIC_NUMBERS = {symbol: Z for Z, symbol in enumerate(ATOM_SYMBOLS)}

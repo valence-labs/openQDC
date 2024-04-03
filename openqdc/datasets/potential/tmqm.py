@@ -6,7 +6,8 @@ import pandas as pd
 from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
-from openqdc.utils.molecule import atom_table
+from openqdc.methods import PotentialMethod
+from openqdc.utils.constants import ATOM_TABLE
 
 
 def content_to_xyz(content, e_map):
@@ -21,7 +22,7 @@ def content_to_xyz(content, e_map):
     s = StringIO(content)
     d = np.loadtxt(s, skiprows=2, dtype="str")
     z, positions = d[:, 0], d[:, 1:].astype(np.float32)
-    z = np.array([atom_table.GetAtomicNumber(s) for s in z])
+    z = np.array([ATOM_TABLE.GetAtomicNumber(s) for s in z])
     xs = np.stack((z, np.zeros_like(z)), axis=-1)
     e = e_map[code]
 
@@ -64,7 +65,7 @@ class TMQM(BaseDataset):
 
     __name__ = "tmqm"
 
-    __energy_methods__ = ["tpssh/def2-tzvp"]
+    __energy_methods__ = [PotentialMethod.TPSSH_DEF2_TZVP]  # "tpssh/def2-tzvp"]
 
     energy_target_names = ["TPSSh/def2TZVP level"]
 
