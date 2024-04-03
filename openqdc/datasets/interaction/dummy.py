@@ -1,6 +1,7 @@
 import numpy as np
 
 from openqdc.datasets.interaction.base import BaseInteractionDataset
+from openqdc.methods import InteractionMethod
 from openqdc.utils.constants import NOT_DEFINED
 
 
@@ -10,7 +11,7 @@ class DummyInteraction(BaseInteractionDataset):
     """
 
     __name__ = "dummy"
-    __energy_methods__ = ["Method1", "Method2"]
+    __energy_methods__ = [InteractionMethod.SAPT0_AUG_CC_PVDDZ, InteractionMethod.CCSD_T_CC_PVDZ]
     __force_mask__ = [False, True]
     __energy_unit__ = "kcal/mol"
     __distance_unit__ = "ang"

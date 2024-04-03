@@ -424,8 +424,13 @@ class BaseDataset:
 
         # save smiles and subset
         local_path = p_join(self.preprocess_path, "props.pkl")
-        for key in self.pkl_data_keys:
-            data_dict[key] = np.unique(data_dict[key], return_inverse=True)
+        # assert that required keys are present in data_dict
+        assert all([key in data_dict for key in self.pkl_data_keys])
+        for key in data_dict:
+            if key not in self.data_keys:
+                x = data_dict[key]
+                x[x == None] = -1  # noqa
+                data_dict[key] = np.unique(data_dict[key], return_inverse=True)
 
         with open(local_path, "wb") as f:
             pkl.dump(data_dict, f)
@@ -461,7 +466,10 @@ class BaseDataset:
         pull_locally(filename, overwrite=overwrite_local_cache)
         with open(filename, "rb") as f:
             tmp = pkl.load(f)
-            for key in self.pkl_data_keys:
+            all_pkl_keys = set(tmp.keys()) - set(self.data_keys)
+            # assert required pkl_keys are present in all_pkl_keys
+            assert all([key in all_pkl_keys for key in self.pkl_data_keys])
+            for key in all_pkl_keys:
                 x = tmp.pop(key)
                 if len(x) == 2:
                     self.data[key] = x[0][x[1]]

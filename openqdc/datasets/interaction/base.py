@@ -1,16 +1,14 @@
 import os
-import pickle as pkl
 from os.path import join as p_join
 from typing import Dict, List, Optional
 
 import numpy as np
 from ase.io.extxyz import write_extxyz
-from loguru import logger
 from sklearn.utils import Bunch
 
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils.constants import MAX_CHARGE
-from openqdc.utils.io import push_remote, to_atoms
+from openqdc.utils.io import to_atoms
 
 
 class BaseInteractionDataset(BaseDataset):
@@ -64,27 +62,6 @@ class BaseInteractionDataset(BaseDataset):
             forces=forces,
             n_atoms_first=n_atoms_first,
         )
-
-    def save_preprocess(self, data_dict):
-        # save memmaps
-        logger.info("Preprocessing data and saving it to cache.")
-        for key in self.data_keys:
-            local_path = p_join(self.preprocess_path, f"{key}.mmap")
-            out = np.memmap(local_path, mode="w+", dtype=data_dict[key].dtype, shape=data_dict[key].shape)
-            out[:] = data_dict.pop(key)[:]
-            out.flush()
-            push_remote(local_path, overwrite=True)
-
-        # save all other keys in props.pkl
-        local_path = p_join(self.preprocess_path, "props.pkl")
-        for key in self.pkl_data_keys:
-            x = data_dict[key]
-            x[x == None] = -1  # noqa
-            data_dict[key] = np.unique(x, return_inverse=True)
-
-        with open(local_path, "wb") as f:
-            pkl.dump(data_dict, f)
-        push_remote(local_path, overwrite=True)
 
     def get_ase_atoms(self, idx: int):
         entry = self[idx]
