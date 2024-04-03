@@ -1,8 +1,13 @@
-from enum import Enum, StrEnum
+from enum import Enum
 
 from loguru import logger
 
 from openqdc.methods.atom_energies import atom_energy_collection, to_e_matrix
+
+
+class StrEnum(str, Enum):
+    def __str__(self):
+        return self.value
 
 
 class QmType(StrEnum):
@@ -15,15 +20,15 @@ class QmType(StrEnum):
 
 
 class InterEnergyType(StrEnum):  # InteractionEnergyType
-    ES = ("electrostatic",)
-    EX = ("exchange",)
-    EX_S2 = ("exchange S^2",)
-    IND = ("induction",)
-    TOTAL = ("total",)
-    EX_IND = ("exchange-induction",)
-    DISP = ("dispersion",)
-    EX_DISP_OS = ("exchange dispersion opposite-spin",)
-    EX_DISP_SS = ("exchange dispersion same-spin",)
+    ES = "electrostatic"
+    EX = "exchange"
+    EX_S2 = "exchange S^2"
+    IND = "induction"
+    TOTAL = "total"
+    EX_IND = "exchange-induction"
+    DISP = "dispersion"
+    EX_DISP_OS = "exchange dispersion opposite-spin"
+    EX_DISP_SS = "exchange dispersion same-spin"
     DELTA_HF = "Delta HF vs SAPT0"
 
 
