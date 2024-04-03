@@ -7,6 +7,7 @@ from .io import (
     load_json,
     load_pkl,
     makedirs,
+    read_qc_archive_h5,
     save_pkl,
     set_cache_dir,
 )
@@ -24,4 +25,5 @@ __all__ = [
     "get_local_cache",
     "get_remote_cache",
     "get_conversion",
+    "read_qc_archive_h5",
 ]

@@ -3,6 +3,7 @@
 import os
 import pickle as pkl
 from copy import deepcopy
+from functools import partial
 from itertools import compress
 from os.path import join as p_join
 from typing import Dict, List, Optional, Union
@@ -16,7 +17,6 @@ from tqdm import tqdm
 
 from openqdc.utils.constants import (
     ATOM_SYMBOLS,
-    ATOM_TABLE,
     MAX_CHARGE,
     NB_ATOMIC_FEATURES,
     NOT_DEFINED,
@@ -31,58 +31,14 @@ from openqdc.utils.io import (
     copy_exists,
     dict_to_atoms,
     get_local_cache,
-    load_hdf5_file,
     load_pkl,
     pull_locally,
     push_remote,
     set_cache_dir,
 )
-from openqdc.utils.molecule import z_to_formula
 from openqdc.utils.package_utils import requires_package
 from openqdc.utils.regressor import Regressor
 from openqdc.utils.units import get_conversion
-
-
-def _extract_entry(
-    df: pd.DataFrame,
-    i: int,
-    subset: str,
-    energy_target_names: List[str],
-    force_target_names: Optional[List[str]] = None,
-) -> Dict[str, np.ndarray]:
-    x = np.array([ATOM_TABLE.GetAtomicNumber(s) for s in df["symbols"][i]])
-    xs = np.stack((x, np.zeros_like(x)), axis=-1)
-    positions = df["geometry"][i].reshape((-1, 3))
-    energies = np.array([df[k][i] for k in energy_target_names])
-
-    res = dict(
-        name=np.array([df["name"][i]]),
-        subset=np.array([subset if subset is not None else z_to_formula(x)]),
-        energies=energies.reshape((1, -1)).astype(np.float32),
-        atomic_inputs=np.concatenate((xs, positions), axis=-1, dtype=np.float32),
-        n_atoms=np.array([x.shape[0]], dtype=np.int32),
-    )
-    if force_target_names is not None and len(force_target_names) > 0:
-        forces = np.zeros((positions.shape[0], 3, len(force_target_names)), dtype=np.float32)
-        forces += np.nan
-        for j, k in enumerate(force_target_names):
-            if len(df[k][i]) != 0:
-                forces[:, :, j] = df[k][i].reshape((-1, 3))
-        res["forces"] = forces
-
-    return res
-
-
-def read_qc_archive_h5(
-    raw_path: str, subset: str, energy_target_names: List[str], force_target_names: List[str]
-) -> List[Dict[str, np.ndarray]]:
-    """Extracts data from the HDF5 archive file."""
-    data = load_hdf5_file(raw_path)
-    data_t = {k2: data[k1][k2][:] for k1 in data.keys() for k2 in data[k1].keys()}
-
-    n = len(data_t["molecule_id"])
-    samples = [_extract_entry(data_t, i, subset, energy_target_names, force_target_names) for i in tqdm(range(n))]
-    return samples
 
 
 class BaseDataset:
@@ -174,6 +130,14 @@ class BaseDataset:
         For backward compatibility. To be removed in the future.
         """
         return self.force_methods
+
+    @property
+    def energy_methods(self):
+        return [str(i) for i in self.__energy_methods__]
+
+    @property
+    def force_methods(self):
+        return list(compress(self.energy_methods, self.force_mask))
 
     def _convert_data(self):
         logger.info(
@@ -379,17 +343,9 @@ class BaseDataset:
         self.new_e0s = f(self.new_e0s)
 
     @property
-    def energy_methods(self):
-        return self.__class__.__energy_methods__
-
-    @property
-    def force_methods(self):
-        return list(compress(self.energy_methods, self.force_mask))
-
-    @property
     def force_mask(self):
         if len(self.__class__.__force_mask__) == 0:
-            self.__class__.__force_mask__ = [False] * len(self.energy_methods)
+            self.__class__.__force_mask__ = [False] * len(self.__energy_methods__)
         return self.__class__.__force_mask__
 
     def _set_units(self, en, ds):
@@ -406,11 +362,11 @@ class BaseDataset:
             self.__class__.__fn_forces__ = get_conversion(old_en + "/" + old_ds, self.__forces_unit__)
 
     def _set_isolated_atom_energies(self):
-        if self.energy_methods is None:
+        if self.__energy_methods__ is None:
             logger.error("No energy methods defined for this dataset.")
         f = get_conversion("hartree", self.__energy_unit__)
         self.__isolated_atom_energies__ = f(
-            np.array([en_method.atom_energies_matrix for en_method in self.energy_methods])
+            np.array([en_method.atom_energies_matrix for en_method in self.__energy_methods__])
         )
 
     def convert_energy(self, x):
@@ -533,16 +489,28 @@ class BaseDataset:
             res = self.collate_list(entries)
             self.save_preprocess(res)
 
-    def save_xyz(self, idx: int, path: Optional[str] = None, ext=True):
+    def save_xyz(self, idx: int, energy_method: int = 0, path: Optional[str] = None, ext=True):
         """
         Save the entry at index idx as an extxyz file.
         """
         if path is None:
             path = os.getcwd()
-        at = self.get_ase_atoms(idx, ext=ext)
-        write_extxyz(p_join(path, f"mol_{idx}.xyz"), at)
+        at = self.get_ase_atoms(idx, ext=ext, energy_method=energy_method)
+        write_extxyz(p_join(path, f"mol_{idx}.xyz"), at, plain=not ext)
 
-    def get_ase_atoms(self, idx: int, ext=True):
+    def to_xyz(self, energy_method: int = 0, path: Optional[str] = None):
+        """
+        Save dataset as single xyz file (extended xyz format).
+        """
+        with open(p_join(path if path else os.getcwd(), f"{self.__name__}.xyz"), "w") as f:
+            for atoms in tqdm(
+                self.as_iter(atoms=True, energy_method=energy_method),
+                total=len(self),
+                desc=f"Saving {self.__name__} as xyz file",
+            ):
+                write_extxyz(f, atoms, append=True)
+
+    def get_ase_atoms(self, idx: int, energy_method: int = 0, ext=True):
         """
         Get the ASE atoms object for the entry at index idx.
 
@@ -554,8 +522,7 @@ class BaseDataset:
             Whether to include additional informations
         """
         entry = self[idx]
-        # _ = entry.pop("forces")
-        at = dict_to_atoms(entry, ext=ext)
+        at = dict_to_atoms(entry, ext=ext, energy_method=energy_method)
         return at
 
     @requires_package("dscribe")
@@ -644,7 +611,7 @@ class BaseDataset:
             datum["idxs"] = idxs
         return datum
 
-    def as_iter(self, atoms: bool = False):
+    def as_iter(self, atoms: bool = False, energy_method: int = 0):
         """
         Return the dataset as an iterator.
 
@@ -653,7 +620,9 @@ class BaseDataset:
         atoms : bool, optional
             Whether to return the items as ASE atoms object, by default False
         """
-        func = self.get_ase_atoms if atoms else self.__getitem__
+
+        func = partial(self.get_ase_atoms, energy_method=energy_method) if atoms else self.__getitem__
+
         for i in range(len(self)):
             yield func(i)
 

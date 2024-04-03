@@ -1,7 +1,8 @@
 from os.path import join as p_join
 
-from openqdc.datasets.base import BaseDataset, read_qc_archive_h5
+from openqdc.datasets.base import BaseDataset
 from openqdc.methods import PotentialMethod
+from openqdc.utils import read_qc_archive_h5
 
 
 class SN2RXN(BaseDataset):

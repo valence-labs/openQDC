@@ -178,6 +178,7 @@ class Functional(Enum):
     WB97X_D3 = "wb97x", CORRECTION.D3
     X3LYP_VWN5 = "x3lyp", CORRECTION.VWN5
     XLYP = "xlyp"
+    NONE = ""
 
     def __init__(self, functional: str, correction: BasisSet = CORRECTION.NONE):
         self.functional = functional
@@ -218,7 +219,7 @@ class QmMethod(Enum):
         raise NotImplementedError()
 
 
-class PotentialMethod(QmMethod):  # SPLIT FOR INTERACTIO ENERGIES AND FIX MD17
+class PotentialMethod(QmMethod):  # SPLIT FOR INTERACTIO ENERGIES AND FIX MD1
     B1LYP_VWN5_DZP = Functional.B1LYP_VWN5, BasisSet.DZP
     B1LYP_VWN5_SZ = Functional.B1LYP_VWN5, BasisSet.SZ
     B1LYP_VWN5_TZP = Functional.B1LYP_VWN5, BasisSet.TZP
@@ -469,6 +470,7 @@ class PotentialMethod(QmMethod):  # SPLIT FOR INTERACTIO ENERGIES AND FIX MD17
     XLYP_DZP = Functional.XLYP, BasisSet.DZP
     XLYP_SZ = Functional.XLYP, BasisSet.SZ
     XLYP_TZP = Functional.XLYP, BasisSet.TZP
+    NONE = Functional.NONE, BasisSet.NONE
 
     @property
     def atom_energies_dict(self):

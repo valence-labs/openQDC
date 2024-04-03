@@ -1,14 +1,16 @@
+import os
 import pickle as pkl
 from os.path import join as p_join
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import numpy as np
+from ase.io.extxyz import write_extxyz
 from loguru import logger
 from sklearn.utils import Bunch
 
 from openqdc.datasets.base import BaseDataset
 from openqdc.utils.constants import MAX_CHARGE, NB_ATOMIC_FEATURES
-from openqdc.utils.io import pull_locally, push_remote
+from openqdc.utils.io import pull_locally, push_remote, to_atoms
 
 
 class BaseInteractionDataset(BaseDataset):
@@ -126,3 +128,19 @@ class BaseInteractionDataset(BaseDataset):
 
         for key in self.data:
             logger.info(f"Loaded {key} with shape {self.data[key].shape}, dtype {self.data[key].dtype}")
+
+    def get_ase_atoms(self, idx: int):
+        entry = self[idx]
+        at = to_atoms(entry["positions"], entry["atomic_numbers"])
+        at.info["n_atoms"] = entry["n_atoms_first"]
+        return at
+
+    def save_xyz(self, idx: int, path: Optional[str] = None):
+        """
+        Save the entry at index idx as an extxyz file.
+        """
+        if path is None:
+            path = os.getcwd()
+        at = self.get_ase_atoms(idx)
+        n_atoms = at.info.pop("n_atoms")
+        write_extxyz(p_join(path, f"mol_{idx}.xyz"), at, plain=True, comment=str(n_atoms))
