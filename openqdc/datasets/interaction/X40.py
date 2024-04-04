@@ -7,7 +7,8 @@ from loguru import logger
 
 from openqdc.datasets.interaction.base import BaseInteractionDataset
 from openqdc.datasets.interaction.L7 import get_loader
-from openqdc.utils.molecule import atom_table
+from openqdc.methods import InteractionMethod, InterEnergyType
+from openqdc.utils.constants import ATOM_TABLE
 
 
 class X40(BaseInteractionDataset):
@@ -29,12 +30,15 @@ class X40(BaseInteractionDataset):
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
     __energy_methods__ = [
-        "CCSD(T)/CBS",
-        "MP2/CBS",
-        "dCCSD(T)/haDZ",
-        "dCCSD(T)/haTZ",
-        "MP2.5/CBS(aDZ)",
+        InteractionMethod.CCSD_T_CBS,  # "CCSD(T)/CBS",
+        InteractionMethod.MP2_CBS,  # "MP2/CBS",
+        InteractionMethod.DCCSDT_HA_DZ,  # "dCCSD(T)/haDZ",
+        InteractionMethod.DCCSDT_HA_TZ,  # "dCCSD(T)/haTZ",
+        InteractionMethod.MP2_5_CBS_ADZ,  # "MP2.5/CBS(aDZ)",
     ]
+    __energy_type__ = [
+        InterEnergyType.TOTAL,
+    ] * 5
 
     energy_target_names = []
 
@@ -62,7 +66,7 @@ class X40(BaseInteractionDataset):
             energies = np.array([energies], dtype=np.float32)
             pos = np.array(lines[1:])[:, 1:].astype(np.float32)
             elems = np.array(lines[1:])[:, 0]
-            atomic_nums = np.expand_dims(np.array([atom_table.GetAtomicNumber(x) for x in elems]), axis=1)
+            atomic_nums = np.expand_dims(np.array([ATOM_TABLE.GetAtomicNumber(x) for x in elems]), axis=1)
             natoms0 = n_atoms_first[0]
             natoms1 = n_atoms[0] - natoms0
             charges = np.expand_dims(np.array([charge0] * natoms0 + [charge1] * natoms1), axis=1)

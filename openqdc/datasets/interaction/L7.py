@@ -6,7 +6,8 @@ import yaml
 from loguru import logger
 
 from openqdc.datasets.interaction.base import BaseInteractionDataset
-from openqdc.utils.molecule import atom_table
+from openqdc.methods import InteractionMethod, InterEnergyType
+from openqdc.utils.constants import ATOM_TABLE
 
 
 class DataItemYAMLObj:
@@ -66,15 +67,17 @@ class L7(BaseInteractionDataset):
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
     __energy_methods__ = [
-        "CSD(T) | QCISD(T)",
-        "DLPNO-CCSD(T)",
-        "MP2/CBS",
-        "MP2C/CBS",
-        "fixed",
-        "DLPNO-CCSD(T0)",
-        "LNO-CCSD(T)",
-        "FN-DMC",
+        InteractionMethod.QCISDT_CBS,  # "QCISD(T)/CBS",
+        InteractionMethod.DLPNO_CCSDT,  # "DLPNO-CCSD(T)",
+        InteractionMethod.MP2_CBS,  # "MP2/CBS",
+        InteractionMethod.MP2C_CBS,  # "MP2C/CBS",
+        InteractionMethod.FIXED,  # "fixed", TODO: we should remove this level of theory because unless we have a pro
+        InteractionMethod.DLPNO_CCSDT0,  # "DLPNO-CCSD(T0)",
+        InteractionMethod.LNO_CCSDT,  # "LNO-CCSD(T)",
+        InteractionMethod.FN_DMC,  # "FN-DMC",
     ]
+
+    __energy_type__ = [InterEnergyType.TOTAL] * 8
 
     energy_target_names = []
 
@@ -102,7 +105,7 @@ class L7(BaseInteractionDataset):
             energies = np.array([energies], dtype=np.float32)
             pos = np.array(lines[1:])[:, 1:].astype(np.float32)
             elems = np.array(lines[1:])[:, 0]
-            atomic_nums = np.expand_dims(np.array([atom_table.GetAtomicNumber(x) for x in elems]), axis=1)
+            atomic_nums = np.expand_dims(np.array([ATOM_TABLE.GetAtomicNumber(x) for x in elems]), axis=1)
             natoms0 = n_atoms_first[0]
             natoms1 = n_atoms[0] - natoms0
             charges = np.expand_dims(np.array([charge0] * natoms0 + [charge1] * natoms1), axis=1)
