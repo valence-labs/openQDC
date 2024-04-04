@@ -297,6 +297,10 @@ class BaseDataset(DatasetPropertyMixIn):
         self.__distance_unit__ = value
         self.__class__.__fn_distance__ = get_conversion(old_unit, value)
 
+    def set_array_format(self, format: str):
+        assert format in ["numpy", "torch", "jax"], f"Format {format} not supported."
+        self.array_format = format
+
     def read_raw_entries(self):
         raise NotImplementedError
 

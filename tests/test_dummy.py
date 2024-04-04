@@ -40,7 +40,16 @@ def test_array_format(format):
 
     ds = Dummy(array_format=format)
 
-    keys = ["positions", "atomic_numbers", "charges", "energies", "forces"]
+    keys = [
+        "positions",
+        "atomic_numbers",
+        "charges",
+        "energies",
+        "forces",
+        "e0",
+        "formation_energies",
+        "per_atom_formation_energies",
+    ]
 
     data = ds[0]
     for key in keys:
