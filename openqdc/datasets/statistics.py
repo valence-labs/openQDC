@@ -108,6 +108,7 @@ class StatisticManager:
         """
         Run the saved calculators and save the results in the manager
         """
+        logger.info("Processing dataset statistics")
         for calculator in self._statistic_calculators:
             calculator.run(self.state)
             self._results[calculator.__class__.__name__] = calculator.result
