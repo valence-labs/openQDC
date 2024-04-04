@@ -9,39 +9,40 @@ from os.path import join as p_join
 from typing import Dict, List, Optional, Union
 
 import numpy as np
-import pandas as pd
 from ase.io.extxyz import write_extxyz
 from loguru import logger
 from sklearn.utils import Bunch
 from tqdm import tqdm
 
-from openqdc.utils.constants import (
-    ATOM_SYMBOLS,
-    MAX_CHARGE,
-    NB_ATOMIC_FEATURES,
-    NOT_DEFINED,
-    POSSIBLE_NORMALIZATION,
+from openqdc.datasets.energies import AtomEnergies
+from openqdc.datasets.properties import DatasetPropertyMixIn
+from openqdc.datasets.statistics import (
+    ForcesCalculatorStats,
+    FormationEnergyStats,
+    PerAtomFormationEnergyStats,
+    StatisticManager,
+    TotalEnergyStats,
 )
+from openqdc.utils.constants import MAX_CHARGE, NB_ATOMIC_FEATURES
+from openqdc.utils.descriptors import get_descriptor
 from openqdc.utils.exceptions import (
     DatasetNotAvailableError,
-    NormalizationNotAvailableError,
     StatisticsNotAvailableError,
 )
 from openqdc.utils.io import (
     copy_exists,
     dict_to_atoms,
     get_local_cache,
-    load_pkl,
     pull_locally,
     push_remote,
     set_cache_dir,
 )
 from openqdc.utils.package_utils import requires_package
-from openqdc.utils.regressor import Regressor
+from openqdc.utils.regressor import Regressor  # noqa
 from openqdc.utils.units import get_conversion
 
 
-class BaseDataset:
+class BaseDataset(DatasetPropertyMixIn):
     """
     Base class for datasets in the openQDC package.
     """
@@ -50,8 +51,8 @@ class BaseDataset:
     force_target_names = []
     __energy_methods__ = []
     __force_mask__ = []
-
     __isolated_atom_energies__ = []
+
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
@@ -59,12 +60,12 @@ class BaseDataset:
     __fn_distance__ = lambda x: x
     __fn_forces__ = lambda x: x
     __average_nb_atoms__ = None
-    __stats__ = {}
 
     def __init__(
         self,
         energy_unit: Optional[str] = None,
         distance_unit: Optional[str] = None,
+        energy_type: str = "formation",
         overwrite_local_cache: bool = False,
         cache_dir: Optional[str] = None,
         recompute_statistics: bool = False,
@@ -82,6 +83,9 @@ class BaseDataset:
             Energy unit to convert dataset to. Supported units: ["kcal/mol", "kj/mol", "hartree", "ev"]
         distance_unit
             Distance unit to convert dataset to. Supported units: ["ang", "nm", "bohr"]
+        energy_type
+            Type of isolated atom energy to use for the dataset. Default: "formation"
+            Supported types: ["formation", "regression", "null"]
         overwrite_local_cache
             Whether to overwrite the locally cached dataset.
         cache_dir
@@ -97,6 +101,8 @@ class BaseDataset:
         self.data = None
         self.recompute_statistics = recompute_statistics
         self.regressor_kwargs = regressor_kwargs
+        self.energy_type = energy_type
+        self.refit_e0s = recompute_statistics or overwrite_local_cache
         if not self.is_preprocessed():
             raise DatasetNotAvailableError(self.__name__)
         else:
@@ -116,6 +122,19 @@ class BaseDataset:
         self._convert_data()
         self._set_isolated_atom_energies()
 
+    def _precompute_statistics(self, overwrite_local_cache: bool = False):
+        # if self.recompute_statistics or overwrite_local_cache:
+        self.statistics = StatisticManager(
+            self,
+            self.recompute_statistics or overwrite_local_cache,  # check if we need to recompute
+            # Add the common statistics (Forces, TotalE, FormE, PerAtomE)
+            ForcesCalculatorStats,
+            TotalEnergyStats,
+            FormationEnergyStats,
+            PerAtomFormationEnergyStats,
+        )
+        self.statistics.run_calculators()  # run the calculators
+
     @classmethod
     def no_init(cls):
         """
@@ -132,152 +151,36 @@ class BaseDataset:
         return self.force_methods
 
     @property
-    def energy_methods(self):
+    def energy_methods(self) -> List[str]:
+        """Return the string version of the energy methods"""
         return [str(i) for i in self.__energy_methods__]
+
+    @property
+    def force_mask(self):
+        if len(self.__class__.__force_mask__) == 0:
+            self.__class__.__force_mask__ = [False] * len(self.__energy_methods__)
+        return self.__class__.__force_mask__
 
     @property
     def force_methods(self):
         return list(compress(self.energy_methods, self.force_mask))
+
+    @property
+    def e0s_dispatcher(self):
+        if not hasattr(self, "_e0s_dispatcher"):
+            # Automatically fetch/compute formation or regression energies
+            self._e0s_dispatcher = AtomEnergies(self, **self.regressor_kwargs)
+        return self._e0s_dispatcher
 
     def _convert_data(self):
         logger.info(
             f"Converting {self.__name__} data to the following units:\n\
                      Energy: {self.energy_unit},\n\
                      Distance: {self.distance_unit},\n\
-                     Forces: {self.force_unit if self.force_methods else 'None'}"
+                     Forces: {self.force_unit if self.__force_methods__ else 'None'}"
         )
         for key in self.data_keys:
             self.data[key] = self._convert_on_loading(self.data[key], key)
-
-    def _set_lin_atom_species_dict(self, E0s, covs, zs):
-        atomic_energies_dict = {}
-        for i, z in enumerate(zs):
-            atomic_energies_dict[z] = E0s[i]
-        self.linear_e0s = atomic_energies_dict
-
-    def _compute_linear_e0s(self):
-        try:
-            regressor = Regressor.from_openqdc_dataset(self, **self.regressor_kwargs)
-            E0s, cov = regressor.solve()
-        except np.linalg.LinAlgError:
-            logger.warning(f"Failed to compute E0s using {regressor.solver_type} regression.")
-            raise np.linalg.LinAlgError
-        self._set_lin_atom_species_dict(E0s, cov, regressor.numbers)
-
-    def _precompute_statistics(self, overwrite_local_cache: bool = False):
-        local_path = p_join(self.preprocess_path, "stats.pkl")
-        if self.is_preprocessed_statistics() and not (overwrite_local_cache or self.recompute_statistics):
-            stats = load_pkl(local_path)
-            logger.info("Loaded precomputed statistics")
-        else:
-            logger.info("Precomputing relevant statistics")
-            (
-                inter_E_mean,
-                inter_E_std,
-                formation_E_mean,
-                formation_E_std,
-                total_E_mean,
-                total_E_std,
-            ) = self._precompute_E()
-            forces_dict = self._precompute_F()
-            stats = {
-                "formation": {"energy": {"mean": formation_E_mean, "std": formation_E_std}, "forces": forces_dict},
-                "inter": {"energy": {"mean": inter_E_mean, "std": inter_E_std}, "forces": forces_dict},
-                "total": {"energy": {"mean": total_E_mean, "std": total_E_std}, "forces": forces_dict},
-            }
-            with open(local_path, "wb") as f:
-                pkl.dump(stats, f)
-        self._compute_average_nb_atoms()
-        self.__stats__ = stats
-
-    def _compute_average_nb_atoms(self):
-        self.__average_nb_atoms__ = np.mean(self.data["n_atoms"])
-
-    def _set_linear_e0s(self):
-        new_e0s = [np.zeros((max(self.numbers) + 1, 21)) for _ in range(len(self.__energy_methods__))]
-        for z, e0 in self.linear_e0s.items():
-            for i in range(len(self.__energy_methods__)):
-                new_e0s[i][z, :] = e0[i]
-        self.new_e0s = np.array(new_e0s)
-
-    def _precompute_E(self):
-        splits_idx = self.data["position_idx_range"][:, 1]
-        s = np.array(self.data["atomic_inputs"][:, :2], dtype=int)
-        s[:, 1] += MAX_CHARGE
-        matrixs = [matrix[s[:, 0], s[:, 1]] for matrix in self.__isolated_atom_energies__]
-        REGRESSOR_SUCCESS = False
-        try:
-            self._compute_linear_e0s()
-            self._set_linear_e0s()
-            linear_matrixs = [matrix[s[:, 0], s[:, 1]] for matrix in self.new_e0s]
-            REGRESSOR_SUCCESS = True
-        except np.linalg.LinAlgError:
-            logger.warning(f"Failed to compute linear regression values for {self.__name__} dataset.")
-        converted_energy_data = self.data["energies"]
-        # calculation per molecule formation energy statistics
-        E, E_lin = [], []
-        for i, matrix in enumerate(matrixs):
-            c = np.cumsum(np.append([0], matrix))[splits_idx]
-            c[1:] = c[1:] - c[:-1]
-            E.append(converted_energy_data[:, i] - c)
-            if REGRESSOR_SUCCESS:
-                c = np.cumsum(np.append([0], linear_matrixs[i]))[splits_idx]
-                c[1:] = c[1:] - c[:-1]
-                E_lin.append(converted_energy_data[:, i] - c)
-        E = np.array(E).T
-        inter_E_mean = np.nanmean(E / self.data["n_atoms"][:, None], axis=0)
-        inter_E_std = np.nanstd(E / self.data["n_atoms"][:, None], axis=0)
-        formation_E_mean = np.nanmean(E, axis=0)
-        formation_E_std = np.nanstd(E, axis=0)
-        total_E_mean = np.nanmean(converted_energy_data, axis=0)
-        total_E_std = np.nanstd(converted_energy_data, axis=0)
-        statistics_dict = {
-            "formation": {"energy": {"mean": np.atleast_2d(formation_E_mean), "std": np.atleast_2d(formation_E_std)}},
-            "per_atom_formation": {"energy": {"mean": np.atleast_2d(inter_E_mean), "std": np.atleast_2d(inter_E_std)}},
-            "total": {"energy": {"mean": np.atleast_2d(total_E_mean), "std": np.atleast_2d(total_E_std)}},
-        }
-        if REGRESSOR_SUCCESS:
-            E_lin = np.array(E_lin).T
-            linear_E_mean = np.nanmean(E_lin, axis=0)
-            linear_E_std = np.nanstd(E_lin, axis=0)
-            linear_inter_E_mean = np.nanmean(E_lin / self.data["n_atoms"][:, None], axis=0)
-            linear_inter_E_std = np.nanstd(E_lin / self.data["n_atoms"][:, None], axis=0)
-            statistics_dict.update(
-                {
-                    "residual_regression": {
-                        "energy": {"mean": np.atleast_2d(linear_E_mean), "std": np.atleast_2d(linear_E_std)}
-                    },
-                    "per_atom_residual_regression": {
-                        "energy": {"mean": np.atleast_2d(linear_inter_E_mean), "std": np.atleast_2d(linear_inter_E_std)}
-                    },
-                    "linear_regression_values": self.linear_e0s,
-                }
-            )
-        return statistics_dict
-
-    def _precompute_F(self):
-        if len(self.force_methods) == 0:
-            return NOT_DEFINED
-        converted_force_data = self.convert_forces(self.data["forces"])
-        force_mean = np.nanmean(converted_force_data, axis=0)
-        force_std = np.nanstd(converted_force_data, axis=0)
-        force_rms = np.sqrt(np.nanmean(converted_force_data**2, axis=0))
-        return {
-            "mean": np.atleast_2d(force_mean.mean(axis=0)),
-            "std": np.atleast_2d(force_std.mean(axis=0)),
-            "components": {"rms": force_rms, "std": force_std, "mean": force_mean},
-        }
-
-    @property
-    def numbers(self):
-        if hasattr(self, "_numbers"):
-            return self._numbers
-        self._numbers = pd.unique(self.data["atomic_inputs"][..., 0]).astype(np.int32)
-        return self._numbers
-
-    @property
-    def chemical_species(self):
-        return np.array(ATOM_SYMBOLS)[self.numbers]
 
     @property
     def energy_unit(self):
@@ -304,7 +207,7 @@ class BaseDataset:
     @property
     def data_keys(self):
         keys = list(self.data_types.keys())
-        if len(self.force_methods) == 0:
+        if len(self.__force_methods__) == 0:
             keys.remove("forces")
         return keys
 
@@ -326,38 +229,13 @@ class BaseDataset:
             "forces": (-1, 3, len(self.force_target_names)),
         }
 
-    @property
-    def atoms_per_molecules(self):
-        try:
-            if hasattr(self, "_n_atoms"):
-                return self._n_atoms
-            self._n_atoms = self.data["n_atoms"]
-            return self._n_atoms
-        except:  # noqa
-            return None
-
-    def _set_new_e0s_unit(self, en):
-        old_en = self.energy_unit
-        en = en if en is not None else old_en
-        f = get_conversion(old_en, en)
-        self.new_e0s = f(self.new_e0s)
-
-    @property
-    def force_mask(self):
-        if len(self.__class__.__force_mask__) == 0:
-            self.__class__.__force_mask__ = [False] * len(self.__energy_methods__)
-        return self.__class__.__force_mask__
-
     def _set_units(self, en, ds):
         old_en, old_ds = self.energy_unit, self.distance_unit
         en = en if en is not None else old_en
         ds = ds if ds is not None else old_ds
-
-        # if en is None:
         self.set_energy_unit(en)
-        # if ds is not None:
         self.set_distance_unit(ds)
-        if self.force_methods:
+        if self.__force_methods__:
             self.__forces_unit__ = self.energy_unit + "/" + self.distance_unit
             self.__class__.__fn_forces__ = get_conversion(old_en + "/" + old_ds, self.__forces_unit__)
 
@@ -365,9 +243,7 @@ class BaseDataset:
         if self.__energy_methods__ is None:
             logger.error("No energy methods defined for this dataset.")
         f = get_conversion("hartree", self.__energy_unit__)
-        self.__isolated_atom_energies__ = f(
-            np.array([en_method.atom_energies_matrix for en_method in self.__energy_methods__])
-        )
+        self.__isolated_atom_energies__ = f(self.e0s_dispatcher.e0s_matrix)
 
     def convert_energy(self, x):
         return self.__class__.__fn_energy__(x)
@@ -480,9 +356,6 @@ class BaseDataset:
         predicats += [os.path.exists(p_join(self.preprocess_path, "props.pkl"))]
         return all(predicats)
 
-    def is_preprocessed_statistics(self):
-        return bool(copy_exists(p_join(self.preprocess_path, "stats.pkl")))
-
     def preprocess(self, overwrite=False):
         if overwrite or not self.is_preprocessed():
             entries = self.read_raw_entries()
@@ -525,90 +398,71 @@ class BaseDataset:
         at = dict_to_atoms(entry, ext=ext, energy_method=energy_method)
         return at
 
-    @requires_package("dscribe")
+    def subsample(
+        self, n_samples: Optional[Union[List[int], int, float]] = None, replace: bool = False, seed: int = 42
+    ):
+        np.random.seed(seed)
+        if n_samples is None:
+            return list(range(len(self)))
+        try:
+            if 0 < n_samples < 1:
+                n_samples = int(n_samples * len(self))
+            if isinstance(n_samples, int):
+                idxs = np.random.choice(len(self), size=n_samples, replace=replace)
+        except (ValueError, TypeError):  # list, set, np.ndarray
+            idxs = n_samples
+        return idxs
+
     @requires_package("datamol")
-    def soap_descriptors(
+    def calculate_descriptors(
         self,
-        n_samples: Optional[Union[List[int], int]] = None,
-        return_idxs: bool = True,
+        descriptor_name: str = "soap",
+        chemical_species: Optional[List[str]] = None,
+        n_samples: Optional[Union[List[int], int, float]] = None,
         progress: bool = True,
-        **soap_kwargs,
+        **descriptor_kwargs,
     ) -> Dict[str, np.ndarray]:
         """
-        Compute the SOAP descriptors for the dataset.
+        Compute the descriptors for the dataset.
 
         Parameters
         ----------
-        n_samples : Optional[Union[List[int],int]], optional
+        descriptor_name : str
+            Name of the descriptor to use. Supported descriptors are ["soap"]
+        chemical_species : Optional[List[str]], optional
+            List of chemical species to use for the descriptor computation, by default None.
+            If None, the chemical species of the dataset are used.
+        n_samples : Optional[Union[List[int],int, float]], optional
             Number of samples to use for the computation, by default None. If None, all the dataset is used.
             If a list of integers is provided, the descriptors are computed for each of the specified idx of samples.
-        return_idxs : bool, optional
-            Whether to return the indices of the samples used, by default True.
         progress : bool, optional
             Whether to show a progress bar, by default True.
-        **soap_kwargs : dict
-            Keyword arguments to pass to the SOAP descriptor.
-            By defaut, the following values are used:
-                - r_cut : 5.0
-                - n_max : 8
-                - l_max : 6
-                - average : "inner"
-                - periodic : False
-                - compression : {"mode" : "mu1nu1"}
+        **descriptor_kwargs : dict
+            Keyword arguments to pass to the descriptor instantiation of the model.
 
         Returns
         -------
         Dict[str, np.ndarray]
             Dictionary containing the following keys:
-                - soap : np.ndarray of shape (N, M) containing the SOAP descriptors for the dataset
-                - soap_kwargs : dict containing the keyword arguments used for the SOAP descriptor
+                - values : np.ndarray of shape (N, M) containing the descriptors for the dataset
                 - idxs : np.ndarray of shape (N,) containing the indices of the samples used
 
         """
         import datamol as dm
-        from dscribe.descriptors import SOAP
 
-        if n_samples is None:
-            idxs = list(range(len(self)))
-        elif isinstance(n_samples, int):
-            idxs = np.random.choice(len(self), size=n_samples, replace=False)
-        else:  # list, set, np.ndarray
-            idxs = n_samples
         datum = {}
-        r_cut = soap_kwargs.pop("r_cut", 5.0)
-        n_max = soap_kwargs.pop("n_max", 8)
-        l_max = soap_kwargs.pop("l_max", 6)
-        average = soap_kwargs.pop("average", "inner")
-        periodic = soap_kwargs.pop("periodic", False)
-        compression = soap_kwargs.pop("compression", {"mode": "mu1nu1"})
-        soap = SOAP(
-            species=self.chemical_species,
-            periodic=periodic,
-            r_cut=r_cut,
-            n_max=n_max,
-            l_max=l_max,
-            average=average,
-            compression=compression,
+        idxs = self.subsample(n_samples)
+        model = get_descriptor(descriptor_name.lower())(
+            species=self.chemical_species if chemical_species is None else chemical_species, **descriptor_kwargs
         )
-        datum["soap_kwargs"] = {
-            "r_cut": r_cut,
-            "n_max": n_max,
-            "l_max": l_max,
-            "average": average,
-            "compression": compression,
-            "species": self.chemical_species,
-            "periodic": periodic,
-            **soap_kwargs,
-        }
 
         def wrapper(idx):
             entry = self.get_ase_atoms(idx, ext=False)
-            return soap.create(entry, centers=entry.positions)
+            return model.calculate(entry)
 
         descr = dm.parallelized(wrapper, idxs, progress=progress, scheduler="threads", n_jobs=-1)
-        datum["soap"] = np.vstack(descr)
-        if return_idxs:
-            datum["idxs"] = idxs
+        datum["values"] = np.vstack(descr)
+        datum["idxs"] = idxs
         return datum
 
     def as_iter(self, atoms: bool = False, energy_method: int = 0):
@@ -626,39 +480,21 @@ class BaseDataset:
         for i in range(len(self)):
             yield func(i)
 
-    @property
-    def _stats(self):
-        return self.__stats__
-
-    @property
-    def average_n_atoms(self):
+    def get_statistics(self, return_none: bool = True):
         """
-        Average number of atoms in a molecule in the dataset.
-        """
-        if self.__average_nb_atoms__ is None:
-            raise StatisticsNotAvailableError(self.__name__)
-        return self.__average_nb_atoms__
-
-    def get_statistics(self, normalization: str = "formation", return_none: bool = True):
-        """
-        Get the statistics of the dataset.
-        normalization : str, optional
-            Type of energy, by default "formation", must be one of ["formation", "total",
-            "residual_regression", "per_atom_formation", "per_atom_residual_regression"]
+        Get the converted statistics of the dataset.
         return_none : bool, optional
             Whether to return None if the statistics for the forces are not available, by default True
             Otherwise, the statistics for the forces are set to 0.0
         """
-        stats = deepcopy(self._stats)
+        stats = deepcopy(self.statistics.get_results())
         if len(stats) == 0:
             raise StatisticsNotAvailableError(self.__name__)
-        if normalization not in POSSIBLE_NORMALIZATION:
-            raise NormalizationNotAvailableError(normalization)
-        selected_stats = stats[normalization]
-        if len(self.force_methods) == 0 and not return_none:
+        selected_stats = stats
+        if not return_none:
             selected_stats.update(
                 {
-                    "forces": {
+                    "ForcesCalculatorStats": {
                         "mean": np.array([0.0]),
                         "std": np.array([0.0]),
                         "components": {
@@ -671,7 +507,7 @@ class BaseDataset:
             )
         # cycle trough dict to convert units
         for key in selected_stats:
-            if key == "forces":
+            if key.lower() == str(ForcesCalculatorStats):
                 for key2 in selected_stats[key]:
                     if key2 != "components":
                         selected_stats[key][key2] = self.convert_forces(selected_stats[key][key2])
@@ -712,18 +548,19 @@ class BaseDataset:
         )
         name = self.__smiles_converter__(self.data["name"][idx])
         subset = self.data["subset"][idx]
-
+        e0s = self.__isolated_atom_energies__[..., z, c + shift].T
+        formation_energies = (energies - e0s.sum(axis=0)).astype(np.float32)
+        forces = None
         if "forces" in self.data:
             forces = np.array(self.data["forces"][p_start:p_end], dtype=np.float32)
-        else:
-            forces = None
         return Bunch(
             positions=positions,
             atomic_numbers=z,
             charges=c,
-            e0=self.__isolated_atom_energies__[..., z, c + shift].T,
-            linear_e0=self.new_e0s[..., z, c + shift].T if hasattr(self, "new_e0s") else None,
+            e0=e0s,
             energies=energies,
+            formation_energies=formation_energies,
+            per_atom_formation_energies=formation_energies / len(z),
             name=name,
             subset=subset,
             forces=forces,

@@ -28,9 +28,9 @@ class DESS66(BaseInteractionDataset):
     """
 
     __name__ = "des_s66"
-    __energy_unit__ = "hartree"
+    __energy_unit__ = "kcal/mol"
     __distance_unit__ = "ang"
-    __forces_unit__ = "hartree/ang"
+    __forces_unit__ = "kcal/mol/ang"
     __energy_methods__ = [
         InteractionMethod.MP2_CC_PVDZ,
         InteractionMethod.MP2_CC_PVQZ,

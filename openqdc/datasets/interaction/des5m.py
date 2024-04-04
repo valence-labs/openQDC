@@ -70,5 +70,9 @@ class DES5M(DES370K):
     _filename = "DES5M.csv"
     _name = "des5m_interaction"
 
+    __energy_unit__ = "kcal/mol"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "kcal/mol/ang"
+
     def read_raw_entries(self) -> List[Dict]:
         return DES5M._read_raw_entries()

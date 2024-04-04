@@ -33,6 +33,7 @@ class ANI1(BaseDataset):
     energy_target_names = [
         "ωB97x:6-31G(d) Energy",
     ]
+
     __energy_unit__ = "hartree"
     __distance_unit__ = "bohr"
     __forces_unit__ = "hartree/bohr"
