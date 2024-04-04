@@ -134,7 +134,9 @@ class NullEnergy(IsolatedEnergyInterface):
     """
 
     def _post_init(self):
-        self._e0_matrixs = [np.zeros((max(chemical_symbols) + 1, MAX_CHARGE_NUMBER)) for _ in range(len(self))]
+        self._e0_matrixs = [
+            np.zeros((len(chemical_symbols), MAX_CHARGE_NUMBER)) for _ in range(len(self.data.energy_methods))
+        ]
 
 
 class PhysicalEnergy(IsolatedEnergyInterface):

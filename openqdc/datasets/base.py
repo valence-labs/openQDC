@@ -397,21 +397,27 @@ class BaseDataset(DatasetPropertyMixIn):
         at = dict_to_atoms(entry, ext=ext)
         return at
 
-    def subsample(self, n_samples: Optional[Union[List[int], int]] = None):
+    def subsample(
+        self, n_samples: Optional[Union[List[int], int, float]] = None, replace: bool = False, seed: int = 42
+    ):
+        np.random.seed(seed)
         if n_samples is None:
-            idxs = list(range(len(self)))
-        elif isinstance(n_samples, int):
-            idxs = np.random.choice(len(self), size=n_samples, replace=False)
-        else:  # list, set, np.ndarray
+            return list(range(len(self)))
+        try:
+            if 0 < n_samples < 1:
+                n_samples = int(n_samples * len(self))
+            if isinstance(n_samples, int):
+                idxs = np.random.choice(len(self), size=n_samples, replace=replace)
+        except (ValueError, TypeError):  # list, set, np.ndarray
             idxs = n_samples
         return idxs
 
     @requires_package("datamol")
     def calculate_descriptors(
         self,
-        model: str = "soap",
+        descriptor_name: str = "soap",
         chemical_species: Optional[List[str]] = None,
-        n_samples: Optional[Union[List[int], int]] = None,
+        n_samples: Optional[Union[List[int], int, float]] = None,
         progress: bool = True,
         **descriptor_kwargs,
     ) -> Dict[str, np.ndarray]:
@@ -420,12 +426,12 @@ class BaseDataset(DatasetPropertyMixIn):
 
         Parameters
         ----------
-        model : str
+        descriptor_name : str
             Name of the descriptor to use. Supported descriptors are ["soap"]
         chemical_species : Optional[List[str]], optional
             List of chemical species to use for the descriptor computation, by default None.
             If None, the chemical species of the dataset are used.
-        n_samples : Optional[Union[List[int],int]], optional
+        n_samples : Optional[Union[List[int],int, float]], optional
             Number of samples to use for the computation, by default None. If None, all the dataset is used.
             If a list of integers is provided, the descriptors are computed for each of the specified idx of samples.
         progress : bool, optional
@@ -444,7 +450,7 @@ class BaseDataset(DatasetPropertyMixIn):
         import datamol as dm
 
         idxs = self.subsample(n_samples)
-        model = get_descriptor(model.lower())(
+        model = get_descriptor(descriptor_name.lower())(
             species=self.chemical_species if chemical_species is None else chemical_species, **descriptor_kwargs
         )
 
