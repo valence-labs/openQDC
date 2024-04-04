@@ -1,9 +1,23 @@
 from io import StringIO
 
+import numpy as np
 import pytest
 
 from openqdc.datasets.io import XYZDataset
 from openqdc.methods.enums import PotentialMethod
+from openqdc.utils.package_utils import has_package
+
+if has_package("torch"):
+    import torch
+
+if has_package("jax"):
+    import jax
+
+format_to_type = {
+    "numpy": np.ndarray,
+    "torch": torch.Tensor if has_package("torch") else None,
+    "jax": jax.numpy.ndarray if has_package("jax") else None,
+}
 
 
 @pytest.fixture
@@ -27,3 +41,17 @@ def test_xyz_dataset(xyz_filelike):
     assert len(ds.numbers) == 3
     assert ds[1].energies == -20.0
     assert set(ds.chemical_species) == {"H", "O", "C"}
+
+
+@pytest.mark.parametrize("format", ["numpy", "torch", "jax"])
+def test_array_format(xyz_filelike, format):
+    if not has_package(format):
+        pytest.skip(f"{format} is not installed, skipping test")
+
+    ds = XYZDataset(path=[xyz_filelike], array_format=format)
+
+    keys = ["positions", "atomic_numbers", "charges", "energies", "forces"]
+
+    data = ds[0]
+    for key in keys:
+        assert isinstance(getattr(data, key), format_to_type[format])
