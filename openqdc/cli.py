@@ -6,8 +6,7 @@ from prettytable import PrettyTable
 from typing_extensions import Annotated
 
 from openqdc import AVAILABLE_DATASETS, AVAILABLE_POTENTIAL_DATASETS
-from openqdc.raws.config_factory import DataConfigFactory
-from openqdc.raws.fetch import DataDownloader
+from openqdc.raws.config_factory import DataConfigFactory, DataDownloader
 
 app = typer.Typer(help="OpenQDC CLI")
 
@@ -66,7 +65,7 @@ def datasets():
     table = PrettyTable(["Name", "Type of Energy", "Forces", "Level of theory"])
     for dataset in AVAILABLE_DATASETS:
         empty_dataset = AVAILABLE_DATASETS[dataset].no_init()
-        has_forces = False if not empty_dataset.__force_methods__ else True
+        has_forces = False if not empty_dataset.force_mask else True
         en_type = "Potential" if dataset in AVAILABLE_POTENTIAL_DATASETS else "Interaction"
         table.add_row(
             [

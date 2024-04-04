@@ -27,9 +27,9 @@ class Metcalf(BaseInteractionDataset):
     """
 
     __name__ = "metcalf"
-    __energy_unit__ = "hartree"
+    __energy_unit__ = "kcal/mol"
     __distance_unit__ = "ang"
-    __forces_unit__ = None
+    __forces_unit__ = "kcal/mol/ang"
     __energy_methods__ = [
         InteractionMethod.SAPT0_JUN_CC_PVDZ,
         InteractionMethod.SAPT0_JUN_CC_PVDZ,

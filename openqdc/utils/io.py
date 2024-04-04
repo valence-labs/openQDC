@@ -15,6 +15,7 @@ from ase.calculators.calculator import Calculator
 from fsspec.callbacks import TqdmCallback
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
+from loguru import logger
 from rdkit.Chem import MolFromXYZFile
 from tqdm import tqdm
 
@@ -140,10 +141,9 @@ def check_file_gcs(path) -> bool:
 
 def save_pkl(file, path):
     """Saves pkl file"""
-    print(f"Saving file at {path}")
+    logger.info(f"Saving file at {path}")
     with fsspec.open(path, "wb") as fp:  # Pickling
         pkl.dump(file, fp)
-    print("Done")
 
 
 def load_pkl_gcs(path, check=True):
@@ -235,8 +235,15 @@ def dict_to_atoms(d: dict, ext: bool = False, energy_method: int = 0) -> Atoms:
     return at
 
 
-def to_atoms(pos, atom_species):
-    return Atoms(positions=pos, numbers=atom_species)
+def to_atoms(positions: np.ndarray, atomic_nums: np.ndarray):
+    """
+    Converts numpy arrays to ase atoms object
+
+    Args:
+        positions (np.ndarray): positions of atoms
+        atomic_nums (np.ndarray): atomic numbers of atoms
+    """
+    return Atoms(positions=positions, numbers=atomic_nums)
 
 
 def print_h5_tree(val, pre=""):
