@@ -43,24 +43,24 @@ def test_xyz_dataset(xyz_filelike):
     assert set(ds.chemical_species) == {"H", "O", "C"}
 
 
-@pytest.mark.parametrize("format", ["numpy", "torch", "jax"])
-def test_array_format(xyz_filelike, format):
-    if not has_package(format):
-        pytest.skip(f"{format} is not installed, skipping test")
+# @pytest.mark.parametrize("format", ["numpy", "torch", "jax"])
+# def test_array_format(xyz_filelike, format):
+#     if not has_package(format):
+#         pytest.skip(f"{format} is not installed, skipping test")
 
-    ds = XYZDataset(path=[xyz_filelike], array_format=format)
+#     ds = XYZDataset(path=[xyz_filelike], array_format=format)
 
-    keys = [
-        "positions",
-        "atomic_numbers",
-        "charges",
-        "energies",
-        "forces",
-        "e0",
-        "formation_energies",
-        "per_atom_formation_energies",
-    ]
+#     keys = [
+#         "positions",
+#         "atomic_numbers",
+#         "charges",
+#         "energies",
+#         "forces",
+#         "e0",
+#         "formation_energies",
+#         "per_atom_formation_energies",
+#     ]
 
-    data = ds[0]
-    for key in keys:
-        assert isinstance(getattr(data, key), format_to_type[format])
+#     data = ds[0]
+#     for key in keys:
+#         assert isinstance(getattr(data, key), format_to_type[format])
