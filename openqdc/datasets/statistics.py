@@ -266,8 +266,8 @@ class ForcesCalculatorStats(AbstractStatsCalculator):
         force_std = np.nanstd(converted_force_data, axis=0)
         force_rms = np.sqrt(np.nanmean(converted_force_data**2, axis=0))
         return ForceStatistics(
-            mean=force_mean,
-            std=force_std,
+            mean=np.atleast_2d(force_mean),
+            std=np.atleast_2d(force_std),
             components=ForceComponentsStatistics(rms=force_rms, std=force_std, mean=force_mean),
         )
 
@@ -281,7 +281,7 @@ class TotalEnergyStats(AbstractStatsCalculator):
         converted_energy_data = self.energies
         total_E_mean = np.nanmean(converted_energy_data, axis=0)
         total_E_std = np.nanstd(converted_energy_data, axis=0)
-        return EnergyStatistics(mean=total_E_mean, std=total_E_std)
+        return EnergyStatistics(mean=np.atleast_2d(total_E_mean), std=np.atleast_2d(total_E_std))
 
 
 class FormationEnergyInterface(AbstractStatsCalculator, ABC):
@@ -334,7 +334,7 @@ class FormationEnergyStats(FormationEnergyInterface):
     def _compute(self, energy) -> EnergyStatistics:
         formation_E_mean = np.nanmean(energy, axis=0)
         formation_E_std = np.nanstd(energy, axis=0)
-        return EnergyStatistics(mean=formation_E_mean, std=formation_E_std)
+        return EnergyStatistics(mean=np.atleast_2d(formation_E_mean), std=np.atleast_2d(formation_E_std))
 
 
 class PerAtomFormationEnergyStats(FormationEnergyInterface):
@@ -345,4 +345,4 @@ class PerAtomFormationEnergyStats(FormationEnergyInterface):
     def _compute(self, energy) -> EnergyStatistics:
         inter_E_mean = np.nanmean((energy / self.n_atoms[:, None]), axis=0)
         inter_E_std = np.nanstd((energy / self.n_atoms[:, None]), axis=0)
-        return EnergyStatistics(mean=inter_E_mean, std=inter_E_std)
+        return EnergyStatistics(mean=np.atleast_2d(inter_E_mean), std=np.atleast_2d(inter_E_std))
