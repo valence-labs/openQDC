@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from openqdc.utils.atomization_energies import chemical_symbols
+from openqdc.utils.constants import ATOM_SYMBOLS
 from openqdc.utils.exceptions import StatisticsNotAvailableError
 
 
@@ -60,4 +60,4 @@ class DatasetPropertyMixIn:
 
     @property
     def chemical_species(self):
-        return np.array(chemical_symbols)[self.numbers]
+        return np.array(ATOM_SYMBOLS)[self.numbers]

@@ -3,6 +3,7 @@
 import os
 import pickle as pkl
 from copy import deepcopy
+from functools import partial
 from itertools import compress
 from os.path import join as p_join
 from typing import Dict, List, Optional, Union
@@ -11,6 +12,7 @@ import numpy as np
 from ase.io.extxyz import write_extxyz
 from loguru import logger
 from sklearn.utils import Bunch
+from tqdm import tqdm
 
 from openqdc.datasets.energies import AtomEnergies
 from openqdc.datasets.properties import DatasetPropertyMixIn
@@ -21,8 +23,7 @@ from openqdc.datasets.statistics import (
     StatisticManager,
     TotalEnergyStats,
 )
-from openqdc.utils.atomization_energies import IsolatedAtomEnergyFactory
-from openqdc.utils.constants import NB_ATOMIC_FEATURES
+from openqdc.utils.constants import MAX_CHARGE, NB_ATOMIC_FEATURES
 from openqdc.utils.descriptors import get_descriptor
 from openqdc.utils.exceptions import (
     DatasetNotAvailableError,
@@ -142,6 +143,35 @@ class BaseDataset(DatasetPropertyMixIn):
         """
         return cls.__new__(cls)
 
+    @property
+    def __force_methods__(self):
+        """
+        For backward compatibility. To be removed in the future.
+        """
+        return self.force_methods
+
+    @property
+    def energy_methods(self) -> List[str]:
+        """Return the string version of the energy methods"""
+        return [str(i) for i in self.__energy_methods__]
+
+    @property
+    def force_mask(self):
+        if len(self.__class__.__force_mask__) == 0:
+            self.__class__.__force_mask__ = [False] * len(self.__energy_methods__)
+        return self.__class__.__force_mask__
+
+    @property
+    def force_methods(self):
+        return list(compress(self.energy_methods, self.force_mask))
+
+    @property
+    def e0s_dispatcher(self):
+        if not hasattr(self, "_e0s_dispatcher"):
+            # Automatically fetch/compute formation or regression energies
+            self._e0s_dispatcher = AtomEnergies(self, **self.regressor_kwargs)
+        return self._e0s_dispatcher
+
     def _convert_data(self):
         logger.info(
             f"Converting {self.__name__} data to the following units:\n\
@@ -151,27 +181,6 @@ class BaseDataset(DatasetPropertyMixIn):
         )
         for key in self.data_keys:
             self.data[key] = self._convert_on_loading(self.data[key], key)
-
-    @property
-    def __force_methods__(self):
-        """
-        For backward compatibility. To be removed in the future.
-        """
-        return self.force_methods
-
-    @property
-    def energy_methods(self):
-        return self.__energy_methods__
-
-    @property
-    def force_methods(self):
-        return list(compress(self.energy_methods, self.force_mask))
-
-    @property
-    def force_mask(self):
-        if len(self.__class__.__force_mask__) == 0:
-            self.__class__.__force_mask__ = [False] * len(self.energy_methods)
-        return self.__class__.__force_mask__
 
     @property
     def energy_unit(self):
@@ -231,17 +240,10 @@ class BaseDataset(DatasetPropertyMixIn):
             self.__class__.__fn_forces__ = get_conversion(old_en + "/" + old_ds, self.__forces_unit__)
 
     def _set_isolated_atom_energies(self):
-        if self.energy_methods is None:
+        if self.__energy_methods__ is None:
             logger.error("No energy methods defined for this dataset.")
         f = get_conversion("hartree", self.__energy_unit__)
         self.__isolated_atom_energies__ = f(self.e0s_dispatcher.e0s_matrix)
-
-    @property
-    def e0s_dispatcher(self):
-        if not hasattr(self, "_e0s_dispatcher"):
-            # Automatically fetch/compute formation or regression energies
-            self._e0s_dispatcher = AtomEnergies(self, **self.regressor_kwargs)
-        return self._e0s_dispatcher
 
     def convert_energy(self, x):
         return self.__class__.__fn_energy__(x)
@@ -267,19 +269,6 @@ class BaseDataset(DatasetPropertyMixIn):
         old_unit = self.distance_unit
         self.__distance_unit__ = value
         self.__class__.__fn_distance__ = get_conversion(old_unit, value)
-
-    def as_iter(self, atoms: bool = False):
-        """
-        Return the dataset as an iterator.
-
-        Parameters
-        ----------
-        atoms : bool, optional
-            Whether to return the items as ASE atoms object, by default False
-        """
-        func = self.get_ase_atoms if atoms else self.__getitem__
-        for i in range(len(self)):
-            yield func(i)
 
     def read_raw_entries(self):
         raise NotImplementedError
@@ -373,16 +362,28 @@ class BaseDataset(DatasetPropertyMixIn):
             res = self.collate_list(entries)
             self.save_preprocess(res)
 
-    def save_xyz(self, idx: int, path: Optional[str] = None, ext=True):
+    def save_xyz(self, idx: int, energy_method: int = 0, path: Optional[str] = None, ext=True):
         """
         Save the entry at index idx as an extxyz file.
         """
         if path is None:
             path = os.getcwd()
-        at = self.get_ase_atoms(idx, ext=ext)
-        write_extxyz(p_join(path, f"mol_{idx}.xyz"), at)
+        at = self.get_ase_atoms(idx, ext=ext, energy_method=energy_method)
+        write_extxyz(p_join(path, f"mol_{idx}.xyz"), at, plain=not ext)
 
-    def get_ase_atoms(self, idx: int, ext=True):
+    def to_xyz(self, energy_method: int = 0, path: Optional[str] = None):
+        """
+        Save dataset as single xyz file (extended xyz format).
+        """
+        with open(p_join(path if path else os.getcwd(), f"{self.__name__}.xyz"), "w") as f:
+            for atoms in tqdm(
+                self.as_iter(atoms=True, energy_method=energy_method),
+                total=len(self),
+                desc=f"Saving {self.__name__} as xyz file",
+            ):
+                write_extxyz(f, atoms, append=True)
+
+    def get_ase_atoms(self, idx: int, energy_method: int = 0, ext=True):
         """
         Get the ASE atoms object for the entry at index idx.
 
@@ -394,7 +395,7 @@ class BaseDataset(DatasetPropertyMixIn):
             Whether to include additional informations
         """
         entry = self[idx]
-        at = dict_to_atoms(entry, ext=ext)
+        at = dict_to_atoms(entry, ext=ext, energy_method=energy_method)
         return at
 
     def subsample(
@@ -443,12 +444,13 @@ class BaseDataset(DatasetPropertyMixIn):
         -------
         Dict[str, np.ndarray]
             Dictionary containing the following keys:
-                - values : np.ndarray of shape (N, M) containing the SOAP descriptors for the dataset
+                - values : np.ndarray of shape (N, M) containing the descriptors for the dataset
                 - idxs : np.ndarray of shape (N,) containing the indices of the samples used
 
         """
         import datamol as dm
 
+        datum = {}
         idxs = self.subsample(n_samples)
         model = get_descriptor(descriptor_name.lower())(
             species=self.chemical_species if chemical_species is None else chemical_species, **descriptor_kwargs
@@ -458,8 +460,25 @@ class BaseDataset(DatasetPropertyMixIn):
             entry = self.get_ase_atoms(idx, ext=False)
             return model.calculate(entry)
 
-        descr_values = dm.parallelized(wrapper, idxs, progress=progress, scheduler="threads", n_jobs=-1)
-        return {"values": np.vstack(descr_values), "idxs": idxs}
+        descr = dm.parallelized(wrapper, idxs, progress=progress, scheduler="threads", n_jobs=-1)
+        datum["values"] = np.vstack(descr)
+        datum["idxs"] = idxs
+        return datum
+
+    def as_iter(self, atoms: bool = False, energy_method: int = 0):
+        """
+        Return the dataset as an iterator.
+
+        Parameters
+        ----------
+        atoms : bool, optional
+            Whether to return the items as ASE atoms object, by default False
+        """
+
+        func = partial(self.get_ase_atoms, energy_method=energy_method) if atoms else self.__getitem__
+
+        for i in range(len(self)):
+            yield func(i)
 
     def get_statistics(self, return_none: bool = True):
         """
@@ -518,7 +537,7 @@ class BaseDataset(DatasetPropertyMixIn):
         return x
 
     def __getitem__(self, idx: int):
-        shift = IsolatedAtomEnergyFactory.max_charge
+        shift = MAX_CHARGE
         p_start, p_end = self.data["position_idx_range"][idx]
         input = self.data["atomic_inputs"][p_start:p_end]
         z, c, positions, energies = (
@@ -530,7 +549,7 @@ class BaseDataset(DatasetPropertyMixIn):
         name = self.__smiles_converter__(self.data["name"][idx])
         subset = self.data["subset"][idx]
         e0s = self.__isolated_atom_energies__[..., z, c + shift].T
-        formation_energies = energies - e0s.sum(axis=0)
+        formation_energies = (energies - e0s.sum(axis=0)).astype(np.float32)
         forces = None
         if "forces" in self.data:
             forces = np.array(self.data["forces"][p_start:p_end], dtype=np.float32)

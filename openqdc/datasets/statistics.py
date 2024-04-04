@@ -176,7 +176,7 @@ class AbstractStatsCalculator(ABC):
             force_recompute=recompute,
             energy_type=dataset.energy_type,
             energies=dataset.data["energies"],
-            forces=dataset.data["forces"],
+            forces=dataset.data["forces"] if "forces" in dataset.data else None,
             n_atoms=dataset.data["n_atoms"],
             position_idx_range=dataset.data["position_idx_range"],
             atom_species=dataset.data["atomic_inputs"][:, 0].ravel(),
@@ -297,11 +297,11 @@ class FormationEnergyInterface(AbstractStatsCalculator, ABC):
         # if the state has not the dependency satisfied
         if not self.deps_satisfied:
             # run the main computation
-            from openqdc.utils.atomization_energies import IsolatedAtomEnergyFactory
+            from openqdc.utils.constants import MAX_CHARGE
 
             splits_idx = self.position_idx_range[:, 1]
             s = np.array(self.atom_species_charges_tuple, dtype=int)
-            s[:, 1] += IsolatedAtomEnergyFactory.max_charge
+            s[:, 1] += MAX_CHARGE
             matrixs = [matrix[s[:, 0], s[:, 1]] for matrix in self.e0_matrix]
             converted_energy_data = self.energies
             E = []

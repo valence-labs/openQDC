@@ -4,10 +4,7 @@ from os.path import join as p_join
 import numpy as np
 from loguru import logger
 
-from openqdc.utils.atomization_energies import (
-    IsolatedAtomEnergyFactory,
-    chemical_symbols,
-)
+from openqdc.methods.enums import PotentialMethod
 from openqdc.utils.io import load_pkl, save_pkl
 from openqdc.utils.regressor import Regressor
 
@@ -134,9 +131,7 @@ class NullEnergy(IsolatedEnergyInterface):
     """
 
     def _post_init(self):
-        self._e0_matrixs = [
-            np.zeros((len(chemical_symbols), MAX_CHARGE_NUMBER)) for _ in range(len(self.data.energy_methods))
-        ]
+        self._e0_matrixs = [PotentialMethod.NONE.atom_energies_matrix for _ in range(len(self.data.energy_methods))]
 
 
 class PhysicalEnergy(IsolatedEnergyInterface):
@@ -145,7 +140,7 @@ class PhysicalEnergy(IsolatedEnergyInterface):
     """
 
     def _post_init(self):
-        self._e0_matrixs = [IsolatedAtomEnergyFactory.get_matrix(en_method) for en_method in self.data.energy_methods]
+        self._e0_matrixs = [energy_method.atom_energies_matrix for energy_method in self.data.__energy_methods__]
 
 
 class RegressionEnergy(IsolatedEnergyInterface):

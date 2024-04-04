@@ -11,6 +11,7 @@ import pandas as pd
 from loguru import logger
 
 from openqdc.datasets.base import BaseDataset
+from openqdc.methods import PotentialMethod
 from openqdc.utils.io import get_local_cache, push_remote
 
 
@@ -66,7 +67,7 @@ def read_preprocessed_archive(path):
 
 class PCQM_PM6(BaseDataset):
     __name__ = "pubchemqc_pm6"
-    __energy_methods__ = ["pm6"]
+    __energy_methods__ = [PotentialMethod.PM6]
 
     energy_target_names = ["pm6"]
 

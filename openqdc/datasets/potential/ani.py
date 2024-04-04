@@ -2,7 +2,9 @@ import os
 from os.path import join as p_join
 
 from openqdc.datasets.base import BaseDataset
-from openqdc.utils import get_local_cache, read_qc_archive_h5
+from openqdc.methods import PotentialMethod
+from openqdc.utils import read_qc_archive_h5
+from openqdc.utils.io import get_local_cache
 
 
 class ANI1(BaseDataset):
@@ -25,7 +27,7 @@ class ANI1(BaseDataset):
     __name__ = "ani1"
 
     __energy_methods__ = [
-        "wb97x/6-31g(d)",
+        PotentialMethod.WB97X_6_31G_D,  # "wb97x/6-31g(d)"
     ]
 
     energy_target_names = [

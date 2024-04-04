@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 from aiohttp import ClientTimeout
 from ase.atoms import Atoms
+from ase.calculators.calculator import Calculator
 from fsspec.callbacks import TqdmCallback
 from fsspec.implementations.local import LocalFileSystem
 from gcsfs import GCSFileSystem
@@ -18,7 +19,8 @@ from loguru import logger
 from rdkit.Chem import MolFromXYZFile
 from tqdm import tqdm
 
-from openqdc.utils.molecule import atom_table, z_to_formula
+from openqdc.utils.constants import ATOM_TABLE
+from openqdc.utils.molecule import z_to_formula
 
 gcp_filesys = fsspec.filesystem("gs")  # entry point for google bucket (need gsutil permission)
 gcp_filesys_public = fsspec.filesystem("https")  # public API for download
@@ -206,7 +208,7 @@ def load_xyz(path):
     return MolFromXYZFile(path)
 
 
-def dict_to_atoms(d: dict, ext: bool = False) -> Atoms:
+def dict_to_atoms(d: dict, ext: bool = False, energy_method: int = 0) -> Atoms:
     """
     Converts dictionary to ase atoms object
 
@@ -218,6 +220,17 @@ def dict_to_atoms(d: dict, ext: bool = False) -> Atoms:
     pos, atomic_numbers, charges = d.pop("positions"), d.pop("atomic_numbers"), d.pop("charges")
     at = Atoms(positions=pos, numbers=atomic_numbers, charges=charges)
     if ext:
+        # Attach calculator for correct extxyz formatting
+        at.set_calculator(Calculator())
+        forces = d.pop("forces", None)
+        if forces.any():
+            # convert to (n_atoms, 3) shape, extxyz can only store 1 label
+            n_atoms, _, _ = forces.shape
+            forces = forces[..., energy_method].reshape(n_atoms, 3)
+        at.calc.results = {
+            "energy": d.pop("energies")[energy_method],
+            "forces": forces,
+        }
         at.info = d
     return at
 
@@ -260,7 +273,7 @@ def extract_entry(
     energy_target_names: List[str],
     force_target_names: Optional[List[str]] = None,
 ) -> Dict[str, np.ndarray]:
-    x = np.array([atom_table.GetAtomicNumber(s) for s in df["symbols"][i]])
+    x = np.array([ATOM_TABLE.GetAtomicNumber(s) for s in df["symbols"][i]])
     xs = np.stack((x, np.zeros_like(x)), axis=-1)
     positions = df["geometry"][i].reshape((-1, 3))
     energies = np.array([df[k][i] for k in energy_target_names])

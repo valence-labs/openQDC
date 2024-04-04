@@ -7,8 +7,10 @@ from loguru import logger
 from tqdm import tqdm
 
 from openqdc.datasets.interaction.base import BaseInteractionDataset
+from openqdc.methods import InteractionMethod, InterEnergyType
+from openqdc.utils.constants import ATOM_TABLE
 from openqdc.utils.io import get_local_cache
-from openqdc.utils.molecule import atom_table, molecule_groups
+from openqdc.utils.molecule import molecule_groups
 
 
 class DES370K(BaseInteractionDataset):
@@ -27,23 +29,43 @@ class DES370K(BaseInteractionDataset):
     __distance_unit__ = "ang"
     __forces_unit__ = "kcal/mol/ang"
     __energy_methods__ = [
-        "mp2/cc-pvdz",
-        "mp2/cc-pvqz",
-        "mp2/cc-pvtz",
-        "mp2/cbs",
-        "ccsd(t)/cc-pvdz",
-        "ccsd(t)/cbs",  # cbs
-        "ccsd(t)/nn",  # nn
-        "sapt0/aug-cc-pwcvxz",
-        "sapt0/aug-cc-pwcvxz_es",
-        "sapt0/aug-cc-pwcvxz_ex",
-        "sapt0/aug-cc-pwcvxz_exs2",
-        "sapt0/aug-cc-pwcvxz_ind",
-        "sapt0/aug-cc-pwcvxz_exind",
-        "sapt0/aug-cc-pwcvxz_disp",
-        "sapt0/aug-cc-pwcvxz_exdisp_os",
-        "sapt0/aug-cc-pwcvxz_exdisp_ss",
-        "sapt0/aug-cc-pwcvxz_delta_HF",
+        InteractionMethod.MP2_CC_PVDZ,
+        InteractionMethod.MP2_CC_PVQZ,
+        InteractionMethod.MP2_CC_PVTZ,
+        InteractionMethod.MP2_CBS,
+        InteractionMethod.CCSD_T_CC_PVDZ,
+        InteractionMethod.CCSD_T_CBS,
+        InteractionMethod.CCSD_T_NN,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
+    ]
+
+    __energy_type__ = [
+        InterEnergyType.TOTAL,
+        InterEnergyType.TOTAL,
+        InterEnergyType.TOTAL,
+        InterEnergyType.TOTAL,
+        InterEnergyType.TOTAL,
+        InterEnergyType.TOTAL,
+        InterEnergyType.TOTAL,
+        InterEnergyType.TOTAL,
+        InterEnergyType.ES,
+        InterEnergyType.EX,
+        InterEnergyType.EX_S2,
+        InterEnergyType.IND,
+        InterEnergyType.EX_IND,
+        InterEnergyType.DISP,
+        InterEnergyType.EX_DISP_OS,
+        InterEnergyType.EX_DISP_SS,
+        InterEnergyType.DELTA_HF,
     ]
 
     energy_target_names = [
@@ -87,7 +109,7 @@ class DES370K(BaseInteractionDataset):
 
             elements = row["elements"].split()
 
-            atomic_nums = np.expand_dims(np.array([atom_table.GetAtomicNumber(x) for x in elements]), axis=1)
+            atomic_nums = np.expand_dims(np.array([ATOM_TABLE.GetAtomicNumber(x) for x in elements]), axis=1)
 
             charges = np.expand_dims(np.array([charge0] * natoms0 + [charge1] * natoms1), axis=1)
 
