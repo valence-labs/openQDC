@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from copy import deepcopy
 from dataclasses import asdict, dataclass
 from os.path import join as p_join
 from typing import Optional
@@ -18,12 +19,9 @@ class StatisticsResults:
     def to_dict(self):
         return asdict(self)
 
-    def convert(self, func):
+    def transform(self, func):
         for k, v in self.to_dict().items():
-            if isinstance(v, dict):
-                self.convert(func)
-            else:
-                setattr(self, k, func(v))
+            setattr(self, k, func(v))
 
 
 @dataclass
@@ -55,11 +53,9 @@ class StatisticManager:
     the statistic calculators
     """
 
-    _state = {}
-    _results = {}
-
     def __init__(self, dataset, recompute: bool = False, *statistic_calculators: "AbstractStatsCalculator"):
-        self.reset_state()
+        self._state = {}
+        self._results = {}
         self._statistic_calculators = [
             statistic_calculators.from_openqdc_dataset(dataset, recompute)
             for statistic_calculators in statistic_calculators
@@ -78,6 +74,12 @@ class StatisticManager:
         """
         self._state = {}
 
+    def reset_results(self):
+        """
+        Reset the results dictionary
+        """
+        self._results = {}
+
     def get_state(self, key: Optional[str] = None):
         """
         key : str, default = None
@@ -94,11 +96,14 @@ class StatisticManager:
         """
         return key in self._state
 
-    def get_results(self):
+    def get_results(self, as_dict: bool = False):
         """
         Aggregate results from all the calculators
         """
-        return self._results
+        results = deepcopy(self._results)
+        if as_dict:
+            return {k: v.as_dict() for k, v in results.items()}
+        return {k: v for k, v in self._results.items()}
 
     def run_calculators(self):
         """
@@ -194,7 +199,7 @@ class AbstractStatsCalculator(ABC):
         """
         Save statistics file to the dataset folder as a pkl file
         """
-        save_pkl(self.result.to_dict(), self.preprocess_path)
+        save_pkl(self.result, self.preprocess_path)
 
     def attempt_load(self) -> bool:
         """
@@ -277,7 +282,7 @@ class TotalEnergyStats(AbstractStatsCalculator):
     Total Energy statistics calculator class
     """
 
-    def compute(self):
+    def compute(self) -> EnergyStatistics:
         converted_energy_data = self.energies
         total_E_mean = np.nanmean(converted_energy_data, axis=0)
         total_E_std = np.nanstd(converted_energy_data, axis=0)
