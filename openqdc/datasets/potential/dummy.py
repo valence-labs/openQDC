@@ -2,7 +2,6 @@ import numpy as np
 
 from openqdc.datasets.base import BaseDataset
 from openqdc.methods import PotentialMethod
-from openqdc.utils.constants import NOT_DEFINED
 
 
 class Dummy(BaseDataset):
@@ -11,8 +10,8 @@ class Dummy(BaseDataset):
     """
 
     __name__ = "dummy"
-    __energy_methods__ = [PotentialMethod.SVWN_DEF2_TZVP, PotentialMethod.PM6]
-    __force_mask__ = [False, True]
+    __energy_methods__ = [PotentialMethod.SVWN_DEF2_TZVP, PotentialMethod.PM6, PotentialMethod.GFN2_XTB]
+    __force_mask__ = [False, True, True]
     __energy_unit__ = "kcal/mol"
     __distance_unit__ = "ang"
     __forces_unit__ = "kcal/mol/ang"
@@ -22,25 +21,6 @@ class Dummy(BaseDataset):
     force_target_names = [f"forces{i}" for i in range(len(__force_mask__))]
     __isolated_atom_energies__ = []
     __average_n_atoms__ = None
-
-    @property
-    def _stats(self):
-        return {
-            "formation": {
-                "energy": {
-                    "mean": np.array([[-12.94348027, -9.83037297]]),
-                    "std": np.array([[4.39971409, 3.3574188]]),
-                },
-                "forces": NOT_DEFINED,
-            },
-            "total": {
-                "energy": {
-                    "mean": np.array([[-89.44242, -1740.5336]]),
-                    "std": np.array([[29.599571, 791.48663]]),
-                },
-                "forces": NOT_DEFINED,
-            },
-        }
 
     def _post_init(self, overwrite_local_cache, energy_unit, distance_unit) -> None:
         self.setup_dummy()

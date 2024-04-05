@@ -21,6 +21,7 @@ from openqdc.datasets.statistics import (
     FormationEnergyStats,
     PerAtomFormationEnergyStats,
     StatisticManager,
+    StatisticsResults,
     TotalEnergyStats,
 )
 from openqdc.utils.constants import MAX_CHARGE, NB_ATOMIC_FEATURES
@@ -528,25 +529,20 @@ class BaseDataset(DatasetPropertyMixIn):
                     "ForcesCalculatorStats": {
                         "mean": np.array([0.0]),
                         "std": np.array([0.0]),
-                        "components": {
-                            "mean": np.array([[0.0], [0.0], [0.0]]),
-                            "std": np.array([[0.0], [0.0], [0.0]]),
-                            "rms": np.array([[0.0], [0.0], [0.0]]),
-                        },
+                        "component_mean": np.array([[0.0], [0.0], [0.0]]),
+                        "component_std": np.array([[0.0], [0.0], [0.0]]),
+                        "component_rms": np.array([[0.0], [0.0], [0.0]]),
                     }
                 }
             )
         # cycle trough dict to convert units
         for key in selected_stats:
-            if key.lower() == str(ForcesCalculatorStats):
+            if isinstance(selected_stats[key], StatisticsResults):
+                selected_stats[key] = selected_stats[key].to_dict()
+
+            if key.lower() == ForcesCalculatorStats.__name__.lower():
                 for key2 in selected_stats[key]:
-                    if key2 != "components":
-                        selected_stats[key][key2] = self.convert_forces(selected_stats[key][key2])
-                    else:
-                        for key2 in selected_stats[key]["components"]:
-                            selected_stats[key]["components"][key2] = self.convert_forces(
-                                selected_stats[key]["components"][key2]
-                            )
+                    selected_stats[key][key2] = self.convert_forces(selected_stats[key][key2])
             else:
                 for key2 in selected_stats[key]:
                     selected_stats[key][key2] = self.convert_energy(selected_stats[key][key2])
