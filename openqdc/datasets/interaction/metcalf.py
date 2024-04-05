@@ -2,10 +2,56 @@ import os
 from typing import Dict, List
 
 import numpy as np
+from loguru import logger
 
 from openqdc.datasets.interaction.base import BaseInteractionDataset
 from openqdc.methods import InteractionMethod, InterEnergyType
 from openqdc.utils.constants import ATOM_TABLE
+
+
+def extract_raw_tar_gz(folder):
+    # go over all files
+    logger.info(f"Extracting all tar.gz files in {folder}")
+    expected_tar_files = {
+        "train": [
+            "TRAINING-2073-ssi-neutral.tar.gz",
+            "TRAINING-2610-donors-perturbed.tar.gz",
+            "TRAINING-4795-acceptors-perturbed.tar.gz",
+        ],
+        "val": ["VALIDATION-125-donors.tar.gz", "VALIDATION-254-acceptors.tar.gz"],
+        "test": [
+            "TEST-Acc--3-methylbutan-2-one_Don--NMe-acetamide-PLDB.tar.gz",
+            "TEST-Acc--Cyclohexanone_Don--NMe-acetamide-PLDB.tar.gz",
+            "TEST-Acc--Isoquinolone_NMe-acetamide.tar.gz",
+            "TEST-Acc--NMe-acetamide_Don--Aniline-CSD.tar.gz",
+            "TEST-Acc--NMe-acetamide_Don--Aniline-PLDB.tar.gz",
+            "TEST-Acc--NMe-acetamide_Don--N-isopropylacetamide-PLDB.tar.gz",
+            "TEST-Acc--NMe-acetamide_Don--N-phenylbenzamide-PLDB.tar.gz",
+            "TEST-Acc--NMe-acetamide_Don--Naphthalene-1H-PLDB.tar.gz",
+            "TEST-Acc--NMe-acetamide_Don--Uracil-PLDB.tar.gz",
+            "TEST-Acc--Tetrahydro-2H-pyran-2-one_NMe-acetamide-PLDB.tar.gz",
+            "TEST-NMe-acetamide_Don--Benzimidazole-PLDB.tar.gz",
+        ],
+    }
+
+    # create a folder with the same name as the tar.gz file
+    for subset in expected_tar_files:
+        for tar_file in expected_tar_files[subset]:
+            logger.info(f"Extracting {tar_file}")
+            tar_file_path = os.path.join(folder, tar_file)
+
+            # check if tar file exists
+            if not os.path.exists(tar_file_path):
+                raise FileNotFoundError(f"File {tar_file_path} not found")
+
+            # skip if extracted folder exists
+            if os.path.exists(os.path.join(folder, tar_file.replace(".tar.gz", ""))):
+                logger.info(f"Skipping {tar_file}")
+                continue
+
+            tar_folder_path = tar_file_path.replace(".tar.gz", "")
+            os.mkdir(tar_folder_path)
+            os.system(f"tar -xzf {tar_file_path} -C {tar_folder_path}")
 
 
 class Metcalf(BaseInteractionDataset):
@@ -53,6 +99,8 @@ class Metcalf(BaseInteractionDataset):
     ]
 
     def read_raw_entries(self) -> List[Dict]:
+        # extract in folders
+        extract_raw_tar_gz(self.root)
         data = []
         for dirname in os.listdir(self.root):
             xyz_dir = os.path.join(self.root, dirname)

@@ -299,6 +299,11 @@ class DataConfigFactory:
         },
     )
 
+    metcalf = dict(
+        dataset_name="metcalf",
+        links={"model-data.tar.gz": "https://zenodo.org/records/10934211/files/model-data.tar?download=1"},
+    )
+
     misato = dict(
         dataset_name="misato",
         links={
