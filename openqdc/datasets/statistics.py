@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from copy import deepcopy
 from dataclasses import asdict, dataclass
 from os.path import join as p_join
 from typing import Optional
@@ -18,12 +19,9 @@ class StatisticsResults:
     def to_dict(self):
         return asdict(self)
 
-    def convert(self, func):
+    def transform(self, func):
         for k, v in self.to_dict().items():
-            if isinstance(v, dict):
-                self.convert(func)
-            else:
-                setattr(self, k, func(v))
+            setattr(self, k, func(v))
 
 
 @dataclass
@@ -37,19 +35,6 @@ class EnergyStatistics(StatisticsResults):
 
 
 @dataclass
-class ForceComponentsStatistics(StatisticsResults):
-    """
-    Dataclass for force statistics related to the x,y,z components
-    mean,std,rms are supposed to be 2d arrays related to the x,y,z components
-    of the forces
-    """
-
-    mean: Optional[np.ndarray]
-    std: Optional[np.ndarray]
-    rms: Optional[np.ndarray]
-
-
-@dataclass
 class ForceStatistics(StatisticsResults):
     """
     Dataclass for force statistics
@@ -57,7 +42,9 @@ class ForceStatistics(StatisticsResults):
 
     mean: Optional[np.ndarray]
     std: Optional[np.ndarray]
-    components: ForceComponentsStatistics
+    component_mean: Optional[np.ndarray]
+    component_std: Optional[np.ndarray]
+    component_rms: Optional[np.ndarray]
 
 
 class StatisticManager:
@@ -66,11 +53,9 @@ class StatisticManager:
     the statistic calculators
     """
 
-    _state = {}
-    _results = {}
-
     def __init__(self, dataset, recompute: bool = False, *statistic_calculators: "AbstractStatsCalculator"):
-        self.reset_state()
+        self._state = {}
+        self._results = {}
         self._statistic_calculators = [
             statistic_calculators.from_openqdc_dataset(dataset, recompute)
             for statistic_calculators in statistic_calculators
@@ -89,6 +74,12 @@ class StatisticManager:
         """
         self._state = {}
 
+    def reset_results(self):
+        """
+        Reset the results dictionary
+        """
+        self._results = {}
+
     def get_state(self, key: Optional[str] = None):
         """
         key : str, default = None
@@ -105,11 +96,14 @@ class StatisticManager:
         """
         return key in self._state
 
-    def get_results(self):
+    def get_results(self, as_dict: bool = False):
         """
         Aggregate results from all the calculators
         """
-        return self._results
+        results = deepcopy(self._results)
+        if as_dict:
+            return {k: v.as_dict() for k, v in results.items()}
+        return {k: v for k, v in self._results.items()}
 
     def run_calculators(self):
         """
@@ -205,7 +199,7 @@ class AbstractStatsCalculator(ABC):
         """
         Save statistics file to the dataset folder as a pkl file
         """
-        save_pkl(self.result.to_dict(), self.preprocess_path)
+        save_pkl(self.result, self.preprocess_path)
 
     def attempt_load(self) -> bool:
         """
@@ -266,17 +260,20 @@ class ForcesCalculatorStats(AbstractStatsCalculator):
 
     def compute(self) -> ForceStatistics:
         if not self.has_forces:
-            return ForceStatistics(
-                mean=None, std=None, components=ForceComponentsStatistics(rms=None, std=None, mean=None)
-            )
+            return ForceStatistics(mean=None, std=None, component_mean=None, component_std=None, component_rms=None)
         converted_force_data = self.forces
-        force_mean = np.nanmean(converted_force_data, axis=0)
-        force_std = np.nanstd(converted_force_data, axis=0)
-        force_rms = np.sqrt(np.nanmean(converted_force_data**2, axis=0))
+        num_methods = converted_force_data.shape[2]
+        mean = np.nanmean(converted_force_data.reshape(-1, num_methods), axis=0)
+        std = np.nanstd(converted_force_data.reshape(-1, num_methods), axis=0)
+        component_mean = np.nanmean(converted_force_data, axis=0)
+        component_std = np.nanstd(converted_force_data, axis=0)
+        component_rms = np.sqrt(np.nanmean(converted_force_data**2, axis=0))
         return ForceStatistics(
-            mean=np.atleast_2d(force_mean),
-            std=np.atleast_2d(force_std),
-            components=ForceComponentsStatistics(rms=force_rms, std=force_std, mean=force_mean),
+            mean=np.atleast_2d(mean),
+            std=np.atleast_2d(std),
+            component_mean=np.atleast_2d(component_mean),
+            component_std=np.atleast_2d(component_std),
+            component_rms=np.atleast_2d(component_rms),
         )
 
 
@@ -285,7 +282,7 @@ class TotalEnergyStats(AbstractStatsCalculator):
     Total Energy statistics calculator class
     """
 
-    def compute(self):
+    def compute(self) -> EnergyStatistics:
         converted_energy_data = self.energies
         total_E_mean = np.nanmean(converted_energy_data, axis=0)
         total_E_std = np.nanstd(converted_energy_data, axis=0)

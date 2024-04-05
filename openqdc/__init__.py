@@ -5,7 +5,11 @@ from typing import TYPE_CHECKING  # noqa F401
 # The below lazy import logic is coming from openff-toolkit:
 # https://github.com/openforcefield/openff-toolkit/blob/b52879569a0344878c40248ceb3bd0f90348076a/openff/toolkit/__init__.py#L44
 
+
 # Dictionary of objects to lazily import; maps the object's name to its module path
+def get_project_root():
+    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 _lazy_imports_obj = {
     "__version__": "openqdc._version",

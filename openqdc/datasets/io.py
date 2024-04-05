@@ -50,9 +50,14 @@ class FromFileDataset(BaseDataset, ABC):
         self.__energy_unit__ = energy_unit
         self.__distance_unit__ = distance_unit
         self.__energy_methods__ = [PotentialMethod.NONE if not level_of_theory else level_of_theory]
+        self.energy_target_names = ["xyz"]
         self.regressor_kwargs = regressor_kwargs
         self.transform = transform
         self._read_and_preprocess()
+        if "forces" in self.data:
+            self.__force_mask__ = [True]
+            self.__class__.__force_methods__ = [level_of_theory]
+            self.force_target_names = ["xyz"]
         self.set_array_format(array_format)
         self._post_init(True, energy_unit, distance_unit)
 

@@ -27,8 +27,9 @@ def test_regressors(small_dummy):
         setattr(reg, "solver_type", solver_type)
         reg.solver = reg._get_solver()
         assert isinstance(reg.solver, inst)
+        num_methods = len(small_dummy.energy_methods)
         try:
             results = reg.solve()
-            assert results[0].shape[1] == 2
+            assert results[0].shape[1] == num_methods
         except np.linalg.LinAlgError:
             pass

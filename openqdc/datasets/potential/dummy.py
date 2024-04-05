@@ -1,8 +1,11 @@
+import pickle as pkl
+from os.path import join as p_join
+
 import numpy as np
+from loguru import logger
 
 from openqdc.datasets.base import BaseDataset
 from openqdc.methods import PotentialMethod
-from openqdc.utils.constants import NOT_DEFINED
 
 
 class Dummy(BaseDataset):
@@ -11,8 +14,8 @@ class Dummy(BaseDataset):
     """
 
     __name__ = "dummy"
-    __energy_methods__ = [PotentialMethod.SVWN_DEF2_TZVP, PotentialMethod.PM6]
-    __force_mask__ = [False, True]
+    __energy_methods__ = [PotentialMethod.SVWN_DEF2_TZVP, PotentialMethod.PM6, PotentialMethod.GFN2_XTB]
+    __force_mask__ = [False, True, True]
     __energy_unit__ = "kcal/mol"
     __distance_unit__ = "ang"
     __forces_unit__ = "kcal/mol/ang"
@@ -22,25 +25,6 @@ class Dummy(BaseDataset):
     force_target_names = [f"forces{i}" for i in range(len(__force_mask__))]
     __isolated_atom_energies__ = []
     __average_n_atoms__ = None
-
-    @property
-    def _stats(self):
-        return {
-            "formation": {
-                "energy": {
-                    "mean": np.array([[-12.94348027, -9.83037297]]),
-                    "std": np.array([[4.39971409, 3.3574188]]),
-                },
-                "forces": NOT_DEFINED,
-            },
-            "total": {
-                "energy": {
-                    "mean": np.array([[-89.44242, -1740.5336]]),
-                    "std": np.array([[29.599571, 791.48663]]),
-                },
-                "forces": NOT_DEFINED,
-            },
-        }
 
     def _post_init(self, overwrite_local_cache, energy_unit, distance_unit) -> None:
         self.setup_dummy()
@@ -90,3 +74,55 @@ class Dummy(BaseDataset):
 
     def __len__(self):
         return 9999
+
+
+class PredefinedDataset(BaseDataset):
+    __name__ = "predefineddataset"
+    __energy_methods__ = [PotentialMethod.WB97M_D3BJ_DEF2_TZVPPD]  # "wb97m-d3bj/def2-tzvppd"]
+    __force_mask__ = [True]
+    __energy_unit__ = "hartree"
+    __distance_unit__ = "bohr"
+    __forces_unit__ = "hartree/bohr"
+    force_target_names = __energy_methods__
+    energy_target_names = __energy_methods__
+
+    @property
+    def preprocess_path(self, overwrite_local_cache=False):
+        from os.path import join as p_join
+
+        from openqdc import get_project_root
+
+        return p_join(get_project_root(), "tests", "files", self.__name__, "preprocessed")
+
+    def is_preprocessed(self):
+        return True
+
+    def read_raw_entries(self):
+        pass
+
+    def read_preprocess(self, overwrite_local_cache=False):
+        logger.info("Reading preprocessed data.")
+        logger.info(
+            f"Dataset {self.__name__} with the following units:\n\
+                     Energy: {self.energy_unit},\n\
+                     Distance: {self.distance_unit},\n\
+                     Forces: {self.force_unit if self.force_methods else 'None'}"
+        )
+        self.data = {}
+        for key in self.data_keys:
+            print(key, self.data_shapes[key], self.data_types[key])
+            filename = p_join(self.preprocess_path, f"{key}.mmap")
+            self.data[key] = np.memmap(filename, mode="r", dtype=self.data_types[key]).reshape(*self.data_shapes[key])
+
+        filename = p_join(self.preprocess_path, "props.pkl")
+        with open(filename, "rb") as f:
+            tmp = pkl.load(f)
+            for key in ["name", "subset", "n_atoms"]:
+                x = tmp.pop(key)
+                if len(x) == 2:
+                    self.data[key] = x[0][x[1]]
+                else:
+                    self.data[key] = x
+
+        for key in self.data:
+            logger.info(f"Loaded {key} with shape {self.data[key].shape}, dtype {self.data[key].dtype}")
