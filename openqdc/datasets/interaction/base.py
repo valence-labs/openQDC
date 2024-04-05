@@ -63,12 +63,11 @@ class BaseInteractionDataset(BaseDataset):
         subset = self.data["subset"][idx]
         n_atoms_first = self.data["n_atoms_first"][idx]
 
+        forces = None
         if "forces" in self.data:
-            forces = self._convert_array(np.array(self.data["forces"][p_start:p_end]), dtype=np.float32)
-        else:
-            forces = None
+            forces = self._convert_array(np.array(self.data["forces"][p_start:p_end], dtype=np.float32))
 
-        e0 = self._convert_array(self.__isolated_atom_energies__[..., z, c + shift].T, dtype=np.float32)
+        e0 = self._convert_array(np.array(self.__isolated_atom_energies__[..., z, c + shift].T, dtype=np.float32))
 
         bunch = Bunch(
             positions=positions,
