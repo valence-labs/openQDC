@@ -15,8 +15,13 @@ class BaseInteractionDataset(BaseDataset):
     __energy_type__ = []
 
     @property
-    def pkl_data_keys(self):
-        return ["name", "subset", "n_atoms", "n_atoms_first"]
+    def pkl_data_types(self):
+        return {
+            "name": str,
+            "subset": str,
+            "n_atoms": np.int32,
+            "n_atoms_first": np.int32,
+        }
 
     def collate_list(self, list_entries: List[Dict]):
         # concatenate entries

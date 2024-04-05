@@ -1,5 +1,7 @@
 import os
-from typing import Dict, List
+from dataclasses import dataclass
+from functools import partial
+from typing import Dict, List, Optional
 
 import numpy as np
 import yaml
@@ -10,42 +12,49 @@ from openqdc.methods import InteractionMethod, InterEnergyType
 from openqdc.utils.constants import ATOM_TABLE
 
 
+@dataclass
+class DataSet:
+    description: Dict
+    items: List[Dict]
+    alternative_reference: Dict
+
+
+@dataclass
 class DataItemYAMLObj:
-    def __init__(self, name, shortname, geometry, reference_value, setup, group, tags):
-        self.name = name
-        self.shortname = shortname
-        self.geometry = geometry
-        self.reference_value = reference_value
-        self.setup = setup
-        self.group = group
-        self.tags = tags
+    name: str
+    shortname: str
+    geometry: str
+    reference_value: float
+    setup: Dict
+    group: str
+    tags: str
 
 
-class DataSetYAMLObj:
-    def __init__(self, name, references, text, method_energy, groups_by, groups, global_setup, method_geometry=None):
-        self.name = name
-        self.references = references
-        self.text = text
-        self.method_energy = method_energy
-        self.method_geometry = method_geometry
-        self.groups_by = groups_by
-        self.groups = groups
-        self.global_setup = global_setup
-
-
-def data_item_constructor(loader: yaml.SafeLoader, node: yaml.nodes.MappingNode):
-    return DataItemYAMLObj(**loader.construct_mapping(node))
-
-
-def dataset_constructor(loader: yaml.SafeLoader, node: yaml.nodes.MappingNode):
-    return DataSetYAMLObj(**loader.construct_mapping(node))
+@dataclass
+class DataSetDescription:
+    name: Dict
+    references: str
+    text: str
+    groups_by: str
+    groups: List[str]
+    global_setup: Dict
+    method_energy: str
+    method_geometry: Optional[str] = None
 
 
 def get_loader():
     """Add constructors to PyYAML loader."""
+
+    def constructor(loader: yaml.SafeLoader, node: yaml.nodes.MappingNode, cls):
+        return cls(**loader.construct_mapping(node))
+
     loader = yaml.SafeLoader
-    loader.add_constructor("!ruby/object:ProtocolDataset::DataSetItem", data_item_constructor)
-    loader.add_constructor("!ruby/object:ProtocolDataset::DataSetDescription", dataset_constructor)
+
+    loader.add_constructor("!ruby/object:ProtocolDataset::DataSet", partial(constructor, cls=DataSet))
+    loader.add_constructor("!ruby/object:ProtocolDataset::DataSetItem", partial(constructor, cls=DataItemYAMLObj))
+    loader.add_constructor(
+        "!ruby/object:ProtocolDataset::DataSetDescription", partial(constructor, cls=DataSetDescription)
+    )
     return loader
 
 
@@ -62,7 +71,7 @@ class L7(BaseInteractionDataset):
     http://cuby4.molecular.cz/dataset_l7.html
     """
 
-    __name__ = "L7"
+    __name__ = "l7"
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
@@ -87,10 +96,10 @@ class L7(BaseInteractionDataset):
         yaml_file = open(yaml_fpath, "r")
         data = []
         data_dict = yaml.load(yaml_file, Loader=get_loader())
-        charge0 = int(data_dict["description"].global_setup["molecule_a"]["charge"])
-        charge1 = int(data_dict["description"].global_setup["molecule_b"]["charge"])
+        charge0 = int(data_dict.description.global_setup["molecule_a"]["charge"])
+        charge1 = int(data_dict.description.global_setup["molecule_b"]["charge"])
 
-        for idx, item in enumerate(data_dict["items"]):
+        for idx, item in enumerate(data_dict.items):
             energies = []
             name = np.array([item.shortname])
             fname = item.geometry.split(":")[1]
@@ -101,7 +110,7 @@ class L7(BaseInteractionDataset):
             n_atoms = np.array([int(lines[0][0])], dtype=np.int32)
             n_atoms_first = np.array([int(item.setup["molecule_a"]["selection"].split("-")[1])], dtype=np.int32)
             subset = np.array([item.group])
-            energies += [float(val[idx]) for val in list(data_dict["alternative_reference"].values())]
+            energies += [float(val[idx]) for val in list(data_dict.alternative_reference.values())]
             energies = np.array([energies], dtype=np.float32)
             pos = np.array(lines[1:])[:, 1:].astype(np.float32)
             elems = np.array(lines[1:])[:, 0]

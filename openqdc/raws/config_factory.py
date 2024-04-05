@@ -51,6 +51,14 @@ class DataConfigFactory:
         links={"rdkit_folder.tar.gz": "https://dataverse.harvard.edu/api/access/datafile/4327252"},
     )
 
+    l7 = dict(
+        dataset_name="l7",
+        links={
+            "l7.yaml": "http://cuby4.molecular.cz/download_datasets/l7.yaml",
+            "geometries.tar.gz": "http://cuby4.molecular.cz/download_geometries/L7.tar",
+        },
+    )
+
     molecule3d = dict(
         dataset_name="molecule3d",
         links={"molecule3d.zip": "https://drive.google.com/uc?id=1C_KRf8mX-gxny7kL9ACNCEV4ceu_fUGy"},
@@ -84,6 +92,28 @@ class DataConfigFactory:
     spicev2 = dict(
         dataset_name="spicev2",
         links={"spice-2.0.0.hdf5": "https://zenodo.org/records/10835749/files/SPICE-2.0.0.hdf5?download=1"},
+    )
+
+    splinter = dict(
+        dataset_name="splinter",
+        links={
+            "dimerpairs.0.tar.gz": "https://figshare.com/ndownloader/files/39449167",
+            "dimerpairs.1.tar.gz": "https://figshare.com/ndownloader/files/40271983",
+            "dimerpairs.2.tar.gz": "https://figshare.com/ndownloader/files/40271989",
+            "dimerpairs.3.tar.gz": "https://figshare.com/ndownloader/files/40272001",
+            "dimerpairs.4.tar.gz": "https://figshare.com/ndownloader/files/40272022",
+            "dimerpairs.5.tar.gz": "https://figshare.com/ndownloader/files/40552931",
+            "dimerpairs.6.tar.gz": "https://figshare.com/ndownloader/files/40272040",
+            "dimerpairs.7.tar.gz": "https://figshare.com/ndownloader/files/40272052",
+            "dimerpairs.8.tar.gz": "https://figshare.com/ndownloader/files/40272061",
+            "dimerpairs.9.tar.gz": "https://figshare.com/ndownloader/files/40272064",
+            "dimerpairs_nonstandard.tar.gz": "https://figshare.com/ndownloader/files/40272067",
+            "lig_interaction_sites.sdf": "https://figshare.com/ndownloader/files/40272070",
+            "lig_monomers.sdf": "https://figshare.com/ndownloader/files/40272073",
+            "prot_interaction_sites.sdf": "https://figshare.com/ndownloader/files/40272076",
+            "prot_monomers.sdf": "https://figshare.com/ndownloader/files/40272079",
+            "merge_monomers.py": "https://figshare.com/ndownloader/files/41807682",
+        },
     )
 
     dess = dict(
@@ -161,11 +191,6 @@ class DataConfigFactory:
         links={"Transition1x.h5": "https://figshare.com/ndownloader/files/36035789"},
     )
 
-    # l7 = dict(
-    #     dataset_name="l7",
-    #     links={"l7.zip": "http://www.begdb.org/moldown.php?id=40"}
-    # )
-
     des_s66 = dict(
         dataset_name="des_s66",
         links={"DESS66.zip": "https://zenodo.org/records/5676284/files/DESS66.zip?download=1"},
@@ -178,6 +203,14 @@ class DataConfigFactory:
     revmd17 = dict(
         dataset_name="revmd17",
         links={"revmd17.zip": "https://figshare.com/ndownloader/articles/12672038/versions/3"},
+    )
+
+    x40 = dict(
+        dataset_name="x40",
+        links={
+            "x40.yaml": "http://cuby4.molecular.cz/download_datasets/x40.yaml",
+            "geometries.tar.gz": "http://cuby4.molecular.cz/download_geometries/X40.tar",
+        },
     )
 
     available_datasets = [k for k in locals().keys() if not k.startswith("__")]

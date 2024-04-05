@@ -25,7 +25,7 @@ class X40(BaseInteractionDataset):
     http://cuby4.molecular.cz/dataset_x40.html
     """
 
-    __name__ = "X40"
+    __name__ = "x40"
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
@@ -48,10 +48,10 @@ class X40(BaseInteractionDataset):
         yaml_file = open(yaml_fpath, "r")
         data = []
         data_dict = yaml.load(yaml_file, Loader=get_loader())
-        charge0 = int(data_dict["description"].global_setup["molecule_a"]["charge"])
-        charge1 = int(data_dict["description"].global_setup["molecule_b"]["charge"])
+        charge0 = int(data_dict.description.global_setup["molecule_a"]["charge"])
+        charge1 = int(data_dict.description.global_setup["molecule_b"]["charge"])
 
-        for idx, item in enumerate(data_dict["items"]):
+        for idx, item in enumerate(data_dict.items):
             energies = []
             name = np.array([item.shortname])
             energies.append(float(item.reference_value))
@@ -62,7 +62,7 @@ class X40(BaseInteractionDataset):
             n_atoms_first = setup[0].split("-")[1]
             n_atoms_first = np.array([int(n_atoms_first)], dtype=np.int32)
             subset = np.array([item.group])
-            energies += [float(val[idx]) for val in list(data_dict["alternative_reference"].values())]
+            energies += [float(val[idx]) for val in list(data_dict.alternative_reference.values())]
             energies = np.array([energies], dtype=np.float32)
             pos = np.array(lines[1:])[:, 1:].astype(np.float32)
             elems = np.array(lines[1:])[:, 0]

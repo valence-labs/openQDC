@@ -310,7 +310,11 @@ class BaseDataset:
 
     @property
     def pkl_data_keys(self):
-        return ["name", "subset", "n_atoms"]
+        return list(self.pkl_data_types.keys())
+
+    @property
+    def pkl_data_types(self):
+        return {"name": str, "subset": str, "n_atoms": np.int32}
 
     @property
     def data_types(self):
@@ -424,12 +428,13 @@ class BaseDataset:
 
         # save smiles and subset
         local_path = p_join(self.preprocess_path, "props.pkl")
+
         # assert that required keys are present in data_dict
-        assert all([key in data_dict for key in self.pkl_data_keys])
-        for key in data_dict:
-            if key not in self.data_keys:
-                x = data_dict[key]
-                x[x == None] = -1  # noqa
+        assert all([key in self.pkl_data_keys for key in data_dict.keys()])
+
+        # store unique and inverse indices for str-based pkl keys
+        for key in self.pkl_data_keys:
+            if self.pkl_data_types[key] == str:
                 data_dict[key] = np.unique(data_dict[key], return_inverse=True)
 
         with open(local_path, "wb") as f:

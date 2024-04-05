@@ -130,7 +130,7 @@ class Splinter(BaseInteractionDataset):
                             index,
                             _,
                         ) = metadata[0].split("_")
-                        r, theta_P, tau_P, theta_L, tau_L, tau_PL = [None] * 6
+                        r, theta_P, tau_P, theta_L, tau_L, tau_PL = [-1] * 6
                     energies = np.array([list(map(float, metadata[4:-1]))]).astype(np.float32)
                     n_atoms_first = np.array([int(metadata[-1])], dtype=np.int32)
                     total_charge, charge0, charge1 = list(map(int, metadata[1:4]))
