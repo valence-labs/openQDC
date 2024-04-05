@@ -542,10 +542,10 @@ class BaseDataset(DatasetPropertyMixIn):
 
             if key.lower() == ForcesCalculatorStats.__name__.lower():
                 for key2 in selected_stats[key]:
-                    selected_stats[key][key2] = self.convert_forces(selected_stats[key][key2])
+                    selected_stats[key][key2] = self._convert_array(self.convert_forces(selected_stats[key][key2]))
             else:
                 for key2 in selected_stats[key]:
-                    selected_stats[key][key2] = self.convert_energy(selected_stats[key][key2])
+                    selected_stats[key][key2] = self._convert_array(self.convert_energy(selected_stats[key][key2]))
         return selected_stats
 
     def __str__(self):

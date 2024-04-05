@@ -120,3 +120,16 @@ def test_force_statistics_shapes(ds):
     assert forces_stats["component_mean"].shape == (3, num_force_methods)
     assert forces_stats["component_std"].shape == (3, num_force_methods)
     assert forces_stats["component_rms"].shape == (3, num_force_methods)
+
+
+@pytest.mark.parametrize("format", ["numpy", "torch", "jax"])
+def test_stats_array_format(format):
+    if not has_package(format):
+        pytest.skip(f"{format} is not installed, skipping test")
+
+    ds = Dummy(array_format=format)
+    stats = ds.get_statistics()
+
+    for key in stats.keys():
+        for k, v in stats[key].items():
+            assert isinstance(v, format_to_type[format])
