@@ -24,11 +24,9 @@ POSSIBLE_NORMALIZATION: Final[List[str]] = [
 NOT_DEFINED = {
     "mean": None,
     "std": None,
-    "components": {
-        "mean": None,
-        "std": None,
-        "rms": None,
-    },
+    "component_mean": None,
+    "component_std": None,
+    "component_rms": None,
 }
 
 ATOM_TABLE = Chem.GetPeriodicTable()

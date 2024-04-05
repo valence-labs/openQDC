@@ -2,7 +2,6 @@
 
 import os
 import pickle as pkl
-from copy import deepcopy
 from functools import partial
 from itertools import compress
 from os.path import join as p_join
@@ -71,13 +70,13 @@ class BaseDataset(DatasetPropertyMixIn):
     __energy_methods__ = []
     __force_mask__ = []
     __isolated_atom_energies__ = []
+    _fn_energy = lambda x: x
+    _fn_distance = lambda x: x
+    _fn_forces = lambda x: x
 
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
-    __fn_energy__ = lambda x: x
-    __fn_distance__ = lambda x: x
-    __fn_forces__ = lambda x: x
     __average_nb_atoms__ = None
 
     def __init__(
@@ -123,6 +122,7 @@ class BaseDataset(DatasetPropertyMixIn):
             solver_type can be one of ["linear", "ridge"]
         """
         set_cache_dir(cache_dir)
+        # self._init_lambda_fn()
         self.data = None
         self.recompute_statistics = recompute_statistics
         self.regressor_kwargs = regressor_kwargs
@@ -135,6 +135,11 @@ class BaseDataset(DatasetPropertyMixIn):
             self.read_preprocess(overwrite_local_cache=overwrite_local_cache)
         self.set_array_format(array_format)
         self._post_init(overwrite_local_cache, energy_unit, distance_unit)
+
+    def _init_lambda_fn(self):
+        self._fn_energy = lambda x: x
+        self._fn_distance = lambda x: x
+        self._fn_forces = lambda x: x
 
     def _post_init(
         self,
@@ -272,7 +277,7 @@ class BaseDataset(DatasetPropertyMixIn):
         self.set_distance_unit(ds)
         if self.__force_methods__:
             self.__forces_unit__ = self.energy_unit + "/" + self.distance_unit
-            self.__class__.__fn_forces__ = get_conversion(old_en + "/" + old_ds, self.__forces_unit__)
+            self._fn_forces = get_conversion(old_en + "/" + old_ds, self.__forces_unit__)
 
     def _set_isolated_atom_energies(self):
         if self.__energy_methods__ is None:
@@ -281,13 +286,13 @@ class BaseDataset(DatasetPropertyMixIn):
         self.__isolated_atom_energies__ = f(self.e0s_dispatcher.e0s_matrix)
 
     def convert_energy(self, x):
-        return self.__class__.__fn_energy__(x)
+        return self._fn_energy(x)
 
     def convert_distance(self, x):
-        return self.__class__.__fn_distance__(x)
+        return self._fn_distance(x)
 
     def convert_forces(self, x):
-        return self.__class__.__fn_forces__(x)
+        return self._fn_forces(x)
 
     def set_energy_unit(self, value: str):
         """
@@ -295,7 +300,7 @@ class BaseDataset(DatasetPropertyMixIn):
         """
         old_unit = self.energy_unit
         self.__energy_unit__ = value
-        self.__class__.__fn_energy__ = get_conversion(old_unit, value)
+        self._fn_energy = get_conversion(old_unit, value)
 
     def set_distance_unit(self, value: str):
         """
@@ -303,7 +308,7 @@ class BaseDataset(DatasetPropertyMixIn):
         """
         old_unit = self.distance_unit
         self.__distance_unit__ = value
-        self.__class__.__fn_distance__ = get_conversion(old_unit, value)
+        self._fn_distance = get_conversion(old_unit, value)
 
     def set_array_format(self, format: str):
         assert format in ["numpy", "torch", "jax"], f"Format {format} not supported."
@@ -535,39 +540,29 @@ class BaseDataset(DatasetPropertyMixIn):
             Whether to return None if the statistics for the forces are not available, by default True
             Otherwise, the statistics for the forces are set to 0.0
         """
-        stats = deepcopy(self.statistics.get_results())
-        if len(stats) == 0:
+        selected_stats = self.statistics.get_results()
+        if len(selected_stats) == 0:
             raise StatisticsNotAvailableError(self.__name__)
-        selected_stats = stats
         if not return_none:
             selected_stats.update(
                 {
                     "ForcesCalculatorStats": {
                         "mean": np.array([0.0]),
                         "std": np.array([0.0]),
-                        "components": {
-                            "mean": np.array([[0.0], [0.0], [0.0]]),
-                            "std": np.array([[0.0], [0.0], [0.0]]),
-                            "rms": np.array([[0.0], [0.0], [0.0]]),
-                        },
+                        "component_mean": np.array([[0.0], [0.0], [0.0]]),
+                        "component_std": np.array([[0.0], [0.0], [0.0]]),
+                        "component_rms": np.array([[0.0], [0.0], [0.0]]),
                     }
                 }
             )
         # cycle trough dict to convert units
-        for key in selected_stats:
-            if key.lower() == str(ForcesCalculatorStats):
-                for key2 in selected_stats[key]:
-                    if key2 != "components":
-                        selected_stats[key][key2] = self.convert_forces(selected_stats[key][key2])
-                    else:
-                        for key2 in selected_stats[key]["components"]:
-                            selected_stats[key]["components"][key2] = self.convert_forces(
-                                selected_stats[key]["components"][key2]
-                            )
+        for key, result in selected_stats.items():
+            if isinstance(result, ForcesCalculatorStats):
+                result.transform(self.convert_forces)
             else:
-                for key2 in selected_stats[key]:
-                    selected_stats[key][key2] = self.convert_energy(selected_stats[key][key2])
-        return selected_stats
+                result.transform(self.convert_energy)
+            result.transform(self._convert_array)
+        return {k: result.to_dict() for k, result in selected_stats.items()}
 
     def __str__(self):
         return f"{self.__name__}"
