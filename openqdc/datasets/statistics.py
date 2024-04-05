@@ -70,6 +70,7 @@ class StatisticManager:
     _results = {}
 
     def __init__(self, dataset, recompute: bool = False, *statistic_calculators: "AbstractStatsCalculator"):
+        self.reset_state()
         self._statistic_calculators = [
             statistic_calculators.from_openqdc_dataset(dataset, recompute)
             for statistic_calculators in statistic_calculators
@@ -81,6 +82,12 @@ class StatisticManager:
         Return the dictionary state of the manager
         """
         return self._state
+
+    def reset_state(self):
+        """
+        Reset the state dictionary
+        """
+        self._state = {}
 
     def get_state(self, key: Optional[str] = None):
         """

@@ -6,7 +6,7 @@ from copy import deepcopy
 from functools import partial
 from itertools import compress
 from os.path import join as p_join
-from typing import Dict, List, Optional, Union
+from typing import Callable, Dict, List, Optional, Union
 
 import numpy as np
 from ase.io.extxyz import write_extxyz
@@ -37,9 +37,28 @@ from openqdc.utils.io import (
     push_remote,
     set_cache_dir,
 )
-from openqdc.utils.package_utils import requires_package
+from openqdc.utils.package_utils import has_package, requires_package
 from openqdc.utils.regressor import Regressor  # noqa
 from openqdc.utils.units import get_conversion
+
+if has_package("torch"):
+    import torch
+
+if has_package("jax"):
+    import jax.numpy as jnp
+
+
+@requires_package("torch")
+def to_torch(x: np.ndarray):
+    return torch.from_numpy(x)
+
+
+@requires_package("jax")
+def to_jax(x: np.ndarray):
+    return jnp.array(x)
+
+
+_CONVERT_DICT = {"torch": to_torch, "jax": to_jax, "numpy": lambda x: x}
 
 
 class BaseDataset(DatasetPropertyMixIn):
@@ -65,10 +84,12 @@ class BaseDataset(DatasetPropertyMixIn):
         self,
         energy_unit: Optional[str] = None,
         distance_unit: Optional[str] = None,
+        array_format: str = "numpy",
         energy_type: str = "formation",
         overwrite_local_cache: bool = False,
         cache_dir: Optional[str] = None,
         recompute_statistics: bool = False,
+        transform: Optional[Callable] = None,
         regressor_kwargs={
             "solver_type": "linear",
             "sub_sample": None,
@@ -83,6 +104,8 @@ class BaseDataset(DatasetPropertyMixIn):
             Energy unit to convert dataset to. Supported units: ["kcal/mol", "kj/mol", "hartree", "ev"]
         distance_unit
             Distance unit to convert dataset to. Supported units: ["ang", "nm", "bohr"]
+        array_format
+            Format to return arrays in. Supported formats: ["numpy", "torch", "jax"]
         energy_type
             Type of isolated atom energy to use for the dataset. Default: "formation"
             Supported types: ["formation", "regression", "null"]
@@ -92,6 +115,8 @@ class BaseDataset(DatasetPropertyMixIn):
             Cache directory location. Defaults to "~/.cache/openqdc"
         recompute_statistics
             Whether to recompute the statistics of the dataset.
+        transform, optional
+            transformation to apply to the __getitem__ calls
         regressor_kwargs
             Dictionary of keyword arguments to pass to the regressor.
             Default: {"solver_type": "linear", "sub_sample": None, "stride": 1}
@@ -101,12 +126,14 @@ class BaseDataset(DatasetPropertyMixIn):
         self.data = None
         self.recompute_statistics = recompute_statistics
         self.regressor_kwargs = regressor_kwargs
+        self.transform = transform
         self.energy_type = energy_type
         self.refit_e0s = recompute_statistics or overwrite_local_cache
         if not self.is_preprocessed():
             raise DatasetNotAvailableError(self.__name__)
         else:
             self.read_preprocess(overwrite_local_cache=overwrite_local_cache)
+        self.set_array_format(array_format)
         self._post_init(overwrite_local_cache, energy_unit, distance_unit)
 
     def _post_init(
@@ -269,6 +296,10 @@ class BaseDataset(DatasetPropertyMixIn):
         old_unit = self.distance_unit
         self.__distance_unit__ = value
         self.__class__.__fn_distance__ = get_conversion(old_unit, value)
+
+    def set_array_format(self, format: str):
+        assert format in ["numpy", "torch", "jax"], f"Format {format} not supported."
+        self.array_format = format
 
     def read_raw_entries(self):
         raise NotImplementedError
@@ -536,24 +567,28 @@ class BaseDataset(DatasetPropertyMixIn):
         """
         return x
 
+    def _convert_array(self, x: np.ndarray):
+        return _CONVERT_DICT.get(self.array_format)(x)
+
     def __getitem__(self, idx: int):
         shift = MAX_CHARGE
         p_start, p_end = self.data["position_idx_range"][idx]
         input = self.data["atomic_inputs"][p_start:p_end]
         z, c, positions, energies = (
-            np.array(input[:, 0], dtype=np.int32),
-            np.array(input[:, 1], dtype=np.int32),
-            np.array(input[:, -3:], dtype=np.float32),
-            np.array(self.data["energies"][idx], dtype=np.float32),
+            self._convert_array(np.array(input[:, 0], dtype=np.int32)),
+            self._convert_array(np.array(input[:, 1], dtype=np.int32)),
+            self._convert_array(np.array(input[:, -3:], dtype=np.float32)),
+            self._convert_array(np.array(self.data["energies"][idx], dtype=np.float32)),
         )
         name = self.__smiles_converter__(self.data["name"][idx])
         subset = self.data["subset"][idx]
-        e0s = self.__isolated_atom_energies__[..., z, c + shift].T
-        formation_energies = (energies - e0s.sum(axis=0)).astype(np.float32)
+        e0s = self._convert_array(self.__isolated_atom_energies__[..., z, c + shift].T)
+        formation_energies = energies - e0s.sum(axis=0)
         forces = None
         if "forces" in self.data:
-            forces = np.array(self.data["forces"][p_start:p_end], dtype=np.float32)
-        return Bunch(
+            forces = self._convert_array(np.array(self.data["forces"][p_start:p_end], dtype=np.float32))
+
+        bunch = Bunch(
             positions=positions,
             atomic_numbers=z,
             charges=c,
@@ -565,3 +600,8 @@ class BaseDataset(DatasetPropertyMixIn):
             subset=subset,
             forces=forces,
         )
+
+        if self.transform is not None:
+            bunch = self.transform(bunch)
+
+        return bunch
