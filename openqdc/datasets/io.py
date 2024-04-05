@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import Callable, List, Optional
 
 import datamol as dm
 import numpy as np
@@ -22,9 +22,12 @@ class FromFileDataset(BaseDataset, ABC):
         path: List[str],
         *,
         dataset_name: Optional[str] = None,
+        energy_type: Optional[str] = "regression",
         energy_unit: Optional[str] = "hartree",
         distance_unit: Optional[str] = "ang",
+        array_format: Optional[str] = "numpy",
         level_of_theory: Optional[QmMethod] = None,
+        transform: Optional[Callable] = None,
         regressor_kwargs={
             "solver_type": "linear",
             "sub_sample": None,
@@ -41,11 +44,16 @@ class FromFileDataset(BaseDataset, ABC):
         """
         self.path = [path] if isinstance(path, str) else path
         self.__name__ = self.__class__.__name__ if dataset_name is None else dataset_name
+        self.recompute_statistics = True
+        self.refit_e0s = True
+        self.energy_type = energy_type
         self.__energy_unit__ = energy_unit
         self.__distance_unit__ = distance_unit
         self.__energy_methods__ = [PotentialMethod.NONE if not level_of_theory else level_of_theory]
         self.regressor_kwargs = regressor_kwargs
+        self.transform = transform
         self._read_and_preprocess()
+        self.set_array_format(array_format)
         self._post_init(True, energy_unit, distance_unit)
 
     def __str__(self):
