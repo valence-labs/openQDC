@@ -13,6 +13,58 @@ from openqdc.utils.io import get_local_cache
 from openqdc.utils.molecule import molecule_groups
 
 
+def parse_des_df(row, energy_target_names):
+    smiles0, smiles1 = row["smiles0"], row["smiles1"]
+    charge0, charge1 = row["charge0"], row["charge1"]
+    natoms0, natoms1 = row["natoms0"], row["natoms1"]
+    pos = np.array(list(map(float, row["xyz"].split()))).reshape(-1, 3)
+    elements = row["elements"].split()
+    atomic_nums = np.expand_dims(np.array([ATOM_TABLE.GetAtomicNumber(x) for x in elements]), axis=1)
+    charges = np.expand_dims(np.array([charge0] * natoms0 + [charge1] * natoms1), axis=1)
+    atomic_inputs = np.concatenate((atomic_nums, charges, pos), axis=-1, dtype=np.float32)
+    energies = np.array(row[energy_target_names].values).astype(np.float32)[None, :]
+    name = np.array([smiles0 + "." + smiles1])
+    return {
+        "energies": energies,
+        "n_atoms": np.array([natoms0 + natoms1], dtype=np.int32),
+        "name": name,
+        "atomic_inputs": atomic_inputs,
+        "charges": charges,
+        "atomic_nums": atomic_nums,
+        "elements": elements,
+        "natoms0": natoms0,
+        "natoms1": natoms1,
+        "smiles0": smiles0,
+        "smiles1": smiles1,
+        "charge0": charge0,
+        "charge1": charge1,
+    }
+
+
+def create_subset(smiles0, smiles1):
+    subsets = []
+    for smiles in [smiles0, smiles1]:
+        found = False
+        for functional_group, smiles_set in molecule_groups.items():
+            if smiles in smiles_set:
+                subsets.append(functional_group)
+                found = True
+        if not found:
+            logger.info(f"molecule group lookup failed for {smiles}")
+    return subsets
+
+
+def convert_to_record(item):
+    return dict(
+        energies=item["energies"],
+        subset=np.array([item["subsets"]]),
+        n_atoms=np.array([item["natoms0"] + item["natoms1"]], dtype=np.int32),
+        n_atoms_first=np.array([item["natoms0"]], dtype=np.int32),
+        atomic_inputs=item["atomic_inputs"],
+        name=item["name"],
+    )
+
+
 class DES370K(BaseInteractionDataset):
     """
     DE Shaw Research interaction energy of over 370K
@@ -95,50 +147,14 @@ class DES370K(BaseInteractionDataset):
     def _root(cls):
         return os.path.join(get_local_cache(), cls._name)
 
-    @classmethod
-    def _read_raw_entries(cls) -> List[Dict]:
+    def read_raw_entries(cls) -> List[Dict]:
         filepath = os.path.join(cls._root(), cls._filename)
         logger.info(f"Reading {cls._name} interaction data from {filepath}")
         df = pd.read_csv(filepath)
         data = []
         for idx, row in tqdm(df.iterrows(), total=df.shape[0]):
-            smiles0, smiles1 = row["smiles0"], row["smiles1"]
-            charge0, charge1 = row["charge0"], row["charge1"]
-            natoms0, natoms1 = row["natoms0"], row["natoms1"]
-            pos = np.array(list(map(float, row["xyz"].split()))).reshape(-1, 3)
-
-            elements = row["elements"].split()
-
-            atomic_nums = np.expand_dims(np.array([ATOM_TABLE.GetAtomicNumber(x) for x in elements]), axis=1)
-
-            charges = np.expand_dims(np.array([charge0] * natoms0 + [charge1] * natoms1), axis=1)
-
-            atomic_inputs = np.concatenate((atomic_nums, charges, pos), axis=-1, dtype=np.float32)
-
-            energies = np.array(row[cls.energy_target_names].values).astype(np.float32)[None, :]
-
-            name = np.array([smiles0 + "." + smiles1])
-
-            subsets = []
-            for smiles in [smiles0, smiles1]:
-                found = False
-                for functional_group, smiles_set in molecule_groups.items():
-                    if smiles in smiles_set:
-                        subsets.append(functional_group)
-                        found = True
-                if not found:
-                    logger.info(f"molecule group lookup failed for {smiles}")
-
-            item = dict(
-                energies=energies,
-                subset=np.array([subsets]),
-                n_atoms=np.array([natoms0 + natoms1], dtype=np.int32),
-                n_atoms_first=np.array([natoms0], dtype=np.int32),
-                atomic_inputs=atomic_inputs,
-                name=name,
-            )
+            item = parse_des_df(row, cls.energy_target_names)
+            item["subset"] = create_subset(item["smiles0"], item["smiles1"])
+            item = convert_to_record(item)
             data.append(item)
         return data
-
-    def read_raw_entries(self) -> List[Dict]:
-        return DES370K._read_raw_entries()
