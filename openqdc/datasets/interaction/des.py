@@ -57,7 +57,7 @@ def create_subset(smiles0, smiles1):
 def convert_to_record(item):
     return dict(
         energies=item["energies"],
-        subset=np.array([item["subsets"]]),
+        subset=np.array([item["subset"]]),
         n_atoms=np.array([item["natoms0"] + item["natoms1"]], dtype=np.int32),
         n_atoms_first=np.array([item["natoms0"]], dtype=np.int32),
         atomic_inputs=item["atomic_inputs"],
@@ -161,7 +161,7 @@ class DES370K(BaseInteractionDataset, IDES):
         data = []
         for idx, row in tqdm(df.iterrows(), total=df.shape[0]):
             item = parse_des_df(row, self.energy_target_names)
-            item["subset"] = self._create_subset(**item)
+            item["subset"] = self._create_subsets(**item)
             item = convert_to_record(item)
             data.append(item)
         return data
