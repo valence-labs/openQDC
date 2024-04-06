@@ -10,10 +10,15 @@ from openqdc.datasets.potential.dummy import Dummy  # noqa: E402
 from openqdc.utils.io import get_local_cache
 from openqdc.utils.package_utils import has_package
 
+
 # start by removing any cached data
-cache_dir = get_local_cache()
-os.system(f"rm -rf {cache_dir}/dummy")
-os.system(f"rm -rf {cache_dir}/dummy_interaction")
+@pytest.fixture(autouse=True)
+def clean_before_run():
+    # start by removing any cached data
+    cache_dir = get_local_cache()
+    os.system(f"rm -rf {cache_dir}/dummy")
+    os.system(f"rm -rf {cache_dir}/dummy_interaction")
+    yield
 
 
 if has_package("torch"):
@@ -62,12 +67,15 @@ def test_dummy_array_format(interaction_ds, format):
         "energies",
         "forces",
         "e0",
-        "formation_energies",
-        "per_atom_formation_energies",
     ]
+    if not interaction_ds:
+        # additional keys returned from the potential dataset
+        keys.extend(["formation_energies", "per_atom_formation_energies"])
 
     data = ds[0]
     for key in keys:
+        if data[key] is None:
+            continue
         assert isinstance(data[key], format_to_type[format])
 
 
@@ -125,11 +133,12 @@ def test_force_statistics_shapes(ds, request):
     keys = ["mean", "std", "component_mean", "component_std", "component_rms"]
     assert all(k in forces_stats for k in keys)
 
-    assert forces_stats["mean"].shape == (1, num_force_methods)
-    assert forces_stats["std"].shape == (1, num_force_methods)
-    assert forces_stats["component_mean"].shape == (3, num_force_methods)
-    assert forces_stats["component_std"].shape == (3, num_force_methods)
-    assert forces_stats["component_rms"].shape == (3, num_force_methods)
+    if len(ds.force_methods) > 0:
+        assert forces_stats["mean"].shape == (1, num_force_methods)
+        assert forces_stats["std"].shape == (1, num_force_methods)
+        assert forces_stats["component_mean"].shape == (3, num_force_methods)
+        assert forces_stats["component_std"].shape == (3, num_force_methods)
+        assert forces_stats["component_rms"].shape == (3, num_force_methods)
 
 
 @pytest.mark.parametrize("interaction_ds", [False, True])
@@ -143,4 +152,6 @@ def test_stats_array_format(interaction_ds, format):
 
     for key in stats.keys():
         for k, v in stats[key].items():
+            if v is None:
+                continue
             assert isinstance(v, format_to_type[format])

@@ -75,4 +75,4 @@ class DES5M(DES370K):
     __forces_unit__ = "kcal/mol/ang"
 
     def read_raw_entries(self) -> List[Dict]:
-        return DES5M._read_raw_entries()
+        return super()._read_raw_entries()

@@ -96,24 +96,18 @@ class DESS66(BaseInteractionDataset):
         logger.info(f"Reading DESS66 interaction data from {self.filepath}")
         df = pd.read_csv(self.filepath)
         data = []
-        for idx, row in tqdm(df.iterrows(), total=df.shape[0]):
+        for _, row in tqdm(df.iterrows(), total=df.shape[0]):
             smiles0, smiles1 = row["smiles0"], row["smiles1"]
             charge0, charge1 = row["charge0"], row["charge1"]
             natoms0, natoms1 = row["natoms0"], row["natoms1"]
             pos = np.array(list(map(float, row["xyz"].split()))).reshape(-1, 3)
 
             elements = row["elements"].split()
-
             atomic_nums = np.expand_dims(np.array([ATOM_TABLE.GetAtomicNumber(x) for x in elements]), axis=1)
-
             charges = np.expand_dims(np.array([charge0] * natoms0 + [charge1] * natoms1), axis=1)
-
             atomic_inputs = np.concatenate((atomic_nums, charges, pos), axis=-1, dtype=np.float32)
-
             energies = np.array(row[self.energy_target_names].values).astype(np.float32)[None, :]
-
             name = np.array([smiles0 + "." + smiles1])
-
             subset = row["system_name"]
 
             item = dict(

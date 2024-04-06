@@ -104,17 +104,11 @@ class DESS66x8(BaseInteractionDataset):
             pos = np.array(list(map(float, row["xyz"].split()))).reshape(-1, 3)
 
             elements = row["elements"].split()
-
             atomic_nums = np.expand_dims(np.array([ATOM_TABLE.GetAtomicNumber(x) for x in elements]), axis=1)
-
             charges = np.expand_dims(np.array([charge0] * natoms0 + [charge1] * natoms1), axis=1)
-
             atomic_inputs = np.concatenate((atomic_nums, charges, pos), axis=-1, dtype=np.float32)
-
             energies = np.array(row[self.energy_target_names].values).astype(np.float32)[None, :]
-
             name = np.array([smiles0 + "." + smiles1])
-
             subset = row["system_name"]
 
             item = dict(
