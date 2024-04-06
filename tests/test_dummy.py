@@ -10,10 +10,14 @@ from openqdc.datasets.potential.dummy import Dummy  # noqa: E402
 from openqdc.utils.io import get_local_cache
 from openqdc.utils.package_utils import has_package
 
-# start by removing any cached data
-cache_dir = get_local_cache()
-os.system(f"rm -rf {cache_dir}/dummy")
-os.system(f"rm -rf {cache_dir}/dummy_interaction")
+
+@pytest.fixture(autouse=True)
+def clean_before_run():
+    # start by removing any cached data
+    cache_dir = get_local_cache()
+    os.system(f"rm -rf {cache_dir}/dummy")
+    os.system(f"rm -rf {cache_dir}/dummy_interaction")
+    yield
 
 
 if has_package("torch"):
