@@ -2,7 +2,6 @@ import numpy as np
 
 from openqdc.datasets.interaction.base import BaseInteractionDataset
 from openqdc.methods import InteractionMethod
-from openqdc.utils.constants import NOT_DEFINED
 
 
 class DummyInteraction(BaseInteractionDataset):
@@ -26,25 +25,6 @@ class DummyInteraction(BaseInteractionDataset):
     def _post_init(self, overwrite_local_cache, energy_unit, distance_unit) -> None:
         self.setup_dummy()
         return super()._post_init(overwrite_local_cache, energy_unit, distance_unit)
-
-    @property
-    def _stats(self):
-        return {
-            "formation": {
-                "energy": {
-                    "mean": np.array([[-12.94348027, -9.83037297]]),
-                    "std": np.array([[4.39971409, 3.3574188]]),
-                },
-                "forces": NOT_DEFINED,
-            },
-            "total": {
-                "energy": {
-                    "mean": np.array([[-89.44242, -1740.5336]]),
-                    "std": np.array([[29.599571, 791.48663]]),
-                },
-                "forces": NOT_DEFINED,
-            },
-        }
 
     def setup_dummy(self):
         n_atoms = np.array([np.random.randint(10, 30) for _ in range(len(self))])
