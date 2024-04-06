@@ -130,9 +130,6 @@ class Metcalf(BaseInteractionDataset):
         # extract in folders
         extract_raw_tar_gz(self.root)
         data = []
-        for _, dirname, _ in os.walk(self.root):
-            xyz_dir = p_join(self.root, dirname)
-            subset = np.array([dirname.split("-")[0].lower()])  # training, validation, or test
-            for filename in glob(xyz_dir + f"{os.sep}*.xyz"):
-                data.append(read_xyz(filename, subset))
+        for filename in glob(self.root + f"{os.sep}*.xyz"):
+            data.append(read_xyz(filename, self.__name__))
         return data
