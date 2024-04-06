@@ -201,17 +201,6 @@ class DESS66(DES370K):
     __name__ = "des_s66"
     __filename__ = "DESS66.csv"
 
-    # def read_raw_entries(self) -> List[Dict]:
-    #    filepath = self.csv_path
-    #    logger.info(f"Reading DESS66 interaction data from {filepath}")
-    #    df = pd.read_csv(filepath)
-    #    data = []
-    #    for idx, row in tqdm(df.iterrows(), total=df.shape[0]):
-    #        item = parse_des_df(row)
-    #        item["subset"] = row["system_name"]
-    #        data.append(convert_to_record(item))
-    #    return data
-
 
 class DESS66x8(DESS66):
     """
