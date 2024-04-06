@@ -341,8 +341,8 @@ class BaseDataset(DatasetPropertyMixIn):
         # save smiles and subset
         local_path = p_join(self.preprocess_path, "props.pkl")
 
-        # assert that required keys are present in data_dict
-        assert all([key in self.pkl_data_keys for key in data_dict.keys()])
+        # assert that (required) pkl keys are present in data_dict
+        assert all([key in data_dict.keys() for key in self.pkl_data_keys])
 
         # store unique and inverse indices for str-based pkl keys
         for key in self.pkl_data_keys:
