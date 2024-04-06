@@ -143,10 +143,9 @@ class L7(BaseInteractionDataset):
     def read_raw_entries(self) -> List[Dict]:
         yaml_fpath = self.yaml_path
         logger.info(f"Reading {self.__name__} interaction data from {self.root}")
-        yaml_file = open(yaml_fpath, "r")
+        with open(yaml_fpath, "r") as yaml_file:
+            data_dict = yaml.load(yaml_file, Loader=get_loader())
         data = []
-        data_dict = yaml.load(yaml_file, Loader=get_loader())
-
         charge0 = int(data_dict.description.global_setup["molecule_a"]["charge"])
         charge1 = int(data_dict.description.global_setup["molecule_b"]["charge"])
 
