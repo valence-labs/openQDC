@@ -1,8 +1,6 @@
 from .base import BaseInteractionDataset  # noqa
-from .des5m import DES5M
-from .des370k import DES370K
-from .dess66 import DESS66
-from .dess66x8 import DESS66x8
+from .des import DES5M, DES370K
+from .dess66 import DESS66, DESS66x8
 from .L7 import L7
 from .metcalf import Metcalf
 from .splinter import Splinter

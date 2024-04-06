@@ -1,14 +1,18 @@
 import os
 from typing import Dict, List
 
-import numpy as np
 import pandas as pd
 from loguru import logger
 from tqdm import tqdm
 
 from openqdc.datasets.interaction.base import BaseInteractionDataset
+from openqdc.datasets.interaction.des370k import convert_to_record, parse_des_df
 from openqdc.methods import InteractionMethod, InterEnergyType
-from openqdc.utils.constants import ATOM_TABLE
+
+CSV_NAME = {
+    "des_s66": "DESS66.csv",
+    "des_s66x8": "DESS66x8.csv",
+}
 
 
 class DESS66(BaseInteractionDataset):
@@ -91,38 +95,37 @@ class DESS66(BaseInteractionDataset):
         "sapt_delta_HF",
     ]
 
+    @property
+    def csv_path(self):
+        return os.path.join(self.root, CSV_NAME[self.__name__])
+
     def read_raw_entries(self) -> List[Dict]:
-        self.filepath = os.path.join(self.root, "DESS66.csv")
-        logger.info(f"Reading DESS66 interaction data from {self.filepath}")
-        df = pd.read_csv(self.filepath)
+        filepath = self.csv_path
+        logger.info(f"Reading DESS66 interaction data from {filepath}")
+        df = pd.read_csv(filepath)
         data = []
         for idx, row in tqdm(df.iterrows(), total=df.shape[0]):
-            smiles0, smiles1 = row["smiles0"], row["smiles1"]
-            charge0, charge1 = row["charge0"], row["charge1"]
-            natoms0, natoms1 = row["natoms0"], row["natoms1"]
-            pos = np.array(list(map(float, row["xyz"].split()))).reshape(-1, 3)
-
-            elements = row["elements"].split()
-
-            atomic_nums = np.expand_dims(np.array([ATOM_TABLE.GetAtomicNumber(x) for x in elements]), axis=1)
-
-            charges = np.expand_dims(np.array([charge0] * natoms0 + [charge1] * natoms1), axis=1)
-
-            atomic_inputs = np.concatenate((atomic_nums, charges, pos), axis=-1, dtype=np.float32)
-
-            energies = np.array(row[self.energy_target_names].values).astype(np.float32)[None, :]
-
-            name = np.array([smiles0 + "." + smiles1])
-
-            subset = row["system_name"]
-
-            item = dict(
-                energies=energies,
-                subset=np.array([subset]),
-                n_atoms=np.array([natoms0 + natoms1], dtype=np.int32),
-                n_atoms_first=np.array([natoms0], dtype=np.int32),
-                atomic_inputs=atomic_inputs,
-                name=name,
-            )
-            data.append(item)
+            item = parse_des_df(row)
+            item["subset"] = row["system_name"]
+            data.append(convert_to_record(item))
         return data
+
+
+class DESS66x8(DESS66):
+    """
+    DE Shaw Research interaction energy
+    estimates of all 528 conformers from
+    the original S66x8 dataset as described
+    in the paper:
+
+    Quantum chemical benchmark databases of gold-standard dimer interaction energies.
+    Donchev, A.G., Taube, A.G., Decolvenaere, E. et al.
+    Sci Data 8, 55 (2021).
+    https://doi.org/10.1038/s41597-021-00833-x
+
+    Data was downloaded from Zenodo:
+
+    https://zenodo.org/records/5676284
+    """
+
+    __name__ = "des_s66x8"
