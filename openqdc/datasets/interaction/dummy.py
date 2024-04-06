@@ -10,7 +10,7 @@ class DummyInteraction(BaseInteractionDataset):
     Dummy Interaction Dataset for Testing
     """
 
-    __name__ = "dummy"
+    __name__ = "dummy_interaction"
     __energy_methods__ = [InteractionMethod.SAPT0_AUG_CC_PVDDZ, InteractionMethod.CCSD_T_CC_PVDZ]
     __force_mask__ = [False, True]
     __energy_unit__ = "kcal/mol"
