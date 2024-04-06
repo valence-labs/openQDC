@@ -1,4 +1,5 @@
 import os
+from abc import ABC, abstractmethod
 from typing import Dict, List
 
 import numpy as np
@@ -9,7 +10,6 @@ from tqdm import tqdm
 from openqdc.datasets.interaction.base import BaseInteractionDataset
 from openqdc.methods import InteractionMethod, InterEnergyType
 from openqdc.utils.constants import ATOM_TABLE
-from openqdc.utils.io import get_local_cache
 from openqdc.utils.molecule import molecule_groups
 
 
@@ -65,7 +65,13 @@ def convert_to_record(item):
     )
 
 
-class DES370K(BaseInteractionDataset):
+class IDES(ABC):
+    @abstractmethod
+    def _create_subsets(self, **kwargs):
+        raise NotImplementedError
+
+
+class DES370K(BaseInteractionDataset, IDES):
     """
     DE Shaw Research interaction energy of over 370K
     small molecule dimers as described in the paper:
@@ -77,6 +83,7 @@ class DES370K(BaseInteractionDataset):
     """
 
     __name__ = "des370k_interaction"
+    __filename__ = "DES370K.csv"
     __energy_unit__ = "kcal/mol"
     __distance_unit__ = "ang"
     __forces_unit__ = "kcal/mol/ang"
@@ -140,21 +147,21 @@ class DES370K(BaseInteractionDataset):
         "sapt_delta_HF",
     ]
 
-    _filename = "DES370K.csv"
-    _name = "des370k_interaction"
+    @property
+    def csv_path(self):
+        return os.path.join(self.root, self.__filename__)
 
-    @classmethod
-    def _root(cls):
-        return os.path.join(get_local_cache(), cls._name)
+    def _create_subsets(self, **kwargs):
+        return create_subset(kwargs["smiles0"], kwargs["smiles1"])
 
-    def read_raw_entries(cls) -> List[Dict]:
-        filepath = os.path.join(cls._root(), cls._filename)
-        logger.info(f"Reading {cls._name} interaction data from {filepath}")
+    def read_raw_entries(self) -> List[Dict]:
+        filepath = self.csv_path
+        logger.info(f"Reading {self.__name__} interaction data from {filepath}")
         df = pd.read_csv(filepath)
         data = []
         for idx, row in tqdm(df.iterrows(), total=df.shape[0]):
-            item = parse_des_df(row, cls.energy_target_names)
-            item["subset"] = create_subset(item["smiles0"], item["smiles1"])
+            item = parse_des_df(row, self.energy_target_names)
+            item["subset"] = self._create_subset(**item)
             item = convert_to_record(item)
             data.append(item)
         return data
@@ -172,60 +179,56 @@ class DES5M(DES370K):
     """
 
     __name__ = "des5m_interaction"
-    __energy_methods__ = [
-        InteractionMethod.MP2_CC_PVQZ,
-        InteractionMethod.MP2_CC_PVTZ,
-        InteractionMethod.MP2_CBS,
-        InteractionMethod.CCSD_T_NN,
-        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
-        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
-        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
-        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
-        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
-        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
-        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
-        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
-        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
-        InteractionMethod.SAPT0_AUG_CC_PWCVXZ,
-    ]
+    __filename__ = "DES5M.csv"
 
-    __energy_type__ = [
-        InterEnergyType.TOTAL,
-        InterEnergyType.TOTAL,
-        InterEnergyType.TOTAL,
-        InterEnergyType.TOTAL,
-        InterEnergyType.TOTAL,
-        InterEnergyType.ES,
-        InterEnergyType.EX,
-        InterEnergyType.EX_S2,
-        InterEnergyType.IND,
-        InterEnergyType.EX_IND,
-        InterEnergyType.DISP,
-        InterEnergyType.EX_DISP_OS,
-        InterEnergyType.EX_DISP_SS,
-        InterEnergyType.DELTA_HF,
-    ]
 
-    energy_target_names = [
-        "qz_MP2_all",
-        "tz_MP2_all",
-        "cbs_MP2_all",
-        "nn_CCSD(T)_all",
-        "sapt_all",
-        "sapt_es",
-        "sapt_ex",
-        "sapt_exs2",
-        "sapt_ind",
-        "sapt_exind",
-        "sapt_disp",
-        "sapt_exdisp_os",
-        "sapt_exdisp_ss",
-        "sapt_delta_HF",
-    ]
+class DESS66(DES370K):
+    """
+    DE Shaw Research interaction energy
+    estimates of all 66 conformers from
+    the original S66 dataset as described
+    in the paper:
 
-    _filename = "DES5M.csv"
-    _name = "des5m_interaction"
+    Quantum chemical benchmark databases of gold-standard dimer interaction energies.
+    Donchev, A.G., Taube, A.G., Decolvenaere, E. et al.
+    Sci Data 8, 55 (2021).
+    https://doi.org/10.1038/s41597-021-00833-x
 
-    __energy_unit__ = "kcal/mol"
-    __distance_unit__ = "ang"
-    __forces_unit__ = "kcal/mol/ang"
+    Data was downloaded from Zenodo:
+    https://zenodo.org/records/5676284
+    """
+
+    __name__ = "des_s66"
+    __filename__ = "DESS66.csv"
+
+    # def read_raw_entries(self) -> List[Dict]:
+    #    filepath = self.csv_path
+    #    logger.info(f"Reading DESS66 interaction data from {filepath}")
+    #    df = pd.read_csv(filepath)
+    #    data = []
+    #    for idx, row in tqdm(df.iterrows(), total=df.shape[0]):
+    #        item = parse_des_df(row)
+    #        item["subset"] = row["system_name"]
+    #        data.append(convert_to_record(item))
+    #    return data
+
+
+class DESS66x8(DESS66):
+    """
+    DE Shaw Research interaction energy
+    estimates of all 528 conformers from
+    the original S66x8 dataset as described
+    in the paper:
+
+    Quantum chemical benchmark databases of gold-standard dimer interaction energies.
+    Donchev, A.G., Taube, A.G., Decolvenaere, E. et al.
+    Sci Data 8, 55 (2021).
+    https://doi.org/10.1038/s41597-021-00833-x
+
+    Data was downloaded from Zenodo:
+
+    https://zenodo.org/records/5676284
+    """
+
+    __name__ = "des_s66x8"
+    __filename__ = "DESS66x8.csv"
