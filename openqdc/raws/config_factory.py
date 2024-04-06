@@ -269,22 +269,14 @@ class DataConfigFactory:
         },
     )
 
-    dess = dict(
-        dataset_name="dess5m",
-        links={
-            "DESS5M.zip": "https://zenodo.org/record/5706002/files/DESS5M.zip",
-            "DESS370.zip": "https://zenodo.org/record/5676266/files/DES370K.zip",
-        },
-    )
-
-    des370k_interaction = dict(
+    des370k = dict(
         dataset_name="des370k_interaction",
         links={
             "DES370K.zip": "https://zenodo.org/record/5676266/files/DES370K.zip",
         },
     )
 
-    des5m_interaction = dict(
+    des5m = dict(
         dataset_name="des5m_interaction",
         links={
             "DES5M.zip": "https://zenodo.org/records/5706002/files/DESS5M.zip?download=1",
@@ -349,12 +341,12 @@ class DataConfigFactory:
         links={"Transition1x.h5": "https://figshare.com/ndownloader/files/36035789"},
     )
 
-    des_s66 = dict(
+    dess66 = dict(
         dataset_name="des_s66",
         links={"DESS66.zip": "https://zenodo.org/records/5676284/files/DESS66.zip?download=1"},
     )
 
-    des_s66x8 = dict(
+    dess66x8 = dict(
         dataset_name="des_s66x8",
         links={"DESS66x8.zip": "https://zenodo.org/records/5676284/files/DESS66x8.zip?download=1"},
     )
