@@ -1,4 +1,5 @@
 import os
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import partial
 from os.path import join as p_join
@@ -9,7 +10,7 @@ import yaml
 from loguru import logger
 
 from openqdc.datasets.interaction.base import BaseInteractionDataset
-from openqdc.methods import InteractionMethod, InterEnergyType
+from openqdc.methods import InterEnergyType
 from openqdc.utils.constants import ATOM_TABLE
 
 
@@ -104,37 +105,14 @@ def build_item(item, charge0, charge1, idx, data_dict, root, filename):
     return datum
 
 
-class L7(BaseInteractionDataset):
-    """
-    The L7 interaction energy dataset as described in:
-
-    Accuracy of Quantum Chemical Methods for Large Noncovalent Complexes
-    Robert Sedlak, Tomasz Janowski, Michal Pitoňák, Jan Řezáč, Peter Pulay, and Pavel Hobza
-    Journal of Chemical Theory and Computation 2013 9 (8), 3364-3374
-    DOI: 10.1021/ct400036b
-
-    Data was downloaded and extracted from:
-    http://cuby4.molecular.cz/dataset_l7.html
-    """
-
+class YamlDataset(BaseInteractionDataset, ABC):
     __name__ = "l7"
     __energy_unit__ = "kcal/mol"
     __distance_unit__ = "ang"
     __forces_unit__ = "kcal/mol/ang"
-    __energy_methods__ = [
-        InteractionMethod.QCISDT_CBS,  # "QCISD(T)/CBS",
-        InteractionMethod.DLPNO_CCSDT,  # "DLPNO-CCSD(T)",
-        InteractionMethod.MP2_CBS,  # "MP2/CBS",
-        InteractionMethod.MP2C_CBS,  # "MP2C/CBS",
-        InteractionMethod.FIXED,  # "fixed", TODO: we should remove this level of theory because unless we have a pro
-        InteractionMethod.DLPNO_CCSDT0,  # "DLPNO-CCSD(T0)",
-        InteractionMethod.LNO_CCSDT,  # "LNO-CCSD(T)",
-        InteractionMethod.FN_DMC,  # "FN-DMC",
-    ]
-
-    __energy_type__ = [InterEnergyType.TOTAL] * 8
-
     energy_target_names = []
+    __energy_methods__ = []
+    __energy_type__ = [InterEnergyType.TOTAL] * len(__energy_methods__)
 
     @property
     def yaml_path(self):
@@ -155,37 +133,6 @@ class L7(BaseInteractionDataset):
             data.append(item)
         return data
 
+    @abstractmethod
     def _process_name(self, item):
-        return item.geometry.split(":")[1]
-
-
-class X40(L7):
-    """
-    X40 interaction dataset of 40 dimer pairs as
-    introduced in the following paper:
-
-    Benchmark Calculations of Noncovalent Interactions of Halogenated Molecules
-    Jan Řezáč, Kevin E. Riley, and Pavel Hobza
-    Journal of Chemical Theory and Computation 2012 8 (11), 4285-4292
-    DOI: 10.1021/ct300647k
-
-    Dataset retrieved and processed from:
-    http://cuby4.molecular.cz/dataset_x40.html
-    """
-
-    __name__ = "x40"
-    __energy_methods__ = [
-        InteractionMethod.CCSD_T_CBS,  # "CCSD(T)/CBS",
-        InteractionMethod.MP2_CBS,  # "MP2/CBS",
-        InteractionMethod.DCCSDT_HA_DZ,  # "dCCSD(T)/haDZ",
-        InteractionMethod.DCCSDT_HA_TZ,  # "dCCSD(T)/haTZ",
-        InteractionMethod.MP2_5_CBS_ADZ,  # "MP2.5/CBS(aDZ)",
-    ]
-    __energy_type__ = [
-        InterEnergyType.TOTAL,
-    ] * 5
-
-    energy_target_names = []
-
-    def _process_name(self, item):
-        return item.shortname
+        raise NotImplementedError
