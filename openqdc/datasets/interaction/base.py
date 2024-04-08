@@ -42,7 +42,6 @@ class BaseInteractionDataset(BaseDataset):
             forces = self._convert_array(np.array(self.data["forces"][p_start:p_end], dtype=np.float32))
 
         e0 = self._convert_array(np.array(self.__isolated_atom_energies__[..., z, c + shift].T, dtype=np.float32))
-        formation_energies = energies - e0.sum(axis=0)
 
         bunch = Bunch(
             positions=positions,
@@ -50,8 +49,6 @@ class BaseInteractionDataset(BaseDataset):
             charges=c,
             e0=e0,
             energies=energies,
-            formation_energies=formation_energies,
-            per_atom_formation_energies=formation_energies / len(z),
             name=name,
             subset=subset,
             forces=forces,

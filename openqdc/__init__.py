@@ -14,6 +14,7 @@ def get_project_root():
 _lazy_imports_obj = {
     "__version__": "openqdc._version",
     "BaseDataset": "openqdc.datasets.base",
+    # POTENTIAL
     "ANI1": "openqdc.datasets.potential.ani",
     "ANI1CCX": "openqdc.datasets.potential.ani",
     "ANI1X": "openqdc.datasets.potential.ani",
@@ -32,12 +33,23 @@ _lazy_imports_obj = {
     "SolvatedPeptides": "openqdc.datasets.potential.solvated_peptides",
     "WaterClusters": "openqdc.datasets.potential.waterclusters3_30",
     "TMQM": "openqdc.datasets.potential.tmqm",
-    "Dummy": "openqdc.datasets.potential.dummy",
     "PCQM_B3LYP": "openqdc.datasets.potential.pcqm",
     "PCQM_PM6": "openqdc.datasets.potential.pcqm",
     "RevMD17": "openqdc.datasets.potential.revmd17",
     "Transition1X": "openqdc.datasets.potential.transition1x",
     "MultixcQM9": "openqdc.datasets.potential.multixcqm9",
+    # INTERACTION
+    "DES5M": "openqdc.datasets.interaction.des",
+    "DES370K": "openqdc.datasets.interaction.des",
+    "DESS66": "openqdc.datasets.interaction.des",
+    "DESS66x8": "openqdc.datasets.interaction.des",
+    "L7": "openqdc.datasets.interaction.l7",
+    "X40": "openqdc.datasets.interaction.x40",
+    "Metcalf": "openqdc.datasets.interaction.metcalf",
+    "Splinter": "openqdc.datasets.interaction.splinter",
+    # DEBUG
+    "Dummy": "openqdc.datasets.potential.dummy",
+    # ALL
     "AVAILABLE_DATASETS": "openqdc.datasets",
     "AVAILABLE_POTENTIAL_DATASETS": "openqdc.datasets.potential",
     "AVAILABLE_INTERACTION_DATASETS": "openqdc.datasets.interaction",
@@ -75,6 +87,13 @@ if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
     from ._version import __version__  # noqa
     from .datasets import AVAILABLE_DATASETS  # noqa
     from .datasets.base import BaseDataset  # noqa
+
+    # INTERACTION
+    from .datasets.interaction.des import DES5M, DES370K, DESS66, DESS66x8  # noqa
+    from .datasets.interaction.l7 import L7  # noqa
+    from .datasets.interaction.metcalf import Metcalf  # noqa
+    from .datasets.interaction.splinter import Splinter  # noqa
+    from .datasets.interaction.x40 import X40  # noqa
     from .datasets.potential.ani import ANI1, ANI1CCX, ANI1X  # noqa
     from .datasets.potential.comp6 import COMP6  # noqa
     from .datasets.potential.dummy import Dummy  # noqa

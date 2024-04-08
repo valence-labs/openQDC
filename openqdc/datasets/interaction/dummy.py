@@ -11,14 +11,13 @@ class DummyInteraction(BaseInteractionDataset):
 
     __name__ = "dummy_interaction"
     __energy_methods__ = [InteractionMethod.SAPT0_AUG_CC_PVDDZ, InteractionMethod.CCSD_T_CC_PVDZ]
-    __force_mask__ = [False, True]
+    __force_mask__ = [False, False]
     __energy_unit__ = "kcal/mol"
     __distance_unit__ = "ang"
     __forces_unit__ = "kcal/mol/ang"
 
     energy_target_names = [f"energy{i}" for i in range(len(__energy_methods__))]
 
-    force_target_names = [f"forces{i}" for i in range(len(__force_mask__))]
     __isolated_atom_energies__ = []
     __average_n_atoms__ = None
 
@@ -48,7 +47,6 @@ class DummyInteraction(BaseInteractionDataset):
         name = [f"dummy_{i}" for i in range(len(self))]
         subset = ["dummy" for i in range(len(self))]
         energies = np.random.rand(len(self), len(self.energy_methods))
-        forces = np.concatenate([np.random.randn(size, 3, len(self.force_methods)) * 100 for size in n_atoms])
         self.data = dict(
             n_atoms=n_atoms,
             position_idx_range=position_idx_range,
@@ -57,7 +55,6 @@ class DummyInteraction(BaseInteractionDataset):
             subset=subset,
             energies=energies,
             n_atoms_first=n_atoms_first,
-            forces=forces,
         )
         self.__average_nb_atoms__ = self.data["n_atoms"].mean()
 

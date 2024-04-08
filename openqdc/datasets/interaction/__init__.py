@@ -1,8 +1,9 @@
 from .base import BaseInteractionDataset  # noqa
 from .des import DES5M, DES370K, DESS66, DESS66x8
-from .l7x40 import L7, X40
+from .l7 import L7
 from .metcalf import Metcalf
 from .splinter import Splinter
+from .x40 import X40
 
 AVAILABLE_INTERACTION_DATASETS = {
     "des5m": DES5M,
