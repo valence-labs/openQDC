@@ -1,57 +1,85 @@
 import os
+from glob import glob
+from io import StringIO
+from os.path import join as p_join
 from typing import Dict, List
 
 import numpy as np
 from loguru import logger
+from tqdm import tqdm
 
 from openqdc.datasets.interaction.base import BaseInteractionDataset
 from openqdc.methods import InteractionMethod, InterEnergyType
+from openqdc.raws.config_factory import decompress_tar_gz
 from openqdc.utils.constants import ATOM_TABLE
+
+EXPECTED_TAR_FILES = {
+    "train": [
+        "TRAINING-2073-ssi-neutral.tar.gz",
+        "TRAINING-2610-donors-perturbed.tar.gz",
+        "TRAINING-4795-acceptors-perturbed.tar.gz",
+    ],
+    "val": ["VALIDATION-125-donors.tar.gz", "VALIDATION-254-acceptors.tar.gz"],
+    "test": [
+        "TEST-Acc--3-methylbutan-2-one_Don--NMe-acetamide-PLDB.tar.gz",
+        "TEST-Acc--Cyclohexanone_Don--NMe-acetamide-PLDB.tar.gz",
+        "TEST-Acc--Isoquinolone_NMe-acetamide.tar.gz",
+        "TEST-Acc--NMe-acetamide_Don--Aniline-CSD.tar.gz",
+        "TEST-Acc--NMe-acetamide_Don--Aniline-PLDB.tar.gz",
+        "TEST-Acc--NMe-acetamide_Don--N-isopropylacetamide-PLDB.tar.gz",
+        "TEST-Acc--NMe-acetamide_Don--N-phenylbenzamide-PLDB.tar.gz",
+        "TEST-Acc--NMe-acetamide_Don--Naphthalene-1H-PLDB.tar.gz",
+        "TEST-Acc--NMe-acetamide_Don--Uracil-PLDB.tar.gz",
+        "TEST-Acc--Tetrahydro-2H-pyran-2-one_NMe-acetamide-PLDB.tar.gz",
+        "TEST-NMe-acetamide_Don--Benzimidazole-PLDB.tar.gz",
+    ],
+}
 
 
 def extract_raw_tar_gz(folder):
-    # go over all files
     logger.info(f"Extracting all tar.gz files in {folder}")
-    expected_tar_files = {
-        "train": [
-            "TRAINING-2073-ssi-neutral.tar.gz",
-            "TRAINING-2610-donors-perturbed.tar.gz",
-            "TRAINING-4795-acceptors-perturbed.tar.gz",
-        ],
-        "val": ["VALIDATION-125-donors.tar.gz", "VALIDATION-254-acceptors.tar.gz"],
-        "test": [
-            "TEST-Acc--3-methylbutan-2-one_Don--NMe-acetamide-PLDB.tar.gz",
-            "TEST-Acc--Cyclohexanone_Don--NMe-acetamide-PLDB.tar.gz",
-            "TEST-Acc--Isoquinolone_NMe-acetamide.tar.gz",
-            "TEST-Acc--NMe-acetamide_Don--Aniline-CSD.tar.gz",
-            "TEST-Acc--NMe-acetamide_Don--Aniline-PLDB.tar.gz",
-            "TEST-Acc--NMe-acetamide_Don--N-isopropylacetamide-PLDB.tar.gz",
-            "TEST-Acc--NMe-acetamide_Don--N-phenylbenzamide-PLDB.tar.gz",
-            "TEST-Acc--NMe-acetamide_Don--Naphthalene-1H-PLDB.tar.gz",
-            "TEST-Acc--NMe-acetamide_Don--Uracil-PLDB.tar.gz",
-            "TEST-Acc--Tetrahydro-2H-pyran-2-one_NMe-acetamide-PLDB.tar.gz",
-            "TEST-NMe-acetamide_Don--Benzimidazole-PLDB.tar.gz",
-        ],
-    }
+    for subset in EXPECTED_TAR_FILES:
+        for tar_file in EXPECTED_TAR_FILES[subset]:
+            tar_file_path = p_join(folder, tar_file)
+            try:
+                decompress_tar_gz(tar_file_path)
+            except FileNotFoundError as e:
+                raise FileNotFoundError(f"File {tar_file_path} not found") from e
 
-    # create a folder with the same name as the tar.gz file
-    for subset in expected_tar_files:
-        for tar_file in expected_tar_files[subset]:
-            logger.info(f"Extracting {tar_file}")
-            tar_file_path = os.path.join(folder, tar_file)
 
-            # check if tar file exists
-            if not os.path.exists(tar_file_path):
-                raise FileNotFoundError(f"File {tar_file_path} not found")
+def content_to_xyz(content, subset):
+    try:
+        num_atoms = np.array([int(content.split("\n")[0])])
+        tmp = content.split("\n")[1].split(",")
+        name = tmp[0]
+        e = tmp[1:-1]
+    except Exception as e:
+        logger.warning(f"Encountered exception in {content} : {e}")
+        return None
 
-            # skip if extracted folder exists
-            if os.path.exists(os.path.join(folder, tar_file.replace(".tar.gz", ""))):
-                logger.info(f"Skipping {tar_file}")
-                continue
+    s = StringIO(content)
+    d = np.loadtxt(s, skiprows=2, dtype="str")
+    z, positions = d[:, 0], d[:, 1:].astype(np.float32)
+    z = np.array([ATOM_TABLE.GetAtomicNumber(s) for s in z])
+    xs = np.stack((z, np.zeros_like(z)), axis=-1)
 
-            tar_folder_path = tar_file_path.replace(".tar.gz", "")
-            os.mkdir(tar_folder_path)
-            os.system(f"tar -xzf {tar_file_path} -C {tar_folder_path}")
+    item = dict(
+        n_atoms=num_atoms,
+        subset=np.array([subset]),
+        energies=e,
+        atomic_inputs=np.concatenate((xs, positions), axis=-1, dtype=np.float32),
+        name=np.array([name]),
+        n_atoms_first=np.array([-1]),
+    )
+
+    return item
+
+
+def read_xyz(fname, subset):
+    with open(fname, "r") as f:
+        contents = f.read().split("\n\n")
+    res = [content_to_xyz(content, subset) for content in tqdm(contents)]
+    return res
 
 
 class Metcalf(BaseInteractionDataset):
@@ -102,35 +130,6 @@ class Metcalf(BaseInteractionDataset):
         # extract in folders
         extract_raw_tar_gz(self.root)
         data = []
-        for dirname in os.listdir(self.root):
-            xyz_dir = os.path.join(self.root, dirname)
-            if not os.path.isdir(xyz_dir):
-                continue
-            subset = np.array([dirname.split("-")[0].lower()])  # training, validation, or test
-            for filename in os.listdir(xyz_dir):
-                if not filename.endswith(".xyz"):
-                    continue
-                lines = list(map(lambda x: x.strip(), open(os.path.join(xyz_dir, filename), "r").readlines()))
-                line_two = lines[1].split(",")
-                energies = np.array([line_two[1:6]], dtype=np.float32)
-                num_atoms = np.array([int(lines[0])])
-
-                elem_xyz = np.array([x.split() for x in lines[2:]])
-                elements = elem_xyz[:, 0]
-                xyz = elem_xyz[:, 1:].astype(np.float32)
-                atomic_nums = np.expand_dims(np.array([ATOM_TABLE.GetAtomicNumber(x) for x in elements]), axis=1)
-                charges = np.expand_dims(np.array([0] * num_atoms[0]), axis=1)
-
-                atomic_inputs = np.concatenate((atomic_nums, charges, xyz), axis=-1, dtype=np.float32)
-
-                item = dict(
-                    n_atoms=num_atoms,
-                    subset=subset,
-                    energies=energies,
-                    positions=xyz,
-                    atomic_inputs=atomic_inputs,
-                    name=np.array([""]),
-                    n_atoms_first=np.array([-1]),
-                )
-                data.append(item)
+        for filename in glob(self.root + f"{os.sep}*.xyz"):
+            data.append(read_xyz(filename, self.__name__))
         return data
