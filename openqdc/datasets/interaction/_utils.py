@@ -76,7 +76,7 @@ def convert_to_record(item):
         energies=item["energies"],
         subset=np.array([item["subset"]]),
         n_atoms=np.array([item["natoms0"] + item["natoms1"]], dtype=np.int32),
-        n_atoms_first=np.array([item["natoms0"]], dtype=np.int32),
+        n_atoms_ptr=np.array([item["natoms0"]], dtype=np.int32),
         atomic_inputs=item["atomic_inputs"],
         name=item["name"],
     )
@@ -95,8 +95,8 @@ def build_item(item, charge0, charge1, idx, data_dict, root, filename):
     datum["n_atoms"] = n_atoms
     datum["pos"] = pos
     datum["atomic_nums"] = atomic_nums
-    datum["n_atoms_first"] = np.array([int(item.setup["molecule_a"]["selection"].split("-")[1])], dtype=np.int32)
-    datum["natoms0"] = datum["n_atoms_first"][0]
+    datum["n_atoms_ptr"] = np.array([int(item.setup["molecule_a"]["selection"].split("-")[1])], dtype=np.int32)
+    datum["natoms0"] = datum["n_atoms_ptr"][0]
     datum["natoms1"] = datum["n_atoms"][0] - datum["natoms0"]
     datum["charges"] = np.expand_dims(np.array([charge0] * datum["natoms0"] + [charge1] * datum["natoms1"]), axis=1)
     datum["atomic_inputs"] = np.concatenate(

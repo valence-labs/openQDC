@@ -136,13 +136,13 @@ class Splinter(BaseInteractionDataset):
                         ) = metadata[0].split("_")
                         r, theta_P, tau_P, theta_L, tau_L, tau_PL = [-1] * 6
                     energies = np.array([list(map(float, metadata[4:-1]))]).astype(np.float32)
-                    n_atoms_first = np.array([int(metadata[-1])], dtype=np.int32)
+                    n_atoms_ptr = np.array([int(metadata[-1])], dtype=np.int32)
                     total_charge, charge0, charge1 = list(map(int, metadata[1:4]))
                     lines = list(map(lambda x: x.split(), lines[2:]))
                     pos = np.array(lines)[:, 1:].astype(np.float32)
                     elems = np.array(lines)[:, 0]
                     atomic_nums = np.expand_dims(np.array([ATOM_TABLE.GetAtomicNumber(x) for x in elems]), axis=1)
-                    natoms0 = n_atoms_first[0]
+                    natoms0 = n_atoms_ptr[0]
                     natoms1 = n_atoms[0] - natoms0
                     charges = np.expand_dims(np.array([charge0] * natoms0 + [charge1] * natoms1), axis=1)
                     atomic_inputs = np.concatenate((atomic_nums, charges, pos), axis=-1, dtype=np.float32)
@@ -152,7 +152,7 @@ class Splinter(BaseInteractionDataset):
                         energies=energies,
                         subset=subset,
                         n_atoms=n_atoms,
-                        n_atoms_first=n_atoms_first,
+                        n_atoms_ptr=n_atoms_ptr,
                         atomic_inputs=atomic_inputs,
                         protein_monomer_name=np.array([protein_monomer_name]),
                         protein_interaction_site_type=np.array([protein_interaction_site_type]),

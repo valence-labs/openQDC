@@ -59,7 +59,7 @@ def convert_to_record(item):
         energies=item["energies"],
         subset=np.array([item["subset"]]),
         n_atoms=np.array([item["natoms0"] + item["natoms1"]], dtype=np.int32),
-        n_atoms_first=np.array([item["natoms0"]], dtype=np.int32),
+        n_atoms_ptr=np.array([item["natoms0"]], dtype=np.int32),
         atomic_inputs=item["atomic_inputs"],
         name=item["name"],
     )

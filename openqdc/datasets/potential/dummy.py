@@ -14,7 +14,7 @@ class Dummy(BaseDataset):
     """
 
     __name__ = "dummy"
-    __energy_methods__ = [PotentialMethod.SVWN_DEF2_TZVP, PotentialMethod.PM6, PotentialMethod.GFN2_XTB]
+    __energy_methods__ = [PotentialMethod.GFN2_XTB, PotentialMethod.WB97X_D_DEF2_SVP, PotentialMethod.GFN2_XTB]
     __force_mask__ = [False, True, True]
     __energy_unit__ = "kcal/mol"
     __distance_unit__ = "ang"
@@ -31,7 +31,7 @@ class Dummy(BaseDataset):
         return super()._post_init(overwrite_local_cache, energy_unit, distance_unit)
 
     def setup_dummy(self):
-        n_atoms = np.array([np.random.randint(1, 100) for _ in range(len(self))])
+        n_atoms = np.array([np.random.randint(2, 100) for _ in range(len(self))])
         position_idx_range = np.concatenate([[0], np.cumsum(n_atoms)]).repeat(2)[1:-1].reshape(-1, 2)
         atomic_inputs = np.concatenate(
             [

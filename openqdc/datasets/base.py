@@ -49,11 +49,15 @@ if has_package("jax"):
 
 @requires_package("torch")
 def to_torch(x: np.ndarray):
+    if isinstance(x, torch.Tensor):
+        return x
     return torch.from_numpy(x)
 
 
 @requires_package("jax")
 def to_jax(x: np.ndarray):
+    if isinstance(x, jnp.ndarray):
+        return x
     return jnp.array(x)
 
 
@@ -166,6 +170,7 @@ class BaseDataset(DatasetPropertyMixIn):
             PerAtomFormationEnergyStats,
         )
         self.statistics.run_calculators()  # run the calculators
+        self._compute_average_nb_atoms()
 
     @classmethod
     def no_init(cls):

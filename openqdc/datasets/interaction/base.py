@@ -20,7 +20,7 @@ class BaseInteractionDataset(BaseDataset):
             "name": str,
             "subset": str,
             "n_atoms": np.int32,
-            "n_atoms_first": np.int32,
+            "n_atoms_ptr": np.int32,
         }
 
     def __getitem__(self, idx: int):
@@ -35,7 +35,7 @@ class BaseInteractionDataset(BaseDataset):
         )
         name = self.__smiles_converter__(self.data["name"][idx])
         subset = self.data["subset"][idx]
-        n_atoms_first = self.data["n_atoms_first"][idx]
+        n_atoms_ptr = self.data["n_atoms_ptr"][idx]
 
         forces = None
         if "forces" in self.data:
@@ -52,7 +52,7 @@ class BaseInteractionDataset(BaseDataset):
             name=name,
             subset=subset,
             forces=forces,
-            n_atoms_first=n_atoms_first,
+            n_atoms_ptr=n_atoms_ptr,
         )
 
         if self.transform is not None:
@@ -63,7 +63,7 @@ class BaseInteractionDataset(BaseDataset):
     def get_ase_atoms(self, idx: int):
         entry = self[idx]
         at = to_atoms(entry["positions"], entry["atomic_numbers"])
-        at.info["n_atoms"] = entry["n_atoms_first"]
+        at.info["n_atoms"] = entry["n_atoms_ptr"]
         return at
 
     def save_xyz(self, idx: int, path: Optional[str] = None):

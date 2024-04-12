@@ -69,7 +69,7 @@ def content_to_xyz(content, subset):
         energies=e,
         atomic_inputs=np.concatenate((xs, positions), axis=-1, dtype=np.float32),
         name=np.array([name]),
-        n_atoms_first=np.array([-1]),
+        n_atoms_ptr=np.array([-1]),
     )
 
     return item

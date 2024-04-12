@@ -27,7 +27,7 @@ class DummyInteraction(BaseInteractionDataset):
 
     def setup_dummy(self):
         n_atoms = np.array([np.random.randint(10, 30) for _ in range(len(self))])
-        n_atoms_first = np.array([np.random.randint(1, 10) for _ in range(len(self))])
+        n_atoms_ptr = np.array([np.random.randint(1, 10) for _ in range(len(self))])
         position_idx_range = np.concatenate([[0], np.cumsum(n_atoms)]).repeat(2)[1:-1].reshape(-1, 2)
         atomic_inputs = np.concatenate(
             [
@@ -54,7 +54,7 @@ class DummyInteraction(BaseInteractionDataset):
             atomic_inputs=atomic_inputs,
             subset=subset,
             energies=energies,
-            n_atoms_first=n_atoms_first,
+            n_atoms_ptr=n_atoms_ptr,
         )
         self.__average_nb_atoms__ = self.data["n_atoms"].mean()
 
