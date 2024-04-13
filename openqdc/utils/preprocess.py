@@ -12,14 +12,15 @@ options_map = {d.__name__: d for d in options}
 
 @click.command()
 @click.option("--dataset", "-d", type=str, default="ani1", help="Dataset name or index.")
-def preprocess(dataset):
+@click.option("--upload", "-u", type=bool, default=False, help="Try to upload it to the remote storage.")
+def preprocess(dataset, upload):
     if dataset not in options_map:
         dataset_id = int(dataset)
         data_class = options[dataset_id]
     else:
         data_class = options_map[dataset]
 
-    data_class.no_init().preprocess(overwrite=True)
+    data_class.no_init().preprocess(upload=upload, overwrite=True)
     data = data_class()
     logger.info(f"Preprocessing {data.__name__}")
 

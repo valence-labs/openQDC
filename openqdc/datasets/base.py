@@ -320,7 +320,17 @@ class BaseDataset(DatasetPropertyMixIn):
 
         return res
 
-    def save_preprocess(self, data_dict):
+    def save_preprocess(self, data_dict, upload=False, overwrite=True):
+        """
+        Save the preprocessed data to the cache directory and optionally upload it to the remote storage.
+        data_dict : dict
+            Dictionary containing the preprocessed data.
+        upload : bool, Defult: False
+            Whether to upload the preprocessed data to the remote storage or only saving it locally.
+        overwrite : bool, Default: False
+            Whether to overwrite the preprocessed data if it already exists.
+            Only used if upload is True. Cache is always overwritten locally.
+        """
         # save memmaps
         logger.info("Preprocessing data and saving it to cache.")
         for key in self.data_keys:
@@ -328,7 +338,8 @@ class BaseDataset(DatasetPropertyMixIn):
             out = np.memmap(local_path, mode="w+", dtype=data_dict[key].dtype, shape=data_dict[key].shape)
             out[:] = data_dict.pop(key)[:]
             out.flush()
-            push_remote(local_path, overwrite=True)
+            if upload:
+                push_remote(local_path, overwrite=overwrite)
 
         # save smiles and subset
         local_path = p_join(self.preprocess_path, "props.pkl")
@@ -337,7 +348,8 @@ class BaseDataset(DatasetPropertyMixIn):
 
         with open(local_path, "wb") as f:
             pkl.dump(data_dict, f)
-        push_remote(local_path, overwrite=True)
+        if upload:
+            push_remote(local_path, overwrite=overwrite)
 
     def _convert_on_loading(self, x, key):
         if key == "energies":
@@ -380,6 +392,9 @@ class BaseDataset(DatasetPropertyMixIn):
             logger.info(f"Loaded {key} with shape {self.data[key].shape}, dtype {self.data[key].dtype}")
 
     def is_preprocessed(self):
+        """
+        Check if the dataset is preprocessed and available online or locally.
+        """
         predicats = [copy_exists(p_join(self.preprocess_path, f"{key}.mmap")) for key in self.data_keys]
         predicats += [copy_exists(p_join(self.preprocess_path, "props.pkl"))]
         return all(predicats)
@@ -392,11 +407,20 @@ class BaseDataset(DatasetPropertyMixIn):
         predicats += [os.path.exists(p_join(self.preprocess_path, "props.pkl"))]
         return all(predicats)
 
-    def preprocess(self, overwrite=False):
+    def preprocess(self, upload: bool = False, overwrite: bool = True):
+        """
+        Preprocess the dataset and save it.
+        upload : bool, Defult: False
+            Whether to upload the preprocessed data to the remote storage or only saving it locally.
+        overwrite : bool, Default: False
+            Whether to overwrite the preprocessed data if it already exists.
+            Only used if upload is True. Cache is always overwritten locally.
+        """
         if overwrite or not self.is_preprocessed():
+            print("HERE")
             entries = self.read_raw_entries()
             res = self.collate_list(entries)
-            self.save_preprocess(res)
+            self.save_preprocess(res, upload, overwrite)
 
     def save_xyz(self, idx: int, energy_method: int = 0, path: Optional[str] = None, ext=True):
         """

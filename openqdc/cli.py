@@ -98,5 +98,36 @@ def fetch(datasets: List[str]):
         dd.from_name(dataset_name)
 
 
+@app.command()
+def preprocess(
+    datasets: List[str],
+    overwrite: Annotated[
+        bool,
+        typer.Option(
+            help="Whether to overwrite or force the re-download of the datasets.",
+        ),
+    ] = True,
+    upload: Annotated[
+        bool,
+        typer.Option(
+            help="Whether to try the upload to the remote storage.",
+        ),
+    ] = False,
+):
+    """
+    Preprocess a raw dataset (previously fetched) into a openqdc dataset and optionally push it to remote.
+    """
+    for dataset in list(map(lambda x: x.lower().replace("_", ""), datasets)):
+        if exist_dataset(dataset):
+            logger.info(f"Preprocessing {AVAILABLE_DATASETS[dataset].__name__}")
+            try:
+                AVAILABLE_DATASETS[dataset].no_init().preprocess(upload=upload, overwrite=overwrite)
+            except Exception as e:
+                logger.error(f"Error while preprocessing {dataset}. {e}. Did you fetch the dataset first?")
+                continue
+        else:
+            logger.warning(f"{dataset} not found.")
+
+
 if __name__ == "__main__":
     app()
