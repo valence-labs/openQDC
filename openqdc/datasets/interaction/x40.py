@@ -1,3 +1,7 @@
+from os.path import join as p_join
+
+import numpy as np
+
 from openqdc.datasets.interaction._utils import YamlDataset
 from openqdc.methods import InteractionMethod
 
@@ -27,3 +31,12 @@ class X40(YamlDataset):
 
     def _process_name(self, item):
         return item.shortname
+
+    def get_n_atoms_ptr(self, item, root, filename):
+        xyz_path = p_join(root, f"{filename}.xyz")
+        with open(xyz_path, "r") as xyz_file:  # avoid not closing the file
+            lines = list(map(lambda x: x.strip().split(), xyz_file.readlines()))
+            setup = lines.pop(1)
+            n_atoms_first = setup[0].split("-")[1]
+            n_atoms_ptr = np.array([int(n_atoms_first)], dtype=np.int32)
+            return n_atoms_ptr

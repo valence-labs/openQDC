@@ -63,7 +63,6 @@ def get_loader():
 def read_xyz_file(xyz_path):
     with open(xyz_path, "r") as xyz_file:  # avoid not closing the file
         lines = list(map(lambda x: x.strip().split(), xyz_file.readlines()))
-        lines.pop(1)
         n_atoms = np.array([int(lines[0][0])], dtype=np.int32)
         pos = np.array(lines[1:])[:, 1:].astype(np.float32)
         elems = np.array(lines[1:])[:, 0]
@@ -82,10 +81,7 @@ def convert_to_record(item):
     )
 
 
-def build_item(item, charge0, charge1, idx, data_dict, root, filename):
-    datum = {
-        "energies": [],
-    }
+def build_item(item, datum, charge0, charge1, idx, data_dict, root, filename):
     datum["name"] = np.array([item.shortname])
     datum["energies"].append(item.reference_value)
     datum["subset"] = np.array([item.group])
@@ -95,7 +91,6 @@ def build_item(item, charge0, charge1, idx, data_dict, root, filename):
     datum["n_atoms"] = n_atoms
     datum["pos"] = pos
     datum["atomic_nums"] = atomic_nums
-    datum["n_atoms_ptr"] = np.array([int(item.setup["molecule_a"]["selection"].split("-")[1])], dtype=np.int32)
     datum["natoms0"] = datum["n_atoms_ptr"][0]
     datum["natoms1"] = datum["n_atoms"][0] - datum["natoms0"]
     datum["charges"] = np.expand_dims(np.array([charge0] * datum["natoms0"] + [charge1] * datum["natoms1"]), axis=1)
@@ -128,10 +123,19 @@ class YamlDataset(BaseInteractionDataset, ABC):
         charge1 = int(data_dict.description.global_setup["molecule_b"]["charge"])
 
         for idx, item in enumerate(data_dict.items):
-            tmp_item = build_item(item, charge0, charge1, idx, data_dict, self.root, self._process_name(item))
+            tmp_item = {
+                "energies": [],
+            }
+            tmp_item["n_atoms_ptr"] = self.get_n_atoms_ptr(item, self.root, self._process_name(item))
+            tmp_item = build_item(item, tmp_item, charge0, charge1, idx, data_dict, self.root, self._process_name(item))
+
             item = convert_to_record(tmp_item)
             data.append(item)
         return data
+
+    @abstractmethod
+    def get_n_atoms_ptr(self, item, root, filename):
+        raise NotImplementedError
 
     @abstractmethod
     def _process_name(self, item):

@@ -1,3 +1,5 @@
+import numpy as np
+
 from openqdc.methods import InteractionMethod
 
 from ._utils import YamlDataset
@@ -30,3 +32,6 @@ class L7(YamlDataset):
 
     def _process_name(self, item):
         return item.geometry.split(":")[1]
+
+    def get_n_atoms_ptr(self, item, root, filename):
+        return np.array([int(item.setup["molecule_a"]["selection"].split("-")[1])], dtype=np.int32)
