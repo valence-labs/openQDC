@@ -1,4 +1,4 @@
-from .base import BaseInteractionDataset  # noqa
+from .base import BaseInteractionDataset
 from .des import DES5M, DES370K, DESS66, DESS66x8
 from .l7 import L7
 from .metcalf import Metcalf

@@ -1,7 +1,1 @@
-from .enums import (  # noqa
-    InteractionMethod,
-    InterEnergyType,
-    PotentialMethod,
-    QmMethod,
-    QmType,
-)
+from .enums import InteractionMethod, InterEnergyType, PotentialMethod, QmMethod, QmType

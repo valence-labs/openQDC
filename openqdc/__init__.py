@@ -1,6 +1,6 @@
 import importlib
 import os
-from typing import TYPE_CHECKING  # noqa F401
+from typing import TYPE_CHECKING
 
 # The below lazy import logic is coming from openff-toolkit:
 # https://github.com/openforcefield/openff-toolkit/blob/b52879569a0344878c40248ceb3bd0f90348076a/openff/toolkit/__init__.py#L44
@@ -84,33 +84,33 @@ def __dir__():
 if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
     # These types are imported lazily at runtime, but we need to tell type
     # checkers what they are.
-    from ._version import __version__  # noqa
-    from .datasets import AVAILABLE_DATASETS  # noqa
-    from .datasets.base import BaseDataset  # noqa
+    from ._version import __version__
+    from .datasets import AVAILABLE_DATASETS
+    from .datasets.base import BaseDataset
 
     # INTERACTION
-    from .datasets.interaction.des import DES5M, DES370K, DESS66, DESS66x8  # noqa
-    from .datasets.interaction.l7 import L7  # noqa
-    from .datasets.interaction.metcalf import Metcalf  # noqa
-    from .datasets.interaction.splinter import Splinter  # noqa
-    from .datasets.interaction.x40 import X40  # noqa
-    from .datasets.potential.ani import ANI1, ANI1CCX, ANI1X  # noqa
-    from .datasets.potential.comp6 import COMP6  # noqa
-    from .datasets.potential.dummy import Dummy  # noqa
-    from .datasets.potential.gdml import GDML  # noqa
-    from .datasets.potential.geom import GEOM  # noqa
-    from .datasets.potential.iso_17 import ISO17  # noqa
-    from .datasets.potential.molecule3d import Molecule3D  # noqa
-    from .datasets.potential.multixcqm9 import MultixcQM9  # noqa
-    from .datasets.potential.nabladft import NablaDFT  # noqa
-    from .datasets.potential.orbnet_denali import OrbnetDenali  # noqa
-    from .datasets.potential.pcqm import PCQM_B3LYP, PCQM_PM6  # noqa
-    from .datasets.potential.qm7x import QM7X  # noqa
-    from .datasets.potential.qmugs import QMugs  # noqa
-    from .datasets.potential.revmd17 import RevMD17  # noqa
-    from .datasets.potential.sn2_rxn import SN2RXN  # noqa
-    from .datasets.potential.solvated_peptides import SolvatedPeptides  # noqa
-    from .datasets.potential.spice import Spice, SpiceV2  # noqa
-    from .datasets.potential.tmqm import TMQM  # noqa
-    from .datasets.potential.transition1x import Transition1X  # noqa
-    from .datasets.potential.waterclusters3_30 import WaterClusters  # noqa
+    from .datasets.interaction.des import DES5M, DES370K, DESS66, DESS66x8
+    from .datasets.interaction.l7 import L7
+    from .datasets.interaction.metcalf import Metcalf
+    from .datasets.interaction.splinter import Splinter
+    from .datasets.interaction.x40 import X40
+    from .datasets.potential.ani import ANI1, ANI1CCX, ANI1X
+    from .datasets.potential.comp6 import COMP6
+    from .datasets.potential.dummy import Dummy
+    from .datasets.potential.gdml import GDML
+    from .datasets.potential.geom import GEOM
+    from .datasets.potential.iso_17 import ISO17
+    from .datasets.potential.molecule3d import Molecule3D
+    from .datasets.potential.multixcqm9 import MultixcQM9
+    from .datasets.potential.nabladft import NablaDFT
+    from .datasets.potential.orbnet_denali import OrbnetDenali
+    from .datasets.potential.pcqm import PCQM_B3LYP, PCQM_PM6
+    from .datasets.potential.qm7x import QM7X
+    from .datasets.potential.qmugs import QMugs
+    from .datasets.potential.revmd17 import RevMD17
+    from .datasets.potential.sn2_rxn import SN2RXN
+    from .datasets.potential.solvated_peptides import SolvatedPeptides
+    from .datasets.potential.spice import Spice, SpiceV2
+    from .datasets.potential.tmqm import TMQM
+    from .datasets.potential.transition1x import Transition1X
+    from .datasets.potential.waterclusters3_30 import WaterClusters
