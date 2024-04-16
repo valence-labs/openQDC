@@ -49,11 +49,15 @@ if has_package("jax"):
 
 @requires_package("torch")
 def to_torch(x: np.ndarray):
+    if isinstance(x, torch.Tensor):
+        return x
     return torch.from_numpy(x)
 
 
 @requires_package("jax")
 def to_jax(x: np.ndarray):
+    if isinstance(x, jnp.ndarray):
+        return x
     return jnp.array(x)
 
 
@@ -166,6 +170,7 @@ class BaseDataset(DatasetPropertyMixIn):
             PerAtomFormationEnergyStats,
         )
         self.statistics.run_calculators()  # run the calculators
+        self._compute_average_nb_atoms()
 
     @classmethod
     def no_init(cls):
@@ -244,6 +249,14 @@ class BaseDataset(DatasetPropertyMixIn):
         return keys
 
     @property
+    def pkl_data_keys(self):
+        return list(self.pkl_data_types.keys())
+
+    @property
+    def pkl_data_types(self):
+        return {"name": str, "subset": str, "n_atoms": np.int32}
+
+    @property
     def data_types(self):
         return {
             "atomic_inputs": np.float32,
@@ -257,8 +270,8 @@ class BaseDataset(DatasetPropertyMixIn):
         return {
             "atomic_inputs": (-1, NB_ATOMIC_FEATURES),
             "position_idx_range": (-1, 2),
-            "energies": (-1, len(self.energy_target_names)),
-            "forces": (-1, 3, len(self.force_target_names)),
+            "energies": (-1, len(self.energy_methods)),
+            "forces": (-1, 3, len(self.force_methods)),
         }
 
     def _set_units(self, en, ds):
@@ -343,8 +356,14 @@ class BaseDataset(DatasetPropertyMixIn):
 
         # save smiles and subset
         local_path = p_join(self.preprocess_path, "props.pkl")
-        for key in ["name", "subset"]:
-            data_dict[key] = np.unique(data_dict[key], return_inverse=True)
+
+        # assert that (required) pkl keys are present in data_dict
+        assert all([key in data_dict.keys() for key in self.pkl_data_keys])
+
+        # store unique and inverse indices for str-based pkl keys
+        for key in self.pkl_data_keys:
+            if self.pkl_data_types[key] == str:
+                data_dict[key] = np.unique(data_dict[key], return_inverse=True)
 
         with open(local_path, "wb") as f:
             pkl.dump(data_dict, f)
@@ -381,7 +400,10 @@ class BaseDataset(DatasetPropertyMixIn):
         pull_locally(filename, overwrite=overwrite_local_cache)
         with open(filename, "rb") as f:
             tmp = pkl.load(f)
-            for key in ["name", "subset", "n_atoms"]:
+            all_pkl_keys = set(tmp.keys()) - set(self.data_keys)
+            # assert required pkl_keys are present in all_pkl_keys
+            assert all([key in all_pkl_keys for key in self.pkl_data_keys])
+            for key in all_pkl_keys:
                 x = tmp.pop(key)
                 if len(x) == 2:
                     self.data[key] = x[0][x[1]]

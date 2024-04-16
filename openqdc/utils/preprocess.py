@@ -7,7 +7,7 @@ from loguru import logger
 from openqdc import AVAILABLE_DATASETS
 
 options = list(AVAILABLE_DATASETS.values())
-options_map = {d.__name__: d for d in options}
+options_map = {d.__name__.lower(): d for d in options}
 
 
 @click.command()

@@ -204,6 +204,14 @@ class DataConfigFactory:
         links={"rdkit_folder.tar.gz": "https://dataverse.harvard.edu/api/access/datafile/4327252"},
     )
 
+    l7 = dict(
+        dataset_name="l7",
+        links={
+            "l7.yaml": "http://cuby4.molecular.cz/download_datasets/l7.yaml",
+            "geometries.tar.gz": "http://cuby4.molecular.cz/download_geometries/L7.tar",
+        },
+    )
+
     molecule3d = dict(
         dataset_name="molecule3d",
         links={"molecule3d.zip": "https://drive.google.com/uc?id=1C_KRf8mX-gxny7kL9ACNCEV4ceu_fUGy"},
@@ -239,22 +247,36 @@ class DataConfigFactory:
         links={"spice-2.0.0.hdf5": "https://zenodo.org/records/10835749/files/SPICE-2.0.0.hdf5?download=1"},
     )
 
-    dess = dict(
-        dataset_name="dess5m",
+    splinter = dict(
+        dataset_name="splinter",
         links={
-            "DESS5M.zip": "https://zenodo.org/record/5706002/files/DESS5M.zip",
-            "DESS370.zip": "https://zenodo.org/record/5676266/files/DES370K.zip",
+            "dimerpairs.0.tar.gz": "https://figshare.com/ndownloader/files/39449167",
+            "dimerpairs.1.tar.gz": "https://figshare.com/ndownloader/files/40271983",
+            "dimerpairs.2.tar.gz": "https://figshare.com/ndownloader/files/40271989",
+            "dimerpairs.3.tar.gz": "https://figshare.com/ndownloader/files/40272001",
+            "dimerpairs.4.tar.gz": "https://figshare.com/ndownloader/files/40272022",
+            "dimerpairs.5.tar.gz": "https://figshare.com/ndownloader/files/40552931",
+            "dimerpairs.6.tar.gz": "https://figshare.com/ndownloader/files/40272040",
+            "dimerpairs.7.tar.gz": "https://figshare.com/ndownloader/files/40272052",
+            "dimerpairs.8.tar.gz": "https://figshare.com/ndownloader/files/40272061",
+            "dimerpairs.9.tar.gz": "https://figshare.com/ndownloader/files/40272064",
+            "dimerpairs_nonstandard.tar.gz": "https://figshare.com/ndownloader/files/40272067",
+            "lig_interaction_sites.sdf": "https://figshare.com/ndownloader/files/40272070",
+            "lig_monomers.sdf": "https://figshare.com/ndownloader/files/40272073",
+            "prot_interaction_sites.sdf": "https://figshare.com/ndownloader/files/40272076",
+            "prot_monomers.sdf": "https://figshare.com/ndownloader/files/40272079",
+            "merge_monomers.py": "https://figshare.com/ndownloader/files/41807682",
         },
     )
 
-    des370k_interaction = dict(
+    des370k = dict(
         dataset_name="des370k_interaction",
         links={
             "DES370K.zip": "https://zenodo.org/record/5676266/files/DES370K.zip",
         },
     )
 
-    des5m_interaction = dict(
+    des5m = dict(
         dataset_name="des5m_interaction",
         links={
             "DES5M.zip": "https://zenodo.org/records/5706002/files/DESS5M.zip?download=1",
@@ -267,6 +289,11 @@ class DataConfigFactory:
             x: f"https://raw.githubusercontent.com/bbskjelstad/tmqm/master/data/{x}"
             for x in ["tmQM_X1.xyz.gz", "tmQM_X2.xyz.gz", "tmQM_y.csv", "Benchmark2_TPSSh_Opt.xyz"]
         },
+    )
+
+    metcalf = dict(
+        dataset_name="metcalf",
+        links={"model-data.tar.gz": "https://zenodo.org/records/10934211/files/model-data.tar?download=1"},
     )
 
     misato = dict(
@@ -314,18 +341,26 @@ class DataConfigFactory:
         links={"Transition1x.h5": "https://figshare.com/ndownloader/files/36035789"},
     )
 
-    des_s66 = dict(
+    dess66 = dict(
         dataset_name="des_s66",
         links={"DESS66.zip": "https://zenodo.org/records/5676284/files/DESS66.zip?download=1"},
     )
 
-    des_s66x8 = dict(
+    dess66x8 = dict(
         dataset_name="des_s66x8",
         links={"DESS66x8.zip": "https://zenodo.org/records/5676284/files/DESS66x8.zip?download=1"},
     )
     revmd17 = dict(
         dataset_name="revmd17",
         links={"revmd17.zip": "https://figshare.com/ndownloader/articles/12672038/versions/3"},
+    )
+
+    x40 = dict(
+        dataset_name="x40",
+        links={
+            "x40.yaml": "http://cuby4.molecular.cz/download_datasets/x40.yaml",
+            "geometries.tar.gz": "http://cuby4.molecular.cz/download_geometries/X40.tar",
+        },
     )
 
     available_datasets = [k for k in locals().keys() if not k.startswith("__")]

@@ -21,7 +21,8 @@ class StatisticsResults:
 
     def transform(self, func):
         for k, v in self.to_dict().items():
-            setattr(self, k, func(v))
+            if v is not None:
+                setattr(self, k, func(v))
 
 
 @dataclass
