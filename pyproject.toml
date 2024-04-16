@@ -93,6 +93,9 @@ include = ["openqdc", "openqdc.*"]
 exclude = []
 namespaces = true
 
+[tool.setuptools.package-data]
+"*" = ["*.txt"]
+
 [tool.pylint.messages_control]
 disable = [
   "no-member",
