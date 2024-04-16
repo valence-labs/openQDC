@@ -124,7 +124,7 @@ def preprocess(
                 AVAILABLE_DATASETS[dataset].no_init().preprocess(upload=upload, overwrite=overwrite)
             except Exception as e:
                 logger.error(f"Error while preprocessing {dataset}. {e}. Did you fetch the dataset first?")
-                continue
+                raise e
         else:
             logger.warning(f"{dataset} not found.")
 
