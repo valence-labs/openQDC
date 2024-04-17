@@ -82,10 +82,10 @@ class ANI1CCX(ANI1):
     __forces_unit__ = "hartree/ang"
 
     __energy_methods__ = [
-        "ccsd(t)/cbs",
-        "ccsd(t)/cc-pvdz",
-        "ccsd(t)/cc-pvtz",
-        "tccsd(t)/cc-pvdz",
+        PotentialMethod.NONE,  # "ccsd(t)/cbs",
+        PotentialMethod.NONE,  # "ccsd(t)/cc-pvdz",
+        PotentialMethod.NONE,  # "ccsd(t)/cc-pvtz",
+        PotentialMethod.NONE,  # "tccsd(t)/cc-pvdz",
     ]
 
     energy_target_names = [
@@ -161,3 +161,10 @@ class ANI1X(ANI1):
         encoded in a different format than its display format
         """
         return x
+
+
+class ANI1CCX_V2(ANI1CCX):
+    __name__ = "ani1ccx_v2"
+
+    __energy_methods__ = ANI1CCX.__energy_methods__ + [PotentialMethod.PM6, PotentialMethod.GFN2_XTB]
+    energy_target_names = ANI1CCX.energy_target_names + ["PM6", "GFN2"]

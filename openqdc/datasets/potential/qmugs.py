@@ -69,3 +69,9 @@ class QMugs(BaseDataset):
 
         samples = dm.parallelized(read_mol, mol_dirs, n_jobs=-1, progress=True, scheduler="threads")
         return samples
+
+
+class QMugs_V2(QMugs):
+    __name__ = "qmugs_v2"
+    __energy_methods__ = QMugs.__energy_methods__ + [PotentialMethod.PM6]
+    energy_target_names = QMugs.energy_target_names + ["PM6"]

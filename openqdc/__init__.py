@@ -17,11 +17,13 @@ _lazy_imports_obj = {
     # POTENTIAL
     "ANI1": "openqdc.datasets.potential.ani",
     "ANI1CCX": "openqdc.datasets.potential.ani",
+    "ANI1CCX_V2": "openqdc.datasets.potential.ani",
     "ANI1X": "openqdc.datasets.potential.ani",
     "Spice": "openqdc.datasets.potential.spice",
     "SpiceV2": "openqdc.datasets.potential.spice",
     "GEOM": "openqdc.datasets.potential.geom",
     "QMugs": "openqdc.datasets.potential.qmugs",
+    "QMugs_V2": "openqdc.datasets.potential.qmugs",
     "ISO17": "openqdc.datasets.potential.iso_17",
     "COMP6": "openqdc.datasets.potential.comp6",
     "GDML": "openqdc.datasets.potential.gdml",
@@ -29,6 +31,7 @@ _lazy_imports_obj = {
     "OrbnetDenali": "openqdc.datasets.potential.orbnet_denali",
     "SN2RXN": "openqdc.datasets.potential.sn2_rxn",
     "QM7X": "openqdc.datasets.potential.qm7x",
+    "QM7X_V2": "openqdc.datasets.potential.qm7x",
     "NablaDFT": "openqdc.datasets.potential.nabladft",
     "SolvatedPeptides": "openqdc.datasets.potential.solvated_peptides",
     "WaterClusters": "openqdc.datasets.potential.waterclusters3_30",
@@ -38,6 +41,7 @@ _lazy_imports_obj = {
     "RevMD17": "openqdc.datasets.potential.revmd17",
     "Transition1X": "openqdc.datasets.potential.transition1x",
     "MultixcQM9": "openqdc.datasets.potential.multixcqm9",
+    "MultixcQM9_V2": "openqdc.datasets.potential.multixcqm9",
     # INTERACTION
     "DES5M": "openqdc.datasets.interaction.des",
     "DES370K": "openqdc.datasets.interaction.des",
@@ -94,19 +98,19 @@ if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
     from .datasets.interaction.metcalf import Metcalf
     from .datasets.interaction.splinter import Splinter
     from .datasets.interaction.x40 import X40
-    from .datasets.potential.ani import ANI1, ANI1CCX, ANI1X
+    from .datasets.potential.ani import ANI1, ANI1CCX, ANI1CCX_V2, ANI1X
     from .datasets.potential.comp6 import COMP6
     from .datasets.potential.dummy import Dummy
     from .datasets.potential.gdml import GDML
     from .datasets.potential.geom import GEOM
     from .datasets.potential.iso_17 import ISO17
     from .datasets.potential.molecule3d import Molecule3D
-    from .datasets.potential.multixcqm9 import MultixcQM9
+    from .datasets.potential.multixcqm9 import MultixcQM9, MultixcQM9_V2
     from .datasets.potential.nabladft import NablaDFT
     from .datasets.potential.orbnet_denali import OrbnetDenali
     from .datasets.potential.pcqm import PCQM_B3LYP, PCQM_PM6
-    from .datasets.potential.qm7x import QM7X
-    from .datasets.potential.qmugs import QMugs
+    from .datasets.potential.qm7x import QM7X, QM7X_V2
+    from .datasets.potential.qmugs import QMugs, QMugs_V2
     from .datasets.potential.revmd17 import RevMD17
     from .datasets.potential.sn2_rxn import SN2RXN
     from .datasets.potential.solvated_peptides import SolvatedPeptides

@@ -542,3 +542,10 @@ class MultixcQM9(BaseDataset):
             {"energies": np.atleast_2d(en), **xyz_dict}
             for xyz_dict, en in zip(df_xyz.to_dict("records"), df_energies.values.astype(np.float32))
         ]
+
+
+class MultixcQM9_V2(MultixcQM9):
+    __name__ = "multixcqm9_v2"
+
+    __energy_methods__ = MultixcQM9.__energy_methods__ + [PotentialMethod.PM6]
+    energy_target_names = MultixcQM9.energy_target_names + ["PM6"]

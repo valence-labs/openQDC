@@ -77,3 +77,11 @@ class QM7X(BaseDataset):
             ]
 
         return samples
+
+
+class QM7X_V2(QM7X):
+    __name__ = "qm7x_v2"
+    __energy_methods__ = QM7X.__energy_methods__ + [PotentialMethod.PM6]
+    __force_mask__ = QM7X.__force_mask__ + [False]
+    energy_target_names = QM7X.energy_target_names + ["PM6"]
+    force_target_names = QM7X.force_target_names
