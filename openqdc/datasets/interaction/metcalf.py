@@ -131,5 +131,5 @@ class Metcalf(BaseInteractionDataset):
         extract_raw_tar_gz(self.root)
         data = []
         for filename in glob(self.root + f"{os.sep}*.xyz"):
-            data.append(read_xyz(filename, self.__name__))
+            data.extend(read_xyz(filename, self.__name__))
         return data
