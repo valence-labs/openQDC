@@ -63,6 +63,7 @@ def get_loader():
 def read_xyz_file(xyz_path):
     with open(xyz_path, "r") as xyz_file:  # avoid not closing the file
         lines = list(map(lambda x: x.strip().split(), xyz_file.readlines()))
+        lines.pop(1)
         n_atoms = np.array([int(lines[0][0])], dtype=np.int32)
         pos = np.array(lines[1:])[:, 1:].astype(np.float32)
         elems = np.array(lines[1:])[:, 0]

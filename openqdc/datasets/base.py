@@ -439,7 +439,6 @@ class BaseDataset(DatasetPropertyMixIn):
             Only used if upload is True. Cache is always overwritten locally.
         """
         if overwrite or not self.is_preprocessed():
-            print("HERE")
             entries = self.read_raw_entries()
             res = self.collate_list(entries)
             self.save_preprocess(res, upload, overwrite)
