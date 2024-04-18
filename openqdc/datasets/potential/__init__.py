@@ -14,7 +14,7 @@ from .qmugs import QMugs, QMugs_V2
 from .revmd17 import RevMD17
 from .sn2_rxn import SN2RXN
 from .solvated_peptides import SolvatedPeptides
-from .spice import Spice, SpiceV2
+from .spice import Spice, SpiceV2, SpiceVL2
 from .tmqm import TMQM
 from .transition1x import Transition1X
 from .waterclusters3_30 import WaterClusters
@@ -41,6 +41,7 @@ AVAILABLE_POTENTIAL_DATASETS = {
     "solvatedpeptides": SolvatedPeptides,
     "spice": Spice,
     "spicev2": SpiceV2,
+    "spicevl2": SpiceVL2,
     "tmqm": TMQM,
     "transition1x": Transition1X,
     "watercluster": WaterClusters,

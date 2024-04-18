@@ -145,3 +145,10 @@ class SpiceV2(Spice):
         tmp = [read_record(data[mol_name], self) for i, mol_name in enumerate(tqdm(data)) if i != 40132]
 
         return tmp
+
+
+class SpiceVL2(SpiceV2):
+    __name__ = "spice_vl2"
+
+    __energy_methods__ = SpiceV2.__energy_methods__ + [PotentialMethod.GFN2_XTB, PotentialMethod.PM6]
+    energy_target_names = SpiceV2.energy_target_names + ["GFN2," "PM6"]
