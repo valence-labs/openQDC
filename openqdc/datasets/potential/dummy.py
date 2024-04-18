@@ -14,7 +14,7 @@ class Dummy(BaseDataset):
     """
 
     __name__ = "dummy"
-    __energy_methods__ = [PotentialMethod.GFN2_XTB, PotentialMethod.WB97X_D_DEF2_SVP, PotentialMethod.GFN2_XTB]
+    __energy_methods__ = [PotentialMethod.GFN2_XTB, PotentialMethod.WB97X_D_DEF2_SVP, PotentialMethod.PM6]
     __force_mask__ = [False, True, True]
     __energy_unit__ = "kcal/mol"
     __distance_unit__ = "ang"
