@@ -29,7 +29,7 @@ def content_to_xyz(content, e_map):
     conf = dict(
         atomic_inputs=np.concatenate((xs, positions), axis=-1, dtype=np.float32),
         name=np.array([name]),
-        energies=np.array([e], dtype=np.float32)[:, None],
+        energies=np.array([e], dtype=np.float64)[:, None],
         n_atoms=np.array([positions.shape[0]], dtype=np.int32),
         subset=np.array(["tmqm"]),
     )

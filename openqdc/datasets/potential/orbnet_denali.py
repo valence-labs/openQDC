@@ -23,7 +23,7 @@ def read_archive(mol_id, conf_dict, base_path, energy_target_names: List[str]) -
             conf = dict(
                 atomic_inputs=np.concatenate((xs, positions), axis=-1, dtype=np.float32),
                 name=np.array([mol_id]),
-                energies=np.array([conf_label[k] for k in energy_target_names], dtype=np.float32)[None, :],
+                energies=np.array([conf_label[k] for k in energy_target_names], dtype=np.float64)[None, :],
                 n_atoms=np.array([positions.shape[0]], dtype=np.int32),
                 subset=np.array([conf_label["subset"]]),
             )

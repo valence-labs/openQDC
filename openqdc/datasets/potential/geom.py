@@ -47,7 +47,7 @@ def read_mol(mol_id: str, mol_dict, base_path: str, partition: str) -> Dict[str,
                 (x[None, ...].repeat(n_confs, axis=0), positions), axis=-1, dtype=np.float32
             ).reshape(-1, 5),
             name=np.array([d["smiles"] for _ in confs]),
-            energies=np.array([cf["totalenergy"] for cf in confs], dtype=np.float32)[:, None],
+            energies=np.array([cf["totalenergy"] for cf in confs], dtype=np.float64)[:, None],
             n_atoms=np.array([positions.shape[1]] * n_confs, dtype=np.int32),
             subset=np.array([partition] * n_confs),
         )

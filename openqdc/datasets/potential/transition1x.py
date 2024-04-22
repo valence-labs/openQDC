@@ -27,7 +27,7 @@ def read_record(r, group):
             dict(
                 name=np.array([rxn] * n_confs),
                 subset=np.array([group] * n_confs),
-                energies=energies.astype(np.float32).reshape(-1, 1),
+                energies=energies.astype(np.float64).reshape(-1, 1),
                 forces=forces.astype(np.float32).reshape(-1, 3),
                 atomic_inputs=atomic_inputs.astype(np.float32).reshape(-1, NB_ATOMIC_FEATURES),
                 n_atoms=np.array([atomic_numbers.shape[1]] * n_confs, dtype=np.int32),
