@@ -363,6 +363,8 @@ class BaseDataset(DatasetPropertyMixIn):
         # store unique and inverse indices for str-based pkl keys
         for key in self.pkl_data_keys:
             if self.pkl_data_types[key] == str:
+                if "des" in self.__name__ and key == "subset":
+                    continue
                 data_dict[key] = np.unique(data_dict[key], return_inverse=True)
 
         with open(local_path, "wb") as f:
