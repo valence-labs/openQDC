@@ -24,7 +24,7 @@ def read_mol(mol_h5, mol_name, energy_target_names, force_target_names):
     res = dict(
         name=np.array([mol_name] * n),
         subset=np.array(["qm7x"] * n),
-        energies=energies.astype(np.float32),
+        energies=energies.astype(np.float64),
         atomic_inputs=a_inputs.astype(np.float32),
         forces=forces.astype(np.float32),
         n_atoms=n_atoms,

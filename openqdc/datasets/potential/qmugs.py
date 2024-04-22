@@ -27,7 +27,7 @@ def read_mol(mol_dir):
     res = dict(
         name=np.array([smiles] * n_confs),
         subset=np.array(["qmugs"] * n_confs),
-        energies=targets.astype(np.float32),
+        energies=targets.astype(np.float64),
         atomic_inputs=np.concatenate((x, positions), axis=-1, dtype=np.float32).reshape(-1, 5),
         n_atoms=np.array([x.shape[1]] * n_confs, dtype=np.int32),
     )

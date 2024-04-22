@@ -25,7 +25,7 @@ def read_record(r, obj):
     res = dict(
         name=np.array([smiles] * n_confs),
         subset=np.array([obj.subset_mapping[subset]] * n_confs),
-        energies=r[obj.energy_target_names[0]][:][:, None].astype(np.float32),
+        energies=r[obj.energy_target_names[0]][:][:, None].astype(np.float64),
         forces=r[obj.force_target_names[0]][:].reshape(
             -1, 3, 1
         ),  # forces -ve of energy gradient but the -1.0 is done in the convert_forces method
