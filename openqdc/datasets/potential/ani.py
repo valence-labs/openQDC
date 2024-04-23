@@ -55,7 +55,7 @@ class ANI1(BaseDataset):
         return path
 
     def read_raw_entries(self):
-        raw_path = p_join(self.root, f"{self.__name__}.h5")
+        raw_path = p_join(self.root, f"{self.__name__}.h5.gz")
         samples = read_qc_archive_h5(raw_path, self.__name__, self.energy_target_names, self.force_target_names)
         return samples
 
