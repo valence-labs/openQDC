@@ -87,6 +87,7 @@ class GEOM(BaseDataset):
     force_target_names = []
 
     partitions = ["qm9", "drugs"]
+    __links__ = {"rdkit_folder.tar.gz": "https://dataverse.harvard.edu/api/access/datafile/4327252"}
 
     def _read_raw_(self, partition):
         raw_path = p_join(self.root, "rdkit_folder")

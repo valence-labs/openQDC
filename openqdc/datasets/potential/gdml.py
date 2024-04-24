@@ -56,6 +56,14 @@ class GDML(BaseDataset):
     __energy_unit__ = "kcal/mol"
     __distance_unit__ = "bohr"
     __forces_unit__ = "kcal/mol/bohr"
+    __links__ = {
+        "gdb7_9.hdf5.gz": "https://zenodo.org/record/3588361/files/208.hdf5.gz",
+        "gdb10_13.hdf5.gz": "https://zenodo.org/record/3588364/files/209.hdf5.gz",
+        "drugbank.hdf5.gz": "https://zenodo.org/record/3588361/files/207.hdf5.gz",
+        "tripeptides.hdf5.gz": "https://zenodo.org/record/3588368/files/211.hdf5.gz",
+        "ani_md.hdf5.gz": "https://zenodo.org/record/3588341/files/205.hdf5.gz",
+        "s66x8.hdf5.gz": "https://zenodo.org/record/3588367/files/210.hdf5.gz",
+    }
 
     def read_raw_entries(self):
         raw_path = p_join(self.root, "gdml.h5")

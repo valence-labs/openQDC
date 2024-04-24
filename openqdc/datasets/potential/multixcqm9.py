@@ -522,6 +522,14 @@ class MultixcQM9(BaseDataset):
     __energy_unit__ = "ev"  # to fix
     __distance_unit__ = "ang"  # to fix
     __forces_unit__ = "ev/ang"  # to fix
+    __links__ = {
+        "xyz.zip": "https://data.dtu.dk/ndownloader/files/35143624",
+        "xtb.zip": "https://data.dtu.dk/ndownloader/files/42444300",
+        "dzp.zip": "https://data.dtu.dk/ndownloader/files/42443925",
+        "tzp.zip": "https://data.dtu.dk/ndownloader/files/42444129",
+        "sz.zip": "https://data.dtu.dk/ndownloader/files/42441345",
+        "failed_indices.dat": "https://data.dtu.dk/ndownloader/files/37337677",
+    }
 
     def _read_molecules_energies(self):
         d = {"DZP": None, "TZP": None, "SZ": None, "XTB": None}

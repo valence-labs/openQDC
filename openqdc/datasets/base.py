@@ -82,6 +82,7 @@ class BaseDataset(DatasetPropertyMixIn):
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
     __average_nb_atoms__ = None
+    __links__ = {}
 
     def __init__(
         self,
@@ -144,6 +145,14 @@ class BaseDataset(DatasetPropertyMixIn):
         self._fn_energy = lambda x: x
         self._fn_distance = lambda x: x
         self._fn_forces = lambda x: x
+
+    @classmethod
+    def fetch(cls, cache_path: Optional[str] = None, overwrite: bool = False) -> None:
+        assert len(cls.__links__) > 0, "No links provided for fetching"
+        from openqdc.raws.config_factory import DataDownloader
+
+        config = dict(dataset_name=cls.no_init().__name__, links=cls.__links__)
+        DataDownloader(cache_path, overwrite).from_config(config)
 
     def _post_init(
         self,

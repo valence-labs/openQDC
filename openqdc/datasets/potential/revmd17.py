@@ -92,6 +92,7 @@ class RevMD17(BaseDataset):
     force_target_names = [
         "PBE-TS Gradient",
     ]
+    __links__ = {"revmd17.zip": "https://figshare.com/ndownloader/articles/12672038/versions/3"}
 
     __energy_unit__ = "kcal/mol"
     __distance_unit__ = "ang"
