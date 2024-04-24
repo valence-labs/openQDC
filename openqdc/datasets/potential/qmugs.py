@@ -59,7 +59,7 @@ class QMugs(BaseDataset):
     __forces_unit__ = "hartree/ang"
     __links__ = {
         "summary.csv": "https://libdrive.ethz.ch/index.php/s/X5vOBNSITAG5vzM/download?path=%2F&files=summary.csv",
-        "structures.tar.gz": "https://libdrive.ethz.ch/index.php/s/X5vOBNSITAG5vzM/download?path=%2F&files=structures.tar.gz",
+        "structures.tar.gz": "https://libdrive.ethz.ch/index.php/s/X5vOBNSITAG5vzM/download?path=%2F&files=structures.tar.gz",  # noqa
     }
 
     energy_target_names = [
