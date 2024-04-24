@@ -546,6 +546,48 @@ class BaseDataset(DatasetPropertyMixIn):
         datum["idxs"] = idxs
         return datum
 
+    @classmethod
+    def as_dataloader(
+        cls,
+        batch_size: int = 8,
+        energy_unit: Optional[str] = None,
+        distance_unit: Optional[str] = None,
+        array_format: str = "torch",
+        energy_type: str = "formation",
+        overwrite_local_cache: bool = False,
+        cache_dir: Optional[str] = None,
+        recompute_statistics: bool = False,
+        transform: Optional[Callable] = None,
+    ):
+        """
+        Return the dataset as a dataloader.
+
+        Parameters
+        ----------
+        batch_size : int, optional
+            Batch size, by default 8
+        For other parameters, see the __init__ method.
+        """
+        if not has_package("torch_geometric"):
+            raise ImportError("torch_geometric is required to use this method.")
+        assert array_format in ["torch", "jax"], f"Format {array_format} must be torch or jax."
+        from torch_geometric.data import Data
+        from torch_geometric.loader import DataLoader
+
+        return DataLoader(
+            cls(
+                energy_unit=energy_unit,
+                distance_unit=distance_unit,
+                array_format=array_format,
+                energy_type=energy_type,
+                overwrite_local_cache=overwrite_local_cache,
+                cache_dir=cache_dir,
+                recompute_statistics=recompute_statistics,
+                transform=lambda x: Data(**x) if transform is None else transform,
+            ),
+            batch_size=batch_size,
+        )
+
     def as_iter(self, atoms: bool = False, energy_method: int = 0):
         """
         Return the dataset as an iterator.

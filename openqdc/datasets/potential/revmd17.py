@@ -79,6 +79,7 @@ class RevMD17(BaseDataset):
         PotentialMethod.PBE_DEF2_TZVP
         # "pbe/def2-tzvp",
     ]
+    __force_mask__ = [True]
 
     energy_target_names = [
         "PBE-TS Energy",

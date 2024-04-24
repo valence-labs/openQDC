@@ -4,6 +4,7 @@ from .dummy import Dummy
 from .gdml import GDML
 from .geom import GEOM
 from .iso_17 import ISO17
+from .md22 import MD22
 from .molecule3d import Molecule3D
 from .multixcqm9 import MultixcQM9, MultixcQM9_V2
 from .nabladft import NablaDFT
@@ -48,4 +49,5 @@ AVAILABLE_POTENTIAL_DATASETS = {
     "multixcqm9": MultixcQM9,
     "multixcqm9v2": MultixcQM9_V2,
     "revmd17": RevMD17,
+    "md22": MD22,
 }

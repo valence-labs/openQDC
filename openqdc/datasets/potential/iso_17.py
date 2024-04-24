@@ -50,7 +50,7 @@ class ISO17(BaseDataset):
         return "-".join(x.decode("ascii").split("_")[:-1])
 
     def read_raw_entries(self):
-        raw_path = p_join(self.root, "iso_17.h5")
+        raw_path = p_join(self.root, "iso_17.h5.gz")
         samples = read_qc_archive_h5(raw_path, "iso_17", self.energy_target_names, self.force_target_names)
 
         return samples
