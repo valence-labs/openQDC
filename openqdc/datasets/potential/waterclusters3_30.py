@@ -76,6 +76,7 @@ class WaterClusters(BaseDataset):
 
     __energy_methods__ = [PotentialMethod.TTM2_1_F]  # "ttm2.1-f"
     energy_target_names = ["TTM2.1-F Potential"]
+    __links__ = {"W3-W30_all_geoms_TTM2.1-F.zip": "https://drive.google.com/uc?id=18Y7OiZXSCTsHrQ83GCc4fyE_abbL6E_n"}
 
     def read_raw_entries(self):
         samples = []

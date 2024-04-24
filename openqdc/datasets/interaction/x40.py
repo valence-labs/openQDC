@@ -28,6 +28,10 @@ class X40(YamlDataset):
         InteractionMethod.DCCSDT_HA_TZ,  # "dCCSD(T)/haTZ",
         InteractionMethod.MP2_5_CBS_ADZ,  # "MP2.5/CBS(aDZ)",
     ]
+    __links__ = {
+        "x40.yaml": "http://cuby4.molecular.cz/download_datasets/x40.yaml",
+        "geometries.tar.gz": "http://cuby4.molecular.cz/download_geometries/X40.tar",
+    }
 
     def _process_name(self, item):
         return item.shortname

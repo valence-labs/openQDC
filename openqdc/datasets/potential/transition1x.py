@@ -73,6 +73,7 @@ class Transition1X(BaseDataset):
     __energy_unit__ = "ev"
     __distance_unit__ = "ang"
     __forces_unit__ = "ev/ang"
+    __links__ = {"Transition1x.h5": "https://figshare.com/ndownloader/files/36035789"}
 
     def read_raw_entries(self):
         raw_path = p_join(self.root, "Transition1x.h5")

@@ -146,13 +146,16 @@ class BaseDataset(DatasetPropertyMixIn):
         self._fn_distance = lambda x: x
         self._fn_forces = lambda x: x
 
+    @property
+    def config(self):
+        assert len(self.__links__) > 0, "No links provided for fetching"
+        return dict(dataset_name=self.__name__, links=self.__links__)
+
     @classmethod
     def fetch(cls, cache_path: Optional[str] = None, overwrite: bool = False) -> None:
-        assert len(cls.__links__) > 0, "No links provided for fetching"
-        from openqdc.raws.config_factory import DataDownloader
+        from openqdc.utils.download_api import DataDownloader
 
-        config = dict(dataset_name=cls.no_init().__name__, links=cls.__links__)
-        DataDownloader(cache_path, overwrite).from_config(config)
+        DataDownloader(cache_path, overwrite).from_config(cls.no_init().config)
 
     def _post_init(
         self,

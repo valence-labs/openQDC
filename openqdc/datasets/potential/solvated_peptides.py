@@ -44,6 +44,7 @@ class SolvatedPeptides(BaseDataset):
     __energy_unit__ = "hartree"
     __distance_unit__ = "bohr"
     __forces_unit__ = "hartree/bohr"
+    __links__ = {"solvated_peptides.hdf5.gz": "https://zenodo.org/record/3585804/files/213.hdf5.gz"}
 
     def __smiles_converter__(self, x):
         """util function to convert string to smiles: useful if the smiles is

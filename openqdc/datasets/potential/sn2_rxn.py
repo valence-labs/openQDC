@@ -32,6 +32,7 @@ class SN2RXN(BaseDataset):
     __energy_unit__ = "ev"
     __distance_unit__ = "bohr"
     __forces_unit__ = "ev/bohr"
+    __links__ = {"sn2_rxn.hdf5.gz": "https://zenodo.org/records/2605341/files/sn2_reactions.npz"}
 
     energy_target_names = [
         # TODO: We need to revalidate this to make sure that is not atomization energies.

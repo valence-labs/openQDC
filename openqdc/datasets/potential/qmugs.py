@@ -57,6 +57,10 @@ class QMugs(BaseDataset):
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
+    __links__ = {
+        "summary.csv": "https://libdrive.ethz.ch/index.php/s/X5vOBNSITAG5vzM/download?path=%2F&files=summary.csv",
+        "structures.tar.gz": "https://libdrive.ethz.ch/index.php/s/X5vOBNSITAG5vzM/download?path=%2F&files=structures.tar.gz",
+    }
 
     energy_target_names = [
         "GFN2:TOTAL_ENERGY",

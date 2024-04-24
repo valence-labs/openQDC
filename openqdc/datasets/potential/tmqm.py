@@ -72,6 +72,10 @@ class TMQM(BaseDataset):
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
+    __links__ = {
+        x: f"https://raw.githubusercontent.com/bbskjelstad/tmqm/master/data/{x}"
+        for x in ["tmQM_X1.xyz.gz", "tmQM_X2.xyz.gz", "tmQM_y.csv", "Benchmark2_TPSSh_Opt.xyz"]
+    }
 
     def read_raw_entries(self):
         df = pd.read_csv(p_join(self.root, "tmQM_y.csv"), sep=";", usecols=["CSD_code", "Electronic_E"])

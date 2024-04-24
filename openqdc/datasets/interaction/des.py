@@ -146,6 +146,9 @@ class DES370K(BaseInteractionDataset, IDES):
         "sapt_exdisp_ss",
         "sapt_delta_HF",
     ]
+    __links__ = {
+        "DES370K.zip": "https://zenodo.org/record/5676266/files/DES370K.zip",
+    }
 
     @property
     def csv_path(self):
@@ -231,6 +234,9 @@ class DES5M(DES370K):
         "sapt_exdisp_ss",
         "sapt_delta_HF",
     ]
+    __links__ = {
+        "DES5M.zip": "https://zenodo.org/records/5706002/files/DESS5M.zip?download=1",
+    }
 
 
 class DESS66(DES370K):
@@ -251,6 +257,7 @@ class DESS66(DES370K):
 
     __name__ = "des_s66"
     __filename__ = "DESS66.csv"
+    __links__ = {"DESS66.zip": "https://zenodo.org/records/5676284/files/DESS66.zip?download=1"}
 
     def _create_subsets(self, **kwargs):
         return kwargs["row"]["system_name"]
@@ -275,3 +282,4 @@ class DESS66x8(DESS66):
 
     __name__ = "des_s66x8"
     __filename__ = "DESS66x8.csv"
+    __links__ = {"DESS66x8.zip": "https://zenodo.org/records/5676284/files/DESS66x8.zip?download=1"}
