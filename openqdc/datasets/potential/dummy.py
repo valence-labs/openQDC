@@ -94,16 +94,6 @@ class PredefinedDataset(BaseDataset):
 
         return p_join(get_project_root(), "tests", "files", self.__name__, "preprocessed")
 
-    # override
-    @property
-    def data_types(self):
-        return {
-            "atomic_inputs": np.float32,
-            "position_idx_range": np.int32,
-            "energies": np.float32,
-            "forces": np.float32,
-        }
-
     def is_preprocessed(self):
         return True
 
