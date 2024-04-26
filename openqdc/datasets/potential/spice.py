@@ -25,7 +25,7 @@ def read_record(r, obj):
     res = dict(
         name=np.array([smiles] * n_confs),
         subset=np.array([obj.subset_mapping[subset]] * n_confs),
-        energies=r[obj.energy_target_names[0]][:][:, None].astype(np.float32),
+        energies=r[obj.energy_target_names[0]][:][:, None].astype(np.float64),
         forces=r[obj.force_target_names[0]][:].reshape(
             -1, 3, 1
         ),  # forces -ve of energy gradient but the -1.0 is done in the convert_forces method
@@ -56,7 +56,7 @@ class Spice(BaseDataset):
     """
 
     __name__ = "spice"
-    __energy_methods__ = [PotentialMethod.WB97M_D3BJ_DEF2_TZVPPD]  # "wb97m-d3bj/def2-tzvppd"]
+    __energy_methods__ = [PotentialMethod.WB97M_D3BJ_DEF2_TZVPPD]
     __force_mask__ = [True]
     __energy_unit__ = "hartree"
     __distance_unit__ = "bohr"
@@ -125,10 +125,10 @@ class SpiceV2(Spice):
         "SPICE PubChem Set 4 Single Points Dataset v1.3": "PubChem",
         "SPICE PubChem Set 5 Single Points Dataset v1.3": "PubChem",
         "SPICE PubChem Set 6 Single Points Dataset v1.3": "PubChem",
-        "SPICE PubChem Set 7 Single Points Dataset v1.0": "PubChem",
-        "SPICE PubChem Set 8 Single Points Dataset v1.0": "PubChem",
-        "SPICE PubChem Set 9 Single Points Dataset v1.0": "PubChem",
-        "SPICE PubChem Set 10 Single Points Dataset v1.0": "PubChem",
+        "SPICE PubChem Set 7 Single Points Dataset v1.0": "PubChemv2",
+        "SPICE PubChem Set 8 Single Points Dataset v1.0": "PubChemv2",
+        "SPICE PubChem Set 9 Single Points Dataset v1.0": "PubChemv2",
+        "SPICE PubChem Set 10 Single Points Dataset v1.0": "PubChemv2",
         "SPICE DES Monomers Single Points Dataset v1.1": "DES370K Monomers",
         "SPICE DES370K Single Points Dataset v1.0": "DES370K Dimers",
         "SPICE DES370K Single Points Dataset Supplement v1.1": "DES370K Dimers",

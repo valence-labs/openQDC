@@ -281,7 +281,7 @@ def extract_entry(
     res = dict(
         name=np.array([df["name"][i]]),
         subset=np.array([subset if subset is not None else z_to_formula(x)]),
-        energies=energies.reshape((1, -1)).astype(np.float32),
+        energies=energies.reshape((1, -1)).astype(np.float64),
         atomic_inputs=np.concatenate((xs, positions), axis=-1, dtype=np.float32),
         n_atoms=np.array([x.shape[0]], dtype=np.int32),
     )

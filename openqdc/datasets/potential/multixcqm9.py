@@ -540,7 +540,7 @@ class MultixcQM9(BaseDataset):
         df_xyz = self._read_all_xyzs()
         return [
             {"energies": np.atleast_2d(en), **xyz_dict}
-            for xyz_dict, en in zip(df_xyz.to_dict("records"), df_energies.values.astype(np.float32))
+            for xyz_dict, en in zip(df_xyz.to_dict("records"), df_energies.values.astype(np.float64))
         ]
 
 

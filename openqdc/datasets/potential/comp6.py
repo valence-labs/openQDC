@@ -63,7 +63,7 @@ class COMP6(BaseDataset):
     def read_raw_entries(self):
         samples = []
         for subset in ["ani_md", "drugbank", "gdb7_9", "gdb10_13", "s66x8", "tripeptides"]:
-            raw_path = p_join(self.root, f"{subset}.h5")
+            raw_path = p_join(self.root, f"{subset}.h5.gz")
             samples += read_qc_archive_h5(raw_path, subset, self.energy_target_names, self.force_target_names)
 
         return samples

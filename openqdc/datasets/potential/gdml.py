@@ -58,7 +58,7 @@ class GDML(BaseDataset):
     __forces_unit__ = "kcal/mol/bohr"
 
     def read_raw_entries(self):
-        raw_path = p_join(self.root, "gdml.h5")
+        raw_path = p_join(self.root, "gdml.h5.gz")
         samples = read_qc_archive_h5(raw_path, "gdml", self.energy_target_names, self.force_target_names)
 
         return samples

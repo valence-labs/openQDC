@@ -261,7 +261,7 @@ class BaseDataset(DatasetPropertyMixIn):
         return {
             "atomic_inputs": np.float32,
             "position_idx_range": np.int32,
-            "energies": np.float32,
+            "energies": np.float64,
             "forces": np.float32,
         }
 
@@ -618,7 +618,7 @@ class BaseDataset(DatasetPropertyMixIn):
             self._convert_array(np.array(input[:, 0], dtype=np.int32)),
             self._convert_array(np.array(input[:, 1], dtype=np.int32)),
             self._convert_array(np.array(input[:, -3:], dtype=np.float32)),
-            self._convert_array(np.array(self.data["energies"][idx], dtype=np.float32)),
+            self._convert_array(np.array(self.data["energies"][idx], dtype=np.float64)),
         )
         name = self.__smiles_converter__(self.data["name"][idx])
         subset = self.data["subset"][idx]

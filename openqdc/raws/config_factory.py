@@ -354,6 +354,21 @@ class DataConfigFactory:
         dataset_name="revmd17",
         links={"revmd17.zip": "https://figshare.com/ndownloader/articles/12672038/versions/3"},
     )
+    md22 = dict(
+        dataset_name="md22",
+        links={
+            f"{x}.npz": f"http://www.quantum-machine.org/gdml/repo/datasets/md22_{x}.npz"
+            for x in [
+                "Ac-Ala3-NHMe",
+                "DHA",
+                "stachyose",
+                "AT-AT",
+                "AT-AT-CG-CG",
+                "double-walled_nanotube",
+                "buckyball-catcher",
+            ]
+        },
+    )
 
     x40 = dict(
         dataset_name="x40",

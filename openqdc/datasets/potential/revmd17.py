@@ -40,7 +40,7 @@ def read_npz_entry(filename, root):
     res = dict(
         name=np.array([trajectories[filename]] * frames),
         subset=np.array([filename] * frames),
-        energies=energies[:, None].astype(np.float32),
+        energies=energies[:, None].astype(np.float64),
         forces=forces.reshape(-1, 3, 1).astype(np.float32),
         atomic_inputs=shape_atom_inputs(coords, nuclear_charges),
         n_atoms=np.array([len(nuclear_charges)] * frames, dtype=np.int32),
@@ -79,6 +79,7 @@ class RevMD17(BaseDataset):
         PotentialMethod.PBE_DEF2_TZVP
         # "pbe/def2-tzvp",
     ]
+    __force_mask__ = [True]
 
     energy_target_names = [
         "PBE-TS Energy",

@@ -20,7 +20,7 @@ def to_mol(entry, metadata) -> Dict[str, np.ndarray]:
     res = dict(
         atomic_inputs=np.concatenate((Z[:, None], C[:, None], R), axis=-1).astype(np.float32),
         name=np.array([metadata["SMILES"]]),
-        energies=E[:, None].astype(np.float32),
+        energies=E[:, None].astype(np.float64),
         forces=F[:, :, None].astype(np.float32),
         n_atoms=np.array([Z.shape[0]], dtype=np.int32),
         subset=np.array([z_to_formula(Z)]),

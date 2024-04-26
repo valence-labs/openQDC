@@ -23,6 +23,15 @@ class BaseInteractionDataset(BaseDataset):
             "n_atoms_ptr": np.int32,
         }
 
+    @property
+    def data_types(self):
+        return {
+            "atomic_inputs": np.float32,
+            "position_idx_range": np.int32,
+            "energies": np.float32,
+            "forces": np.float32,
+        }
+
     def __getitem__(self, idx: int):
         shift = MAX_CHARGE
         p_start, p_end = self.data["position_idx_range"][idx]
