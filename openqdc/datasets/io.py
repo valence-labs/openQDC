@@ -47,6 +47,7 @@ class FromFileDataset(BaseDataset, ABC):
         self.recompute_statistics = True
         self.refit_e0s = True
         self.energy_type = energy_type
+        self._original_unit = energy_unit
         self.__energy_unit__ = energy_unit
         self.__distance_unit__ = distance_unit
         self.__energy_methods__ = [PotentialMethod.NONE if not level_of_theory else level_of_theory]
