@@ -1,8 +1,10 @@
 from enum import Enum
 
 from loguru import logger
+from numpy import array, float32
 
 from openqdc.methods.atom_energies import atom_energy_collection, to_e_matrix
+from openqdc.utils.constants import ATOM_SYMBOLS
 
 
 class StrEnum(str, Enum):
@@ -472,6 +474,13 @@ class PotentialMethod(QmMethod):  # SPLIT FOR INTERACTIO ENERGIES AND FIX MD1
     XLYP_TZP = Functional.XLYP, BasisSet.TZP
     NONE = Functional.NONE, BasisSet.NONE
 
+    def _build_default_dict(self):
+        e0_dict = {}
+        for SYMBOL in ATOM_SYMBOLS:
+            for CHARGE in range(-10, 11):
+                e0_dict[(SYMBOL, CHARGE)] = array([0], dtype=float32)
+        return e0_dict
+
     @property
     def atom_energies_dict(self):
         """Get the atomization energy dictionary"""
@@ -483,7 +492,7 @@ class PotentialMethod(QmMethod):  # SPLIT FOR INTERACTIO ENERGIES AND FIX MD1
                 raise
         except:  # noqa
             logger.info(f"No available atomization energy for the QM method {key}. All values are set to 0.")
-
+            energies = self._build_default_dict()
         return energies
 
 

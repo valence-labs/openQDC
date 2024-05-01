@@ -129,6 +129,7 @@ class BaseDataset(DatasetPropertyMixIn):
         set_cache_dir(cache_dir)
         # self._init_lambda_fn()
         self.data = None
+        self._original_unit = self.__energy_unit__
         self.recompute_statistics = recompute_statistics
         self.regressor_kwargs = regressor_kwargs
         self.transform = transform
@@ -269,6 +270,10 @@ class BaseDataset(DatasetPropertyMixIn):
         return {"name": str, "subset": str, "n_atoms": np.int32}
 
     @property
+    def atom_energies(self):
+        return self._e0s_dispatcher
+
+    @property
     def data_types(self):
         return {
             "atomic_inputs": np.float32,
@@ -299,7 +304,11 @@ class BaseDataset(DatasetPropertyMixIn):
     def _set_isolated_atom_energies(self):
         if self.__energy_methods__ is None:
             logger.error("No energy methods defined for this dataset.")
-        f = get_conversion("hartree", self.__energy_unit__)
+        if self.energy_type == "formation":
+            f = get_conversion("hartree", self.__energy_unit__)
+        else:
+            # regression are calculated on the original unit of the dataset
+            f = get_conversion(self._original_unit, self.__energy_unit__)
         self.__isolated_atom_energies__ = f(self.e0s_dispatcher.e0s_matrix)
 
     def convert_energy(self, x):
@@ -557,48 +566,6 @@ class BaseDataset(DatasetPropertyMixIn):
         datum["values"] = np.vstack(descr)
         datum["idxs"] = idxs
         return datum
-
-    @classmethod
-    def as_dataloader(
-        cls,
-        batch_size: int = 8,
-        energy_unit: Optional[str] = None,
-        distance_unit: Optional[str] = None,
-        array_format: str = "torch",
-        energy_type: str = "formation",
-        overwrite_local_cache: bool = False,
-        cache_dir: Optional[str] = None,
-        recompute_statistics: bool = False,
-        transform: Optional[Callable] = None,
-    ):
-        """
-        Return the dataset as a dataloader.
-
-        Parameters
-        ----------
-        batch_size : int, optional
-            Batch size, by default 8
-        For other parameters, see the __init__ method.
-        """
-        if not has_package("torch_geometric"):
-            raise ImportError("torch_geometric is required to use this method.")
-        assert array_format in ["torch", "jax"], f"Format {array_format} must be torch or jax."
-        from torch_geometric.data import Data
-        from torch_geometric.loader import DataLoader
-
-        return DataLoader(
-            cls(
-                energy_unit=energy_unit,
-                distance_unit=distance_unit,
-                array_format=array_format,
-                energy_type=energy_type,
-                overwrite_local_cache=overwrite_local_cache,
-                cache_dir=cache_dir,
-                recompute_statistics=recompute_statistics,
-                transform=lambda x: Data(**x) if transform is None else transform,
-            ),
-            batch_size=batch_size,
-        )
 
     def as_iter(self, atoms: bool = False, energy_method: int = 0):
         """
