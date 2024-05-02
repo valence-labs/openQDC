@@ -146,6 +146,8 @@ class Regressor:
             else:
                 X, y = self.X, self.y[:, energy_idx]
             E0s, cov = self.solver(X, y)
+            if cov is None:
+                cov = np.zeros_like(E0s) + 1.0
             E0_list.append(E0s)
             cov_list.append(cov)
         return np.vstack(E0_list).T, np.vstack(cov_list).T

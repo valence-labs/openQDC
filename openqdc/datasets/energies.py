@@ -1,10 +1,13 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
 from os.path import join as p_join
+from typing import Dict, Union
 
 import numpy as np
 from loguru import logger
 
 from openqdc.methods.enums import PotentialMethod
+from openqdc.utils.constants import ATOM_SYMBOLS, ATOMIC_NUMBERS
 from openqdc.utils.io import load_pkl, save_pkl
 from openqdc.utils.regressor import Regressor
 
@@ -41,6 +44,56 @@ def dispatch_factory(data, **kwargs) -> "IsolatedEnergyInterface":
         return NullEnergy(data, **kwargs)
 
 
+@dataclass(frozen=False, eq=True)
+class AtomSpecies:
+    """
+    Structure that defines a tuple of chemical specie and charge
+    and provide hash and automatic conversion from atom number to
+    checmical symbol
+    """
+
+    symbol: Union[str, int]
+    charge: int = 0
+
+    def __post_init__(self):
+        if not isinstance(self.symbol, str):
+            self.symbol = ATOM_SYMBOLS[self.symbol]
+        self.number = ATOMIC_NUMBERS[self.symbol]
+
+    def __hash__(self):
+        return hash((self.symbol, self.charge))
+
+    def __eq__(self, other):
+        if not isinstance(other, AtomSpecies):
+            symbol, charge = other[0], other[1]
+            other = AtomSpecies(symbol=symbol, charge=charge)
+        return (self.number, self.charge) == (other.number, other.charge)
+
+
+@dataclass
+class AtomEnergy:
+    """
+    Datastructure to store isolated atom energies
+    and the std deviation associated to the value.
+    By default the std will be 1 if no value was calculated
+    or not available (formation energy case)
+    """
+
+    mean: np.array
+    std: np.array = field(default_factory=lambda: np.array([1], dtype=np.float32))
+
+    def __post_init__(self):
+        if not isinstance(self.mean, np.ndarray):
+            self.mean = np.array([self.mean], dtype=np.float32)
+
+    def append(self, other: "AtomEnergy"):
+        """
+        Append the mean and std of another atom energy
+        """
+        self.mean = np.append(self.mean, other.mean)
+        self.std = np.append(self.std, other.std)
+
+
 class AtomEnergies:
     """
     Manager class for interface with the isolated atom energies classes
@@ -71,14 +124,48 @@ class AtomEnergies:
         """
         return self.factory.e0_matrix
 
+    @property
+    def e0s_dict(self) -> Dict[AtomSpecies, AtomEnergy]:
+        """
+        Return the isolated atom energies dictionary
+        """
+        return self.factory.e0_dict
+
+    def __str__(self):
+        return f"Atoms: { list(set(map(lambda x : x.symbol, self.e0s_dict.keys())))}"
+
+    def __repr__(self):
+        return str(self)
+
+    def __getitem__(self, item: AtomSpecies) -> AtomEnergy:
+        """
+        Retrieve a key from the isolated atom dictionary.
+        Item can be written as tuple(Symbol, charge),
+        tuple(Chemical number, charge). If no charge is passed,
+        it will be automatically set to 0.
+        Examples:
+            AtomEnergies[6], AtomEnergies[6,1],
+            AtomEnergies["C",1], AtomEnergies[(6,1)]
+            AtomEnergies[("C,1)]
+        """
+        try:
+            atom, charge = item[0], item[1]
+        except TypeError:
+            atom = item
+            charge = 0
+        except IndexError:
+            atom = item[0]
+            charge = 0
+        if not isinstance(atom, str):
+            atom = ATOM_SYMBOLS[atom]
+        return self.e0s_dict[(atom, charge)]
+
 
 class IsolatedEnergyInterface(ABC):
     """
     Abstract class that defines the interface for the
     different implementation of an isolated atom energy value
     """
-
-    _e0_matrixs = []
 
     def __init__(self, data, **kwargs):
         """
@@ -93,7 +180,8 @@ class IsolatedEnergyInterface(ABC):
             selected energy class. Mostly used for regression
             to pass the regressor_kwargs.
         """
-
+        self._e0_matrixs = []
+        self._e0_dict = None
         self.kwargs = kwargs
         self.data = data
         self._post_init()
@@ -120,8 +208,38 @@ class IsolatedEnergyInterface(ABC):
         """
         return np.array(self._e0_matrixs)
 
+    @property
+    def e0_dict(self) -> Dict:
+        """
+        Return the isolated atom energies dict
+        """
+
+        return self._e0s_dict
+
     def __str__(self) -> str:
         return self.__class__.__name__.lower()
+
+
+class PhysicalEnergy(IsolatedEnergyInterface):
+    """
+    Class that returns a physical (SE,DFT,etc) isolated atom energies.
+    """
+
+    def _assembly_e0_dict(self):
+        datum = {}
+        for method in self.data.__energy_methods__:
+            for key, values in method.atom_energies_dict.items():
+                atm = AtomSpecies(*key)
+                ens = AtomEnergy(values)
+                if atm not in datum:
+                    datum[atm] = ens
+                else:
+                    datum[atm].append(ens)
+        self._e0s_dict = datum
+
+    def _post_init(self):
+        self._e0_matrixs = [energy_method.atom_energies_matrix for energy_method in self.data.__energy_methods__]
+        self._assembly_e0_dict()
 
 
 class NullEnergy(IsolatedEnergyInterface):
@@ -130,17 +248,21 @@ class NullEnergy(IsolatedEnergyInterface):
     of no energies are available.
     """
 
+    def _assembly_e0_dict(self):
+        datum = {}
+        for _ in self.data.__energy_methods__:
+            for key, values in PotentialMethod.NONE.atom_energies_dict.items():
+                atm = AtomSpecies(*key)
+                ens = AtomEnergy(values)
+                if atm not in datum:
+                    datum[atm] = ens
+                else:
+                    datum[atm].append(ens)
+        self._e0s_dict = datum
+
     def _post_init(self):
         self._e0_matrixs = [PotentialMethod.NONE.atom_energies_matrix for _ in range(len(self.data.energy_methods))]
-
-
-class PhysicalEnergy(IsolatedEnergyInterface):
-    """
-    Class that returns a physical (SE,DFT,etc) isolated atom energies.
-    """
-
-    def _post_init(self):
-        self._e0_matrixs = [energy_method.atom_energies_matrix for energy_method in self.data.__energy_methods__]
+        self._assembly_e0_dict()
 
 
 class RegressionEnergy(IsolatedEnergyInterface):
@@ -175,7 +297,9 @@ class RegressionEnergy(IsolatedEnergyInterface):
         """
         atomic_energies_dict = {}
         for i, z in enumerate(self.regressor.numbers):
-            atomic_energies_dict[z] = E0s[i]
+            for charge in range(-10, 11):
+                atomic_energies_dict[AtomSpecies(z, charge)] = AtomEnergy(E0s[i], 1 if covs is None else covs[i])
+            # atomic_energies_dict[z] = E0s[i]
         self._e0s_dict = atomic_energies_dict
         self.save_e0s()
 
@@ -187,7 +311,9 @@ class RegressionEnergy(IsolatedEnergyInterface):
         new_e0s = [np.zeros((max(self.data.numbers) + 1, MAX_CHARGE_NUMBER)) for _ in range(len(self))]
         for z, e0 in self._e0s_dict.items():
             for i in range(len(self)):
-                new_e0s[i][z, :] = e0[i]
+                # new_e0s[i][z, :] = e0[i]
+                new_e0s[i][z.number, z.charge] = e0.mean[i]
+            # for atom_sp, values in
         self._e0_matrixs = new_e0s
 
     def save_e0s(self) -> None:
