@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from os.path import join as p_join
-from typing import Union
+from typing import Dict, Union
 
 import numpy as np
 from loguru import logger
@@ -45,7 +45,13 @@ def dispatch_factory(data, **kwargs) -> "IsolatedEnergyInterface":
 
 
 @dataclass(frozen=False, eq=True)
-class AtomSpec:
+class AtomSpecies:
+    """
+    Structure that defines a tuple of chemical specie and charge
+    and provide hash and automatic conversion from atom number to
+    checmical symbol
+    """
+
     symbol: Union[str, int]
     charge: int = 0
 
@@ -58,14 +64,21 @@ class AtomSpec:
         return hash((self.symbol, self.charge))
 
     def __eq__(self, other):
-        if not isinstance(other, AtomSpec):
+        if not isinstance(other, AtomSpecies):
             symbol, charge = other[0], other[1]
-            other = AtomSpec(symbol=symbol, charge=charge)
+            other = AtomSpecies(symbol=symbol, charge=charge)
         return (self.number, self.charge) == (other.number, other.charge)
 
 
 @dataclass
 class AtomEnergy:
+    """
+    Datastructure to store isolated atom energies
+    and the std deviation associated to the value.
+    By default the std will be 1 if no value was calculated
+    or not available (formation energy case)
+    """
+
     mean: np.array
     std: np.array = field(default_factory=lambda: np.array([1], dtype=np.float32))
 
@@ -73,7 +86,10 @@ class AtomEnergy:
         if not isinstance(self.mean, np.ndarray):
             self.mean = np.array([self.mean], dtype=np.float32)
 
-    def append(self, other):
+    def append(self, other: "AtomEnergy"):
+        """
+        Append the mean and std of another atom energy
+        """
         self.mean = np.append(self.mean, other.mean)
         self.std = np.append(self.std, other.std)
 
@@ -109,7 +125,7 @@ class AtomEnergies:
         return self.factory.e0_matrix
 
     @property
-    def e0s_dict(self):
+    def e0s_dict(self) -> Dict[AtomSpecies, AtomEnergy]:
         """
         Return the isolated atom energies dictionary
         """
@@ -121,7 +137,17 @@ class AtomEnergies:
     def __repr__(self):
         return str(self)
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: AtomSpecies) -> AtomEnergy:
+        """
+        Retrieve a key from the isolated atom dictionary.
+        Item can be written as tuple(Symbol, charge),
+        tuple(Chemical number, charge). If no charge is passed,
+        it will be automatically set to 0.
+        Examples:
+            AtomEnergies[6], AtomEnergies[6,1],
+            AtomEnergies["C",1], AtomEnergies[(6,1)]
+            AtomEnergies[("C,1)]
+        """
         try:
             atom, charge = item[0], item[1]
         except TypeError:
@@ -183,9 +209,9 @@ class IsolatedEnergyInterface(ABC):
         return np.array(self._e0_matrixs)
 
     @property
-    def e0_dict(self) -> np.ndarray:
+    def e0_dict(self) -> Dict:
         """
-        Return the isolated atom energies matrixes
+        Return the isolated atom energies dict
         """
 
         return self._e0s_dict
@@ -203,7 +229,7 @@ class PhysicalEnergy(IsolatedEnergyInterface):
         datum = {}
         for method in self.data.__energy_methods__:
             for key, values in method.atom_energies_dict.items():
-                atm = AtomSpec(*key)
+                atm = AtomSpecies(*key)
                 ens = AtomEnergy(values)
                 if atm not in datum:
                     datum[atm] = ens
@@ -226,7 +252,7 @@ class NullEnergy(IsolatedEnergyInterface):
         datum = {}
         for _ in self.data.__energy_methods__:
             for key, values in PotentialMethod.NONE.atom_energies_dict.items():
-                atm = AtomSpec(*key)
+                atm = AtomSpecies(*key)
                 ens = AtomEnergy(values)
                 if atm not in datum:
                     datum[atm] = ens
@@ -272,7 +298,7 @@ class RegressionEnergy(IsolatedEnergyInterface):
         atomic_energies_dict = {}
         for i, z in enumerate(self.regressor.numbers):
             for charge in range(-10, 11):
-                atomic_energies_dict[AtomSpec(z, charge)] = AtomEnergy(E0s[i], 1 if covs is None else covs[i])
+                atomic_energies_dict[AtomSpecies(z, charge)] = AtomEnergy(E0s[i], 1 if covs is None else covs[i])
             # atomic_energies_dict[z] = E0s[i]
         self._e0s_dict = atomic_energies_dict
         self.save_e0s()
