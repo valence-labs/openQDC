@@ -103,6 +103,10 @@ def fetch(
 ):
     """
     Download the raw datasets files from the main openQDC hub.
+    overwrite: bool = False,
+        If True, the files will be re-downloaded and overwritten.
+    cache_dir: Optional[str] = None,
+        Path to the cache. If not provided, the default cache directory will be used.
     Special case: if the dataset is "all", "potential", "interaction".
         all: all available datasets will be downloaded.
         potential: all the potential datasets will be downloaded
