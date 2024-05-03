@@ -183,7 +183,6 @@ class Functional(Enum):
     X3LYP_VWN5 = "x3lyp", CORRECTION.VWN5
     XLYP = "xlyp"
     NONE = ""
-    A = ""
 
     def __init__(self, functional: str, correction: BasisSet = CORRECTION.NONE):
         self.functional = functional
