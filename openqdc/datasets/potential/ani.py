@@ -168,3 +168,4 @@ class ANI1CCX_V2(ANI1CCX):
 
     __energy_methods__ = ANI1CCX.__energy_methods__ + [PotentialMethod.PM6, PotentialMethod.GFN2_XTB]
     energy_target_names = ANI1CCX.energy_target_names + ["PM6", "GFN2"]
+    __force_mask__ = ANI1CCX.__force_mask__ + [False, False]

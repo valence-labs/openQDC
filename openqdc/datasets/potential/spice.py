@@ -152,3 +152,4 @@ class SpiceVL2(SpiceV2):
 
     __energy_methods__ = SpiceV2.__energy_methods__ + [PotentialMethod.GFN2_XTB, PotentialMethod.PM6]
     energy_target_names = SpiceV2.energy_target_names + ["GFN2," "PM6"]
+    __force_mask__ = SpiceV2.__force_mask__ + [False, False]
