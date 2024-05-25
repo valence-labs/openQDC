@@ -1,8 +1,40 @@
 from os.path import join as p_join
 
+import numpy as np
+from tqdm import tqdm
+
 from openqdc.datasets.base import BaseDataset
 from openqdc.methods import PotentialMethod
-from openqdc.utils import read_qc_archive_h5
+
+
+def extract_npz_entry(data):
+    n_entries = data["N"].shape[0]
+
+    nuclear_charges_full = data["Z"]
+    n_atoms_full = data["N"]
+    coors_full = data["R"]
+    forces_full = data["F"]
+    energies_full = data["E"]
+
+    entries = []
+    for idx in tqdm(range(n_entries)):
+        n_atoms = n_atoms_full[idx]
+        energies = energies_full[idx]
+        nuclear_charges = nuclear_charges_full[idx, :n_atoms][:, None]
+        coords = coors_full[idx, :n_atoms, :].reshape(-1, 3)
+        forces = forces_full[idx, :n_atoms, :]
+        res = dict(
+            name=np.array(["SN2RXN"]),
+            subset=np.array(["SN2RXN"]),
+            energies=energies.reshape(-1, 1).astype(np.float64),
+            forces=forces.reshape(-1, 3, 1).astype(np.float32),
+            atomic_inputs=np.concatenate(
+                (nuclear_charges, np.zeros_like(nuclear_charges), coords), axis=-1, dtype=np.float32
+            ),
+            n_atoms=np.array([n_atoms], dtype=np.int32),
+        )
+        entries.append(res)
+    return entries
 
 
 class SN2RXN(BaseDataset):
@@ -30,9 +62,9 @@ class SN2RXN(BaseDataset):
         # "dsd-blyp-d3(bj)/def2-tzvp",
     ]
     __energy_unit__ = "ev"
-    __distance_unit__ = "bohr"
-    __forces_unit__ = "ev/bohr"
-    __links__ = {"sn2_rxn.hdf5.gz": "https://zenodo.org/records/2605341/files/sn2_reactions.npz"}
+    __distance_unit__ = "ang"
+    __forces_unit__ = "ev/ang"
+    __links__ = {"sn2_rxn.npz": "https://zenodo.org/records/2605341/files/sn2_reactions.npz"}
 
     energy_target_names = [
         # TODO: We need to revalidate this to make sure that is not atomization energies.
@@ -45,14 +77,9 @@ class SN2RXN(BaseDataset):
         "DSD-BLYP-D3(BJ):def2-TZVP Gradient",
     ]
 
-    def __smiles_converter__(self, x):
-        """util function to convert string to smiles: useful if the smiles is
-        encoded in a different format than its display format
-        """
-        return "-".join(x.decode("ascii").split("_")[:-1])
-
     def read_raw_entries(self):
-        raw_path = p_join(self.root, "sn2_rxn.h5")
-        samples = read_qc_archive_h5(raw_path, "sn2_rxn", self.energy_target_names, self.force_target_names)
+        raw_path = p_join(self.root, "sn2_rxn.npz")
+        data = np.load(raw_path)
+        samples = extract_npz_entry(data)
 
         return samples
