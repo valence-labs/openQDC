@@ -54,8 +54,8 @@ class GDML(BaseDataset):
     ]
 
     __energy_unit__ = "kcal/mol"
-    __distance_unit__ = "bohr"
-    __forces_unit__ = "kcal/mol/bohr"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "kcal/mol/ang"
     __links__ = {
         "gdb7_9.hdf5.gz": "https://zenodo.org/record/3588361/files/208.hdf5.gz",
         "gdb10_13.hdf5.gz": "https://zenodo.org/record/3588364/files/209.hdf5.gz",
