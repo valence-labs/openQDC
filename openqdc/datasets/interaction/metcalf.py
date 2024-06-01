@@ -52,7 +52,7 @@ def content_to_xyz(content, subset):
         num_atoms = np.array([int(content.split("\n")[0])])
         tmp = content.split("\n")[1].split(",")
         name = tmp[0]
-        e = tmp[1:-1]
+        e = np.array(list(map(float, tmp[1:-1]))).astype(np.float32)
     except Exception as e:
         logger.warning(f"Encountered exception in {content} : {e}")
         return None
