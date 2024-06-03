@@ -40,8 +40,8 @@ class ISO17(BaseDataset):
     ]
 
     __energy_unit__ = "ev"
-    __distance_unit__ = "bohr"  # bohr
-    __forces_unit__ = "ev/bohr"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "ev/ang"
     __links__ = {"iso_17.hdf5.gz": "https://zenodo.org/record/3585907/files/216.hdf5.gz"}
 
     def __smiles_converter__(self, x):
