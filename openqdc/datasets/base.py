@@ -89,7 +89,7 @@ class BaseDataset(DatasetPropertyMixIn):
         energy_unit: Optional[str] = None,
         distance_unit: Optional[str] = None,
         array_format: str = "numpy",
-        energy_type: str = "formation",
+        energy_type: Optional[str] = "formation",
         overwrite_local_cache: bool = False,
         cache_dir: Optional[str] = None,
         recompute_statistics: bool = False,
@@ -112,7 +112,7 @@ class BaseDataset(DatasetPropertyMixIn):
             Format to return arrays in. Supported formats: ["numpy", "torch", "jax"]
         energy_type
             Type of isolated atom energy to use for the dataset. Default: "formation"
-            Supported types: ["formation", "regression", "null"]
+            Supported types: ["formation", "regression", "null", None]
         overwrite_local_cache
             Whether to overwrite the locally cached dataset.
         cache_dir
@@ -133,7 +133,7 @@ class BaseDataset(DatasetPropertyMixIn):
         self.recompute_statistics = recompute_statistics
         self.regressor_kwargs = regressor_kwargs
         self.transform = transform
-        self.energy_type = energy_type
+        self.energy_type = energy_type if energy_type is not None else "null"
         self.refit_e0s = recompute_statistics or overwrite_local_cache
         if not self.is_preprocessed():
             raise DatasetNotAvailableError(self.__name__)
