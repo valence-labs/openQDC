@@ -7,12 +7,11 @@ import numpy as np
 from loguru import logger
 
 from openqdc.methods.enums import PotentialMethod
-from openqdc.utils.constants import ATOM_SYMBOLS, ATOMIC_NUMBERS
+from openqdc.utils.constants import ATOM_SYMBOLS, ATOMIC_NUMBERS, MAX_CHARGE_NUMBER
 from openqdc.utils.io import load_pkl, save_pkl
 from openqdc.utils.regressor import Regressor
 
 POSSIBLE_ENERGIES = ["formation", "regression", "null"]
-MAX_CHARGE_NUMBER = 21
 
 
 def dispatch_factory(data, **kwargs) -> "IsolatedEnergyInterface":
