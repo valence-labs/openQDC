@@ -7,8 +7,11 @@ from rich import print
 from typing_extensions import Annotated
 
 from openqdc.datasets import COMMON_MAP_POTENTIALS  # noqa
-from openqdc.datasets import AVAILABLE_DATASETS, AVAILABLE_POTENTIAL_DATASETS
-from openqdc.raws.config_factory import DataConfigFactory, DataDownloader
+from openqdc.datasets import (
+    AVAILABLE_DATASETS,
+    AVAILABLE_INTERACTION_DATASETS,
+    AVAILABLE_POTENTIAL_DATASETS,
+)
 
 app = typer.Typer(help="OpenQDC CLI")
 
@@ -83,22 +86,49 @@ def datasets():
 
 
 @app.command()
-def fetch(datasets: List[str]):
+def fetch(
+    datasets: List[str],
+    overwrite: Annotated[
+        bool,
+        typer.Option(
+            help="Whether to overwrite or force the re-download of the files.",
+        ),
+    ] = False,
+    cache_dir: Annotated[
+        Optional[str],
+        typer.Option(
+            help="Path to the cache. If not provided, the default cache directory (.cache/openqdc/) will be used.",
+        ),
+    ] = None,
+):
     """
     Download the raw datasets files from the main openQDC hub.
-    Special case: if the dataset is "all", all available datasets will be downloaded.
-
+    overwrite: bool = False,
+        If True, the files will be re-downloaded and overwritten.
+    cache_dir: Optional[str] = None,
+        Path to the cache. If not provided, the default cache directory will be used.
+    Special case: if the dataset is "all", "potential", "interaction".
+        all: all available datasets will be downloaded.
+        potential: all the potential datasets will be downloaded
+        interaction: all the interaction datasets will be downloaded
     Example:
         openqdc fetch Spice
     """
-    if datasets[0] == "all":
-        dataset_names = DataConfigFactory.available_datasets
+    if datasets[0].lower() == "all":
+        dataset_names = AVAILABLE_DATASETS
+    elif datasets[0].lower() == "potential":
+        dataset_names = AVAILABLE_POTENTIAL_DATASETS
+    elif datasets[0].lower() == "interaction":
+        dataset_names = AVAILABLE_INTERACTION_DATASETS
     else:
         dataset_names = datasets
 
-    for dataset_name in dataset_names:
-        dd = DataDownloader()
-        dd.from_name(dataset_name)
+    for dataset in list(map(lambda x: x.lower().replace("_", ""), dataset_names)):
+        if exist_dataset(dataset):
+            try:
+                AVAILABLE_DATASETS[dataset].fetch(cache_dir, overwrite)
+            except Exception as e:
+                logger.error(f"Something unexpected happended while fetching {dataset}: {repr(e)}")
 
 
 @app.command()
@@ -128,8 +158,6 @@ def preprocess(
             except Exception as e:
                 logger.error(f"Error while preprocessing {dataset}. {e}. Did you fetch the dataset first?")
                 raise e
-        else:
-            logger.warning(f"{dataset} not found.")
 
 
 if __name__ == "__main__":

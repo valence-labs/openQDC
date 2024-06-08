@@ -61,6 +61,10 @@ class OrbnetDenali(BaseDataset):
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
+    __links__ = {
+        "orbnet_denali.tar.gz": "https://figshare.com/ndownloader/files/28672287",
+        "orbnet_denali_targets.tar.gz": "https://figshare.com/ndownloader/files/28672248",
+    }
 
     def read_raw_entries(self):
         label_path = p_join(self.root, "denali_labels.csv")

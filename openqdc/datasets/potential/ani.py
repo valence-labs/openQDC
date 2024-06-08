@@ -37,10 +37,16 @@ class ANI1(BaseDataset):
     __energy_unit__ = "hartree"
     __distance_unit__ = "bohr"
     __forces_unit__ = "hartree/bohr"
+    __links__ = {"ani1.hdf5.gz": "https://zenodo.org/record/3585840/files/214.hdf5.gz"}
 
     @property
     def root(self):
         return p_join(get_local_cache(), "ani")
+
+    @property
+    def config(self):
+        assert len(self.__links__) > 0, "No links provided for fetching"
+        return dict(dataset_name="ani", links=self.__links__)
 
     def __smiles_converter__(self, x):
         """util function to convert string to smiles: useful if the smiles is
@@ -95,6 +101,7 @@ class ANI1CCX(ANI1):
         "TPNO-CCSD(T):cc-pVDZ Correlation Energy",
     ]
     force_target_names = []
+    __links__ = {"ani1x.hdf5.gz": "https://zenodo.org/record/4081694/files/292.hdf5.gz"}
 
     def __smiles_converter__(self, x):
         """util function to convert string to smiles: useful if the smiles is
@@ -152,6 +159,7 @@ class ANI1X(ANI1):
     ]
 
     __force_mask__ = [False, False, False, False, False, False, True, True]
+    __links__ = {"ani1ccx.hdf5.gz": "https://zenodo.org/record/4081692/files/293.hdf5.gz"}
 
     def convert_forces(self, x):
         return super().convert_forces(x) * 0.529177249  # correct the Dataset error

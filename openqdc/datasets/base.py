@@ -82,6 +82,7 @@ class BaseDataset(DatasetPropertyMixIn):
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
     __average_nb_atoms__ = None
+    __links__ = {}
 
     def __init__(
         self,
@@ -128,6 +129,7 @@ class BaseDataset(DatasetPropertyMixIn):
         set_cache_dir(cache_dir)
         # self._init_lambda_fn()
         self.data = None
+        self._original_unit = self.__energy_unit__
         self.recompute_statistics = recompute_statistics
         self.regressor_kwargs = regressor_kwargs
         self.transform = transform
@@ -144,6 +146,17 @@ class BaseDataset(DatasetPropertyMixIn):
         self._fn_energy = lambda x: x
         self._fn_distance = lambda x: x
         self._fn_forces = lambda x: x
+
+    @property
+    def config(self):
+        assert len(self.__links__) > 0, "No links provided for fetching"
+        return dict(dataset_name=self.__name__, links=self.__links__)
+
+    @classmethod
+    def fetch(cls, cache_path: Optional[str] = None, overwrite: bool = False) -> None:
+        from openqdc.utils.download_api import DataDownloader
+
+        DataDownloader(cache_path, overwrite).from_config(cls.no_init().config)
 
     def _post_init(
         self,
@@ -257,6 +270,10 @@ class BaseDataset(DatasetPropertyMixIn):
         return {"name": str, "subset": str, "n_atoms": np.int32}
 
     @property
+    def atom_energies(self):
+        return self._e0s_dispatcher
+
+    @property
     def data_types(self):
         return {
             "atomic_inputs": np.float32,
@@ -287,7 +304,11 @@ class BaseDataset(DatasetPropertyMixIn):
     def _set_isolated_atom_energies(self):
         if self.__energy_methods__ is None:
             logger.error("No energy methods defined for this dataset.")
-        f = get_conversion("hartree", self.__energy_unit__)
+        if self.energy_type == "formation":
+            f = get_conversion("hartree", self.__energy_unit__)
+        else:
+            # regression are calculated on the original unit of the dataset
+            f = get_conversion(self._original_unit, self.__energy_unit__)
         self.__isolated_atom_energies__ = f(self.e0s_dispatcher.e0s_matrix)
 
     def convert_energy(self, x):

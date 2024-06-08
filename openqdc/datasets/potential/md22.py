@@ -41,6 +41,18 @@ def create_path(filename, root):
 
 class MD22(RevMD17):
     __name__ = "md22"
+    __links__ = {
+        f"{x}.npz": f"http://www.quantum-machine.org/gdml/repo/datasets/md22_{x}.npz"
+        for x in [
+            "Ac-Ala3-NHMe",
+            "DHA",
+            "stachyose",
+            "AT-AT",
+            "AT-AT-CG-CG",
+            "double-walled_nanotube",
+            "buckyball-catcher",
+        ]
+    }
 
     def read_raw_entries(self):
         entries_list = []

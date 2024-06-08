@@ -92,6 +92,24 @@ class Splinter(BaseInteractionDataset):
         InterEnergyType.DISP,
     ]
     energy_target_names = []
+    __links__ = {
+        "dimerpairs.0.tar.gz": "https://figshare.com/ndownloader/files/39449167",
+        "dimerpairs.1.tar.gz": "https://figshare.com/ndownloader/files/40271983",
+        "dimerpairs.2.tar.gz": "https://figshare.com/ndownloader/files/40271989",
+        "dimerpairs.3.tar.gz": "https://figshare.com/ndownloader/files/40272001",
+        "dimerpairs.4.tar.gz": "https://figshare.com/ndownloader/files/40272022",
+        "dimerpairs.5.tar.gz": "https://figshare.com/ndownloader/files/40552931",
+        "dimerpairs.6.tar.gz": "https://figshare.com/ndownloader/files/40272040",
+        "dimerpairs.7.tar.gz": "https://figshare.com/ndownloader/files/40272052",
+        "dimerpairs.8.tar.gz": "https://figshare.com/ndownloader/files/40272061",
+        "dimerpairs.9.tar.gz": "https://figshare.com/ndownloader/files/40272064",
+        "dimerpairs_nonstandard.tar.gz": "https://figshare.com/ndownloader/files/40272067",
+        "lig_interaction_sites.sdf": "https://figshare.com/ndownloader/files/40272070",
+        "lig_monomers.sdf": "https://figshare.com/ndownloader/files/40272073",
+        "prot_interaction_sites.sdf": "https://figshare.com/ndownloader/files/40272076",
+        "prot_monomers.sdf": "https://figshare.com/ndownloader/files/40272079",
+        "merge_monomers.py": "https://figshare.com/ndownloader/files/41807682",
+    }
 
     def read_raw_entries(self) -> List[Dict]:
         logger.info(f"Reading Splinter interaction data from {self.root}")

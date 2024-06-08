@@ -208,6 +208,7 @@ class AbstractStatsCalculator(ABC):
         """
         try:
             self.result = load_pkl(self.preprocess_path)
+            logger.info(f"Statistics for {str(self)} loaded successfully")
             return True
         except FileNotFoundError:
             logger.warning(f"Statistics for {str(self)} not found. Computing...")

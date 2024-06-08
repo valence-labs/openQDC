@@ -88,6 +88,7 @@ class Molecule3D(BaseDataset):
     __energy_unit__ = "ev"  # CALCULATED
     __distance_unit__ = "ang"
     __forces_unit__ = "ev/ang"
+    __links__ = {"molecule3d.zip": "https://drive.google.com/uc?id=1C_KRf8mX-gxny7kL9ACNCEV4ceu_fUGy"}
 
     energy_target_names = ["b3lyp/6-31g*.energy"]
 

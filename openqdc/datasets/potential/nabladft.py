@@ -74,6 +74,7 @@ class NablaDFT(BaseDataset):
     __energy_unit__ = "hartree"
     __distance_unit__ = "bohr"
     __forces_unit__ = "hartree/bohr"
+    __links__ = {"nabladft.db": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/moses_db/dataset_full.db"}
 
     @requires_package("nablaDFT")
     def read_raw_entries(self):

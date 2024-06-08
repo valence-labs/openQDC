@@ -10,8 +10,8 @@ from tqdm import tqdm
 
 from openqdc.datasets.interaction.base import BaseInteractionDataset
 from openqdc.methods import InteractionMethod, InterEnergyType
-from openqdc.raws.config_factory import decompress_tar_gz
 from openqdc.utils.constants import ATOM_TABLE
+from openqdc.utils.download_api import decompress_tar_gz
 
 EXPECTED_TAR_FILES = {
     "train": [
@@ -125,6 +125,7 @@ class Metcalf(BaseInteractionDataset):
         "induction energy",
         "dispersion energy",
     ]
+    __links__ = {"model-data.tar.gz": "https://zenodo.org/records/10934211/files/model-data.tar?download=1"}
 
     def read_raw_entries(self) -> List[Dict]:
         # extract in folders
