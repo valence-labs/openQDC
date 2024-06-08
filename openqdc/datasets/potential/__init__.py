@@ -1,4 +1,4 @@
-from .ani import ANI1, ANI1CCX, ANI1CCX_V2, ANI1X
+from .ani import ANI1, ANI1CCX, ANI1CCX_V2, ANI1X, ANI2
 from .comp6 import COMP6
 from .dummy import Dummy
 from .gdml import GDML

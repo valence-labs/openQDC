@@ -57,7 +57,7 @@ class QM7X(BaseDataset):
 
     __energy_methods__ = [PotentialMethod.PBE0_DEF2_TZVP, PotentialMethod.DFT3B]  # "pbe0/def2-tzvp", "dft3b"]
 
-    energy_target_names = ["ePBE0", "eMBD"]
+    energy_target_names = ["ePBE0+MBD", "eDFTB+MBD"]
 
     __force_mask__ = [True, True]
 
