@@ -557,3 +557,4 @@ class MultixcQM9_V2(MultixcQM9):
 
     __energy_methods__ = MultixcQM9.__energy_methods__ + [PotentialMethod.PM6]
     energy_target_names = MultixcQM9.energy_target_names + ["PM6"]
+    __force_mask__ = MultixcQM9.__force_mask__ + [False]

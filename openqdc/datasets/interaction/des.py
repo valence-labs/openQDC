@@ -51,6 +51,7 @@ def create_subset(smiles0, smiles1):
                 found = True
         if not found:
             logger.info(f"molecule group lookup failed for {smiles}")
+    subsets = ["_".join(subsets)]
     return subsets
 
 

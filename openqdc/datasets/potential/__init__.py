@@ -1,4 +1,4 @@
-from .ani import ANI1, ANI1CCX, ANI1CCX_V2, ANI1X, ANI2
+from .ani import ANI1, ANI1CCX, ANI1CCX_V2, ANI1X, ANI2X
 from .comp6 import COMP6
 from .dummy import Dummy
 from .gdml import GDML
@@ -25,6 +25,7 @@ AVAILABLE_POTENTIAL_DATASETS = {
     "ANI1CCX": ANI1CCX,
     "ANI1CCX_V2": ANI1CCX_V2,
     "ANI1X": ANI1X,
+    "ANI2X": ANI2X,
     "COMP6": COMP6,
     "GDML": GDML,
     "GEOM": GEOM,

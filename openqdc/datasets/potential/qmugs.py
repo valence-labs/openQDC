@@ -79,3 +79,4 @@ class QMugs_V2(QMugs):
     __name__ = "qmugs_v2"
     __energy_methods__ = QMugs.__energy_methods__ + [PotentialMethod.PM6]
     energy_target_names = QMugs.energy_target_names + ["PM6"]
+    __force_mask__ = QMugs.__force_mask__ + [False]
