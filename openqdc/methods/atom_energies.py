@@ -5,7 +5,12 @@ from typing import Tuple
 import numpy as np
 from loguru import logger
 
-from openqdc.utils.constants import ATOMIC_NUMBERS, MAX_ATOMIC_NUMBER, MAX_CHARGE
+from openqdc.utils.constants import (
+    ATOMIC_NUMBERS,
+    MAX_ATOMIC_NUMBER,
+    MAX_CHARGE,
+    MAX_CHARGE_NUMBER,
+)
 
 EF_KEY = Tuple[str, int]
 
@@ -35,7 +40,7 @@ def to_e_matrix(atom_energies: dict) -> np.ndarray:
                         | 2 |    |    |   |    |    |
     """
 
-    matrix = np.zeros((MAX_ATOMIC_NUMBER, MAX_CHARGE * 2 + 1))
+    matrix = np.zeros((MAX_ATOMIC_NUMBER, MAX_CHARGE_NUMBER))
     if len(atom_energies) > 0:
         for key in atom_energies.keys():
             try:

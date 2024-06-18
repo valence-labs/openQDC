@@ -1,3 +1,4 @@
+import zipfile
 from io import StringIO
 from os.path import join as p_join
 
@@ -7,8 +8,6 @@ from tqdm import tqdm
 from openqdc.datasets.base import BaseDataset
 from openqdc.methods import PotentialMethod
 from openqdc.utils.constants import ATOM_TABLE, MAX_ATOMIC_NUMBER
-
-# we could use ase.io.read to read extxyz files
 
 
 def content_to_xyz(content, n_waters):
@@ -76,15 +75,19 @@ class WaterClusters(BaseDataset):
 
     __energy_methods__ = [PotentialMethod.TTM2_1_F]  # "ttm2.1-f"
     energy_target_names = ["TTM2.1-F Potential"]
+    __links__ = {"W3-W30_all_geoms_TTM2.1-F.zip": "https://drive.google.com/uc?id=18Y7OiZXSCTsHrQ83GCc4fyE_abbL6E_n"}
 
     def read_raw_entries(self):
         samples = []
+        parent_folder = p_join(self.root, "W3-W30_all_geoms_TTM2.1-F/")
         for i in range(3, 31):
-            raw_path = p_join(self.root, f"W3-W30_all_geoms_TTM2.1-F/W{i}_geoms_all.xyz")
-            data = read_xyz(
-                raw_path,
-                i,
-            )
+            name = f"W{i}_geoms_all"
+            zip_path = p_join(parent_folder, f"{name}.zip")
+            xyz_path = p_join(parent_folder, f"{name}.xyz")
+            with zipfile.ZipFile(zip_path, "r") as zip_ref:
+                zip_ref.extractall(parent_folder)
+
+            data = read_xyz(xyz_path, i)
             samples += data
 
         return samples

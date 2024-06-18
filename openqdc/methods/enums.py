@@ -1,8 +1,10 @@
-from enum import Enum
+from enum import Enum, unique
 
 from loguru import logger
+from numpy import array, float32
 
 from openqdc.methods.atom_energies import atom_energy_collection, to_e_matrix
+from openqdc.utils.constants import ATOM_SYMBOLS
 
 
 class StrEnum(str, Enum):
@@ -10,6 +12,7 @@ class StrEnum(str, Enum):
         return self.value
 
 
+@unique
 class QmType(StrEnum):
     FF = "Force Field"
     SE = "Semi Empirical"
@@ -19,6 +22,7 @@ class QmType(StrEnum):
     MP2 = "Moller Plesset"
 
 
+@unique
 class InterEnergyType(StrEnum):  # InteractionEnergyType
     ES = "electrostatic"
     EX = "exchange"
@@ -219,6 +223,7 @@ class QmMethod(Enum):
         raise NotImplementedError()
 
 
+@unique
 class PotentialMethod(QmMethod):  # SPLIT FOR INTERACTIO ENERGIES AND FIX MD1
     B1LYP_VWN5_DZP = Functional.B1LYP_VWN5, BasisSet.DZP
     B1LYP_VWN5_SZ = Functional.B1LYP_VWN5, BasisSet.SZ
@@ -472,6 +477,13 @@ class PotentialMethod(QmMethod):  # SPLIT FOR INTERACTIO ENERGIES AND FIX MD1
     XLYP_TZP = Functional.XLYP, BasisSet.TZP
     NONE = Functional.NONE, BasisSet.NONE
 
+    def _build_default_dict(self):
+        e0_dict = {}
+        for SYMBOL in ATOM_SYMBOLS:
+            for CHARGE in range(-10, 11):
+                e0_dict[(SYMBOL, CHARGE)] = array([0], dtype=float32)
+        return e0_dict
+
     @property
     def atom_energies_dict(self):
         """Get the atomization energy dictionary"""
@@ -483,10 +495,11 @@ class PotentialMethod(QmMethod):  # SPLIT FOR INTERACTIO ENERGIES AND FIX MD1
                 raise
         except:  # noqa
             logger.info(f"No available atomization energy for the QM method {key}. All values are set to 0.")
-
+            energies = self._build_default_dict()
         return energies
 
 
+@unique
 class InteractionMethod(QmMethod):
     CCSD_T_NN = Functional.CCSDT, BasisSet.NN
     CCSD_T_CBS = Functional.CCSDT, BasisSet.CBS

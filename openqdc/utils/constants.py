@@ -3,7 +3,8 @@ from typing import Final, List
 import numpy as np
 from rdkit import Chem
 
-MAX_CHARGE: Final[int] = 6
+MAX_CHARGE: Final[int] = 10
+MAX_CHARGE_NUMBER: Final[int] = 2 * MAX_CHARGE + 1
 
 NB_ATOMIC_FEATURES: Final[int] = 5
 

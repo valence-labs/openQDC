@@ -12,8 +12,8 @@ docs_dir: "docs"
 nav:
   - Overview: index.md
   - Available Datasets: datasets.md
-  - Tutorials:
-    - Really hard example: tutorials/usage.ipynb
+  #- Tutorials:
+  #  #- Really hard example: tutorials/usage.ipynb
   - API:
     - Datasets: API/available_datasets.md
     - Isolated Atoms Energies: API/isolated_atom_energies.md

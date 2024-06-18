@@ -41,8 +41,8 @@ def read_mol(mol: Chem.rdchem.Mol, energy: float) -> Dict[str, np.ndarray]:
     res = dict(
         name=np.array([smiles]),
         subset=np.array(["molecule3d"]),
-        energies=np.array([energy]).astype(np.float32)[:, None],
-        atomic_inputs=np.concatenate((x, positions), axis=-1, dtype=np.float64),
+        energies=np.array([energy]).astype(np.float64)[:, None],
+        atomic_inputs=np.concatenate((x, positions), axis=-1, dtype=np.float32),
         n_atoms=np.array([x.shape[0]], dtype=np.int32),
     )
 
@@ -88,6 +88,7 @@ class Molecule3D(BaseDataset):
     __energy_unit__ = "ev"  # CALCULATED
     __distance_unit__ = "ang"
     __forces_unit__ = "ev/ang"
+    __links__ = {"molecule3d.zip": "https://drive.google.com/uc?id=1C_KRf8mX-gxny7kL9ACNCEV4ceu_fUGy"}
 
     energy_target_names = ["b3lyp/6-31g*.energy"]
 

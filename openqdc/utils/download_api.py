@@ -5,16 +5,119 @@ import socket
 import tarfile
 import urllib.error
 import urllib.request
+import warnings
 import zipfile
+from dataclasses import dataclass
+from typing import Optional
 
 import fsspec
 import gdown
 import requests
 import tqdm
+from aiohttp import ClientTimeout
+from fsspec import AbstractFileSystem
+from fsspec.callbacks import TqdmCallback
+from fsspec.implementations.local import LocalFileSystem
 from loguru import logger
 from sklearn.utils import Bunch
 
-from openqdc.utils.io import get_local_cache
+import openqdc.utils.io as ioqdc
+
+
+@dataclass
+class FileSystem:
+    """
+    A class to handle file system operations
+    """
+
+    public_endpoint: Optional[AbstractFileSystem] = None
+    private_endpoint: Optional[AbstractFileSystem] = None
+    local_endpoint: AbstractFileSystem = LocalFileSystem()
+
+    @property
+    def public(self):
+        self.connect()
+        return self.public_endpoint
+
+    @property
+    def private(self):
+        self.connect()
+        return self.private_endpoint
+
+    @property
+    def local(self):
+        return self.local_endpoint
+
+    @property
+    def is_connected(self):
+        """
+        Check if it is connected to the public or the private endpoints
+        """
+        return self.public_endpoint is not None or self.private_endpoint is not None
+
+    def connect(self):
+        """
+        Attempt connection to the public and private endpoints
+        """
+        if not self.is_connected:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")  # No quota warning
+                self.public_endpoint = self.get_default_endpoint("public")
+                self.private_endpoint = self.get_default_endpoint("private")
+                self.public_endpoint.client_kwargs = {"timeout": ClientTimeout(total=3600, connect=1000)}
+
+    def get_default_endpoint(self, endpoint: str) -> AbstractFileSystem:
+        """
+        Return a default endpoint for the given str [public, private]
+        """
+        if endpoint == "private":
+            return fsspec.filesystem("gs")
+        elif endpoint == "public":
+            return fsspec.filesystem("https")
+        else:
+            return self.local_endpoint
+
+    def get_file(self, remote_path: str, local_path: str):
+        """
+        Retrieve file from remote gs path or local cache
+        """
+        self.public.get_file(
+            remote_path,
+            local_path,
+            callback=TqdmCallback(
+                tqdm_kwargs={
+                    "ascii": " ▖▘▝▗▚▞-",
+                    "desc": f"Downloading {os.path.basename(remote_path)}",
+                    "unit": "B",
+                }
+            ),
+        )
+
+    def put_file(self, local_path: str, remote_path: str):
+        """
+        Attempt to push file to remote gs path
+        """
+        self.private.put_file(
+            local_path,
+            remote_path,
+            callback=TqdmCallback(
+                tqdm_kwargs={
+                    "ascii": " ▖▘▝▗▚▞-",
+                    "desc": f"Uploading {os.path.basename(remote_path)}",
+                    "unit": "B",
+                },
+            ),
+        )
+
+    def exists(self, path):
+        """
+        Check if file exists
+        """
+        return self.public.exists(path)
+
+    def mkdirs(self, path, exist_ok=True):
+        """Creates directory"""
+        self.private.mkdirs(path, exist_ok=exist_ok)
 
 
 def download_url(url, local_filename):
@@ -163,7 +266,7 @@ class DataDownloader:
 
     def __init__(self, cache_path=None, overwrite=False):
         if cache_path is None:
-            cache_path = get_local_cache()
+            cache_path = ioqdc.get_local_cache()
 
         self.cache_path = cache_path
         self.overwrite = overwrite
@@ -177,3 +280,6 @@ class DataDownloader:
         for local, link in b_config.links.items():
             outfile = os.path.join(data_path, local)
             fetch_file(link, outfile)
+
+
+API = FileSystem()

@@ -4,7 +4,7 @@ import numpy as np
 
 from openqdc.datasets.base import BaseDataset
 from openqdc.methods import PotentialMethod
-from openqdc.raws.config_factory import decompress_tar_gz
+from openqdc.utils.download_api import decompress_tar_gz
 
 trajectories = {
     "rmd17_aspirin": "CC(=O)OC1=CC=CC=C1C(=O)O",
@@ -92,6 +92,7 @@ class RevMD17(BaseDataset):
     force_target_names = [
         "PBE-TS Gradient",
     ]
+    __links__ = {"revmd17.zip": "https://figshare.com/ndownloader/articles/12672038/versions/3"}
 
     __energy_unit__ = "kcal/mol"
     __distance_unit__ = "ang"

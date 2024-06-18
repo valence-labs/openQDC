@@ -7,14 +7,24 @@ from rich import print
 from typing_extensions import Annotated
 
 from openqdc.datasets import COMMON_MAP_POTENTIALS  # noqa
-from openqdc.datasets import AVAILABLE_DATASETS, AVAILABLE_POTENTIAL_DATASETS
-from openqdc.raws.config_factory import DataConfigFactory, DataDownloader
+from openqdc.datasets import (
+    AVAILABLE_DATASETS,
+    AVAILABLE_INTERACTION_DATASETS,
+    AVAILABLE_POTENTIAL_DATASETS,
+)
 
 app = typer.Typer(help="OpenQDC CLI")
 
 
+def sanitize(dictionary):
+    return {k.lower().replace("_", "").replace("-", ""): v for k, v in dictionary.items()}
+
+
+SANITIZED_AVAILABLE_DATASETS = sanitize(AVAILABLE_DATASETS)
+
+
 def exist_dataset(dataset):
-    if dataset not in AVAILABLE_DATASETS:
+    if dataset not in sanitize(AVAILABLE_DATASETS):
         logger.error(f"{dataset} is not available. Please open an issue on Github for the team to look into it.")
         return False
     return True
@@ -54,10 +64,10 @@ def download(
     """
     for dataset in list(map(lambda x: x.lower().replace("_", ""), datasets)):
         if exist_dataset(dataset):
-            if AVAILABLE_DATASETS[dataset].no_init().is_cached() and not overwrite:
+            if SANITIZED_AVAILABLE_DATASETS[dataset].no_init().is_cached() and not overwrite:
                 logger.info(f"{dataset} is already cached. Skipping download")
             else:
-                AVAILABLE_DATASETS[dataset](overwrite_local_cache=True, cache_dir=cache_dir)
+                SANITIZED_AVAILABLE_DATASETS[dataset](overwrite_local_cache=True, cache_dir=cache_dir)
 
 
 @app.command()
@@ -83,22 +93,48 @@ def datasets():
 
 
 @app.command()
-def fetch(datasets: List[str]):
+def fetch(
+    datasets: List[str],
+    overwrite: Annotated[
+        bool,
+        typer.Option(
+            help="Whether to overwrite or force the re-download of the files.",
+        ),
+    ] = False,
+    cache_dir: Annotated[
+        Optional[str],
+        typer.Option(
+            help="Path to the cache. If not provided, the default cache directory (.cache/openqdc/) will be used.",
+        ),
+    ] = None,
+):
     """
     Download the raw datasets files from the main openQDC hub.
-    Special case: if the dataset is "all", all available datasets will be downloaded.
-
+    overwrite: bool = False,
+        If True, the files will be re-downloaded and overwritten.
+    cache_dir: Optional[str] = None,
+        Path to the cache. If not provided, the default cache directory will be used.
+    Special case: if the dataset is "all", "potential", "interaction".
+        all: all available datasets will be downloaded.
+        potential: all the potential datasets will be downloaded
+        interaction: all the interaction datasets will be downloaded
     Example:
         openqdc fetch Spice
     """
-    if datasets[0] == "all":
-        dataset_names = DataConfigFactory.available_datasets
+    if datasets[0].lower() == "all":
+        dataset_names = list(sanitize(AVAILABLE_DATASETS).keys())
+    elif datasets[0].lower() == "potential":
+        dataset_names = list(sanitize(AVAILABLE_POTENTIAL_DATASETS).keys())
+    elif datasets[0].lower() == "interaction":
+        dataset_names = list(sanitize(AVAILABLE_INTERACTION_DATASETS).keys())
     else:
         dataset_names = datasets
-
-    for dataset_name in dataset_names:
-        dd = DataDownloader()
-        dd.from_name(dataset_name)
+    for dataset in list(map(lambda x: x.lower().replace("_", ""), dataset_names)):
+        if exist_dataset(dataset):
+            try:
+                SANITIZED_AVAILABLE_DATASETS[dataset].fetch(cache_dir, overwrite)
+            except Exception as e:
+                logger.error(f"Something unexpected happended while fetching {dataset}: {repr(e)}")
 
 
 @app.command()
@@ -122,14 +158,12 @@ def preprocess(
     """
     for dataset in list(map(lambda x: x.lower().replace("_", ""), datasets)):
         if exist_dataset(dataset):
-            logger.info(f"Preprocessing {AVAILABLE_DATASETS[dataset].__name__}")
+            logger.info(f"Preprocessing {SANITIZED_AVAILABLE_DATASETS[dataset].__name__}")
             try:
-                AVAILABLE_DATASETS[dataset].no_init().preprocess(upload=upload, overwrite=overwrite)
+                SANITIZED_AVAILABLE_DATASETS[dataset].no_init().preprocess(upload=upload, overwrite=overwrite)
             except Exception as e:
                 logger.error(f"Error while preprocessing {dataset}. {e}. Did you fetch the dataset first?")
                 raise e
-        else:
-            logger.warning(f"{dataset} not found.")
 
 
 if __name__ == "__main__":

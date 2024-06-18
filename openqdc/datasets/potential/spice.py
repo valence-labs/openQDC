@@ -80,6 +80,7 @@ class Spice(BaseDataset):
         "SPICE PubChem Set 6 Single Points Dataset v1.2": "PubChem",
         "SPICE Ion Pairs Single Points Dataset v1.1": "Ion Pairs",
     }
+    __links__ = {"SPICE-1.1.4.hdf5": "https://zenodo.org/record/8222043/files/SPICE-1.1.4.hdf5"}
 
     def convert_forces(self, x):
         return (-1.0) * super().convert_forces(x)
@@ -135,6 +136,7 @@ class SpiceV2(Spice):
         "SPICE PubChem Boron Silicon v1.0": "PubChem Boron Silicon",
         "SPICE Ion Pairs Single Points Dataset v1.2": "Ion Pairs",
     }
+    __links__ = {"spice-2.0.0.hdf5": "https://zenodo.org/records/10835749/files/SPICE-2.0.0.hdf5?download=1"}
 
     def read_raw_entries(self):
         raw_path = p_join(self.root, "spice-2.0.0.hdf5")
@@ -152,3 +154,4 @@ class SpiceVL2(SpiceV2):
 
     __energy_methods__ = SpiceV2.__energy_methods__ + [PotentialMethod.GFN2_XTB, PotentialMethod.PM6]
     energy_target_names = SpiceV2.energy_target_names + ["GFN2," "PM6"]
+    __force_mask__ = SpiceV2.__force_mask__ + [False, False]

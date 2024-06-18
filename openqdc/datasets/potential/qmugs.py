@@ -57,6 +57,10 @@ class QMugs(BaseDataset):
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
+    __links__ = {
+        "summary.csv": "https://libdrive.ethz.ch/index.php/s/X5vOBNSITAG5vzM/download?path=%2F&files=summary.csv",
+        "structures.tar.gz": "https://libdrive.ethz.ch/index.php/s/X5vOBNSITAG5vzM/download?path=%2F&files=structures.tar.gz",  # noqa
+    }
 
     energy_target_names = [
         "GFN2:TOTAL_ENERGY",
@@ -75,3 +79,4 @@ class QMugs_V2(QMugs):
     __name__ = "qmugs_v2"
     __energy_methods__ = QMugs.__energy_methods__ + [PotentialMethod.PM6]
     energy_target_names = QMugs.energy_target_names + ["PM6"]
+    __force_mask__ = QMugs.__force_mask__ + [False]

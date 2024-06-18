@@ -29,6 +29,10 @@ class L7(YamlDataset):
         InteractionMethod.LNO_CCSDT,  # "LNO-CCSD(T)",
         InteractionMethod.FN_DMC,  # "FN-DMC",
     ]
+    __links__ = {
+        "l7.yaml": "http://cuby4.molecular.cz/download_datasets/l7.yaml",
+        "geometries.tar.gz": "http://cuby4.molecular.cz/download_geometries/L7.tar",
+    }
 
     def _process_name(self, item):
         return item.geometry.split(":")[1]
