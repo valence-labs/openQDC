@@ -9,24 +9,15 @@ import fsspec
 import h5py
 import numpy as np
 import pandas as pd
-from aiohttp import ClientTimeout
 from ase.atoms import Atoms
 from ase.calculators.calculator import Calculator
-from fsspec.callbacks import TqdmCallback
-from fsspec.implementations.local import LocalFileSystem
-from gcsfs import GCSFileSystem
 from loguru import logger
 from rdkit.Chem import MolFromXYZFile
 from tqdm import tqdm
 
 from openqdc.utils.constants import ATOM_TABLE
+from openqdc.utils.download_api import API
 from openqdc.utils.molecule import z_to_formula
-
-gcp_filesys = fsspec.filesystem("gs")  # entry point for google bucket (need gsutil permission)
-gcp_filesys_public = fsspec.filesystem("https")  # public API for download
-local_filesys = LocalFileSystem()
-
-gcp_filesys_public.client_kwargs = {"timeout": ClientTimeout(total=3600, connect=1000)}
 
 _OPENQDC_CACHE_DIR = (
     "~/.cache/openqdc" if "OPENQDC_CACHE_DIR" not in os.environ else os.path.normpath(os.environ["OPENQDC_CACHE_DIR"])
@@ -74,18 +65,11 @@ def push_remote(local_path, overwrite=True):
     Attempt to push file to remote gs path
     """
     remote_path = local_path.replace(get_local_cache(), get_remote_cache(write_access=overwrite))
-    gcp_filesys.mkdirs(os.path.dirname(remote_path), exist_ok=False)
-    if not gcp_filesys.exists(remote_path) or overwrite:
-        gcp_filesys.put_file(
+    API.private.mkdirs(os.path.dirname(remote_path), exist_ok=False)
+    if not API.private.exists(remote_path) or overwrite:
+        API.put_file(
             local_path,
             remote_path,
-            callback=TqdmCallback(
-                tqdm_kwargs={
-                    "ascii": " ▖▘▝▗▚▞-",
-                    "desc": f"Uploading {os.path.basename(remote_path)}",
-                    "unit": "B",
-                },
-            ),
         )
     return remote_path
 
@@ -97,29 +81,18 @@ def pull_locally(local_path, overwrite=False):
     remote_path = local_path.replace(get_local_cache(), get_remote_cache())
     os.makedirs(os.path.dirname(local_path), exist_ok=True)
     if not os.path.exists(local_path) or overwrite:
-        gcp_filesys_public.get_file(
-            remote_path,
-            local_path,
-            callback=TqdmCallback(
-                tqdm_kwargs={
-                    "ascii": " ▖▘▝▗▚▞-",
-                    "desc": f"Downloading {os.path.basename(remote_path)}",
-                    "unit": "B",
-                },
-            ),
-        )
+        API.get_file(remote_path, local_path)
     return local_path
 
 
 def copy_exists(local_path):
     remote_path = local_path.replace(get_local_cache(), get_remote_cache())
-    return os.path.exists(local_path) or gcp_filesys_public.exists(remote_path)
+    return os.path.exists(local_path) or API.exists(remote_path)
 
 
 def makedirs_gcs(path, exist_ok=True):
     """Creates directory"""
-    fs: GCSFileSystem = fsspec.filesystem("gs")
-    fs.mkdirs(path, exist_ok=exist_ok)
+    API.mkdirs(path, exist_ok=exist_ok)
 
 
 def makedirs(path, exist_ok=True):
@@ -135,8 +108,7 @@ def check_file(path) -> bool:
 def check_file_gcs(path) -> bool:
     """Checks if file present on GCS FileSystem"""
     # get file system
-    fs: GCSFileSystem = fsspec.filesystem("gs")
-    return fs.exists(path)
+    return API.exists(path)  # API.private.exists(path)
 
 
 def save_pkl(file, path):
@@ -152,10 +124,7 @@ def load_pkl_gcs(path, check=True):
         if not check_file_gcs(path):
             raise FileNotFoundError(f"File {path} does not exist on GCS and local.")
 
-    # get file system
-    fs: GCSFileSystem = fsspec.filesystem("gs")
-
-    with fs.open(path, "rb") as fp:  # Unpickling
+    with API.private.open(path, "rb") as fp:  # Unpickling
         return pkl.load(fp)
 
 

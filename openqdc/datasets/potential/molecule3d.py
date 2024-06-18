@@ -41,8 +41,8 @@ def read_mol(mol: Chem.rdchem.Mol, energy: float) -> Dict[str, np.ndarray]:
     res = dict(
         name=np.array([smiles]),
         subset=np.array(["molecule3d"]),
-        energies=np.array([energy]).astype(np.float32)[:, None],
-        atomic_inputs=np.concatenate((x, positions), axis=-1, dtype=np.float64),
+        energies=np.array([energy]).astype(np.float64)[:, None],
+        atomic_inputs=np.concatenate((x, positions), axis=-1, dtype=np.float32),
         n_atoms=np.array([x.shape[0]], dtype=np.int32),
     )
 

@@ -16,8 +16,15 @@ from openqdc.datasets import (
 app = typer.Typer(help="OpenQDC CLI")
 
 
+def sanitize(dictionary):
+    return {k.lower().replace("_", "").replace("-", ""): v for k, v in dictionary.items()}
+
+
+SANITIZED_AVAILABLE_DATASETS = sanitize(AVAILABLE_DATASETS)
+
+
 def exist_dataset(dataset):
-    if dataset not in AVAILABLE_DATASETS:
+    if dataset not in sanitize(AVAILABLE_DATASETS):
         logger.error(f"{dataset} is not available. Please open an issue on Github for the team to look into it.")
         return False
     return True
@@ -57,10 +64,10 @@ def download(
     """
     for dataset in list(map(lambda x: x.lower().replace("_", ""), datasets)):
         if exist_dataset(dataset):
-            if AVAILABLE_DATASETS[dataset].no_init().is_cached() and not overwrite:
+            if SANITIZED_AVAILABLE_DATASETS[dataset].no_init().is_cached() and not overwrite:
                 logger.info(f"{dataset} is already cached. Skipping download")
             else:
-                AVAILABLE_DATASETS[dataset](overwrite_local_cache=True, cache_dir=cache_dir)
+                SANITIZED_AVAILABLE_DATASETS[dataset](overwrite_local_cache=True, cache_dir=cache_dir)
 
 
 @app.command()
@@ -103,6 +110,10 @@ def fetch(
 ):
     """
     Download the raw datasets files from the main openQDC hub.
+    overwrite: bool = False,
+        If True, the files will be re-downloaded and overwritten.
+    cache_dir: Optional[str] = None,
+        Path to the cache. If not provided, the default cache directory will be used.
     Special case: if the dataset is "all", "potential", "interaction".
         all: all available datasets will be downloaded.
         potential: all the potential datasets will be downloaded
@@ -111,18 +122,17 @@ def fetch(
         openqdc fetch Spice
     """
     if datasets[0].lower() == "all":
-        dataset_names = AVAILABLE_DATASETS
+        dataset_names = list(sanitize(AVAILABLE_DATASETS).keys())
     elif datasets[0].lower() == "potential":
-        dataset_names = AVAILABLE_POTENTIAL_DATASETS
+        dataset_names = list(sanitize(AVAILABLE_POTENTIAL_DATASETS).keys())
     elif datasets[0].lower() == "interaction":
-        dataset_names = AVAILABLE_INTERACTION_DATASETS
+        dataset_names = list(sanitize(AVAILABLE_INTERACTION_DATASETS).keys())
     else:
         dataset_names = datasets
-
     for dataset in list(map(lambda x: x.lower().replace("_", ""), dataset_names)):
         if exist_dataset(dataset):
             try:
-                AVAILABLE_DATASETS[dataset].fetch(cache_dir, overwrite)
+                SANITIZED_AVAILABLE_DATASETS[dataset].fetch(cache_dir, overwrite)
             except Exception as e:
                 logger.error(f"Something unexpected happended while fetching {dataset}: {repr(e)}")
 
@@ -148,9 +158,9 @@ def preprocess(
     """
     for dataset in list(map(lambda x: x.lower().replace("_", ""), datasets)):
         if exist_dataset(dataset):
-            logger.info(f"Preprocessing {AVAILABLE_DATASETS[dataset].__name__}")
+            logger.info(f"Preprocessing {SANITIZED_AVAILABLE_DATASETS[dataset].__name__}")
             try:
-                AVAILABLE_DATASETS[dataset].no_init().preprocess(upload=upload, overwrite=overwrite)
+                SANITIZED_AVAILABLE_DATASETS[dataset].no_init().preprocess(upload=upload, overwrite=overwrite)
             except Exception as e:
                 logger.error(f"Error while preprocessing {dataset}. {e}. Did you fetch the dataset first?")
                 raise e
