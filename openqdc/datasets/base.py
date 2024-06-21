@@ -38,7 +38,12 @@ from openqdc.utils.io import (
 )
 from openqdc.utils.package_utils import has_package, requires_package
 from openqdc.utils.regressor import Regressor  # noqa
-from openqdc.utils.units import get_conversion, EnergyTypeConversion, DistanceTypeConversion, ForceTypeConversion
+from openqdc.utils.units import (
+    DistanceTypeConversion,
+    EnergyTypeConversion,
+    ForceTypeConversion,
+    get_conversion,
+)
 
 if has_package("torch"):
     import torch
@@ -298,10 +303,12 @@ class BaseDataset(DatasetPropertyMixIn):
         self.set_energy_unit(en)
         self.set_distance_unit(ds)
         if self.__force_methods__:
-            #self.__forces_unit__ = str(self.energy_unit) + "/" + str(self.distance_unit)
-            self._fn_forces = self.force_unit.to(str(self.energy_unit),str(self.distance_unit)) #get_conversion(old_en + "/" + old_ds, self.__forces_unit__)
-            self.__forces_unit__ = str(self.energy_unit)+"/"+str(self.distance_unit)
-            
+            # self.__forces_unit__ = str(self.energy_unit) + "/" + str(self.distance_unit)
+            self._fn_forces = self.force_unit.to(
+                str(self.energy_unit), str(self.distance_unit)
+            )  # get_conversion(old_en + "/" + old_ds, self.__forces_unit__)
+            self.__forces_unit__ = str(self.energy_unit) + "/" + str(self.distance_unit)
+
     def _set_isolated_atom_energies(self):
         if self.__energy_methods__ is None:
             logger.error("No energy methods defined for this dataset.")
@@ -325,20 +332,20 @@ class BaseDataset(DatasetPropertyMixIn):
         """
         Set a new energy unit for the dataset.
         """
-        #old_unit = self.energy_unit
-        #self.__energy_unit__ = value
-        self._fn_energy = self.energy_unit.to(value) #get_conversion(old_unit, value)
+        # old_unit = self.energy_unit
+        # self.__energy_unit__ = value
+        self._fn_energy = self.energy_unit.to(value)  # get_conversion(old_unit, value)
         self.__energy_unit__ = value
 
     def set_distance_unit(self, value: str):
         """
         Set a new distance unit for the dataset.
         """
-        #old_unit = self.distance_unit
-       # self.__distance_unit__ = value
-        self._fn_distance = self.distance_unit.to(value) #get_conversion(old_unit, value)
+        # old_unit = self.distance_unit
+        # self.__distance_unit__ = value
+        self._fn_distance = self.distance_unit.to(value)  # get_conversion(old_unit, value)
         self.__distance_unit__ = value
-        
+
     def set_array_format(self, format: str):
         assert format in ["numpy", "torch", "jax"], f"Format {format} not supported."
         self.array_format = format

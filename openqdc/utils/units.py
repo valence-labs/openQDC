@@ -8,79 +8,93 @@ Distance units:
     ["ang", "nm", "bohr"]
 """
 
-from typing import Callable
 from enum import Enum, unique
+from typing import Callable
 
 from openqdc.utils.exceptions import ConversionAlreadyDefined, ConversionNotDefinedError
 
+CONVERSION_REGISTRY = {}
+
+
+# Redefined to avoid circular imports
 class StrEnum(str, Enum):
     def __str__(self):
         return self.value.lower()
 
+
+# Parent class for all conversion enums
 class ConversionEnum(Enum):
-    
     @classmethod
     def list(cls):
         return list(map(lambda c: c.value, cls))
 
+
 @unique
 class EnergyTypeConversion(ConversionEnum, StrEnum):
+    """
+    Define the possible energy units for conversion
+    """
+
     KCAL_MOL = "kcal/mol"
     KJ_MOL = "kj/mol"
     HARTREE = "hartree"
     EV = "ev"
     MEV = "mev"
     RYD = "ryd"
-    
-    
+
     def to(self, energy: "EnergyTypeConversion"):
         return get_conversion(str(self), str(energy))
 
+
 @unique
 class DistanceTypeConversion(ConversionEnum, StrEnum):
+    """
+    Define the possible distance units for conversion
+    """
+
     ANG = "ang"
     NM = "nm"
     BOHR = "bohr"
-    
-    def to(self, distance: "DistanceTypeConversion", fraction : bool = False):
+
+    def to(self, distance: "DistanceTypeConversion", fraction: bool = False):
         return get_conversion(str(self), str(distance)) if not fraction else get_conversion(str(distance), str(self))
-    
-@unique  
+
+
+@unique
 class ForceTypeConversion(ConversionEnum):
+    """
+    Define the possible foce units for conversion
+    """
+
     #     Name      = EnergyTypeConversion,         , DistanceTypeConversion
-    HARTREE_BOHR    = EnergyTypeConversion.HARTREE  , DistanceTypeConversion.BOHR
-    HARTREE_ANG     = EnergyTypeConversion.HARTREE  , DistanceTypeConversion.ANG
-    HARTREE_NM      = EnergyTypeConversion.HARTREE  , DistanceTypeConversion.NM
-    EV_BOHR         = EnergyTypeConversion.EV       , DistanceTypeConversion.BOHR
-    EV_ANG          = EnergyTypeConversion.EV       , DistanceTypeConversion.ANG
-    EV_NM           = EnergyTypeConversion.EV       , DistanceTypeConversion.NM
-    KCAL_MOL_BOHR   = EnergyTypeConversion.KCAL_MOL , DistanceTypeConversion.BOHR
-    KCAL_MOL_ANG    = EnergyTypeConversion.KCAL_MOL , DistanceTypeConversion.ANG
-    KCAL_MOL_NM     = EnergyTypeConversion.KCAL_MOL , DistanceTypeConversion.NM
-    KJ_MOL_BOHR     = EnergyTypeConversion.KJ_MOL   , DistanceTypeConversion.BOHR
-    KJ_MOL_ANG      = EnergyTypeConversion.KJ_MOL   , DistanceTypeConversion.ANG
-    KJ_MOL_NM       = EnergyTypeConversion.KJ_MOL   , DistanceTypeConversion.NM
-    MEV_BOHR        = EnergyTypeConversion.MEV      , DistanceTypeConversion.BOHR
-    MEV_ANG         = EnergyTypeConversion.MEV      , DistanceTypeConversion.ANG
-    MEV_NM          = EnergyTypeConversion.MEV      , DistanceTypeConversion.NM
-    RYD_BOHR        = EnergyTypeConversion.RYD      , DistanceTypeConversion.BOHR
-    RYD_ANG         = EnergyTypeConversion.RYD      , DistanceTypeConversion.ANG
-    RYD_NM          = EnergyTypeConversion.RYD      , DistanceTypeConversion.NM
-    
-    def __init__(self, 
-                 energy: EnergyTypeConversion,
-                 distance: DistanceTypeConversion):
+    HARTREE_BOHR = EnergyTypeConversion.HARTREE, DistanceTypeConversion.BOHR
+    HARTREE_ANG = EnergyTypeConversion.HARTREE, DistanceTypeConversion.ANG
+    HARTREE_NM = EnergyTypeConversion.HARTREE, DistanceTypeConversion.NM
+    EV_BOHR = EnergyTypeConversion.EV, DistanceTypeConversion.BOHR
+    EV_ANG = EnergyTypeConversion.EV, DistanceTypeConversion.ANG
+    EV_NM = EnergyTypeConversion.EV, DistanceTypeConversion.NM
+    KCAL_MOL_BOHR = EnergyTypeConversion.KCAL_MOL, DistanceTypeConversion.BOHR
+    KCAL_MOL_ANG = EnergyTypeConversion.KCAL_MOL, DistanceTypeConversion.ANG
+    KCAL_MOL_NM = EnergyTypeConversion.KCAL_MOL, DistanceTypeConversion.NM
+    KJ_MOL_BOHR = EnergyTypeConversion.KJ_MOL, DistanceTypeConversion.BOHR
+    KJ_MOL_ANG = EnergyTypeConversion.KJ_MOL, DistanceTypeConversion.ANG
+    KJ_MOL_NM = EnergyTypeConversion.KJ_MOL, DistanceTypeConversion.NM
+    MEV_BOHR = EnergyTypeConversion.MEV, DistanceTypeConversion.BOHR
+    MEV_ANG = EnergyTypeConversion.MEV, DistanceTypeConversion.ANG
+    MEV_NM = EnergyTypeConversion.MEV, DistanceTypeConversion.NM
+    RYD_BOHR = EnergyTypeConversion.RYD, DistanceTypeConversion.BOHR
+    RYD_ANG = EnergyTypeConversion.RYD, DistanceTypeConversion.ANG
+    RYD_NM = EnergyTypeConversion.RYD, DistanceTypeConversion.NM
+
+    def __init__(self, energy: EnergyTypeConversion, distance: DistanceTypeConversion):
         self.energy = energy
         self.distance = distance
 
     def __str__(self):
         return f"{self.energy}/{self.distance}"
-    
+
     def to(self, energy: EnergyTypeConversion, distance: DistanceTypeConversion):
-        return lambda x : self.distance.to(distance, fraction=True)(self.energy.to(energy)(x))
-
-
-CONVERSION_REGISTRY = {}
+        return lambda x: self.distance.to(distance, fraction=True)(self.energy.to(energy)(x))
 
 
 class Conversion:
@@ -95,11 +109,7 @@ class Conversion:
         The callable to compute the conversion
     """
 
-    def __init__(self, 
-                 in_unit: str,
-                 out_unit: str,
-                 func: Callable[[float], float]
-                 ):
+    def __init__(self, in_unit: str, out_unit: str, func: Callable[[float], float]):
         """
 
         Parameters
@@ -177,21 +187,3 @@ Conversion("ang", "nm", lambda x: x * 0.1)
 Conversion("nm", "ang", lambda x: x * 10.0)
 Conversion("nm", "bohr", lambda x: x * 18.8973)
 Conversion("bohr", "nm", lambda x: x / 18.8973)
-
-## common forces conversion
-#Conversion("hartree/bohr", "ev/ang", lambda x: get_conversion("ang", "bohr")(get_conversion("hartree", "ev")(x)))
-#Conversion("hartree/bohr", "ev/bohr", lambda x: get_conversion("hartree", "ev")(x))
-#Conversion("hartree/bohr", "kcal/mol/bohr", lambda x: get_conversion("hartree", "kcal/mol")(x))
-#Conversion(
-#    "hartree/bohr", "kcal/mol/ang", lambda x: get_conversion("ang", "bohr")(get_conversion("hartree", "kcal/mol")(x))
-#)
-#Conversion("hartree/ang", "kcal/mol/ang", lambda x: get_conversion("hartree", "kcal/mol")(x))
-#Conversion("hartree/ang", "hartree/bohr", lambda x: get_conversion("bohr", "ang")(x))
-#Conversion("hartree/bohr", "hartree/ang", lambda x: get_conversion("ang", "bohr")(x))
-#Conversion("kcal/mol/bohr", "hartree/bohr", lambda x: get_conversion("kcal/mol", "hartree")(x))
-#Conversion("ev/ang", "hartree/ang", lambda x: get_conversion("ev", "hartree")(x))
-#Conversion("ev/bohr", "hartree/bohr", lambda x: get_conversion("ev", "hartree")(x))
-#Conversion("ev/bohr", "ev/ang", lambda x: get_conversion("ang", "bohr")(x))
-#Conversion("ev/bohr", "kcal/mol/ang", lambda x: get_conversion("ang", "bohr")(get_conversion("ev", "kcal/mol")(x)))
-#Conversion("kcal/mol/bohr", "kcal/mol/ang", lambda x: get_conversion("ang", "bohr")(x))
-#Conversion("ev/ang", "kcal/mol/ang", lambda x: get_conversion("ev", "kcal/mol")(x))
