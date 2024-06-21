@@ -9,7 +9,7 @@ from openqdc.utils.constants import ATOM_SYMBOLS
 
 class StrEnum(str, Enum):
     def __str__(self):
-        return self.value
+        return self.value.lower()
 
 
 @unique

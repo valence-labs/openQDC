@@ -1,4 +1,5 @@
 from io import StringIO
+import os
 
 import numpy as np
 import pytest
@@ -6,6 +7,7 @@ import pytest
 from openqdc.datasets.io import XYZDataset
 from openqdc.methods.enums import PotentialMethod
 from openqdc.utils.package_utils import has_package
+from openqdc.utils.io import get_local_cache
 
 if has_package("torch"):
     import torch
@@ -20,6 +22,13 @@ format_to_type = {
 }
 
 
+@pytest.fixture(autouse=True)
+def clean_before_run():
+    # start by removing any cached data
+    cache_dir = get_local_cache()
+    os.system(f"rm -rf {cache_dir}/XYZDataset")
+    yield
+    
 @pytest.fixture
 def xyz_filelike():
     xyz_str = """3

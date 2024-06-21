@@ -38,7 +38,7 @@ from openqdc.utils.io import (
 )
 from openqdc.utils.package_utils import has_package, requires_package
 from openqdc.utils.regressor import Regressor  # noqa
-from openqdc.utils.units import get_conversion
+from openqdc.utils.units import get_conversion, EnergyTypeConversion, DistanceTypeConversion, ForceTypeConversion
 
 if has_package("torch"):
     import torch
@@ -129,7 +129,7 @@ class BaseDataset(DatasetPropertyMixIn):
         set_cache_dir(cache_dir)
         # self._init_lambda_fn()
         self.data = None
-        self._original_unit = self.__energy_unit__
+        self._original_unit = self.energy_unit
         self.recompute_statistics = recompute_statistics
         self.regressor_kwargs = regressor_kwargs
         self.transform = transform
@@ -225,24 +225,24 @@ class BaseDataset(DatasetPropertyMixIn):
     def _convert_data(self):
         logger.info(
             f"Converting {self.__name__} data to the following units:\n\
-                     Energy: {self.energy_unit},\n\
-                     Distance: {self.distance_unit},\n\
-                     Forces: {self.force_unit if self.__force_methods__ else 'None'}"
+                     Energy: {str(self.energy_unit)},\n\
+                     Distance: {str(self.distance_unit)},\n\
+                     Forces: {str(self.force_unit) if self.__force_methods__ else 'None'}"
         )
         for key in self.data_keys:
             self.data[key] = self._convert_on_loading(self.data[key], key)
 
     @property
     def energy_unit(self):
-        return self.__energy_unit__
+        return EnergyTypeConversion(self.__energy_unit__)
 
     @property
     def distance_unit(self):
-        return self.__distance_unit__
+        return DistanceTypeConversion(self.__distance_unit__)
 
     @property
     def force_unit(self):
-        return self.__forces_unit__
+        return ForceTypeConversion(*self.__forces_unit__.split("/"))
 
     @property
     def root(self):
@@ -298,9 +298,10 @@ class BaseDataset(DatasetPropertyMixIn):
         self.set_energy_unit(en)
         self.set_distance_unit(ds)
         if self.__force_methods__:
-            self.__forces_unit__ = self.energy_unit + "/" + self.distance_unit
-            self._fn_forces = get_conversion(old_en + "/" + old_ds, self.__forces_unit__)
-
+            #self.__forces_unit__ = str(self.energy_unit) + "/" + str(self.distance_unit)
+            self._fn_forces = self.force_unit.to(str(self.energy_unit),str(self.distance_unit)) #get_conversion(old_en + "/" + old_ds, self.__forces_unit__)
+            self.__forces_unit__ = str(self.energy_unit)+"/"+str(self.distance_unit)
+            
     def _set_isolated_atom_energies(self):
         if self.__energy_methods__ is None:
             logger.error("No energy methods defined for this dataset.")
@@ -308,7 +309,7 @@ class BaseDataset(DatasetPropertyMixIn):
             f = get_conversion("hartree", self.__energy_unit__)
         else:
             # regression are calculated on the original unit of the dataset
-            f = get_conversion(self._original_unit, self.__energy_unit__)
+            f = self._original_unit.to(self.energy_unit)
         self.__isolated_atom_energies__ = f(self.e0s_dispatcher.e0s_matrix)
 
     def convert_energy(self, x):
@@ -324,18 +325,20 @@ class BaseDataset(DatasetPropertyMixIn):
         """
         Set a new energy unit for the dataset.
         """
-        old_unit = self.energy_unit
+        #old_unit = self.energy_unit
+        #self.__energy_unit__ = value
+        self._fn_energy = self.energy_unit.to(value) #get_conversion(old_unit, value)
         self.__energy_unit__ = value
-        self._fn_energy = get_conversion(old_unit, value)
 
     def set_distance_unit(self, value: str):
         """
         Set a new distance unit for the dataset.
         """
-        old_unit = self.distance_unit
+        #old_unit = self.distance_unit
+       # self.__distance_unit__ = value
+        self._fn_distance = self.distance_unit.to(value) #get_conversion(old_unit, value)
         self.__distance_unit__ = value
-        self._fn_distance = get_conversion(old_unit, value)
-
+        
     def set_array_format(self, format: str):
         assert format in ["numpy", "torch", "jax"], f"Format {format} not supported."
         self.array_format = format

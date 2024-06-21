@@ -210,7 +210,21 @@ class ANI1CCX_V2(ANI1CCX):
 
 
 class ANI2X(ANI1):
-    """ """
+    """
+    The ANI-2X dataset was constructed using active learning from modified versions of GDB-11, CheMBL,
+    and s66x8. It adds three new elements (F, Cl, S) resulting in 4.6 million conformers from 13k
+    chemical isomers, optimized using the LBFGS algorithm and labeled with ωB97X/6-31G*.
+
+    Usage
+    ```python
+    from openqdc.datasets import ANI@X
+    dataset = ANI2X()
+    ```
+
+    References:
+    - ANI-2x: https://doi.org/10.1021/acs.jctc.0c00121
+    - Github: https://github.com/aiqm/ANI1x_datasets
+    """
 
     __name__ = "ani2x"
     __energy_unit__ = "hartree"
