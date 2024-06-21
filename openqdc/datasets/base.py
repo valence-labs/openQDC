@@ -247,7 +247,10 @@ class BaseDataset(DatasetPropertyMixIn):
 
     @property
     def force_unit(self):
-        return ForceTypeConversion(*self.__forces_unit__.split("/"))
+        units = self.__forces_unit__.split("/")
+        if len(units) > 2:
+            units = ["/".join(units[:2]), units[-1]]
+        return ForceTypeConversion(*units)
 
     @property
     def root(self):
@@ -296,17 +299,14 @@ class BaseDataset(DatasetPropertyMixIn):
             "forces": (-1, 3, len(self.force_methods)),
         }
 
-    def _set_units(self, en, ds):
+    def _set_units(self, en: Optional[str] = None, ds: Optional[str] = None):
         old_en, old_ds = self.energy_unit, self.distance_unit
         en = en if en is not None else old_en
         ds = ds if ds is not None else old_ds
         self.set_energy_unit(en)
         self.set_distance_unit(ds)
         if self.__force_methods__:
-            # self.__forces_unit__ = str(self.energy_unit) + "/" + str(self.distance_unit)
-            self._fn_forces = self.force_unit.to(
-                str(self.energy_unit), str(self.distance_unit)
-            )  # get_conversion(old_en + "/" + old_ds, self.__forces_unit__)
+            self._fn_forces = self.force_unit.to(str(self.energy_unit), str(self.distance_unit))
             self.__forces_unit__ = str(self.energy_unit) + "/" + str(self.distance_unit)
 
     def _set_isolated_atom_energies(self):

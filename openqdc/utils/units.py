@@ -24,9 +24,7 @@ class StrEnum(str, Enum):
 
 # Parent class for all conversion enums
 class ConversionEnum(Enum):
-    @classmethod
-    def list(cls):
-        return list(map(lambda c: c.value, cls))
+    pass
 
 
 @unique
