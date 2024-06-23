@@ -1,3 +1,4 @@
+import os
 from functools import partial
 from os.path import join as p_join
 
@@ -7,6 +8,7 @@ import pandas as pd
 
 from openqdc.datasets.base import BaseDataset
 from openqdc.methods import PotentialMethod
+from openqdc.utils.io import get_local_cache
 
 # fmt: off
 FILE_NUM = [
@@ -109,6 +111,16 @@ class QM1B(BaseDataset):
         **{f"part_{i:03d}.parquet": f"https://ndownloader.figshare.com/files/{FILE_NUM[i]}" for i in range(0, 256)},
     }
 
+    @property
+    def root(self):
+        return p_join(get_local_cache(), "qm1b")
+
+    @property
+    def preprocess_path(self):
+        path = p_join(self.root, "preprocessed", self.__name__)
+        os.makedirs(path, exist_ok=True)
+        return path
+
     def read_raw_entries(self):
         filenames = list(map(lambda x: p_join(self.root, f"part_{x:03d}.parquet"), list(range(0, 256)))) + [
             p_join(self.root, "qm1b_validation.parquet")
@@ -128,3 +140,18 @@ class QM1B(BaseDataset):
         list_of_list = dm.utils.parallelized(read_entries_parallel, filenames, scheduler="processes", progress=True)
 
         return [x for xs in list_of_list for x in xs]
+
+
+class QM1B_SMALL(QM1B):
+    """
+    QM1B_SMALL is a subset of the QM1B dataset containing a
+    maximum of 15 random conformers per molecule.
+
+    Usage:
+    ```python
+    from openqdc.datasets import QM1B_SMALL
+    dataset = QM1B_SMALL()
+    ```
+    """
+
+    __name__ = "qm1b_small"

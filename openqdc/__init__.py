@@ -35,6 +35,7 @@ _lazy_imports_obj = {
     "QM7X": "openqdc.datasets.potential.qm7x",
     "QM7X_V2": "openqdc.datasets.potential.qm7x",
     "QM1B": "openqdc.datasets.potential.qm1b",
+    "QM1B_SMALL": "openqdc.datasets.potential.qm1b",
     "NablaDFT": "openqdc.datasets.potential.nabladft",
     "SolvatedPeptides": "openqdc.datasets.potential.solvated_peptides",
     "WaterClusters": "openqdc.datasets.potential.waterclusters3_30",
@@ -116,7 +117,7 @@ if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
     from .datasets.potential.nabladft import NablaDFT
     from .datasets.potential.orbnet_denali import OrbnetDenali
     from .datasets.potential.pcqm import PCQM_B3LYP, PCQM_PM6
-    from .datasets.potential.qm1b import QM1B
+    from .datasets.potential.qm1b import QM1B, QM1B_SMALL
     from .datasets.potential.qm7x import QM7X, QM7X_V2
     from .datasets.potential.qmugs import QMugs, QMugs_V2
     from .datasets.potential.revmd17 import RevMD17
