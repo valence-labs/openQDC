@@ -45,6 +45,7 @@ class BasisSet(StrEnum):
     HA_DZ = "haDZ"
     HA_TZ = "haTZ"
     CBS_ADZ = "cbs(adz)"
+    STO3G = "sto-3g"
     GSTAR = "6-31g*"
     CC_PVDZ = "cc-pvdz"
     CC_PVTZ = "cc-pvtz"
@@ -231,6 +232,7 @@ class PotentialMethod(QmMethod):  # SPLIT FOR INTERACTIO ENERGIES AND FIX MD1
     B1PW91_VWN5_DZP = Functional.B1PW91_VWN5, BasisSet.DZP
     B1PW91_VWN5_SZ = Functional.B1PW91_VWN5, BasisSet.SZ
     B1PW91_VWN5_TZP = Functional.B1PW91_VWN5, BasisSet.TZP
+    B3LYP_STO3G = Functional.B3LYP, BasisSet.STO3G  # TODO: calculate e0s
     B3LYP_VWN5_DZP = Functional.B3LYP_VWN5, BasisSet.DZP
     B3LYP_VWN5_SZ = Functional.B3LYP_VWN5, BasisSet.SZ
     B3LYP_VWN5_TZP = Functional.B3LYP_VWN5, BasisSet.TZP

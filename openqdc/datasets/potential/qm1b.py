@@ -59,7 +59,6 @@ FILE_NUM = [
 
 def extract_from_row(row, file_idx=None):
     smiles = row["smile"]
-    # subset = dm.to_smiles(dm.to_scaffold_murcko(mol, make_generic=True), explicit_hs=False)
     z = np.array(row["z"])[:, None]
     c = np.zeros_like(z)
     x = np.concatenate((z, c), axis=1)
@@ -77,32 +76,29 @@ def extract_from_row(row, file_idx=None):
 
 class QM1B(BaseDataset):
     """
-    QM7X is a collection of almost 4.2 million conformers from 6,950 unique molecules. It contains DFT
-    energy and force labels at the PBE0+MBD level of theory. It consists of structures for molecules with
-    up to seven heavy (C, N, O, S, Cl) atoms from the GDB13 database. For each molecule, (meta-)stable
-    equilibrium structures including constitutional/structural isomers and stereoisomers are
-    searched using density-functional tight binding (DFTB). Then, for each (meta-)stable structure, 100
-    off-equilibrium structures are obtained and labeled with PBE0+MBD.
+    QM1B is a low-resolution DFT dataset generated using PySCF IPU.
+    It is composed of one billion training examples containing 9-11 heavy atoms.
+    It was created by taking 1.09M SMILES strings from the GDB-11 database and
+    computing molecular properties (e.g. HOMO-LUMO gap) for a set of up to 1000
+    conformers per molecule at the B3LYP/STO-3G level of theory.
 
     Usage:
     ```python
-    from openqdc.datasets import QM7X
-    dataset = QM7X()
+    from openqdc.datasets import QM1B
+    dataset = QM1B()
     ```
 
     References:
-    - https://arxiv.org/abs/2006.15139
-    - https://zenodo.org/records/4288677
+    - https://arxiv.org/pdf/2311.01135
+    - https://github.com/graphcore-research/qm1b-dataset/
     """
 
     __name__ = "qm1b"
 
-    __energy_methods__ = [PotentialMethod.PBE0_DEF2_TZVP]  # "pbe0/def2-tzvp", "dft3b"]
+    __energy_methods__ = [PotentialMethod.B3LYP_STO3G]
     __force_methods__ = []
-    energy_target_names = ["ePBE0+MBD"]
 
-    # PotentialMethod.B3LYP_STO3G B3LYPSTO-3G
-
+    energy_target_names = ["b3lyp/sto-3g"]
     force_target_names = []
 
     __energy_unit__ = "ev"
@@ -127,7 +123,7 @@ class QM1B(BaseDataset):
             fn = partial(extract_parallel, df)
             list_of_idxs = list(range(len(df)))
             results = dm.utils.parallelized(fn, list_of_idxs, scheduler="threads", progress=False)
-            return results  # extract_from_row(df.iloc[i])
+            return results
 
         list_of_list = dm.utils.parallelized(read_entries_parallel, filenames, scheduler="processes", progress=True)
 
