@@ -250,7 +250,7 @@ class BaseDataset(DatasetPropertyMixIn):
         units = self.__forces_unit__.split("/")
         if len(units) > 2:
             units = ["/".join(units[:2]), units[-1]]
-        return ForceTypeConversion(*units)
+        return ForceTypeConversion(tuple(units))  # < 3.12 compatibility
 
     @property
     def root(self):

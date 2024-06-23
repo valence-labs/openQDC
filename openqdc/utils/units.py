@@ -146,8 +146,8 @@ def get_conversion(in_unit: str, out_unit: str):
 Conversion("ev", "kcal/mol", lambda x: x * 23.0605)
 Conversion("ev", "hartree", lambda x: x * 0.0367493)
 Conversion("ev", "kj/mol", lambda x: x * 96.4853)
-Conversion("mev", "ev", lambda x: x * 1000.0)
-Conversion("ev", "mev", lambda x: x * 0.0001)
+Conversion("ev", "mev", lambda x: x * 1000.0)
+Conversion("mev", "ev", lambda x: x * 0.0001)
 Conversion("ev", "ryd", lambda x: x * 0.07349864)
 
 # kcal/mol conversion
