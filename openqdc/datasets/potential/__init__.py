@@ -10,6 +10,7 @@ from .multixcqm9 import MultixcQM9, MultixcQM9_V2
 from .nabladft import NablaDFT
 from .orbnet_denali import OrbnetDenali
 from .pcqm import PCQM_B3LYP, PCQM_PM6
+from .qm1b import QM1B, QM1B_SMALL
 from .qm7x import QM7X, QM7X_V2
 from .qmugs import QMugs, QMugs_V2
 from .revmd17 import RevMD17
@@ -39,6 +40,8 @@ AVAILABLE_POTENTIAL_DATASETS = {
     "QM7X_V2": QM7X_V2,
     "QMugs": QMugs,
     "QMugs_V2": QMugs_V2,
+    "QM1B": QM1B,
+    "QM1B_SMALL": QM1B_SMALL,
     "SN2RXN": SN2RXN,
     "SolvatedPeptides": SolvatedPeptides,
     "Spice": Spice,
