@@ -77,21 +77,35 @@ class FileSystem:
         else:
             return self.local_endpoint
 
-    def get_file(self, remote_path: str, local_path: str):
+    def get_file(self, remote_path: str, local_path: str, zarr: bool = False):
         """
         Retrieve file from remote gs path or local cache
         """
-        self.public.get_file(
-            remote_path,
-            local_path,
-            callback=TqdmCallback(
-                tqdm_kwargs={
-                    "ascii": " ▖▘▝▗▚▞-",
-                    "desc": f"Downloading {os.path.basename(remote_path)}",
-                    "unit": "B",
-                }
-            ),
-        )
+        if not zarr:
+            self.public.get_file(
+                remote_path,
+                local_path,
+                callback=TqdmCallback(
+                    tqdm_kwargs={
+                        "ascii": " ▖▘▝▗▚▞-",
+                        "desc": f"Downloading {os.path.basename(remote_path)}",
+                        "unit": "B",
+                    }
+                ),
+            )
+        else:
+            print(local_path)
+            self.local.copy(
+                remote_path,
+                local_path,
+                recursive=True,
+                callback=TqdmCallback(
+                    tqdm_kwargs={
+                        "ascii": " ▖▘▝▗▚▞-",
+                        "desc": f"Downloading {os.path.basename(remote_path)}",
+                        "unit": "B",
+                    }
+                ))
 
     def put_file(self, local_path: str, remote_path: str):
         """

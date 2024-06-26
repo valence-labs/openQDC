@@ -12,6 +12,7 @@ from ase.io.extxyz import write_extxyz
 from loguru import logger
 from sklearn.utils import Bunch
 from tqdm import tqdm
+import zarr
 
 from openqdc.datasets.energies import AtomEnergies
 from openqdc.datasets.properties import DatasetPropertyMixIn
@@ -99,6 +100,7 @@ class BaseDataset(DatasetPropertyMixIn):
         cache_dir: Optional[str] = None,
         recompute_statistics: bool = False,
         transform: Optional[Callable] = None,
+        read_as_zarr: bool = False,
         regressor_kwargs={
             "solver_type": "linear",
             "sub_sample": None,
@@ -138,6 +140,7 @@ class BaseDataset(DatasetPropertyMixIn):
         self.recompute_statistics = recompute_statistics
         self.regressor_kwargs = regressor_kwargs
         self.transform = transform
+        self.read_as_zarr = read_as_zarr
         self.energy_type = energy_type if energy_type is not None else "null"
         self.refit_e0s = recompute_statistics or overwrite_local_cache
         if not self.is_preprocessed():
@@ -423,23 +426,45 @@ class BaseDataset(DatasetPropertyMixIn):
         )
         self.data = {}
         for key in self.data_keys:
-            filename = p_join(self.preprocess_path, f"{key}.mmap")
-            pull_locally(filename, overwrite=overwrite_local_cache)
-            self.data[key] = np.memmap(filename, mode="r", dtype=self.data_types[key]).reshape(*self.data_shapes[key])
+            if not self.read_as_zarr:
+                filename = p_join(self.preprocess_path, f"{key}.mmap")
+                pull_locally(filename, overwrite=overwrite_local_cache)
+                self.data[key] = np.memmap(filename, mode="r", dtype=self.data_types[key]).reshape(*self.data_shapes[key])
+            else:
+                logger.info("Reading as zarr")
+                filename = p_join(self.root, "zarr", f"{key}.zarr")
+                pull_locally(filename, overwrite=overwrite_local_cache, zarr=self.read_as_zarr)
+                self.data[key] = zarr.open(filename, "r")[:]#.reshape(*self.data_shapes[key])
 
-        filename = p_join(self.preprocess_path, "props.pkl")
-        pull_locally(filename, overwrite=overwrite_local_cache)
-        with open(filename, "rb") as f:
-            tmp = pkl.load(f)
+        if not self.read_as_zarr:
+            filename = p_join(self.preprocess_path, "props.pkl")
+            pull_locally(filename, overwrite=overwrite_local_cache)
+            with open(filename, "rb") as f:
+                tmp = pkl.load(f)
+                all_pkl_keys = set(tmp.keys()) - set(self.data_keys)
+                # assert required pkl_keys are present in all_pkl_keys
+                assert all([key in all_pkl_keys for key in self.pkl_data_keys])
+                for key in all_pkl_keys:
+                    x = tmp.pop(key)
+                    if len(x) == 2:
+                        self.data[key] = x[0][x[1]]
+                    else:
+                        self.data[key] = x
+        else:
+            logger.info("Reading as zarr")
+            filename = p_join(self.root, "zarr", "metadata.zarr")
+            pull_locally(filename, overwrite=overwrite_local_cache, zarr=self.read_as_zarr)
+            tmp = zarr.open(filename, "r")
             all_pkl_keys = set(tmp.keys()) - set(self.data_keys)
-            # assert required pkl_keys are present in all_pkl_keys
+                # assert required pkl_keys are present in all_pkl_keys
             assert all([key in all_pkl_keys for key in self.pkl_data_keys])
             for key in all_pkl_keys:
-                x = tmp.pop(key)
-                if len(x) == 2:
-                    self.data[key] = x[0][x[1]]
+                if (key + "_ptr") in tmp:
+                    self.data[key] = tmp[key][:][tmp[key+"_ptr"][:]]
                 else:
-                    self.data[key] = x
+                    self.data[key] = tmp[key][:]
+            
+            
 
         for key in self.data:
             logger.info(f"Loaded {key} with shape {self.data[key].shape}, dtype {self.data[key].dtype}")

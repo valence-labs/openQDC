@@ -162,14 +162,14 @@ class ANI1X(ANI1):
     __forces_unit__ = "hartree/ang"
 
     __energy_methods__ = [
-        "hf/cc-pvdz",
-        "hf/cc-pvqz",
-        "hf/cc-pvtz",
-        "mp2/cc-pvdz",
-        "mp2/cc-pvqz",
-        "mp2/cc-pvtz",
-        "wb97x/6-31g(d)",
-        "wb97x/cc-pvtz",
+        PotentialMethod.NONE, #"hf/cc-pvdz",
+        PotentialMethod.NONE, #"hf/cc-pvqz",
+        PotentialMethod.NONE, #"hf/cc-pvtz",
+        PotentialMethod.NONE, #"mp2/cc-pvdz",
+        PotentialMethod.NONE, #"mp2/cc-pvqz",
+        PotentialMethod.NONE, #"mp2/cc-pvtz",
+        PotentialMethod.NONE, #"wb97x/6-31g(d)",
+        PotentialMethod.NONE, #"wb97x/cc-pvtz",
     ]
 
     energy_target_names = [

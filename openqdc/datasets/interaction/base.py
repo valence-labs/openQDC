@@ -20,7 +20,7 @@ class BaseInteractionDataset(BaseDataset):
             "name": str,
             "subset": str,
             "n_atoms": np.int32,
-            "n_atoms_ptr": np.int32,
+            #"n_atoms_ptr": np.int32,
         }
 
     @property
