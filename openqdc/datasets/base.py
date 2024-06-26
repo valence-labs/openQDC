@@ -507,7 +507,7 @@ class BaseDataset(DatasetPropertyMixIn):
             res = self.collate_list(entries)
             self.save_preprocess(res, upload, overwrite, as_zarr)
             
-    def upload(self, overwrite: bool = False, as_zarr : bool=True):
+    def upload(self, overwrite: bool = False, as_zarr : bool=False):
         """
         Upload the preprocessed data to the remote storage.
         """

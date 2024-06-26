@@ -74,6 +74,12 @@ class QM9(BaseDataset):
         return p_join(get_local_cache(), "qmx")
 
     @property
+    def preprocess_path(self):
+        path = p_join(self.root, "preprocessed", self.__name__)
+        os.makedirs(path, exist_ok=True)
+        return path
+
+    @property
     def config(self):
         assert len(self.__links__) > 0, "No links provided for fetching"
         return dict(dataset_name="qmx", links=self.__links__)

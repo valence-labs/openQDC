@@ -166,6 +166,29 @@ def preprocess(
                 raise e
             
 
+@app.command()
+def upload(
+    datasets: List[str],
+    overwrite: Annotated[
+        bool,
+        typer.Option(
+            help="Whether to overwrite or force the re-download of the datasets.",
+        ),
+    ] = True,
+):
+    """
+    Upload a preprocessed dataset to the remote storage.
+    """
+    for dataset in list(map(lambda x: x.lower().replace("_", ""), datasets)):
+        if exist_dataset(dataset):
+            logger.info(f"Uploading {SANITIZED_AVAILABLE_DATASETS[dataset].__name__}")
+            try:
+                SANITIZED_AVAILABLE_DATASETS[dataset]().upload(overwrite=overwrite)
+            except Exception as e:
+                logger.error(f"Error while uploading {dataset}. {e}. Did you preprocess the dataset first?")
+                raise e
+            
+
 
 
 if __name__ == "__main__":

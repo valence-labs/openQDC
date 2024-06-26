@@ -1,4 +1,5 @@
 from .ani import ANI1, ANI1CCX, ANI1CCX_V2, ANI1X, ANI2X
+from .alchemy import Alchemy
 from .comp6 import COMP6
 from .dummy import Dummy
 from .gdml import GDML
@@ -21,8 +22,10 @@ from .tmqm import TMQM
 from .transition1x import Transition1X
 from .waterclusters3_30 import WaterClusters
 from .vqm24 import VQM24
+from .proteinfragments import ProteinFragments, MDDataset
 
 AVAILABLE_POTENTIAL_DATASETS = {
+    "Alchemy" : Alchemy,
     "ANI1": ANI1,
     "ANI1CCX": ANI1CCX,
     "ANI1CCX_V2": ANI1CCX_V2,
@@ -56,4 +59,6 @@ AVAILABLE_POTENTIAL_DATASETS = {
     "RevMD17": RevMD17,
     "MD22": MD22,
     "VQM24" : VQM24,
+    "ProteinFragments" : ProteinFragments,
+    "MDDataset" : MDDataset,
 }
