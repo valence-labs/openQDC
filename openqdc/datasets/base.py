@@ -77,6 +77,7 @@ class BaseDataset(DatasetPropertyMixIn):
 
     energy_target_names = []
     force_target_names = []
+    read_as_zarr=False
     __energy_methods__ = []
     __force_mask__ = []
     __isolated_atom_energies__ = []
@@ -378,7 +379,7 @@ class BaseDataset(DatasetPropertyMixIn):
 
         return res
 
-    def save_preprocess(self, data_dict, upload=False, overwrite=True):
+    def save_preprocess(self, data_dict, upload=False, overwrite=True, as_zarr: bool=False):
         """
         Save the preprocessed data to the cache directory and optionally upload it to the remote storage.
         data_dict : dict
@@ -492,7 +493,7 @@ class BaseDataset(DatasetPropertyMixIn):
             predicats += [os.path.exists(p_join(self.preprocess_path, "props.pkl"))]
         return all(predicats)
 
-    def preprocess(self, upload: bool = False, overwrite: bool = True):
+    def preprocess(self, upload: bool = False, overwrite: bool = True, as_zarr: bool=True):
         """
         Preprocess the dataset and save it.
         upload : bool, Defult: False
@@ -504,7 +505,13 @@ class BaseDataset(DatasetPropertyMixIn):
         if overwrite or not self.is_preprocessed():
             entries = self.read_raw_entries()
             res = self.collate_list(entries)
-            self.save_preprocess(res, upload, overwrite)
+            self.save_preprocess(res, upload, overwrite, as_zarr)
+            
+    def upload(self, overwrite: bool = False, as_zarr : bool=True):
+        """
+        Upload the preprocessed data to the remote storage.
+        """
+        self.save_preprocess(self.data, True, overwrite, as_zarr)
 
     def save_xyz(self, idx: int, energy_method: int = 0, path: Optional[str] = None, ext=True):
         """

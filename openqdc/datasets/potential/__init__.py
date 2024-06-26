@@ -20,6 +20,7 @@ from .spice import Spice, SpiceV2, SpiceVL2
 from .tmqm import TMQM
 from .transition1x import Transition1X
 from .waterclusters3_30 import WaterClusters
+from .vqm24 import VQM24
 
 AVAILABLE_POTENTIAL_DATASETS = {
     "ANI1": ANI1,
@@ -54,4 +55,5 @@ AVAILABLE_POTENTIAL_DATASETS = {
     "MultixcQM9_V2": MultixcQM9_V2,
     "RevMD17": RevMD17,
     "MD22": MD22,
+    "VQM24" : VQM24,
 }
