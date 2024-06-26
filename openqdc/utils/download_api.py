@@ -82,16 +82,16 @@ class FileSystem:
         Retrieve file from remote gs path or local cache
         """
         self.public.get_file(
-                remote_path,
-                local_path,
-                callback=TqdmCallback(
-                    tqdm_kwargs={
-                        "ascii": " ▖▘▝▗▚▞-",
-                        "desc": f"Downloading {os.path.basename(remote_path)}",
-                        "unit": "B",
-                    }
-                ),
-            )
+            remote_path,
+            local_path,
+            callback=TqdmCallback(
+                tqdm_kwargs={
+                    "ascii": " ▖▘▝▗▚▞-",
+                    "desc": f"Downloading {os.path.basename(remote_path)}",
+                    "unit": "B",
+                }
+            ),
+        )
 
     def put_file(self, local_path: str, remote_path: str):
         """

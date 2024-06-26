@@ -37,7 +37,7 @@ def extract_ani2_entries(properties):
     return res
 
 
-class QM9(BaseDataset):
+class QMX(BaseDataset):
     """
     The ANI-1 dataset is a collection of 22 x 10^6 structural conformations from 57,000 distinct small
     organic molecules with energy labels calculated using DFT. The molecules
@@ -67,7 +67,7 @@ class QM9(BaseDataset):
     __energy_unit__ = "hartree"
     __distance_unit__ = "bohr"
     __forces_unit__ = "hartree/bohr"
-    __links__ = {"ani1.hdf5.gz": "https://zenodo.org/record/3585840/files/214.hdf5.gz"}
+    __links__ = {}
 
     @property
     def root(self):
@@ -100,3 +100,46 @@ class QM9(BaseDataset):
         raw_path = p_join(self.root, f"{self.__name__}.h5.gz")
         samples = read_qc_archive_h5(raw_path, self.__name__, self.energy_target_names, self.force_target_names)
         return samples
+
+
+# ['smiles', 'E1-CC2', 'E2-CC2', 'f1-CC2', 'f2-CC2', 'E1-PBE0', 'E2-PBE0', 'f1-PBE0', 'f2-PBE0', 'E1-PBE0.1', 'E2-PBE0.1', 'f1-PBE0.1', 'f2-PBE0.1', 'E1-CAM', 'E2-CAM', 'f1-CAM', 'f2-CAM']
+class QM7(QMX):
+    __links__ = {"qm7.hdf5.gz": "https://zenodo.org/record/3588337/files/150.hdf5.gz?download=1"}
+
+    def read_raw_entries(self):
+        "h5.gz"
+
+
+class QM7b(QMX):
+    __links__ = {"qm7b.hdf5.gz": "https://zenodo.org/record/3588335/files/200.hdf5.gz?download=1"}
+
+
+class QM8(QMX):
+    """QM8 is the dataset used in a study on modeling quantum
+    mechanical calculations of electronic spectra and excited
+    state energy (ka increase of energy from the ground states) of small molecules. Multiple methods, including
+    time-dependent density functional theories (TDDFT) and
+    second-order approximate coupled-cluster (CC2)
+    - Column 1: Molecule ID (gdb9 index) mapping to the .sdf file
+    - Columns 2-5: RI-CC2/def2TZVP
+    - Columns 6-9: LR-TDPBE0/def2SVP
+    - Columns 10-13: LR-TDPBE0/def2TZVP
+    - Columns 14-17: LR-TDCAM-B3LYP/def2TZVP
+
+    """
+
+    #'E1-CC2', 'E2-CC2',
+    # E1-PBE0', 'E2-PBE0'
+    # 'E1-CAM', 'E2-CAM'
+    __links__ = {
+        "qm8.csv": "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/qm8.csv",
+        "qm8.tar.gz": "https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/gdb8.tar.gz",
+    }
+
+    def read_raw_entries(self):
+        df = pd.read_csv(p_join(self.root, "qm8.csv"))
+        mols = dm.read_sdf(p_join(self.root, "qm8.sdf"), sanitize=False, remove_hs=False)
+
+
+class QM9(QMX):
+    __links__ = {"qm9.hdf5.gz": "https://zenodo.org/record/3588339/files/155.hdf5.gz?download=1"}

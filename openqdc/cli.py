@@ -164,7 +164,7 @@ def preprocess(
             except Exception as e:
                 logger.error(f"Error while preprocessing {dataset}. {e}. Did you fetch the dataset first?")
                 raise e
-            
+
 
 @app.command()
 def upload(
@@ -187,8 +187,6 @@ def upload(
             except Exception as e:
                 logger.error(f"Error while uploading {dataset}. {e}. Did you preprocess the dataset first?")
                 raise e
-            
-
 
 
 if __name__ == "__main__":

@@ -8,11 +8,11 @@ from os.path import join as p_join
 from typing import Callable, Dict, List, Optional, Union
 
 import numpy as np
+import zarr
 from ase.io.extxyz import write_extxyz
 from loguru import logger
 from sklearn.utils import Bunch
 from tqdm import tqdm
-import zarr
 
 from openqdc.datasets.energies import AtomEnergies
 from openqdc.datasets.properties import DatasetPropertyMixIn
@@ -77,7 +77,7 @@ class BaseDataset(DatasetPropertyMixIn):
 
     energy_target_names = []
     force_target_names = []
-    read_as_zarr=False
+    read_as_zarr = False
     __energy_methods__ = []
     __force_mask__ = []
     __isolated_atom_energies__ = []
@@ -164,19 +164,19 @@ class BaseDataset(DatasetPropertyMixIn):
     @classmethod
     def fetch(cls, cache_path: Optional[str] = None, overwrite: bool = False) -> None:
         from openqdc.utils.download_api import DataDownloader
+
         DataDownloader(cache_path, overwrite).from_config(cls.no_init().config)
-        
+
     @property
     def ext(self):
         return ".mmap" if not self.read_as_zarr else ".zip"
-    
+
     @property
     def load_fn(self):
         return np.memmap if not self.read_as_zarr else zarr.open
-    
+
     def add_extension(self, filename):
         return filename + self.ext
-    
 
     def _post_init(
         self,
@@ -379,7 +379,7 @@ class BaseDataset(DatasetPropertyMixIn):
 
         return res
 
-    def save_preprocess(self, data_dict, upload=False, overwrite=True, as_zarr: bool=False):
+    def save_preprocess(self, data_dict, upload=False, overwrite=True, as_zarr: bool = False):
         """
         Save the preprocessed data to the cache directory and optionally upload it to the remote storage.
         data_dict : dict
@@ -442,8 +442,8 @@ class BaseDataset(DatasetPropertyMixIn):
             pull_locally(filename, overwrite=overwrite_local_cache)
             self.data[key] = self.load_fn(filename, mode="r", dtype=self.data_types[key])
             if self.read_as_zarr:
-                self.data[key]=self.data[key][:]
-            self.data[key]=self.data[key].reshape(*self.data_shapes[key])
+                self.data[key] = self.data[key][:]
+            self.data[key] = self.data[key].reshape(*self.data_shapes[key])
 
         if not self.read_as_zarr:
             filename = p_join(self.preprocess_path, "props.pkl")
@@ -464,14 +464,14 @@ class BaseDataset(DatasetPropertyMixIn):
             pull_locally(filename, overwrite=overwrite_local_cache)
             tmp = self.load_fn(filename)
             all_pkl_keys = set(tmp.keys()) - set(self.data_keys)
-                # assert required pkl_keys are present in all_pkl_keys
+            # assert required pkl_keys are present in all_pkl_keys
             assert all([key in all_pkl_keys for key in self.pkl_data_keys])
             for key in all_pkl_keys:
                 if key not in self.pkl_data_keys:
                     self.data[key] = tmp[key][:][tmp[key][:]]
                 else:
                     self.data[key] = tmp[key][:]
-            
+
         for key in self.data:
             logger.info(f"Loaded {key} with shape {self.data[key].shape}, dtype {self.data[key].dtype}")
 
@@ -488,12 +488,14 @@ class BaseDataset(DatasetPropertyMixIn):
         """
         Check if the dataset is cached locally.
         """
-        predicats = [os.path.exists(p_join(self.preprocess_path, self.add_extension(f"{key}"))) for key in self.data_keys]
+        predicats = [
+            os.path.exists(p_join(self.preprocess_path, self.add_extension(f"{key}"))) for key in self.data_keys
+        ]
         if not self.read_as_zarr:
             predicats += [os.path.exists(p_join(self.preprocess_path, "props.pkl"))]
         return all(predicats)
 
-    def preprocess(self, upload: bool = False, overwrite: bool = True, as_zarr: bool=True):
+    def preprocess(self, upload: bool = False, overwrite: bool = True, as_zarr: bool = True):
         """
         Preprocess the dataset and save it.
         upload : bool, Defult: False
@@ -506,8 +508,8 @@ class BaseDataset(DatasetPropertyMixIn):
             entries = self.read_raw_entries()
             res = self.collate_list(entries)
             self.save_preprocess(res, upload, overwrite, as_zarr)
-            
-    def upload(self, overwrite: bool = False, as_zarr : bool=False):
+
+    def upload(self, overwrite: bool = False, as_zarr: bool = False):
         """
         Upload the preprocessed data to the remote storage.
         """
