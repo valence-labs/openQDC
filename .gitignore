@@ -149,3 +149,6 @@ cookie.txt
 *.txt
 *.sh
 .DS_Store
+*.zarr/
+scripts/
+notebooks/
