@@ -74,14 +74,14 @@ def push_remote(local_path, overwrite=True):
     return remote_path
 
 
-def pull_locally(local_path, overwrite=False, zarr=False):
+def pull_locally(local_path, overwrite=False):
     """
     Retrieve file from remote gs path or local cache
     """
     remote_path = local_path.replace(get_local_cache(), get_remote_cache())
     os.makedirs(os.path.dirname(local_path), exist_ok=True)
     if not os.path.exists(local_path) or overwrite:
-        API.get_file(remote_path, local_path, zarr)
+        API.get_file(remote_path, local_path)
     return local_path
 
 

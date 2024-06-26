@@ -163,8 +163,19 @@ class BaseDataset(DatasetPropertyMixIn):
     @classmethod
     def fetch(cls, cache_path: Optional[str] = None, overwrite: bool = False) -> None:
         from openqdc.utils.download_api import DataDownloader
-
         DataDownloader(cache_path, overwrite).from_config(cls.no_init().config)
+        
+    @property
+    def ext(self):
+        return ".mmap" if not self.read_as_zarr else ".zip"
+    
+    @property
+    def load_fn(self):
+        return np.memmap if not self.read_as_zarr else zarr.open
+    
+    def add_extension(self, filename):
+        return filename + self.ext
+    
 
     def _post_init(
         self,
@@ -261,7 +272,7 @@ class BaseDataset(DatasetPropertyMixIn):
 
     @property
     def preprocess_path(self):
-        path = p_join(self.root, "preprocessed")
+        path = p_join(self.root, "preprocessed" if not self.read_as_zarr else "zarr")
         os.makedirs(path, exist_ok=True)
         return path
 
@@ -426,15 +437,12 @@ class BaseDataset(DatasetPropertyMixIn):
         )
         self.data = {}
         for key in self.data_keys:
-            if not self.read_as_zarr:
-                filename = p_join(self.preprocess_path, f"{key}.mmap")
-                pull_locally(filename, overwrite=overwrite_local_cache)
-                self.data[key] = np.memmap(filename, mode="r", dtype=self.data_types[key]).reshape(*self.data_shapes[key])
-            else:
-                logger.info("Reading as zarr")
-                filename = p_join(self.root, "zarr", f"{key}.zarr")
-                pull_locally(filename, overwrite=overwrite_local_cache, zarr=self.read_as_zarr)
-                self.data[key] = zarr.open(filename, "r")[:]#.reshape(*self.data_shapes[key])
+            filename = p_join(self.preprocess_path, self.add_extension(f"{key}"))
+            pull_locally(filename, overwrite=overwrite_local_cache)
+            self.data[key] = self.load_fn(filename, mode="r", dtype=self.data_types[key])
+            if self.read_as_zarr:
+                self.data[key]=self.data[key][:]
+            self.data[key]=self.data[key].reshape(*self.data_shapes[key])
 
         if not self.read_as_zarr:
             filename = p_join(self.preprocess_path, "props.pkl")
@@ -451,21 +459,18 @@ class BaseDataset(DatasetPropertyMixIn):
                     else:
                         self.data[key] = x
         else:
-            logger.info("Reading as zarr")
-            filename = p_join(self.root, "zarr", "metadata.zarr")
-            pull_locally(filename, overwrite=overwrite_local_cache, zarr=self.read_as_zarr)
-            tmp = zarr.open(filename, "r")
+            filename = p_join(self.preprocess_path, self.add_extension("metadata"))
+            pull_locally(filename, overwrite=overwrite_local_cache)
+            tmp = self.load_fn(filename)
             all_pkl_keys = set(tmp.keys()) - set(self.data_keys)
                 # assert required pkl_keys are present in all_pkl_keys
             assert all([key in all_pkl_keys for key in self.pkl_data_keys])
             for key in all_pkl_keys:
-                if (key + "_ptr") in tmp:
-                    self.data[key] = tmp[key][:][tmp[key+"_ptr"][:]]
+                if key not in self.pkl_data_keys:
+                    self.data[key] = tmp[key][:][tmp[key][:]]
                 else:
                     self.data[key] = tmp[key][:]
             
-            
-
         for key in self.data:
             logger.info(f"Loaded {key} with shape {self.data[key].shape}, dtype {self.data[key].dtype}")
 
@@ -473,16 +478,18 @@ class BaseDataset(DatasetPropertyMixIn):
         """
         Check if the dataset is preprocessed and available online or locally.
         """
-        predicats = [copy_exists(p_join(self.preprocess_path, f"{key}.mmap")) for key in self.data_keys]
-        predicats += [copy_exists(p_join(self.preprocess_path, "props.pkl"))]
+        predicats = [copy_exists(p_join(self.preprocess_path, self.add_extension(f"{key}"))) for key in self.data_keys]
+        if not self.read_as_zarr:
+            predicats += [copy_exists(p_join(self.preprocess_path, "props.pkl"))]
         return all(predicats)
 
     def is_cached(self):
         """
         Check if the dataset is cached locally.
         """
-        predicats = [os.path.exists(p_join(self.preprocess_path, f"{key}.mmap")) for key in self.data_keys]
-        predicats += [os.path.exists(p_join(self.preprocess_path, "props.pkl"))]
+        predicats = [os.path.exists(p_join(self.preprocess_path, self.add_extension(f"{key}"))) for key in self.data_keys]
+        if not self.read_as_zarr:
+            predicats += [os.path.exists(p_join(self.preprocess_path, "props.pkl"))]
         return all(predicats)
 
     def preprocess(self, upload: bool = False, overwrite: bool = True):
