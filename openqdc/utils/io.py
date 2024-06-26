@@ -150,8 +150,8 @@ def load_hdf5_file(hdf5_file_path: str):
 
     # inorder to enable multiprocessing:
     # https://github.com/fsspec/gcsfs/issues/379#issuecomment-839929801
-    fsspec.asyn.iothread[0] = None
-    fsspec.asyn.loop[0] = None
+    # fsspec.asyn.iothread[0] = None
+    # fsspec.asyn.loop[0] = None
 
     return file
 
