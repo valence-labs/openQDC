@@ -122,6 +122,11 @@ class QM7(QMX):
                            'WB97M-V:def2-tzvp', 'WB97M-V:sto-3g', 'WB97X-D:aug-cc-pvdz', 
                            'WB97X-D:aug-cc-pvtz', 'WB97X-D:def2-svp', 'WB97X-D:def2-tzvp', 
                            'WB97X-D:sto-3g']
+    
+    __energy_methods__ = [
+        PotentialMethod.NONE for _ in range(len(energy_target_names))  # "wb97x/6-31g(d)"
+    ]
+
 
 
 

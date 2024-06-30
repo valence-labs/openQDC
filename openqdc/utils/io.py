@@ -54,9 +54,10 @@ def get_remote_cache(write_access=False) -> str:
     Returns the entry point based on the write access.
     """
     if write_access:
-        remote_cache = "gs://qmdata-public/openqdc"
+        remote_cache = "/openqdc/v1" #"gs://qmdata-public/openqdc"
     else:
-        remote_cache = "https://storage.googleapis.com/qmdata-public/openqdc"
+        remote_cache = "/openqdc/v1"
+        #remote_cache = "https://storage.googleapis.com/qmdata-public/openqdc"
     return remote_cache
 
 

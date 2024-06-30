@@ -273,7 +273,7 @@ class BaseDataset(DatasetPropertyMixIn):
 
     @property
     def preprocess_path(self):
-        path = p_join(self.root, "preprocessed" if not self.read_as_zarr else "zarr")
+        path = p_join(self.root, "preprocessed")
         os.makedirs(path, exist_ok=True)
         return path
 
@@ -393,7 +393,7 @@ class BaseDataset(DatasetPropertyMixIn):
         # save memmaps
         logger.info("Preprocessing data and saving it to cache.")
         for key in self.data_keys:
-            local_path = p_join(self.preprocess_path, f"{key}.mmap")
+            local_path = p_join(self.preprocess_path, f"{key}.mmap" if not as_zarr else f"{key}.zip")
             out = np.memmap(local_path, mode="w+", dtype=data_dict[key].dtype, shape=data_dict[key].shape)
             out[:] = data_dict.pop(key)[:]
             out.flush()
@@ -468,6 +468,7 @@ class BaseDataset(DatasetPropertyMixIn):
             assert all([key in all_pkl_keys for key in self.pkl_data_keys])
             for key in all_pkl_keys:
                 if key not in self.pkl_data_keys:
+                    print(key, list(tmp.items()))
                     self.data[key] = tmp[key][:][tmp[key][:]]
                 else:
                     self.data[key] = tmp[key][:]
@@ -513,7 +514,12 @@ class BaseDataset(DatasetPropertyMixIn):
         """
         Upload the preprocessed data to the remote storage.
         """
-        self.save_preprocess(self.data, True, overwrite, as_zarr)
+        for key in self.data_keys:
+            local_path = p_join(self.preprocess_path, f"{key}.mmap" if not as_zarr else f"{key}.zip")
+            push_remote(local_path, overwrite=overwrite)
+        local_path = p_join(self.preprocess_path, "props.pkl" if not as_zarr else "metadata.zip")
+        push_remote(local_path, overwrite=overwrite)
+            
 
     def save_xyz(self, idx: int, energy_method: int = 0, path: Optional[str] = None, ext=True):
         """

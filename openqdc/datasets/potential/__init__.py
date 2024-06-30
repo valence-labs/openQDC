@@ -24,6 +24,7 @@ from .tmqm import TMQM
 from .transition1x import Transition1X
 from .vqm24 import VQM24
 from .waterclusters3_30 import WaterClusters
+from .waterclusters import SCANWaterClusters
 
 AVAILABLE_POTENTIAL_DATASETS = {
     "Alchemy": Alchemy,
@@ -59,6 +60,7 @@ AVAILABLE_POTENTIAL_DATASETS = {
     "TMQM": TMQM,
     "Transition1X": Transition1X,
     "WaterClusters": WaterClusters,
+    "SCANWaterClusters": SCANWaterClusters,
     "MultixcQM9": MultixcQM9,
     "MultixcQM9_V2": MultixcQM9_V2,
     "RevMD17": RevMD17,
