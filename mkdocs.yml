@@ -12,8 +12,8 @@ docs_dir: "docs"
 nav:
   - Overview: index.md
   - Available Datasets: datasets.md
-  - Tutorials:
-    - Really hard example: tutorials/usage.ipynb
+  #- Tutorials:
+  #  #- Really hard example: tutorials/usage.ipynb
   - API:
     - Datasets: API/available_datasets.md
     - Isolated Atoms Energies: API/isolated_atom_energies.md
@@ -33,7 +33,6 @@ extra_css:
 
 extra_javascript:
   - javascripts/config.js
-  - https://polyfill.io/v3/polyfill.min.js?features=es6
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
 
 markdown_extensions:
@@ -58,13 +57,13 @@ plugins:
   - search
   - mkdocstrings:
       watch:
-        - src/
+        - openqdc/
       handlers:
         python:
           setup_commands:
             - import sys
             - sys.path.append("docs")
-            - sys.path.append("src")
+            - sys.path.append("openqdc")
           selection:
             new_path_syntax: yes
           rendering:

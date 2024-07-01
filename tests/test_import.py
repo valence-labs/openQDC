@@ -1,2 +1,6 @@
 def test_open_qdc():
-    import openQDC  # noqa
+    import openqdc  # noqa
+
+
+def test_dataset():
+    from openqdc import Spice  # noqa
