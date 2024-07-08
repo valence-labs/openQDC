@@ -1,16 +1,17 @@
 import os
 from os.path import join as p_join
 
+import datamol as dm
 import numpy as np
+import pandas as pd
+from tqdm import tqdm
 
 from openqdc.datasets.base import BaseDataset
 from openqdc.methods import PotentialMethod
 from openqdc.utils import load_hdf5_file, read_qc_archive_h5
 from openqdc.utils.io import get_local_cache
 from openqdc.utils.molecule import get_atomic_number_and_charge
-import pandas as pd 
-import datamol as dm
-from tqdm import tqdm
+
 
 def extract_ani2_entries(properties):
     coordinates = properties["coordinates"]
@@ -49,7 +50,7 @@ class QMX(BaseDataset):
     - Github: https://github.com/aiqm/ANI1x_datasets
     """
 
-    __name__ = "qm9"
+    __name__ = "qmx"
 
     __energy_methods__ = [
         PotentialMethod.WB97X_6_31G_D,  # "wb97x/6-31g(d)"

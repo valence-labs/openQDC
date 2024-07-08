@@ -88,6 +88,7 @@ def pull_locally(local_path, overwrite=False):
 
 def copy_exists(local_path):
     remote_path = local_path.replace(get_local_cache(), get_remote_cache())
+    print(remote_path)
     return os.path.exists(local_path) or API.exists(remote_path)
 
 

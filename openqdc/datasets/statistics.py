@@ -149,6 +149,7 @@ class AbstractStatsCalculator(ABC):
         self.e0_matrix = e0_matrix
         self.n_atoms = n_atoms
         self.atom_species_charges_tuple = (atom_species, atom_charges)
+        self._root=p_join(get_local_cache(), self.name)    
         if atom_species is not None and atom_charges is not None:
             # by value not reference
             self.atom_species_charges_tuple = np.concatenate((atom_species[:, None], atom_charges[:, None]), axis=-1)
@@ -159,7 +160,7 @@ class AbstractStatsCalculator(ABC):
 
     @property
     def preprocess_path(self):
-        path = p_join(self.root, "preprocessed", str(self) + ".pkl")
+        path = p_join(self.root, "statistics", self.name + f"_{str(self)}" + f".pkl")
         return path
 
     @property
@@ -167,14 +168,14 @@ class AbstractStatsCalculator(ABC):
         """
         Path to the dataset folder
         """
-        return p_join(get_local_cache(), self.name)
+        return self._root
 
     @classmethod
     def from_openqdc_dataset(cls, dataset, recompute: bool = False):
         """
         Create a calculator object from a dataset object
         """
-        return cls(
+        obj = cls(
             name=dataset.__name__,
             force_recompute=recompute,
             energy_type=dataset.energy_type,
@@ -186,6 +187,8 @@ class AbstractStatsCalculator(ABC):
             atom_charges=dataset.data["atomic_inputs"][:, 1].ravel(),
             e0_matrix=dataset.__isolated_atom_energies__,
         )
+        obj._root = dataset.root # set to the dataset root in case of multiple datasets
+        return obj
 
     @abstractmethod
     def compute(self) -> StatisticsResults:
@@ -200,6 +203,7 @@ class AbstractStatsCalculator(ABC):
         """
         Save statistics file to the dataset folder as a pkl file
         """
+        print(self.preprocess_path)
         save_pkl(self.result, self.preprocess_path)
 
     def attempt_load(self) -> bool:

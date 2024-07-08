@@ -23,8 +23,8 @@ from .spice import Spice, SpiceV2, SpiceVL2
 from .tmqm import TMQM
 from .transition1x import Transition1X
 from .vqm24 import VQM24
-from .waterclusters3_30 import WaterClusters
 from .waterclusters import SCANWaterClusters
+from .waterclusters3_30 import WaterClusters
 
 AVAILABLE_POTENTIAL_DATASETS = {
     "Alchemy": Alchemy,

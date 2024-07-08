@@ -1,10 +1,11 @@
 import zipfile
+from collections import defaultdict
 from io import StringIO
 from os.path import join as p_join
 
 import numpy as np
 from tqdm import tqdm
-from collections import defaultdict
+
 from openqdc.datasets.base import BaseDataset
 from openqdc.methods import PotentialMethod
 from openqdc.utils.constants import ATOM_TABLE, MAX_ATOMIC_NUMBER
@@ -27,6 +28,7 @@ def read_geometries(fname, dataset):
 @requires_package("monty")
 def read_energies(fname, dataset):
     from monty.serialization import loadfn
+
     # fname
     _energies = loadfn(fname)[dataset]
     metadata_restrictions = {"basis_set": _default_basis_sets.get(dataset)}

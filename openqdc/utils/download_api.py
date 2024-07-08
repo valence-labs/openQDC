@@ -10,13 +10,12 @@ import zipfile
 from dataclasses import dataclass
 from typing import Optional
 
-from dotenv import load_dotenv
-
 import fsspec
 import gdown
 import requests
 import tqdm
 from aiohttp import ClientTimeout
+from dotenv import load_dotenv
 from fsspec import AbstractFileSystem
 from fsspec.callbacks import TqdmCallback
 from fsspec.implementations.local import LocalFileSystem
@@ -24,6 +23,7 @@ from loguru import logger
 from sklearn.utils import Bunch
 
 import openqdc.utils.io as ioqdc
+
 
 @dataclass
 class FileSystem:
@@ -37,7 +37,7 @@ class FileSystem:
     endpoint_url = 'https://874f02b9d981bd6c279e979c0d91c4b4.r2.cloudflarestorage.com'
     
     def __init__(self):
-        logger.warning("Problem loading enviromnet variables") if not load_dotenv() else ""
+        load_dotenv()
         self.KEY = os.getenv("CLOUDFARE_KEY", None)
         self.SECRET = os.getenv("CLOUDFARE_SECRET", None)
         

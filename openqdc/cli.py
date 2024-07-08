@@ -55,6 +55,12 @@ def download(
             help="Path to the cache. If not provided, the default cache directory (.cache/openqdc/) will be used.",
         ),
     ] = None,
+    as_zarr : Annotated[
+        bool,
+        typer.Option(
+            help="Whether to overwrite or force the re-download of the datasets.",
+        ),
+    ] = False,
 ):
     """
     Download preprocessed ml-ready datasets from the main openQDC hub.
@@ -64,10 +70,14 @@ def download(
     """
     for dataset in list(map(lambda x: x.lower().replace("_", ""), datasets)):
         if exist_dataset(dataset):
-            if SANITIZED_AVAILABLE_DATASETS[dataset].no_init().is_cached() and not overwrite:
+            ds=SANITIZED_AVAILABLE_DATASETS[dataset].no_init()
+            ds.read_as_zarr=as_zarr
+            if ds.is_cached() and not overwrite:
                 logger.info(f"{dataset} is already cached. Skipping download")
             else:
-                SANITIZED_AVAILABLE_DATASETS[dataset](overwrite_local_cache=True, cache_dir=cache_dir)
+                SANITIZED_AVAILABLE_DATASETS[dataset](overwrite_local_cache=True,
+                                                       cache_dir=cache_dir,
+                                                       read_as_zarr=as_zarr)
 
 
 @app.command()
@@ -213,11 +223,13 @@ def convert_to_zarr(
     """
     Conver a preprocessed dataset to the zarr file format.
     """
-    import zarr 
-    from openqdc.utils.io import load_pkl
+    import os
     from os.path import join as p_join
+
     import numpy as np
-    import os 
+    import zarr
+
+    from openqdc.utils.io import load_pkl 
     def silent_remove(filename):
         try:
             os.remove(filename)

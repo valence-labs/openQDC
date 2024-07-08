@@ -468,7 +468,7 @@ class BaseDataset(DatasetPropertyMixIn):
             assert all([key in all_pkl_keys for key in self.pkl_data_keys])
             for key in all_pkl_keys:
                 if key not in self.pkl_data_keys:
-                    print(key, list(tmp.items()))
+                    #print(key, list(tmp.items()))
                     self.data[key] = tmp[key][:][tmp[key][:]]
                 else:
                     self.data[key] = tmp[key][:]
@@ -481,8 +481,10 @@ class BaseDataset(DatasetPropertyMixIn):
         Check if the dataset is preprocessed and available online or locally.
         """
         predicats = [copy_exists(p_join(self.preprocess_path, self.add_extension(f"{key}"))) for key in self.data_keys]
+
         if not self.read_as_zarr:
             predicats += [copy_exists(p_join(self.preprocess_path, "props.pkl"))]
+        print(predicats)
         return all(predicats)
 
     def is_cached(self):
