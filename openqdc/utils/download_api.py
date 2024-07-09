@@ -89,7 +89,7 @@ class FileSystem:
                     secret="d5b32f241ad8ee8d0a3173cd51b4f36d6869f168b21acef75f244a81dc10e1fb",
                     endpoint_url=self.endpoint_url,
                 )
-                if os.environ.get("OPENQDC_DOWNLOAD_API") is not None
+                if os.environ.get("OPENQDC_DOWNLOAD_API") is None
                 else fsspec.filesystem("https")
             )
             # return fsspec.filesystem("https")
