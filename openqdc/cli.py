@@ -1,3 +1,4 @@
+import os
 from typing import List, Optional
 
 import typer
@@ -13,7 +14,6 @@ from openqdc.datasets import (
     AVAILABLE_POTENTIAL_DATASETS,
 )
 from openqdc.utils.io import get_local_cache
-import os 
 
 app = typer.Typer(help="OpenQDC CLI")
 
@@ -63,12 +63,12 @@ def download(
             help="Whether to overwrite or force the re-download of the datasets.",
         ),
     ] = False,
-    gs : Annotated[
+    gs: Annotated[
         bool,
         typer.Option(
             help="Whether to use gs to re-download of the datasets.",
         ),
-    ] = False, 
+    ] = False,
 ):
     """
     Download preprocessed ml-ready datasets from the main openQDC hub.
@@ -303,12 +303,14 @@ def convert_to_zarr(
                 logger.error(f"Error while converting {dataset}. {e}. Did you preprocess the dataset first?")
                 raise e
 
+
 @app.command()
 def show_cache():
     """
     Get the current local cache path of openQDC
     """
     print(f"openQDC local cache:\n {get_local_cache()}")
+
 
 if __name__ == "__main__":
     app()

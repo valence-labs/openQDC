@@ -24,7 +24,7 @@ from loguru import logger
 from sklearn.utils import Bunch
 
 import openqdc.utils.io as ioqdc
-import os 
+
 
 @dataclass
 class FileSystem:
@@ -79,16 +79,20 @@ class FileSystem:
         Return a default endpoint for the given str [public, private]
         """
         if endpoint == "private":
-            #return fsspec.filesystem("gs")
+            # return fsspec.filesystem("gs")
             return fsspec.filesystem("s3", key=self.KEY, secret=self.SECRET, endpoint_url=self.endpoint_url)
         elif endpoint == "public":
-            return fsspec.filesystem(
-                "s3",
-                key="a046308c078b0134c9e261aa91f63ab2",
-                secret="d5b32f241ad8ee8d0a3173cd51b4f36d6869f168b21acef75f244a81dc10e1fb",
-                endpoint_url=self.endpoint_url,
-            ) if not os.environ["OPENQDC_DOWNLOAD_API"] == "gs" else fsspec.filesystem("https")
-            #return fsspec.filesystem("https")
+            return (
+                fsspec.filesystem(
+                    "s3",
+                    key="a046308c078b0134c9e261aa91f63ab2",
+                    secret="d5b32f241ad8ee8d0a3173cd51b4f36d6869f168b21acef75f244a81dc10e1fb",
+                    endpoint_url=self.endpoint_url,
+                )
+                if os.environ.get("OPENQDC_DOWNLOAD_API") is not None
+                else fsspec.filesystem("https")
+            )
+            # return fsspec.filesystem("https")
         else:
             return self.local_endpoint
 
