@@ -1,19 +1,18 @@
 """The BaseDataset defining shared functionality between all datasets."""
 
 import os
-import pickle as pkl
 from functools import partial
 from itertools import compress
 from os.path import join as p_join
 from typing import Callable, Dict, List, Optional, Union
 
 import numpy as np
-import zarr
 from ase.io.extxyz import write_extxyz
 from loguru import logger
 from sklearn.utils import Bunch
 from tqdm import tqdm
 
+from openqdc.datasets.dataset_structure import MemMapDataset, ZarrDataset
 from openqdc.datasets.energies import AtomEnergies
 from openqdc.datasets.properties import DatasetPropertyMixIn
 from openqdc.datasets.statistics import (
@@ -33,7 +32,6 @@ from openqdc.utils.io import (
     copy_exists,
     dict_to_atoms,
     get_local_cache,
-    pull_locally,
     push_remote,
     set_cache_dir,
 )
@@ -157,6 +155,12 @@ class BaseDataset(DatasetPropertyMixIn):
         self._fn_forces = lambda x: x
 
     @property
+    def dataset_wrapper(self):
+        if not hasattr("_dataset_wrapper", self):
+            self._dataset_wrapper = ZarrDataset() if self.read_as_zarr else MemMapDataset()
+        return self._dataset_wrapper
+
+    @property
     def config(self):
         assert len(self.__links__) > 0, "No links provided for fetching"
         return dict(dataset_name=self.__name__, links=self.__links__)
@@ -166,17 +170,6 @@ class BaseDataset(DatasetPropertyMixIn):
         from openqdc.utils.download_api import DataDownloader
 
         DataDownloader(cache_path, overwrite).from_config(cls.no_init().config)
-
-    @property
-    def ext(self):
-        return ".mmap" if not self.read_as_zarr else ".zip"
-
-    @property
-    def load_fn(self):
-        return np.memmap if not self.read_as_zarr else zarr.open
-
-    def add_extension(self, filename):
-        return filename + self.ext
 
     def _post_init(
         self,
@@ -392,29 +385,32 @@ class BaseDataset(DatasetPropertyMixIn):
         """
         # save memmaps
         logger.info("Preprocessing data and saving it to cache.")
-        for key in self.data_keys:
-            local_path = p_join(self.preprocess_path, f"{key}.mmap" if not as_zarr else f"{key}.zip")
-            out = np.memmap(local_path, mode="w+", dtype=data_dict[key].dtype, shape=data_dict[key].shape)
-            out[:] = data_dict.pop(key)[:]
-            out.flush()
-            if upload:
-                push_remote(local_path, overwrite=overwrite)
-
-        # save smiles and subset
-        local_path = p_join(self.preprocess_path, "props.pkl")
-
-        # assert that (required) pkl keys are present in data_dict
-        assert all([key in data_dict.keys() for key in self.pkl_data_keys])
-
-        # store unique and inverse indices for str-based pkl keys
-        for key in self.pkl_data_keys:
-            if self.pkl_data_types[key] == str:
-                data_dict[key] = np.unique(data_dict[key], return_inverse=True)
-
-        with open(local_path, "wb") as f:
-            pkl.dump(data_dict, f)
+        paths = self.dataset_wrapper.save_preprocess(
+            self.preprocess_path, self.data_keys, data_dict, self.pkl_data_keys, self.pkl_data_types
+        )
         if upload:
-            push_remote(local_path, overwrite=overwrite)
+            for local_path in paths:
+                push_remote(local_path, overwrite=overwrite)  # make it async?
+
+    def read_preprocess(self, overwrite_local_cache=False):
+        logger.info("Reading preprocessed data.")
+        logger.info(
+            f"Dataset {self.__name__} with the following units:\n\
+                     Energy: {self.energy_unit},\n\
+                     Distance: {self.distance_unit},\n\
+                     Forces: {self.force_unit if self.force_methods else 'None'}"
+        )
+
+        self.data = self.dataset_wrapper.load_data(
+            self.preprocess_path,
+            self.data_keys,
+            self.data_types,
+            self.data_shapes,
+            self.pkl_data_keys,
+            overwrite_local_cache,
+        )  # this should be async if possible
+        for key in self.data:
+            logger.info(f"Loaded {key} with shape {self.data[key].shape}, dtype {self.data[key].dtype}")
 
     def _convert_on_loading(self, x, key):
         if key == "energies":
@@ -428,63 +424,15 @@ class BaseDataset(DatasetPropertyMixIn):
         else:
             return x
 
-    def read_preprocess(self, overwrite_local_cache=False):
-        logger.info("Reading preprocessed data.")
-        logger.info(
-            f"Dataset {self.__name__} with the following units:\n\
-                     Energy: {self.energy_unit},\n\
-                     Distance: {self.distance_unit},\n\
-                     Forces: {self.force_unit if self.force_methods else 'None'}"
-        )
-        self.data = {}
-        for key in self.data_keys:
-            filename = p_join(self.preprocess_path, self.add_extension(f"{key}"))
-            pull_locally(filename, overwrite=overwrite_local_cache)
-            self.data[key] = self.load_fn(filename, mode="r", dtype=self.data_types[key])
-            if self.read_as_zarr:
-                self.data[key] = self.data[key][:]
-            self.data[key] = self.data[key].reshape(*self.data_shapes[key])
-
-        if not self.read_as_zarr:
-            filename = p_join(self.preprocess_path, "props.pkl")
-            pull_locally(filename, overwrite=overwrite_local_cache)
-            with open(filename, "rb") as f:
-                tmp = pkl.load(f)
-                all_pkl_keys = set(tmp.keys()) - set(self.data_keys)
-                # assert required pkl_keys are present in all_pkl_keys
-                assert all([key in all_pkl_keys for key in self.pkl_data_keys])
-                for key in all_pkl_keys:
-                    x = tmp.pop(key)
-                    if len(x) == 2:
-                        self.data[key] = x[0][x[1]]
-                    else:
-                        self.data[key] = x
-        else:
-            filename = p_join(self.preprocess_path, self.add_extension("metadata"))
-            pull_locally(filename, overwrite=overwrite_local_cache)
-            tmp = self.load_fn(filename)
-            all_pkl_keys = set(tmp.keys()) - set(self.data_keys)
-            # assert required pkl_keys are present in all_pkl_keys
-            assert all([key in all_pkl_keys for key in self.pkl_data_keys])
-            for key in all_pkl_keys:
-                if key not in self.pkl_data_keys:
-                    #print(key, list(tmp.items()))
-                    self.data[key] = tmp[key][:][tmp[key][:]]
-                else:
-                    self.data[key] = tmp[key][:]
-
-        for key in self.data:
-            logger.info(f"Loaded {key} with shape {self.data[key].shape}, dtype {self.data[key].dtype}")
-
     def is_preprocessed(self):
         """
         Check if the dataset is preprocessed and available online or locally.
         """
-        predicats = [copy_exists(p_join(self.preprocess_path, self.add_extension(f"{key}"))) for key in self.data_keys]
-
-        if not self.read_as_zarr:
-            predicats += [copy_exists(p_join(self.preprocess_path, "props.pkl"))]
-        print(predicats)
+        predicats = [
+            copy_exists(p_join(self.preprocess_path, self.dataset_wrapper.add_extension(f"{key}")))
+            for key in self.data_keys
+        ]
+        predicats += [copy_exists(p_join(self.preprocess_path, file)) for file in self.dataset_wrapper._extra_files]
         return all(predicats)
 
     def is_cached(self):
@@ -492,10 +440,10 @@ class BaseDataset(DatasetPropertyMixIn):
         Check if the dataset is cached locally.
         """
         predicats = [
-            os.path.exists(p_join(self.preprocess_path, self.add_extension(f"{key}"))) for key in self.data_keys
+            os.path.exists(p_join(self.preprocess_path, self.dataset_wrapper.add_extension(f"{key}")))
+            for key in self.data_keys
         ]
-        if not self.read_as_zarr:
-            predicats += [os.path.exists(p_join(self.preprocess_path, "props.pkl"))]
+        predicats += [copy_exists(p_join(self.preprocess_path, file)) for file in self.dataset_wrapper._extra_files]
         return all(predicats)
 
     def preprocess(self, upload: bool = False, overwrite: bool = True, as_zarr: bool = True):
@@ -521,7 +469,6 @@ class BaseDataset(DatasetPropertyMixIn):
             push_remote(local_path, overwrite=overwrite)
         local_path = p_join(self.preprocess_path, "props.pkl" if not as_zarr else "metadata.zip")
         push_remote(local_path, overwrite=overwrite)
-            
 
     def save_xyz(self, idx: int, energy_method: int = 0, path: Optional[str] = None, ext=True):
         """

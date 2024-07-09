@@ -14,7 +14,8 @@ import fsspec
 import gdown
 import requests
 import tqdm
-from aiohttp import ClientTimeout
+
+# from aiohttp import ClientTimeout
 from dotenv import load_dotenv
 from fsspec import AbstractFileSystem
 from fsspec.callbacks import TqdmCallback
@@ -34,13 +35,13 @@ class FileSystem:
     public_endpoint: Optional[AbstractFileSystem] = None
     private_endpoint: Optional[AbstractFileSystem] = None
     local_endpoint: AbstractFileSystem = LocalFileSystem()
-    endpoint_url = 'https://874f02b9d981bd6c279e979c0d91c4b4.r2.cloudflarestorage.com'
-    
+    endpoint_url = "https://874f02b9d981bd6c279e979c0d91c4b4.r2.cloudflarestorage.com"
+
     def __init__(self):
         load_dotenv()
         self.KEY = os.getenv("CLOUDFARE_KEY", None)
         self.SECRET = os.getenv("CLOUDFARE_SECRET", None)
-        
+
     @property
     def public(self):
         self.connect()
@@ -71,24 +72,23 @@ class FileSystem:
                 warnings.simplefilter("ignore")  # No quota warning
                 self.public_endpoint = self.get_default_endpoint("public")
                 self.private_endpoint = self.get_default_endpoint("private")
-                #self.public_endpoint.client_kwargs = {"timeout": ClientTimeout(total=3600, connect=1000)}
+                # self.public_endpoint.client_kwargs = {"timeout": ClientTimeout(total=3600, connect=1000)}
 
     def get_default_endpoint(self, endpoint: str) -> AbstractFileSystem:
         """
         Return a default endpoint for the given str [public, private]
         """
         if endpoint == "private":
-            #return fsspec.filesystem("gs")
-            return fsspec.filesystem("s3", 
-                                     key=self.KEY,
-                                     secret=self.SECRET,
-                                     endpoint_url=self.endpoint_url)
+            # return fsspec.filesystem("gs")
+            return fsspec.filesystem("s3", key=self.KEY, secret=self.SECRET, endpoint_url=self.endpoint_url)
         elif endpoint == "public":
-            return fsspec.filesystem("s3", 
-                                     key='a046308c078b0134c9e261aa91f63ab2',
-                                     secret='d5b32f241ad8ee8d0a3173cd51b4f36d6869f168b21acef75f244a81dc10e1fb',
-                                     endpoint_url=self.endpoint_url)
-            #return fsspec.filesystem("https")
+            return fsspec.filesystem(
+                "s3",
+                key="a046308c078b0134c9e261aa91f63ab2",
+                secret="d5b32f241ad8ee8d0a3173cd51b4f36d6869f168b21acef75f244a81dc10e1fb",
+                endpoint_url=self.endpoint_url,
+            )
+            # return fsspec.filesystem("https")
         else:
             return self.local_endpoint
 
@@ -298,4 +298,3 @@ class DataDownloader:
 
 
 API = FileSystem()
-

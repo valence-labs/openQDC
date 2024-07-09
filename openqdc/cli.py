@@ -12,6 +12,7 @@ from openqdc.datasets import (
     AVAILABLE_INTERACTION_DATASETS,
     AVAILABLE_POTENTIAL_DATASETS,
 )
+from openqdc.utils.io import get_local_cache
 
 app = typer.Typer(help="OpenQDC CLI")
 
@@ -55,7 +56,7 @@ def download(
             help="Path to the cache. If not provided, the default cache directory (.cache/openqdc/) will be used.",
         ),
     ] = None,
-    as_zarr : Annotated[
+    as_zarr: Annotated[
         bool,
         typer.Option(
             help="Whether to overwrite or force the re-download of the datasets.",
@@ -70,14 +71,14 @@ def download(
     """
     for dataset in list(map(lambda x: x.lower().replace("_", ""), datasets)):
         if exist_dataset(dataset):
-            ds=SANITIZED_AVAILABLE_DATASETS[dataset].no_init()
-            ds.read_as_zarr=as_zarr
+            ds = SANITIZED_AVAILABLE_DATASETS[dataset].no_init()
+            ds.read_as_zarr = as_zarr
             if ds.is_cached() and not overwrite:
                 logger.info(f"{dataset} is already cached. Skipping download")
             else:
-                SANITIZED_AVAILABLE_DATASETS[dataset](overwrite_local_cache=True,
-                                                       cache_dir=cache_dir,
-                                                       read_as_zarr=as_zarr)
+                SANITIZED_AVAILABLE_DATASETS[dataset](
+                    overwrite_local_cache=True, cache_dir=cache_dir, read_as_zarr=as_zarr
+                )
 
 
 @app.command()
@@ -185,7 +186,7 @@ def upload(
             help="Whether to overwrite or force the re-download of the datasets.",
         ),
     ] = True,
-    as_zarr : Annotated[
+    as_zarr: Annotated[
         bool,
         typer.Option(
             help="Whether to upload the zarr files if available.",
@@ -204,6 +205,7 @@ def upload(
                 logger.error(f"Error while uploading {dataset}. {e}. Did you preprocess the dataset first?")
                 raise e
 
+
 @app.command()
 def convert_to_zarr(
     datasets: List[str],
@@ -221,7 +223,7 @@ def convert_to_zarr(
     ] = False,
 ):
     """
-    Conver a preprocessed dataset to the zarr file format.
+    Convert a preprocessed dataset to the zarr file format.
     """
     import os
     from os.path import join as p_join
@@ -229,72 +231,77 @@ def convert_to_zarr(
     import numpy as np
     import zarr
 
-    from openqdc.utils.io import load_pkl 
+    from openqdc.utils.io import load_pkl
+
     def silent_remove(filename):
         try:
             os.remove(filename)
         except OSError:
             pass
+
     for dataset in list(map(lambda x: x.lower().replace("_", ""), datasets)):
         if exist_dataset(dataset):
             logger.info(f"Uploading {SANITIZED_AVAILABLE_DATASETS[dataset].__name__}")
             try:
-                ds=SANITIZED_AVAILABLE_DATASETS[dataset](overwrite_local_cache=download)
-                #os.makedirs(p_join(ds.root, "zips", ds.__name__), exist_ok=True)
-                
+                ds = SANITIZED_AVAILABLE_DATASETS[dataset](overwrite_local_cache=download)
+                # os.makedirs(p_join(ds.root, "zips", ds.__name__), exist_ok=True)
+
                 pkl = load_pkl(p_join(ds.preprocess_path, "props.pkl"))
-                metadata=p_join(ds.preprocess_path, "metadata.zip")
-                if overwrite: silent_remove(metadata)
+                metadata = p_join(ds.preprocess_path, "metadata.zip")
+                if overwrite:
+                    silent_remove(metadata)
                 group = zarr.group(zarr.storage.ZipStore(metadata))
                 for key, value in pkl.items():
-                    #sub=group.create_group(key)
-                    if key in ['name', 'subset']:
-                        data=group.create_dataset(key, shape=value[0].shape, dtype=value[0].dtype)
-                        data[:]=value[0][:]
-                        data2=group.create_dataset(key + "_ptr", shape=value[1].shape,
-                                                 dtype=np.int32)
+                    # sub=group.create_group(key)
+                    if key in ["name", "subset"]:
+                        data = group.create_dataset(key, shape=value[0].shape, dtype=value[0].dtype)
+                        data[:] = value[0][:]
+                        data2 = group.create_dataset(key + "_ptr", shape=value[1].shape, dtype=np.int32)
                         data2[:] = value[1][:]
                     else:
-                        data=group.create_dataset(key, shape=value.shape, dtype=value.dtype)
-                        data[:]=value[:]
-                
+                        data = group.create_dataset(key, shape=value.shape, dtype=value.dtype)
+                        data[:] = value[:]
+
                 force_attrs = {
-                    "unit" : str(ds.force_unit),
-                    "level_of_theory" : ds.force_methods,
+                    "unit": str(ds.force_unit),
+                    "level_of_theory": ds.force_methods,
                 }
 
-                energy_attrs = {
-                    "unit" : str(ds.energy_unit),
-                    "level_of_theory": ds.energy_methods
-                }
+                energy_attrs = {"unit": str(ds.energy_unit), "level_of_theory": ds.energy_methods}
 
                 atomic_inputs_attrs = {
-                    "unit" : str(ds.distance_unit),
+                    "unit": str(ds.distance_unit),
                 }
-                attrs = {
-                    "forces" : force_attrs,
-                    "energies" : energy_attrs,
-                    "atomic_inputs" : atomic_inputs_attrs
-                }
+                attrs = {"forces": force_attrs, "energies": energy_attrs, "atomic_inputs": atomic_inputs_attrs}
 
-
-                #os.makedirs(p_join(ds.root, "zips",  ds.__name__), exist_ok=True)
+                # os.makedirs(p_join(ds.root, "zips",  ds.__name__), exist_ok=True)
                 for key, value in ds.data.items():
                     if key not in ds.data_keys:
                         continue
                     print(key, value.shape)
 
-                    zarr_path=p_join(ds.preprocess_path,  key + ".zip") #ds.__name__,
-                    if overwrite: silent_remove(zarr_path)
-                    z=zarr.open(zarr.storage.ZipStore(zarr_path), "w", zarr_version=2, shape=value.shape,
-                            dtype=value.dtype)
-                    z[:]=value[:]
+                    zarr_path = p_join(ds.preprocess_path, key + ".zip")  # ds.__name__,
+                    if overwrite:
+                        silent_remove(zarr_path)
+                    z = zarr.open(
+                        zarr.storage.ZipStore(zarr_path), "w", zarr_version=2, shape=value.shape, dtype=value.dtype
+                    )
+                    z[:] = value[:]
                     if key in attrs:
                         z.attrs.update(attrs[key])
 
             except Exception as e:
                 logger.error(f"Error while converting {dataset}. {e}. Did you preprocess the dataset first?")
                 raise e
-            
+
+
+@app.command
+def cache():
+    """
+    Get the current local cache path of openQDC
+    """
+    print(f"openQDC local cache:\n {get_local_cache()}")
+
+
 if __name__ == "__main__":
     app()
