@@ -13,6 +13,7 @@ from openqdc.datasets import (
     AVAILABLE_POTENTIAL_DATASETS,
 )
 from openqdc.utils.io import get_local_cache
+import os 
 
 app = typer.Typer(help="OpenQDC CLI")
 
@@ -62,6 +63,12 @@ def download(
             help="Whether to overwrite or force the re-download of the datasets.",
         ),
     ] = False,
+    gs : Annotated[
+        bool,
+        typer.Option(
+            help="Whether to use gs to re-download of the datasets.",
+        ),
+    ] = False, 
 ):
     """
     Download preprocessed ml-ready datasets from the main openQDC hub.
@@ -69,6 +76,8 @@ def download(
     Example:
         openqdc download Spice QMugs
     """
+    if gs:
+        os.environ["OPENQDC_DOWNLOAD_API"] = "gs"
     for dataset in list(map(lambda x: x.lower().replace("_", ""), datasets)):
         if exist_dataset(dataset):
             ds = SANITIZED_AVAILABLE_DATASETS[dataset].no_init()
@@ -294,14 +303,12 @@ def convert_to_zarr(
                 logger.error(f"Error while converting {dataset}. {e}. Did you preprocess the dataset first?")
                 raise e
 
-
-@app.command
-def cache():
+@app.command()
+def show_cache():
     """
     Get the current local cache path of openQDC
     """
     print(f"openQDC local cache:\n {get_local_cache()}")
-
 
 if __name__ == "__main__":
     app()

@@ -59,9 +59,9 @@ class QM7X(BaseDataset):
 
     energy_target_names = ["ePBE0+MBD", "eDFTB+MBD"]
 
-    __force_mask__ = [True, True]
+    __force_mask__ = [True, False]
 
-    force_target_names = ["pbe0FOR", "vdwFOR"]
+    force_target_names = ["pbe0FOR"]
 
     __energy_unit__ = "ev"
     __distance_unit__ = "ang"

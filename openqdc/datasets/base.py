@@ -156,7 +156,7 @@ class BaseDataset(DatasetPropertyMixIn):
 
     @property
     def dataset_wrapper(self):
-        if not hasattr("_dataset_wrapper", self):
+        if not hasattr(self, "_dataset_wrapper"):
             self._dataset_wrapper = ZarrDataset() if self.read_as_zarr else MemMapDataset()
         return self._dataset_wrapper
 

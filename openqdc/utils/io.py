@@ -23,6 +23,9 @@ _OPENQDC_CACHE_DIR = (
     "~/.cache/openqdc" if "OPENQDC_CACHE_DIR" not in os.environ else os.path.normpath(os.environ["OPENQDC_CACHE_DIR"])
 )
 
+_OPENQDC_DOWNLOAD_API = { "s3" :  "/openqdc/v1" ,
+    "gs" : "https://storage.googleapis.com/qmdata-public/openqdc"
+}
 
 def set_cache_dir(d):
     r"""
@@ -54,10 +57,11 @@ def get_remote_cache(write_access=False) -> str:
     Returns the entry point based on the write access.
     """
     if write_access:
-        remote_cache = "/openqdc/v1"  # "gs://qmdata-public/openqdc"
+        remote_cache = "/openqdc/v1" #"gs://qmdata-public/openqdc"
+        #remote_cache = "gs://qmdata-public/openqdc"
     else:
-        remote_cache = "/openqdc/v1"
-        # remote_cache = "https://storage.googleapis.com/qmdata-public/openqdc"
+        remote_cache = _OPENQDC_DOWNLOAD_API.get(os.environ["OPENQDC_DOWNLOAD_API"], "/openqdc/v1")
+        #remote_cache = "https://storage.googleapis.com/qmdata-public/openqdc"
     return remote_cache
 
 
