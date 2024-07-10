@@ -19,22 +19,34 @@ app = typer.Typer(help="OpenQDC CLI")
 
 
 def sanitize(dictionary):
+    """
+    Sanitize dataset names to be used in the CLI.
+    """
     return {k.lower().replace("_", "").replace("-", ""): v for k, v in dictionary.items()}
 
 
 SANITIZED_AVAILABLE_DATASETS = sanitize(AVAILABLE_DATASETS)
 
 
-def exist_dataset(dataset):
+def exist_dataset(dataset) -> bool:
+    """
+    Check if dataset is available in the openQDC datasets.
+    """
     if dataset not in sanitize(AVAILABLE_DATASETS):
         logger.error(f"{dataset} is not available. Please open an issue on Github for the team to look into it.")
         return False
     return True
 
 
-def format_entry(empty_dataset):
+def format_entry(empty_dataset, max_num_to_display: int = 6):
+    """
+    Format the entry for the table.
+    max_num_to_display: int = 6,
+        Maximum number of energy methods to display. Used to keep the table format
+        readable in case of datasets with many energy methods. [ex. MultiXQM9]
+    """
     energy_methods = [str(x) for x in empty_dataset.__energy_methods__]
-    max_num_to_display = 6
+
     if len(energy_methods) > 6:
         entry = ",".join(energy_methods[:max_num_to_display]) + "..."
     else:
@@ -48,7 +60,7 @@ def download(
     overwrite: Annotated[
         bool,
         typer.Option(
-            help="Whether to overwrite or force the re-download of the datasets.",
+            help="Whether to force the re-download of the datasets and overwrite the current cached dataset.",
         ),
     ] = False,
     cache_dir: Annotated[
@@ -60,13 +72,14 @@ def download(
     as_zarr: Annotated[
         bool,
         typer.Option(
-            help="Whether to overwrite or force the re-download of the datasets.",
+            help="Whether to use a zarr format for the datasets instead of memmap.",
         ),
     ] = False,
     gs: Annotated[
         bool,
         typer.Option(
-            help="Whether to use gs to re-download of the datasets.",
+            help="Whether source to use for downloading. If True, Google Storage will be used."
+            + "Otherwise, AWS S3 will be used",
         ),
     ] = False,
 ):
@@ -78,6 +91,7 @@ def download(
     """
     if gs:
         os.environ["OPENQDC_DOWNLOAD_API"] = "gs"
+
     for dataset in list(map(lambda x: x.lower().replace("_", ""), datasets)):
         if exist_dataset(dataset):
             ds = SANITIZED_AVAILABLE_DATASETS[dataset].no_init()
@@ -93,7 +107,7 @@ def download(
 @app.command()
 def datasets():
     """
-    Print a table of the available openQDC datasets and some informations.
+    Print a formatted table of the available openQDC datasets and some informations.
     """
     table = PrettyTable(["Name", "Type of Energy", "Forces", "Level of theory"])
     for dataset in AVAILABLE_DATASETS:
@@ -118,7 +132,7 @@ def fetch(
     overwrite: Annotated[
         bool,
         typer.Option(
-            help="Whether to overwrite or force the re-download of the files.",
+            help="Whether to overwrite or force the re-download of the raw files.",
         ),
     ] = False,
     cache_dir: Annotated[
@@ -129,17 +143,14 @@ def fetch(
     ] = None,
 ):
     """
-    Download the raw datasets files from the main openQDC hub.
-    overwrite: bool = False,
-        If True, the files will be re-downloaded and overwritten.
-    cache_dir: Optional[str] = None,
-        Path to the cache. If not provided, the default cache directory will be used.
-    Special case: if the dataset is "all", "potential", "interaction".
-        all: all available datasets will be downloaded.
-        potential: all the potential datasets will be downloaded
-        interaction: all the interaction datasets will be downloaded
-    Example:
-        openqdc fetch Spice
+    Download the raw datasets files from the main openQDC hub.\n
+    Special case: if the dataset is "all", "potential", "interaction".\n
+    all: all available datasets will be downloaded.\n
+    potential: all the potential datasets will be downloaded\n
+    interaction: all the interaction datasets will be downloaded\n\n
+
+    Example:\n
+    openqdc fetch Spice
     """
     if datasets[0].lower() == "all":
         dataset_names = list(sanitize(AVAILABLE_DATASETS).keys())
@@ -163,18 +174,27 @@ def preprocess(
     overwrite: Annotated[
         bool,
         typer.Option(
-            help="Whether to overwrite or force the re-download of the datasets.",
+            help="Whether to overwrite the current cached datasets.",
         ),
     ] = True,
     upload: Annotated[
         bool,
         typer.Option(
-            help="Whether to try the upload to the remote storage.",
+            help="Whether to attempt the upload to the remote storage. Must have write permissions.",
+        ),
+    ] = False,
+    as_zarr: Annotated[
+        bool,
+        typer.Option(
+            help="Whether to preprocess as a zarr format or a memmap format.",
         ),
     ] = False,
 ):
     """
     Preprocess a raw dataset (previously fetched) into a openqdc dataset and optionally push it to remote.
+
+    Example:
+        openqdc preprocess Spice QMugs
     """
     for dataset in list(map(lambda x: x.lower().replace("_", ""), datasets)):
         if exist_dataset(dataset):
@@ -192,7 +212,7 @@ def upload(
     overwrite: Annotated[
         bool,
         typer.Option(
-            help="Whether to overwrite or force the re-download of the datasets.",
+            help="Whether to overwrite the remote files if they are present.",
         ),
     ] = True,
     as_zarr: Annotated[
@@ -204,6 +224,9 @@ def upload(
 ):
     """
     Upload a preprocessed dataset to the remote storage.
+
+    Example:
+        openqdc upload Spice --overwrite
     """
     for dataset in list(map(lambda x: x.lower().replace("_", ""), datasets)):
         if exist_dataset(dataset):
@@ -216,23 +239,23 @@ def upload(
 
 
 @app.command()
-def convert_to_zarr(
+def convert(
     datasets: List[str],
     overwrite: Annotated[
         bool,
         typer.Option(
-            help="Whether to overwrite or force the re-download of the datasets.",
+            help="Whether to overwrite the current zarr cached datasets.",
         ),
     ] = False,
     download: Annotated[
         bool,
         typer.Option(
-            help="Whether to force the re-download of the datasets.",
+            help="Whether to force the re-download of the memmap datasets.",
         ),
     ] = False,
 ):
     """
-    Convert a preprocessed dataset to the zarr file format.
+    Convert a preprocessed dataset from a memmap dataset to a zarr dataset.
     """
     import os
     from os.path import join as p_join
@@ -243,6 +266,9 @@ def convert_to_zarr(
     from openqdc.utils.io import load_pkl
 
     def silent_remove(filename):
+        """
+        Zarr zip files are currently not overwritable. This function is used to remove the file if it exists.
+        """
         try:
             os.remove(filename)
         except OSError:
@@ -305,7 +331,7 @@ def convert_to_zarr(
 
 
 @app.command()
-def show_cache():
+def cache():
     """
     Get the current local cache path of openQDC
     """

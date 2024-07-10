@@ -40,7 +40,7 @@ def read_npz_entry(raw_path):
 
 # graphs is smiles
 class VQM24(BaseDataset):
-    """ """
+    """https://arxiv.org/abs/2405.05961"""
 
     __name__ = "vqm24"
 

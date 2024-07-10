@@ -17,6 +17,8 @@ def try_retrieve(obj, callable, default=None):
 
 
 class FromFileDataset(BaseDataset, ABC):
+    """Abstract class for datasets that read from a common format file like xzy, netcdf, gro, hdf5, etc."""
+
     def __init__(
         self,
         path: List[str],
@@ -35,12 +37,30 @@ class FromFileDataset(BaseDataset, ABC):
         },
     ):
         """
-        Create a dataset from a xyz file.
+        Create a dataset from a list of files.
 
         Parameters
         ----------
         path : List[str]
             The path to the file or a list of paths.
+        dataset_name : Optional[str], optional
+            The name of the dataset, by default None.
+        energy_type : Optional[str], optional
+            The type of isolated atom energy by default "regression".
+            Supported types: ["formation", "regression", "null", None]
+        energy_unit
+            Energy unit of the dataset. Default is "hartree".
+        distance_unit
+            Distance unit of the dataset. Default is "ang".
+        level_of_theory: Optional[QmMethod, str]
+            The level of theory of the dataset.
+            Used if energy_type is "formation" to fetch the correct isolated atom energies.
+        transform, optional
+            transformation to apply to the __getitem__ calls
+        regressor_kwargs
+            Dictionary of keyword arguments to pass to the regressor.
+            Default: {"solver_type": "linear", "sub_sample": None, "stride": 1}
+            solver_type can be one of ["linear", "ridge"]
         """
         self.path = [path] if isinstance(path, str) else path
         self.__name__ = self.__class__.__name__ if dataset_name is None else dataset_name
@@ -62,29 +82,19 @@ class FromFileDataset(BaseDataset, ABC):
         self.set_array_format(array_format)
         self._post_init(True, energy_unit, distance_unit)
 
-    def __str__(self):
-        return self.__name__.lower()
-
-    def __repr__(self):
-        return str(self)
-
     @abstractmethod
     def read_as_atoms(self, path: str) -> List[Atoms]:
         """
-        Method that reads a path and return a list of Atoms objects.
+        Method that reads a file and return a list of Atoms objects.
+        path : str
+            The path to the file.
         """
         raise NotImplementedError
 
-    def collate_list(self, list_entries):
-        res = {key: np.concatenate([r[key] for r in list_entries if r is not None], axis=0) for key in list_entries[0]}
-        csum = np.cumsum(res.get("n_atoms"))
-        x = np.zeros((csum.shape[0], 2), dtype=np.int32)
-        x[1:, 0], x[:, 1] = csum[:-1], csum
-        res["position_idx_range"] = x
-
-        return res
-
-    def read_raw_entries(self):
+    def read_raw_entries(self) -> List[dict]:
+        """
+        Process the files and return a list of data objects.
+        """
         entries_list = []
         for path in self.path:
             for entry in self.read_as_atoms(path):
@@ -96,6 +106,11 @@ class FromFileDataset(BaseDataset, ABC):
         self.data = self.collate_list(entries_list)
 
     def _convert_to_record(self, obj: Atoms):
+        """
+        Convert an Atoms object to a record for the openQDC dataset processing.
+        obj : Atoms
+            The ase.Atoms object to convert
+        """
         name = obj.info.get("name", None)
         subset = obj.info.get("subset", str(self))
         positions = obj.positions
@@ -116,8 +131,18 @@ class FromFileDataset(BaseDataset, ABC):
             n_atoms=np.array([len(positions)], dtype=np.int32),
         )
 
+    def __str__(self):
+        return self.__name__.lower()
+
+    def __repr__(self):
+        return str(self)
+
 
 class XYZDataset(FromFileDataset):
+    """
+    Baseclass to read datasets from xyz and extxyz files.
+    """
+
     def read_as_atoms(self, path):
         from ase.io import iread
 

@@ -90,7 +90,7 @@ class Database:
 
 # graphs is smiles
 class ProteinFragments(BaseDataset):
-    """ """
+    """https://www.science.org/doi/10.1126/sciadv.adn4397"""
 
     __name__ = "proteinfragments"
 
@@ -134,6 +134,10 @@ class ProteinFragments(BaseDataset):
 
 
 class MDDataset(ProteinFragments):
+    """
+    Part of the proteinfragments dataset that is generated from the molecular dynamics with their model.
+    """
+
     __name__ = "mddataset"
 
     __links__ = {

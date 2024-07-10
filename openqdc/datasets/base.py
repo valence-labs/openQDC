@@ -361,7 +361,7 @@ class BaseDataset(DatasetPropertyMixIn):
     def read_raw_entries(self):
         raise NotImplementedError
 
-    def collate_list(self, list_entries):
+    def collate_list(self, list_entries: List[Dict]):
         # concatenate entries
         res = {key: np.concatenate([r[key] for r in list_entries if r is not None], axis=0) for key in list_entries[0]}
 

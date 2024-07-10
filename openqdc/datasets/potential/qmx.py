@@ -1,4 +1,5 @@
 import os
+from abc import ABC
 from os.path import join as p_join
 
 import datamol as dm
@@ -32,21 +33,9 @@ def extract_ani2_entries(properties):
     return res
 
 
-class QMX(BaseDataset):
+class QMX(ABC, BaseDataset):
     """
-    The ANI-1 dataset is a collection of 22 x 10^6 structural conformations from 57,000 distinct small
-    organic molecules with energy labels calculated using DFT. The molecules
-    contain 4 distinct atoms, C, N, O and H.
-
-    Usage
-    ```python
-    from openqdc.datasets import ANI1
-    dataset = ANI1()
-    ```
-
-    References:
-    - ANI-1: https://www.nature.com/articles/sdata2017193
-    - Github: https://github.com/aiqm/ANI1x_datasets
+    QMX dataset base abstract class
     """
 
     __name__ = "qm9"
@@ -334,4 +323,16 @@ class QM9(QMX):
         "WB97X-D:aug-cc-pvtz",
         "WB97X-D:def2-svp",
         "WB97X-D:def2-tzvp",
+    ]
+
+    __energy_methods__ = [
+        PotentialMethod.NONE,  # "wb97x/6-31g(d)"
+        PotentialMethod.NONE,
+        PotentialMethod.NONE,
+        PotentialMethod.NONE,
+        PotentialMethod.NONE,
+        PotentialMethod.NONE,
+        PotentialMethod.NONE,
+        PotentialMethod.NONE,
+        PotentialMethod.NONE,
     ]

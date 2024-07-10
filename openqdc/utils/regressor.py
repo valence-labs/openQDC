@@ -88,6 +88,10 @@ class Regressor:
 
     @classmethod
     def from_openqdc_dataset(cls, dataset, *args, **kwargs):
+        """
+        Initialize the regressor from an openqdc dataset.
+        *args and and **kwargs are passed to the __init__ method and depends on the specific regressor.
+        """
         energies = dataset.data["energies"]
         position_idx_range = dataset.data["position_idx_range"]
         atomic_numbers = dataset.data["atomic_inputs"][:, 0].astype("int32")
@@ -137,6 +141,9 @@ class Regressor:
         self.y = B
 
     def solve(self):
+        """
+        Solve the regression problem and return the predicted isolated energies and the estimated uncertainty.
+        """
         logger.info(f"Solving regression with {self.solver}.")
         E0_list, cov_list = [], []
         for energy_idx in range(self.y.shape[1]):
@@ -157,6 +164,11 @@ class Regressor:
 
 
 def atom_standardization(X, y):
+    """
+    Standardize the energies and the atom counts.
+    This will make the calculated uncertainty more
+    meaningful.
+    """
     X_norm = X.sum()
     X = X / X_norm
     y = y / X_norm
@@ -165,6 +177,11 @@ def atom_standardization(X, y):
 
 
 class LinearSolver(Solver):
+    """
+    Linear regression solver.
+    No Uncertainty associated as it is quite small.
+    """
+
     _regr_str = "LinearRegression"
 
     @staticmethod
@@ -175,6 +192,10 @@ class LinearSolver(Solver):
 
 
 class RidgeSolver(Solver):
+    """
+    Ridge regression solver.
+    """
+
     _regr_str = "RidgeRegression"
 
     @staticmethod

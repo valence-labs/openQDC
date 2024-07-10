@@ -44,6 +44,11 @@ def read_mol(file, energy):
 
 
 class Alchemy(BaseDataset):
+    """
+    https://alchemy.tencent.com/
+    https://arxiv.org/abs/1906.09427
+    """
+
     __name__ = "alchemy"
 
     __energy_methods__ = [
