@@ -40,7 +40,7 @@ _lazy_imports_obj = {
     "NablaDFT": "openqdc.datasets.potential.nabladft",
     "SolvatedPeptides": "openqdc.datasets.potential.solvated_peptides",
     "WaterClusters": "openqdc.datasets.potential.waterclusters3_30",
-    "SCANWaterClusters" : "openqdc.datasets.potential.waterclusters",
+    "SCANWaterClusters": "openqdc.datasets.potential.waterclusters",
     "TMQM": "openqdc.datasets.potential.tmqm",
     "PCQM_B3LYP": "openqdc.datasets.potential.pcqm",
     "PCQM_PM6": "openqdc.datasets.potential.pcqm",
@@ -53,9 +53,9 @@ _lazy_imports_obj = {
     "QM7b": "openqdc.datasets.potential.qmx",
     "QM8": "openqdc.datasets.potential.qmx",
     "QM9": "openqdc.datasets.potential.qmx",
-    "ProteinFragments" : "openqdc.datasets.potential.proteinfragments",
-    "MDDataset" : "openqdc.datasets.potential.proteinfragments",
-    "VQM24" : "openqdc.datasets.potential.vqm24",
+    "ProteinFragments": "openqdc.datasets.potential.proteinfragments",
+    "MDDataset": "openqdc.datasets.potential.proteinfragments",
+    "VQM24": "openqdc.datasets.potential.vqm24",
     # INTERACTION
     "DES5M": "openqdc.datasets.interaction.des",
     "DES370K": "openqdc.datasets.interaction.des",
@@ -67,7 +67,7 @@ _lazy_imports_obj = {
     "Splinter": "openqdc.datasets.interaction.splinter",
     # DEBUG
     "Dummy": "openqdc.datasets.potential.dummy",
-    "PredefinedDataset" : "openqdc.datasets.potential.dummy",
+    "PredefinedDataset": "openqdc.datasets.potential.dummy",
     # ALL
     "AVAILABLE_DATASETS": "openqdc.datasets",
     "AVAILABLE_POTENTIAL_DATASETS": "openqdc.datasets.potential",
@@ -128,17 +128,17 @@ if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
     from .datasets.potential.nabladft import NablaDFT
     from .datasets.potential.orbnet_denali import OrbnetDenali
     from .datasets.potential.pcqm import PCQM_B3LYP, PCQM_PM6
+    from .datasets.potential.proteinfragments import MDDataset, ProteinFragments
     from .datasets.potential.qm1b import QM1B, QM1B_SMALL
     from .datasets.potential.qm7x import QM7X, QM7X_V2
     from .datasets.potential.qmugs import QMugs, QMugs_V2
+    from .datasets.potential.qmx import QM7, QM8, QM9, QM7b
     from .datasets.potential.revmd17 import RevMD17
     from .datasets.potential.sn2_rxn import SN2RXN
     from .datasets.potential.solvated_peptides import SolvatedPeptides
     from .datasets.potential.spice import Spice, SpiceV2, SpiceVL2
     from .datasets.potential.tmqm import TMQM
     from .datasets.potential.transition1x import Transition1X
-    from .datasets.potential.waterclusters3_30 import WaterClusters
     from .datasets.potential.vqm24 import VQM24
     from .datasets.potential.waterclusters import SCANWaterClusters
-    from .datasets.potential.qmx import QM7, QM8, QM9, QM7b
-    from .datasets.potential.proteinfragments import MDDataset, ProteinFragments
+    from .datasets.potential.waterclusters3_30 import WaterClusters

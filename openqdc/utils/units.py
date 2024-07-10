@@ -43,14 +43,15 @@ class EnergyTypeConversion(ConversionEnum, StrEnum):
     def to(self, energy: "EnergyTypeConversion") -> Callable[[float], float]:
         """
         Get the conversion function to convert the energy to the desired units.
-        
+
         Parameters:
-            energy: energy unit to convert to 
-    
+            energy: energy unit to convert to
+
         Returns:
             Callable[[float], float]: callable to convert the distance to the desired units
         """
         return get_conversion(str(self), str(energy))
+
 
 @unique
 class DistanceTypeConversion(ConversionEnum, StrEnum):
@@ -65,11 +66,11 @@ class DistanceTypeConversion(ConversionEnum, StrEnum):
     def to(self, distance: "DistanceTypeConversion", fraction: bool = False) -> Callable[[float], float]:
         """
         Get the conversion function to convert the distance to the desired units.
-        
+
         Parameters:
-            distance: distance unit to convert to 
+            distance: distance unit to convert to
             fraction: whether it is distance^1 or distance^-1
-            
+
         Returns:
             Callable[[float], float]: callable to convert the distance to the desired units
         """
@@ -112,11 +113,11 @@ class ForceTypeConversion(ConversionEnum):
     def to(self, energy: EnergyTypeConversion, distance: DistanceTypeConversion) -> Callable[[float], float]:
         """
         Get the conversion function to convert the force to the desired units.
-        
+
         Parameters:
             energy: energy unit to convert to
             fraction: distance unit to convert to
-            
+
         Returns:
             Callable[[float], float]: callable to convert the distance to the desired units
         """
@@ -152,11 +153,11 @@ class Conversion:
 def get_conversion(in_unit: str, out_unit: str) -> Callable[[float], float]:
     """
     Utility function to get the conversion function between two units.
-    
+
     Parameters:
         in_unit : The input unit
         out_unit : The output unit
-    
+
     Returns:
         Callable[[float], float]: The conversion function
     """
