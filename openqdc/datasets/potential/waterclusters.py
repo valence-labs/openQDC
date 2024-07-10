@@ -1,7 +1,7 @@
 from collections import defaultdict
 from os.path import join as p_join
 
-import pandas as pd
+import numpy as np
 
 from openqdc.datasets.base import BaseDataset
 from openqdc.methods import PotentialMethod
@@ -63,20 +63,51 @@ def read_energies(fname, dataset):
     return dict(energies)
 
 
-def format_geometry_and_entries(geometry, energies, subset):
-    pass
+def extract_desc(atom):
+    # atom_dict=atom.__dict__
+    # arrays -> numbers, positions
+    # charge, spin_multiplicity
+    pos = atom.get_positions()
+    z = atom.get_atomic_numbers()
+    charges = atom.get_initial_charges()
+    formula = atom.get_chemical_formula()
+    return pos, z, charges, formula
+
+
+def format_geometry_and_entries(geometries, energies, subset):
+    entries_list = []
+    for entry, atoms in geometries.items():
+        pos, z, charges, formula = extract_desc(atoms)
+        energies_list = []
+        for level_of_theory, entry_en_dict in energies.items():
+            en = entry_en_dict.get(entry, np.nan)
+            energies_list.append(en)
+        energy_array = np.array(energies_list)
+        if subset in ["WATER27", "H2O_alkali_clusters", "H2O_halide_clusters"]:
+            # only the first 9 energies are available
+            energy_array.resize(19)
+            energy_array[energy_array == 0] = np.nan
+        res = dict(
+            atomic_inputs=np.concatenate(
+                (np.hstack((z[:, None], charges[:, None])), pos), axis=-1, dtype=np.float32
+            ).reshape(-1, 5),
+            name=np.array([formula]),
+            energies=np.array(energy_array, dtype=np.float64).reshape(1, -1),
+            n_atoms=np.array([pos.shape[0]], dtype=np.int32),
+            subset=np.array([subset]),
+        )
+        entries_list.append(res)
+    return entries_list
 
 
 class SCANWaterClusters(BaseDataset):
     """https://chemrxiv.org/engage/chemrxiv/article-details/662aaff021291e5d1db7d8ec"""
 
     __name__ = "scanwaterclusters"
-    __energy_methods__ = [PotentialMethod.GFN2_XTB]
 
     __energy_unit__ = "hartree"
     __distance_unit__ = "ang"
     __forces_unit__ = "hartree/ang"
-
     energy_target_names = [
         "HF",
         "HF-r2SCAN-DC4",
@@ -98,8 +129,9 @@ class SCANWaterClusters(BaseDataset):
         "r2SCAN80",
         "r2SCAN90",
     ]
+    __energy_methods__ = [PotentialMethod.NONE for _ in range(len(energy_target_names))]
     force_target_names = []
-
+    # 27            # 9 level
     subsets = ["BEGDB_H2O", "WATER27", "H2O_alkali_clusters", "H2O_halide_clusters"]
     __links__ = {
         "geometries.json.gz": "https://github.com/esoteric-ephemera/water_cluster_density_errors/blob/main/data_files/geometries.json.gz?raw=True",  # noqa
@@ -115,5 +147,5 @@ class SCANWaterClusters(BaseDataset):
             for k in energies:
                 _ = energies[k].pop("metadata")
                 datum[k] = energies[k]["total_energies"]
-
-            return pd.concat([pd.DataFrame({"positions": geometries}), datum], axis=1)
+            entries.extend(format_geometry_and_entries(geometries, datum, subset))
+        return entries
