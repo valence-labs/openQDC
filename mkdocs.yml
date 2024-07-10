@@ -17,6 +17,7 @@ nav:
   - API:
     - Datasets: API/available_datasets.md
     - Isolated Atoms Energies: API/isolated_atom_energies.md
+    - Units: API/units.md
 theme:
   name: material
   custom_dir: docs/_overrides
@@ -71,6 +72,8 @@ plugins:
             show_root_heading: yes
             heading_level: 3
             show_if_no_docstring: true
+          options:
+            docstring_style : google
   - mkdocs-jupyter:
       execute: False
       # kernel_name: python3

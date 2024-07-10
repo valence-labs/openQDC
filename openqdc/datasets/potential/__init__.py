@@ -1,7 +1,7 @@
 from .alchemy import Alchemy
 from .ani import ANI1, ANI1CCX, ANI1CCX_V2, ANI1X, ANI2X
 from .comp6 import COMP6
-from .dummy import Dummy
+from .dummy import Dummy, PredefinedDataset
 from .gdml import GDML
 from .geom import GEOM
 from .iso_17 import ISO17
