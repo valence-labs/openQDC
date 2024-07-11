@@ -61,9 +61,11 @@ def read_mol(mol_id: str, mol_dict, base_path: str, partition: str) -> Dict[str,
 
 class GEOM(BaseDataset):
     """
-    The Geometric Ensemble Of Molecules (GEOM) dataset contains 37 million conformers for 133,000 molecules
-    from QM9, and 317,000 molecules with experimental data related to biophysics, physiology,
-    and physical chemistry. The dataset is generated using the GFN2-xTB semi-empirical method.
+    Geometric Ensemble Of Molecules (GEOM) dataset contains 37 million conformers for 133,000 molecules
+    from QM9, and 317,000 molecules with experimental data related to biophysics, physiology, and physical chemistry.
+    For each molecule, the initial structure is generated with RDKit, optimized with the GFN2-xTB energy method and
+    the lowest energy conformer is fed to the CREST software. CREST software uses metadynamics for exploring the
+    conformational space for each molecule. Energies in the dataset are computed using semi-empirical method GFN2-xTB.
 
     Usage:
     ```python
@@ -72,8 +74,9 @@ class GEOM(BaseDataset):
     ```
 
     References:
-    - https://www.nature.com/articles/s41597-022-01288-4
-    - https://github.com/learningmatter-mit/geom
+        https://www.nature.com/articles/s41597-022-01288-4
+        https://github.com/learningmatter-mit/geom
+        CREST Software: https://pubs.rsc.org/en/content/articlelanding/2020/cp/c9cp06869d
     """
 
     __name__ = "geom"

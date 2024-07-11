@@ -66,6 +66,23 @@ def read_preprocessed_archive(path):
 
 
 class PCQM_PM6(BaseDataset):
+    """
+    PubChemQC PM6 (PCQM_PM6) is an exhaustive dataset containing 221 million organic molecules with optimized
+    molecular geometries and electronic properties. To generate the dataset, only molecules with weights less
+    than 1000g/mol are considered from the PubChem ftp site. The initial structure is generated using OpenBabel
+    and then is optimized using geometry optimization with the semi-empirical method PM6. The energies are also
+    computed using the PM6 method.
+
+    Usage:
+    ```python
+    from openqdc.datasets import PCQM_PM6
+    dataset = PCQM_PM6()
+    ```
+
+    References:
+        https://pubs.acs.org/doi/abs/10.1021/acs.jcim.0c00740
+    """
+
     __name__ = "pubchemqc_pm6"
     __energy_methods__ = [PotentialMethod.PM6]
 
@@ -150,6 +167,21 @@ class PCQM_PM6(BaseDataset):
 
 
 class PCQM_B3LYP(PCQM_PM6):
+    """
+    PubChemQC B3LYP/6-31G* (PCQM_B3LYP) comprises of 85 million molecules ranging from essential compounds to
+    biomolecules. The geometries for the molecule are optimized using PM6. Using the optimized geometry,
+    the electronic structure and properties are calculated using B3LIP/6-31G* method.
+
+    Usage:
+    ```python
+    from openqdc.datasets import PCQM_B3LYP
+    dataset = PCQM_B3LYP()
+    ```
+
+    References:
+        https://arxiv.org/abs/2305.18454
+    """
+
     __name__ = "pubchemqc_b3lyp"
     __energy_methods__ = ["b3lyp/6-31g*"]
     energy_target_names = ["b3lyp"]

@@ -38,8 +38,9 @@ def read_mol(mol_dir):
 class QMugs(BaseDataset):
     """
     The QMugs dataset contains 2 million conformers for 665k biologically and pharmacologically relevant molecules
-    extracted from the ChEMBL database. The atomic and molecular properties are calculated using both,
-    semi-empirical methods (GFN2-xTB) and DFT method (ωB97X-D/def2-SVP).
+    extracted from the ChEMBL database. Three geometries per molecule are generated and optimized using the GFN2-xTB
+    method. Using the optimized geometry, the atomic and molecular properties are calculated using both, semi-empirical
+    method (GFN2-xTB) and DFT method (ωB97X-D/def2-SVP).
 
     Usage:
     ```python
@@ -48,8 +49,9 @@ class QMugs(BaseDataset):
     ```
 
     References:
-    - https://www.nature.com/articles/s41597-022-01390-7#ethics
-    - https://www.research-collection.ethz.ch/handle/20.500.11850/482129
+        https://arxiv.org/abs/2107.00367
+        https://www.nature.com/articles/s41597-022-01390-7#ethics
+        https://www.research-collection.ethz.ch/handle/20.500.11850/482129
     """
 
     __name__ = "qmugs"
@@ -76,6 +78,16 @@ class QMugs(BaseDataset):
 
 
 class QMugs_V2(QMugs):
+    """
+    QMugs_V2 is an extension of the QMugs dataset containing PM6 labels for each of the 4.2M geometries.
+
+    Usage:
+    ```python
+    from openqdc.datasets import QMugs_V2
+    dataset = QMugs_V2()
+    ```
+    """
+
     __name__ = "qmugs_v2"
     __energy_methods__ = QMugs.__energy_methods__ + [PotentialMethod.PM6]
     energy_target_names = QMugs.energy_target_names + ["PM6"]

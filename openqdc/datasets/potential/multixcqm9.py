@@ -37,20 +37,21 @@ def read_xyz_files(folder_path):
 
 class MultixcQM9(BaseDataset):
     """
-    MultixcQM9 is a dataset of  molecular and reaction energies from
-    multi-level quantum chemical methods consisting of 133 K QM9 molecules
-    calculated with 76 different DFT functionals and three different basis sets
-    (228 energy numbers for each molecule) + 1 GFN2-XTB calculation.
+    MultixcQM9 is a dataset of molecular and reaction energies from multi-level quantum chemical methods consisting
+    of 133K QM9 molecules geometries calculated with 76 different DFT functionals and three different basis sets
+    resulting in 228 energy values for each molecule along with semi-empirical method GFN2-xTB. Geometries for the
+    molecules are used directly from Kim et al. which uses G4MP2 method.
 
     Usage:
     ```python
-    from openqdc.datasets import NablaDFT
-    dataset = NablaDFT()
+    from openqdc.datasets import MultixcQM9
+    dataset = MultixcQM9()
     ```
 
     References:
-    - https://www.nature.com/articles/s41597-023-02690-2
-    - https://github.com/chemsurajit/largeDFTdata
+        https://www.nature.com/articles/s41597-023-02690-2\n
+        https://github.com/chemsurajit/largeDFTdata\n
+        https://www.nature.com/articles/s41597-019-0121-7\n
     """
 
     __name__ = "multixcqm9"

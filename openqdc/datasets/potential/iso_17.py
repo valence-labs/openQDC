@@ -7,11 +7,12 @@ from openqdc.utils import read_qc_archive_h5
 
 class ISO17(BaseDataset):
     """
-    ISO17 dataset consists of the largest set of isomers from the QM9 dataset that consists of a fixed
-    composition of atoms (C7O2H10) arranged in different chemically valid structures. It consist
-    of 129 molecules, each containing 5,000 conformational geometries, energies and forces with a resolution
-    of 1 femtosecond in the molecular dynamics trajectories. The simulations were carried out using the
-    Perdew-Burke-Ernzerhof (PBE) functional and the Tkatchenko-Scheffler (TS) van der Waals correction method.
+    ISO17 dataset consists of the largest set of isomers from the QM9 dataset that consists of a fixed composition of
+    atoms (C7O2H10) arranged in different chemically valid structures. It consist of 129 molecules, each containing
+    5,000 conformational geometries, energies and forces with a resolution of 1 fs in the molecular dynamics
+    trajectories. The simulations were carried out using density functional theory (DFT) in the generalized gradient
+    approximation (GGA) with the Perdew-Burke-Ernzerhof (PBE) functional and the Tkatchenko-Scheffler (TS) van der
+    Waals correction method.
 
     Usage:
     ```python
@@ -20,7 +21,11 @@ class ISO17(BaseDataset):
     ```
 
     References:
-    - https://paperswithcode.com/dataset/iso17
+        https://arxiv.org/abs/1706.08566
+        https://arxiv.org/abs/1609.08259
+        https://www.nature.com/articles/sdata201422
+        https://pubmed.ncbi.nlm.nih.gov/10062328/
+        https://pubmed.ncbi.nlm.nih.gov/19257665/
     """
 
     __name__ = "iso_17"
