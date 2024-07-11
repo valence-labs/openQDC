@@ -72,8 +72,8 @@ class GEOM(BaseDataset):
     ```
 
     References:
-    - https://www.nature.com/articles/s41597-022-01288-4
-    - https://github.com/learningmatter-mit/geom
+        https://www.nature.com/articles/s41597-022-01288-4\n
+        https://github.com/learningmatter-mit/geom
     """
 
     __name__ = "geom"

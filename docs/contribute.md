@@ -45,7 +45,7 @@ You can build and serve the documentation locally with:
 mike serve
 ```
 
-or with 
+or with
 
 ```bash
 mkdocs serve
@@ -54,4 +54,3 @@ mkdocs serve
 ### Multi-versionning
 
 The doc is built for eash push on `main` and every git tags using [mike](https://github.com/jimporter/mike). Everything is automated using Github Actions. Please refer to the official mike's documentation for the details.
-

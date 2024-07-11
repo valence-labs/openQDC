@@ -15,9 +15,9 @@ Or if you want to directly import a specific dataset:
 ```python
 from openqdc as Spice
 # Spice dataset with distance unit in angstrom instead of bohr
-dataset = Spice(distance_unit="ang") 
+dataset = Spice(distance_unit="ang")
 ```
 
 ## Lazy loading
 
-OpenQDC uses lazy loading to dynamically expose all its API without imposing a long import time during `import openqdc as qdc`. In case of trouble you can always disable lazy loading by setting the environment variable `OPENQDC_DISABLE_LAZY_LOADING` to `1`. 
+OpenQDC uses lazy loading to dynamically expose all its API without imposing a long import time during `import openqdc as qdc`. In case of trouble you can always disable lazy loading by setting the environment variable `OPENQDC_DISABLE_LAZY_LOADING` to `1`.

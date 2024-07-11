@@ -99,49 +99,14 @@ markdown_extensions:
   - toc:
       permalink: true
 
-#watch:
-#  - openqdc/
-#
-#plugins:
-#  - search
-#
-#  - mkdocstrings:
-#      handlers:
-#        python:
-#          setup_commands:
-#            - import sys
-#            - sys.path.append("docs")
-#            - sys.path.append("openqdc")
-#          selection:
-#            new_path_syntax: yes
-#          rendering:
-#            show_root_heading: yes
-#            heading_level: 3
-#            show_if_no_docstring: true
-#          options:
-#            show_inheritance_diagram: true
-#            docstring_style : google
-#            show_if_no_docstring: false
-#            show_docstring_examples: true
-#
-#  - mkdocs-jupyter:
-#      execute: False
-#      # kernel_name: python3
-#
-#  - mike:
-#      version_selector: true
-#
-#extra:
-#  version:
-#    # Multi versioning provider for mkdocs-material (used for the JS selector)
-#    provider: mike
-
+watch:
+  - openqdc/
 
 plugins:
   - search
   - mkdocstrings:
-      watch:
-        - openqdc/
+      #watch:
+      #  - openqdc/
       handlers:
         python:
           setup_commands:
@@ -157,3 +122,7 @@ plugins:
   - mkdocs-jupyter:
       execute: False
       # kernel_name: python3
+
+extra:
+  version:
+    provider: mike

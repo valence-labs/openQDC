@@ -150,6 +150,20 @@ class SpiceV2(Spice):
 
 
 class SpiceVL2(SpiceV2):
+    """
+    SpiceVL2 dataset augmented with GFN2 and PM6 energies.
+
+    Usage:
+    ```python
+    from openqdc.datasets import SpiceVL2
+    dataset = SpiceVL2()
+    ```
+
+    References:
+    - https://github.com/openmm/spice-dataset/releases/tag/2.0.0
+    - https://github.com/openmm/spice-dataset
+    """
+
     __name__ = "spice_vl2"
 
     __energy_methods__ = SpiceV2.__energy_methods__ + [PotentialMethod.GFN2_XTB, PotentialMethod.PM6]

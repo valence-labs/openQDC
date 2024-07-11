@@ -1,1 +1,1 @@
-::: openqdc.datasets.potential.geom
+::: openqdc.datasets.potential.geom.GEOM

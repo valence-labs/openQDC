@@ -79,9 +79,6 @@ class ANI1(BaseDataset):
         return dict(dataset_name="ani", links=self.__links__)
 
     def __smiles_converter__(self, x):
-        """util function to convert string to smiles: useful if the smiles is
-        encoded in a different format than its display format
-        """
         return "-".join(x.decode("ascii").split("-")[:-1])
 
     @property
@@ -134,9 +131,6 @@ class ANI1CCX(ANI1):
     __links__ = {"ani1x.hdf5.gz": "https://zenodo.org/record/4081694/files/292.hdf5.gz"}
 
     def __smiles_converter__(self, x):
-        """util function to convert string to smiles: useful if the smiles is
-        encoded in a different format than its display format
-        """
         return x
 
 
@@ -195,9 +189,6 @@ class ANI1X(ANI1):
         return super().convert_forces(x) * 0.529177249  # correct the Dataset error
 
     def __smiles_converter__(self, x):
-        """util function to convert string to smiles: useful if the smiles is
-        encoded in a different format than its display format
-        """
         return x
 
 
@@ -258,9 +249,6 @@ class ANI2X(ANI1):
     }
 
     def __smiles_converter__(self, x):
-        """util function to convert string to smiles: useful if the smiles is
-        encoded in a different format than its display format
-        """
         return x
 
     def read_raw_entries(self):
