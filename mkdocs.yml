@@ -15,6 +15,7 @@ strict: false
 nav:
   - Overview: index.md
   - Usage: usage.md
+  - CLI: cli.md
   - Available Datasets: datasets.md
   - Tutorials:
     - Really hard example: tutorials/usage.ipynb
@@ -58,7 +59,7 @@ nav:
     - Utils: API/utils.md
   - Contribute: contribute.md
   - Add a dataset: dataset_upload.md
-  - License: license.md
+  - License: licensing.md
 
 theme:
   name: material

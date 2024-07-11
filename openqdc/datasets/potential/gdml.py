@@ -8,15 +8,17 @@ from openqdc.utils import read_qc_archive_h5
 class GDML(BaseDataset):
     """
     Gradient Domain Machine Learning (GDML) is a dataset consisting of samples from ab initio
-    molecular dynamics (AIMD) trajectories. The dataset consists of,
-    - Benzene: 627000 samples
-    - Uracil: 133000 samples
-    - Naptalene: 326000 samples
-    - Aspirin: 211000 samples
-    - Salicylic Acid: 320000 samples
-    - Malonaldehyde: 993000 samples
-    - Ethanol: 555000 samples
-    - Toluene: 100000 samples
+    molecular dynamics (AIMD) trajectories.
+
+    The dataset consists of the following trajectories:
+        Benzene: 627000 samples\n
+        Uracil: 133000 samples\n
+        Naptalene: 326000 samples\n
+        Aspirin: 211000 samples\n
+        Salicylic Acid: 320000 samples\n
+        Malonaldehyde: 993000 samples\n
+        Ethanol: 555000 samples\n
+        Toluene: 100000 samples\n
 
     Usage
     ```python
@@ -25,8 +27,8 @@ class GDML(BaseDataset):
     ```
 
     References:
-    - https://www.science.org/doi/10.1126/sciadv.1603015
-    - http://www.sgdml.org/#datasets
+        https://www.science.org/doi/10.1126/sciadv.1603015
+        http://www.sgdml.org/#datasets
     """
 
     __name__ = "gdml"
