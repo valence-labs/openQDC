@@ -1,11 +1,14 @@
 """
-Unit conversion utils.
+Units conversion utilities module.
 
 Available Energy units:
     ["kcal/mol", "kj/mol", "hartree", "ev" "mev", "ryd]
 
 Available Distance units:
     ["ang", "nm", "bohr"]
+
+Available Force units:
+    Combinations between Energy and Distance units
 """
 
 from enum import Enum, unique
@@ -48,7 +51,7 @@ class EnergyTypeConversion(ConversionEnum, StrEnum):
             energy: energy unit to convert to
 
         Returns:
-            Callable[[float], float]: callable to convert the distance to the desired units
+            Callable to convert the distance to the desired units
         """
         return get_conversion(str(self), str(energy))
 
@@ -72,7 +75,7 @@ class DistanceTypeConversion(ConversionEnum, StrEnum):
             fraction: whether it is distance^1 or distance^-1
 
         Returns:
-            Callable[[float], float]: callable to convert the distance to the desired units
+            callable to convert the distance to the desired units
         """
         return get_conversion(str(self), str(distance)) if not fraction else get_conversion(str(distance), str(self))
 
@@ -116,10 +119,10 @@ class ForceTypeConversion(ConversionEnum):
 
         Parameters:
             energy: energy unit to convert to
-            fraction: distance unit to convert to
+            distance: distance unit to convert to
 
         Returns:
-            Callable[[float], float]: callable to convert the distance to the desired units
+            callable to convert the distance to the desired units
         """
         return lambda x: self.distance.to(distance, fraction=True)(self.energy.to(energy)(x))
 
@@ -159,7 +162,7 @@ def get_conversion(in_unit: str, out_unit: str) -> Callable[[float], float]:
         out_unit : The output unit
 
     Returns:
-        Callable[[float], float]: The conversion function
+        The conversion function
     """
     name = "convert_" + in_unit.lower().strip() + "_to_" + out_unit.lower().strip()
     if in_unit.lower().strip() == out_unit.lower().strip():
