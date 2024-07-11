@@ -28,7 +28,10 @@ OpenQDC uses Github Actions to:
   - Static type check with `mypy`.
   - Modules import formatting with `isort`.
   - Pre-commit hooks.
-- **Documentation**: build and deploy the documentation on `main` and for every new git tag.
+- **Documentation**:
+  - Google docstring format.
+  - build and deploy the documentation on `main` and for every new git tag.
+
 
 ## Run tests
 

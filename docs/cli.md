@@ -2,18 +2,18 @@
 You can quickly download, fetch, preprocess and upload openQDC datasets using the command line interface (CLI).
 
 ## Datasets
-Print a formatted table of the available openQDC datasets and some informations. 
+Print a formatted table of the available openQDC datasets and some informations.
 
 Usage:
 
-    openqdc datasets [OPTIONS] 
+    openqdc datasets [OPTIONS]
 
 Options:
 
-    --help          Show this message and exit.    
+    --help          Show this message and exit.
 
 ## Cache
-Get the current local cache path of openQDC 
+Get the current local cache path of openQDC
 
 Usage:
 
@@ -21,7 +21,7 @@ Usage:
 
 Options:
 
-    --help          Show this message and exit.    
+    --help          Show this message and exit.
 
 
 ## Download
@@ -29,54 +29,54 @@ Download preprocessed ml-ready datasets from the main openQDC hub.
 
 Usage:
 
-    openqdc download DATASETS... [OPTIONS] 
+    openqdc download DATASETS... [OPTIONS]
 
 Options:
 
+    --help          Show this message and exit.
     --overwrite     Whether to force the re-download of the datasets and overwrite the current cached dataset. [default: no-overwrite]
-    --cache-dir     Path to the cache. If not provided, the default cache directory (.cache/openqdc/) will be used. [default: None] 
+    --cache-dir     Path to the cache. If not provided, the default cache directory (.cache/openqdc/) will be used. [default: None]
     --as-zarr       Whether to use a zarr format for the datasets instead of memmap. [default: no-as-zarr]
-    --gs            Whether source to use for downloading. If True, Google Storage will be used.Otherwise, AWS S3 will be used [default: no-gs] 
-    --help          Show this message and exit.   
+    --gs            Whether source to use for downloading. If True, Google Storage will be used.Otherwise, AWS S3 will be used [default: no-gs]
 
 Example:
 
-    openqdc fetch Spice  
+    openqdc download Spice
 
 ## Fetch
 Download the raw datasets files from the main openQDC hub
 
 Note:
 
-    Special case: if the dataset is "all", "potential", "interaction".   
+    Special case: if the dataset is "all", "potential", "interaction".
 
 Usage:
 
-    openqdc fetch DATASETS... [OPTIONS] 
+    openqdc fetch DATASETS... [OPTIONS]
 
 Options:
 
+    --help          Show this message and exit.
     --overwrite     Whether to overwrite or force the re-download of the raw files. [default: no-overwrite]
     --cache-dir     Path to the cache. If not provided, the default cache directory (.cache/openqdc/) will be used. [default: None]
-    --help          Show this message and exit.    
 
 Example:
 
-    openqdc fetch Spice 
+    openqdc fetch Spice
 
 ## Preprocess
 Preprocess a raw dataset (previously fetched) into a openqdc dataset and optionally push it to remote.
 
 Usage:
 
-    openqdc preprocess DATASETS... [OPTIONS] 
+    openqdc preprocess DATASETS... [OPTIONS]
 
 Options:
 
+    --help         Show this message and exit.
     --overwrite    Whether to overwrite the current cached datasets. [default: overwrite]
-    --upload       Whether to attempt the upload to the remote storage. Must have write permissions. [default: no-upload]      
+    --upload       Whether to attempt the upload to the remote storage. Must have write permissions. [default: no-upload]
     --as-zarr      Whether to preprocess as a zarr format or a memmap format. [default: no-as-zarr]
-    --help         Show this message and exit.  
 
 Example:
 
@@ -87,27 +87,27 @@ Upload a preprocessed dataset to the remote storage
 
 Usage:
 
-    openqdc upload DATASETS... [OPTIONS] 
-
-Options:
-
-    --help          Show this message and exit.    
-    --overwrite     Whether to overwrite the remote files if they are present. [default: overwrite] 
-    --as-zarr       Whether to upload the zarr files if available. [default: no-as-zarr]    
-
-Example:
-
-    openqdc upload Spice --overwrite      
-
-## Convert
-Convert a preprocessed dataset from a memmap dataset to a zarr dataset.  
-
-Usage:
-
-    openqdc convert DATASETS... [OPTIONS] 
+    openqdc upload DATASETS... [OPTIONS]
 
 Options:
 
     --help          Show this message and exit.
-    --overwrite     Whether to overwrite the current zarr cached datasets. [default: no-overwrite] 
-    --download      Whether to force the re-download of the memmap datasets. [default: no-download] 
+    --overwrite     Whether to overwrite the remote files if they are present. [default: overwrite]
+    --as-zarr       Whether to upload the zarr files if available. [default: no-as-zarr]
+
+Example:
+
+    openqdc upload Spice --overwrite
+
+## Convert
+Convert a preprocessed dataset from a memmap dataset to a zarr dataset.
+
+Usage:
+
+    openqdc convert DATASETS... [OPTIONS]
+
+Options:
+
+    --help          Show this message and exit.
+    --overwrite     Whether to overwrite the current zarr cached datasets. [default: no-overwrite]
+    --download      Whether to force the re-download of the memmap datasets. [default: no-download]

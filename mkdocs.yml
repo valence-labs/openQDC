@@ -20,6 +20,7 @@ nav:
   - Tutorials:
     - Really hard example: tutorials/usage.ipynb
   - API:
+    - e0 and QM methods: API/methods.md
     - Datasets:
       - Potential Energy:
         - Alchemy : API/datasets/alchemy.md
@@ -54,7 +55,6 @@ nav:
         - X40 : API/datasets/x40.md
         - Metcalf : API/datasets/metcalf.md
         - Splinter : API/datasets/splinter.md
-    - e0 and QM methods: API/methods.md
     - Units: API/units.md
     - Utils: API/utils.md
   - Contribute: contribute.md
