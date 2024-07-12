@@ -7,10 +7,10 @@ from openqdc.utils import read_qc_archive_h5
 
 class SolvatedPeptides(BaseDataset):
     """
-    The solvated protein fragments dataset probes many-body intermolecular
-    interactions between "protein fragments" and water molecules.
-    It contains energy and forces for 2731180 structures calculated
-    at the revPBE-D3(BJ)/def2-TZVP level of theory.
+    The solvated protein fragments dataset probes many-body intermolecular interactions between "protein fragments"
+    and water molecules. Geometries are first optimized with the semi-empirical method PM7 and then MD simulations are
+    run at 1000K with a time-step of 0.1fs using Atomic Simulations Environment (ASE). Structures are saved every 10
+    steps, where energies, forces and dipole moments are calculated at revPBE-D3(BJ)/def2-TZVP level of theory.
 
     Usage:
     ```python
@@ -19,8 +19,8 @@ class SolvatedPeptides(BaseDataset):
     ```
 
     References:
-    - https://doi.org/10.1021/acs.jctc.9b00181
-    - https://zenodo.org/records/2605372
+        https://doi.org/10.1021/acs.jctc.9b00181
+        https://zenodo.org/records/2605372
     """
 
     __name__ = "solvated_peptides"
