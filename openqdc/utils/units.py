@@ -1,11 +1,14 @@
 """
-Unit conversion utils.
+Units conversion utilities module.
 
-Energy units:
-    ["kcal/mol", "kj/mol", "hartree", "ev"]
+Available Energy units:
+    ["kcal/mol", "kj/mol", "hartree", "ev" "mev", "ryd]
 
-Distance units:
+Available Distance units:
     ["ang", "nm", "bohr"]
+
+Available Force units:
+    Combinations between Energy and Distance units
 """
 
 from enum import Enum, unique
@@ -40,7 +43,16 @@ class EnergyTypeConversion(ConversionEnum, StrEnum):
     MEV = "mev"
     RYD = "ryd"
 
-    def to(self, energy: "EnergyTypeConversion"):
+    def to(self, energy: "EnergyTypeConversion") -> Callable[[float], float]:
+        """
+        Get the conversion function to convert the energy to the desired units.
+
+        Parameters:
+            energy: energy unit to convert to
+
+        Returns:
+            Callable to convert the distance to the desired units
+        """
         return get_conversion(str(self), str(energy))
 
 
@@ -54,7 +66,17 @@ class DistanceTypeConversion(ConversionEnum, StrEnum):
     NM = "nm"
     BOHR = "bohr"
 
-    def to(self, distance: "DistanceTypeConversion", fraction: bool = False):
+    def to(self, distance: "DistanceTypeConversion", fraction: bool = False) -> Callable[[float], float]:
+        """
+        Get the conversion function to convert the distance to the desired units.
+
+        Parameters:
+            distance: distance unit to convert to
+            fraction: whether it is distance^1 or distance^-1
+
+        Returns:
+            callable to convert the distance to the desired units
+        """
         return get_conversion(str(self), str(distance)) if not fraction else get_conversion(str(distance), str(self))
 
 
@@ -91,33 +113,32 @@ class ForceTypeConversion(ConversionEnum):
     def __str__(self):
         return f"{self.energy}/{self.distance}"
 
-    def to(self, energy: EnergyTypeConversion, distance: DistanceTypeConversion):
+    def to(self, energy: EnergyTypeConversion, distance: DistanceTypeConversion) -> Callable[[float], float]:
+        """
+        Get the conversion function to convert the force to the desired units.
+
+        Parameters:
+            energy: energy unit to convert to
+            distance: distance unit to convert to
+
+        Returns:
+            callable to convert the distance to the desired units
+        """
         return lambda x: self.distance.to(distance, fraction=True)(self.energy.to(energy)(x))
 
 
 class Conversion:
     """
-    Conversion from one unit system to another.
-
-    Attributes
-    ----------
-    name
-        A human-readable name for the conversion
-    fn:
-        The callable to compute the conversion
+    Conversion from one unit system to another defined by a name and a callable
     """
 
     def __init__(self, in_unit: str, out_unit: str, func: Callable[[float], float]):
         """
 
-        Parameters
-        ----------
-        in_unit
-            String defining the units of the current values
-        out_unit
-            String defining the target units
-        func
-            The callable to compute the conversion
+        Parameters:
+            in_unit: String defining the units of the current values
+            out_unit: String defining the target units
+            func: The callable to compute the conversion
         """
         name = "convert_" + in_unit.lower().strip() + "_to_" + out_unit.lower().strip()
 
@@ -129,11 +150,20 @@ class Conversion:
         self.fn = func
 
     def __call__(self, x):
-        """Convert measure"""
         return self.fn(x)
 
 
-def get_conversion(in_unit: str, out_unit: str):
+def get_conversion(in_unit: str, out_unit: str) -> Callable[[float], float]:
+    """
+    Utility function to get the conversion function between two units.
+
+    Parameters:
+        in_unit : The input unit
+        out_unit : The output unit
+
+    Returns:
+        The conversion function
+    """
     name = "convert_" + in_unit.lower().strip() + "_to_" + out_unit.lower().strip()
     if in_unit.lower().strip() == out_unit.lower().strip():
         return lambda x: x
@@ -141,6 +171,8 @@ def get_conversion(in_unit: str, out_unit: str):
         raise ConversionNotDefinedError(in_unit, out_unit)
     return CONVERSION_REGISTRY[name]
 
+
+# Conversion definitions
 
 # ev conversion
 Conversion("ev", "kcal/mol", lambda x: x * 23.0605)

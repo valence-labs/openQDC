@@ -1,7 +1,7 @@
 import pickle as pkl
 from abc import ABC, abstractmethod
 from os.path import join as p_join
-from typing import List, Optional
+from typing import Callable, List, Optional
 
 import numpy as np
 import zarr
@@ -23,7 +23,10 @@ class GeneralStructure(ABC):
 
     @property
     @abstractmethod
-    def load_fn(self):
+    def load_fn(self) -> Callable:
+        """
+        Function to use for loading the data.
+        """
         raise NotImplementedError
 
     def add_extension(self, filename):

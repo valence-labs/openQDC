@@ -15,6 +15,7 @@ _lazy_imports_obj = {
     "__version__": "openqdc._version",
     "BaseDataset": "openqdc.datasets.base",
     # POTENTIAL
+    "Alchemy": "openqdc.datasets.potential.alchemy",
     "ANI1": "openqdc.datasets.potential.ani",
     "ANI1CCX": "openqdc.datasets.potential.ani",
     "ANI1CCX_V2": "openqdc.datasets.potential.ani",
@@ -39,6 +40,7 @@ _lazy_imports_obj = {
     "NablaDFT": "openqdc.datasets.potential.nabladft",
     "SolvatedPeptides": "openqdc.datasets.potential.solvated_peptides",
     "WaterClusters": "openqdc.datasets.potential.waterclusters3_30",
+    "SCANWaterClusters": "openqdc.datasets.potential.waterclusters",
     "TMQM": "openqdc.datasets.potential.tmqm",
     "PCQM_B3LYP": "openqdc.datasets.potential.pcqm",
     "PCQM_PM6": "openqdc.datasets.potential.pcqm",
@@ -47,6 +49,13 @@ _lazy_imports_obj = {
     "Transition1X": "openqdc.datasets.potential.transition1x",
     "MultixcQM9": "openqdc.datasets.potential.multixcqm9",
     "MultixcQM9_V2": "openqdc.datasets.potential.multixcqm9",
+    "QM7": "openqdc.datasets.potential.qmx",
+    "QM7b": "openqdc.datasets.potential.qmx",
+    "QM8": "openqdc.datasets.potential.qmx",
+    "QM9": "openqdc.datasets.potential.qmx",
+    "ProteinFragments": "openqdc.datasets.potential.proteinfragments",
+    "MDDataset": "openqdc.datasets.potential.proteinfragments",
+    "VQM24": "openqdc.datasets.potential.vqm24",
     # INTERACTION
     "DES5M": "openqdc.datasets.interaction.des",
     "DES370K": "openqdc.datasets.interaction.des",
@@ -58,6 +67,7 @@ _lazy_imports_obj = {
     "Splinter": "openqdc.datasets.interaction.splinter",
     # DEBUG
     "Dummy": "openqdc.datasets.potential.dummy",
+    "PredefinedDataset": "openqdc.datasets.potential.dummy",
     # ALL
     "AVAILABLE_DATASETS": "openqdc.datasets",
     "AVAILABLE_POTENTIAL_DATASETS": "openqdc.datasets.potential",
@@ -105,9 +115,10 @@ if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
     from .datasets.interaction.x40 import X40
 
     # POTENTIAL
+    from .datasets.potential.alchemy import Alchemy
     from .datasets.potential.ani import ANI1, ANI1CCX, ANI1CCX_V2, ANI1X, ANI2X
     from .datasets.potential.comp6 import COMP6
-    from .datasets.potential.dummy import Dummy
+    from .datasets.potential.dummy import Dummy, PredefinedDataset
     from .datasets.potential.gdml import GDML
     from .datasets.potential.geom import GEOM
     from .datasets.potential.iso_17 import ISO17
@@ -117,13 +128,17 @@ if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
     from .datasets.potential.nabladft import NablaDFT
     from .datasets.potential.orbnet_denali import OrbnetDenali
     from .datasets.potential.pcqm import PCQM_B3LYP, PCQM_PM6
+    from .datasets.potential.proteinfragments import MDDataset, ProteinFragments
     from .datasets.potential.qm1b import QM1B, QM1B_SMALL
     from .datasets.potential.qm7x import QM7X, QM7X_V2
     from .datasets.potential.qmugs import QMugs, QMugs_V2
+    from .datasets.potential.qmx import QM7, QM8, QM9, QM7b
     from .datasets.potential.revmd17 import RevMD17
     from .datasets.potential.sn2_rxn import SN2RXN
     from .datasets.potential.solvated_peptides import SolvatedPeptides
     from .datasets.potential.spice import Spice, SpiceV2, SpiceVL2
     from .datasets.potential.tmqm import TMQM
     from .datasets.potential.transition1x import Transition1X
+    from .datasets.potential.vqm24 import VQM24
+    from .datasets.potential.waterclusters import SCANWaterClusters
     from .datasets.potential.waterclusters3_30 import WaterClusters

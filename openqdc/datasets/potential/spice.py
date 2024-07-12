@@ -162,6 +162,10 @@ class SpiceVL2(SpiceV2):
     from openqdc.datasets import SpiceVL2
     dataset = SpiceVL2()
     ```
+
+    References:
+        https://github.com/openmm/spice-dataset/releases/tag/2.0.0
+        https://github.com/openmm/spice-dataset
     """
 
     __name__ = "spice_vl2"

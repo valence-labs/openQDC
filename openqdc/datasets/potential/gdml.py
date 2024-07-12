@@ -13,6 +13,17 @@ class GDML(BaseDataset):
     (211000 conformations) Salicylic Acid (320000 conformations), Malonaldehyde (993000 conformations),
     Ethanol (555000 conformations) and Toluene (100000 conformations). Energy and force labels for
     each conformation are computed using the PBE + vdW-TS electronic structure method.
+    molecular dynamics (AIMD) trajectories.
+
+    The dataset consists of the following trajectories:
+        Benzene: 627000 samples\n
+        Uracil: 133000 samples\n
+        Naptalene: 326000 samples\n
+        Aspirin: 211000 samples\n
+        Salicylic Acid: 320000 samples\n
+        Malonaldehyde: 993000 samples\n
+        Ethanol: 555000 samples\n
+        Toluene: 100000 samples\n
 
     Usage:
     ```python

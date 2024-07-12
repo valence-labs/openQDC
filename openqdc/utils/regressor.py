@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 
-SubSampleFrac = Union[float, int]
+from openqdc.datasets.base import BaseDataset
 
 
 def non_nan_idxs(array):
@@ -24,7 +24,18 @@ class Solver(ABC):
 
     @staticmethod
     @abstractmethod
-    def solve(X, Y):
+    def solve(X: np.ndarray, Y: np.ndarray) -> Tuple[np.ndarray, Optional[np.ndarray]]:
+        """
+        Main method to solve the regression problem.
+        Must be implemented in all the subclasses.
+
+        Parameters:
+            X: Input features of shape (n_samples, n_species)
+            Y: Target values of shape (n_samples,) (energy values for the regression)
+
+        Returns:
+            Tuple of predicted values and the estimated uncertainty.
+        """
         pass
 
     def __call__(self, X, Y):
@@ -38,7 +49,26 @@ class Solver(ABC):
 
 
 class Regressor:
-    """Regressor class for preparing and solving regression problem for isolated atom energies."""
+    """
+    Regressor class for preparing and solving regression problem for isolated atom energies.
+    A isolated atom energy regression problem is defined as:\n
+    X = [n_samples, n_species] (number of atoms of each species per sample)\n
+    Y = [n_samples, ] (energies)\n
+    The regression problem is solved by solving the linear system X E0 = Y.
+
+    Example:
+        For a sytem of 2 samples (H20, CH4)\n
+            n_species = 3, n_samples = 2\n
+            H20 = 2H , 1O -> X = [2, 1, 0]\n
+            CH4 = 4C, 1H -> X = [1, 0, 4]\n
+            X = [[2, 1, 0],
+                [ 1, 0, 4]]\n
+            Y = [[10, 20]]\n
+            X E0 = Y\n
+        Linear system to solve\n
+            [[2 eH, 1 eO, 0 eC],
+            [ 1 eH, 0 eO, 4 eC]] = [[10, 20]]
+    """
 
     solver: Solver
 
@@ -49,27 +79,29 @@ class Regressor:
         position_idx_range: np.ndarray,
         solver_type: str = "linear",
         stride: int = 1,
-        subsample: Optional[SubSampleFrac] = None,
+        subsample: Optional[Union[float, int]] = None,
         remove_nan: bool = True,
         *args,
         **kwargs,
     ):
         """
-        Parameters
-        ----------
-        energies
-            numpy array of energies in the shape (n_samples, n_energy_methods)
-        atomic_numbers
-            numpy array of atomic numbers in the shape (n_atoms,)
-        position_idx_range
-            array of shape (n_samples, 2) containing the start and end indices of the atoms in the dataset
-        stride
-            Stride to use for the regression.
-        subsample
-            Sumsample the dataset. If a float, it is interpreted as a fraction of the dataset to use.
-            If >1 it is interpreted as the number of samples to use.
-        remove_nan
-            Sanitize the dataset by removing energies samples with NaN values.
+        Regressor class for preparing and solving regression problem for isolated atom energies.
+
+        Parameters:
+            energies:
+                numpy array of energies in the shape (n_samples, n_energy_methods)
+            atomic_numbers:
+                numpy array of atomic numbers in the shape (n_atoms,)
+            position_idx_range:
+                array of shape (n_samples, 2) containing the start and end indices of the atoms in the dataset
+            solver_type: Type of solver to use. ["linear", "ridge"]
+            stride: Stride to use for the regression.
+            subsample: Sumsample the dataset.
+                If a float, it is interpreted as a fraction of the dataset to use.
+                If >1 it is interpreted as the number of samples to use.
+            remove_nan: Sanitize the dataset by removing energies samples with NaN values.
+            *args: Additional arguments to be passed to the regressor.
+            **kwargs: Additional keyword arguments to be passed to the regressor.
         """
         self.subsample = subsample
         self.stride = stride
@@ -87,7 +119,19 @@ class Regressor:
         self._post_init()
 
     @classmethod
-    def from_openqdc_dataset(cls, dataset, *args, **kwargs):
+    def from_openqdc_dataset(cls, dataset: BaseDataset, *args, **kwargs) -> "Regressor":
+        """
+        Initialize the regressor object from an openqdc dataset. This is the default method.
+        *args and and **kwargs are passed to the __init__ method and depends on the specific regressor.
+
+        Parameters:
+            dataset: openqdc dataset object.
+            *args: Additional arguments to be passed to the regressor.
+            **kwargs: Additional keyword arguments to be passed to the regressor.
+
+        Returns:
+            Instance of the regressor class.
+        """
         energies = dataset.data["energies"]
         position_idx_range = dataset.data["position_idx_range"]
         atomic_numbers = dataset.data["atomic_inputs"][:, 0].astype("int32")
@@ -137,6 +181,9 @@ class Regressor:
         self.y = B
 
     def solve(self):
+        """
+        Solve the regression problem and return the predicted isolated energies and the estimated uncertainty.
+        """
         logger.info(f"Solving regression with {self.solver}.")
         E0_list, cov_list = [], []
         for energy_idx in range(self.y.shape[1]):
@@ -157,6 +204,11 @@ class Regressor:
 
 
 def atom_standardization(X, y):
+    """
+    Standardize the energies and the atom counts.
+    This will make the calculated uncertainty more
+    meaningful.
+    """
     X_norm = X.sum()
     X = X / X_norm
     y = y / X_norm
@@ -165,6 +217,13 @@ def atom_standardization(X, y):
 
 
 class LinearSolver(Solver):
+    """
+    Linear regression solver.
+
+    Note:
+        No Uncertainty associated as it is quite small.
+    """
+
     _regr_str = "LinearRegression"
 
     @staticmethod
@@ -175,6 +234,10 @@ class LinearSolver(Solver):
 
 
 class RidgeSolver(Solver):
+    """
+    Ridge regression solver.
+    """
+
     _regr_str = "RidgeRegression"
 
     @staticmethod

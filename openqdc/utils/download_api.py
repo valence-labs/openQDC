@@ -29,7 +29,7 @@ import openqdc.utils.io as ioqdc
 @dataclass
 class FileSystem:
     """
-    A class to handle file system operations
+    A basic class to handle file system operations
     """
 
     public_endpoint: Optional[AbstractFileSystem] = None
@@ -38,22 +38,31 @@ class FileSystem:
     endpoint_url = "https://874f02b9d981bd6c279e979c0d91c4b4.r2.cloudflarestorage.com"
 
     def __init__(self):
-        load_dotenv()
+        load_dotenv()  # load environment variables from .env
         self.KEY = os.getenv("CLOUDFARE_KEY", None)
         self.SECRET = os.getenv("CLOUDFARE_SECRET", None)
 
     @property
     def public(self):
+        """
+        Return the public remote filesystem with read permission
+        """
         self.connect()
         return self.public_endpoint
 
     @property
     def private(self):
+        """
+        Return the private remote filesystem with write permission
+        """
         self.connect()
         return self.private_endpoint
 
     @property
     def local(self):
+        """
+        Return the local filesystem
+        """
         return self.local_endpoint
 
     @property
@@ -65,7 +74,7 @@ class FileSystem:
 
     def connect(self):
         """
-        Attempt connection to the public and private endpoints
+        Attempt connection to the public and private remote endpoints
         """
         if not self.is_connected:
             with warnings.catch_warnings():

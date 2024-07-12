@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from copy import deepcopy
 from dataclasses import asdict, dataclass
 from os.path import join as p_join
-from typing import Optional
+from typing import Callable, Optional
 
 import numpy as np
 from loguru import logger
@@ -17,9 +17,15 @@ class StatisticsResults:
     """
 
     def to_dict(self):
+        """
+        Convert the class to a dictionary
+        """
         return asdict(self)
 
-    def transform(self, func):
+    def transform(self, func: Callable):
+        """
+        Apply a function to all the attributes of the class
+        """
         for k, v in self.to_dict().items():
             if v is not None:
                 setattr(self, k, func(v))
@@ -55,6 +61,14 @@ class StatisticManager:
     """
 
     def __init__(self, dataset, recompute: bool = False, *statistic_calculators: "AbstractStatsCalculator"):
+        """
+        dataset : openqdc.datasets.base.BaseDataset
+            The dataset object to compute the statistics
+        recompute : bool, default = False
+            Flag to recompute the statistics
+        *statistic_calculators :  AbstractStatsCalculator
+            statistic calculators to run
+        """
         self._state = {}
         self._results = {}
         self._statistic_calculators = [
@@ -120,7 +134,7 @@ class AbstractStatsCalculator(ABC):
     """
     Abstract class that defines the interface for all
     the calculators object and the methods to
-    compute the statistics
+    compute the statistics.
     """
 
     # State Dependencies of the calculator to skip part of the calculation
@@ -140,6 +154,28 @@ class AbstractStatsCalculator(ABC):
         atom_charges: Optional[np.ndarray] = None,
         forces: Optional[np.ndarray] = None,
     ):
+        """
+        name : str
+            Name of the dataset for saving and loading.
+        energy_type : str, default = None
+            Type of the energy for the computation of the statistics. Used for loading and saving.
+        force_recompute : bool, default = False
+            Flag to force the recomputation of the statistics
+        energies : np.ndarray, default = None
+            Energies of the dataset
+        n_atoms : np.ndarray, default = None
+            Number of atoms in the dataset
+        atom_species : np.ndarray, default = None
+            Atomic species of the dataset
+        position_idx_range : np.ndarray, default = None
+            Position index range of the dataset
+        e0_matrix : np.ndarray, default = None
+            Isolated atom energies matrix of the dataset
+        atom_charges : np.ndarray, default = None
+            Atomic charges of the dataset
+        forces : np.ndarray, default = None
+            Forces of the dataset
+        """
         self.name = name
         self.energy_type = energy_type
         self.force_recompute = force_recompute
@@ -173,7 +209,7 @@ class AbstractStatsCalculator(ABC):
     @classmethod
     def from_openqdc_dataset(cls, dataset, recompute: bool = False):
         """
-        Create a calculator object from a dataset object
+        Create a calculator object from a dataset object.
         """
         obj = cls(
             name=dataset.__name__,
@@ -203,7 +239,6 @@ class AbstractStatsCalculator(ABC):
         """
         Save statistics file to the dataset folder as a pkl file
         """
-        print(self.preprocess_path)
         save_pkl(self.result, self.preprocess_path)
 
     def attempt_load(self) -> bool:

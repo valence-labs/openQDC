@@ -62,6 +62,7 @@ class Alchemy(BaseDataset):
 
     Reference:
         https://arxiv.org/abs/1906.09427
+        https://alchemy.tencent.com/        
     """
 
     __name__ = "alchemy"

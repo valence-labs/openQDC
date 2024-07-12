@@ -1,4 +1,5 @@
 import os
+from abc import ABC
 from os.path import join as p_join
 
 import datamol as dm
@@ -32,21 +33,9 @@ def extract_ani2_entries(properties):
     return res
 
 
-class QMX(BaseDataset):
+class QMX(ABC, BaseDataset):
     """
-    The ANI-1 dataset is a collection of 22 x 10^6 structural conformations from 57,000 distinct small
-    organic molecules with energy labels calculated using DFT. The molecules
-    contain 4 distinct atoms, C, N, O and H.
-
-    Usage
-    ```python
-    from openqdc.datasets import ANI1
-    dataset = ANI1()
-    ```
-
-    References:
-    - ANI-1: https://www.nature.com/articles/sdata2017193
-    - Github: https://github.com/aiqm/ANI1x_datasets
+    QMX dataset base abstract class
     """
 
     __name__ = "qm9"
@@ -88,6 +77,26 @@ class QMX(BaseDataset):
 # ['smiles', 'E1-CC2', 'E2-CC2', 'f1-CC2', 'f2-CC2', 'E1-PBE0', 'E2-PBE0', 'f1-PBE0', 'f2-PBE0',
 # 'E1-PBE0.1', 'E2-PBE0.1', 'f1-PBE0.1', 'f2-PBE0.1', 'E1-CAM', 'E2-CAM', 'f1-CAM', 'f2-CAM']
 class QM7(QMX):
+    """
+    QM7 is a dataset constructed from subsets of the GDB-13 database (
+    stable and synthetically accessible organic molecules),
+    containing up to seven “heavy” atoms.
+    The molecules conformation are optimized using DFT at the
+    PBE0/def2-TZVP level of theory.
+
+    Chemical species:
+        [C, N, O, S, H]
+
+    Usage:
+    ```python
+    from openqdc.datasets import QM7
+    dataset = QM7()
+    ```
+
+    References:
+        https://arxiv.org/pdf/1703.00564
+    """
+
     __links__ = {"qm7.hdf5.gz": "https://zenodo.org/record/3588337/files/150.hdf5.gz?download=1"}
     __name__ = "qm7"
 
@@ -178,6 +187,26 @@ class QM7(QMX):
 
 
 class QM7b(QMX):
+    """
+    QM7b is a dataset constructed from subsets of the GDB-13 database (
+    stable and synthetically accessible organic molecules),
+    containing up to seven “heavy” atoms.
+    The molecules conformation are optimized using DFT at the
+    PBE0/def2-TZVP level of theory.
+
+    Chemical species:
+        [C, N, O, S, Cl, H]
+
+    Usage:
+    ```python
+    from openqdc.datasets import QM7b
+    dataset = QM7b()
+    ```
+
+    References:
+        https://arxiv.org/pdf/1703.00564
+    """
+
     __links__ = {"qm7b.hdf5.gz": "https://zenodo.org/record/3588335/files/200.hdf5.gz?download=1"}
     __name__ = "qm7b"
     energy_target_names = [
@@ -262,16 +291,25 @@ class QM7b(QMX):
 
 
 class QM8(QMX):
-    """QM8 is the dataset used in a study on modeling quantum
+    """QM8 is the subset of QM9 used in a study on modeling quantum
     mechanical calculations of electronic spectra and excited
-    state energy (ka increase of energy from the ground states) of small molecules. Multiple methods, including
+    state energy (a increase of energy from the ground states) of small molecules
+    up to eight heavy atoms.
+    Multiple methods were used, including
     time-dependent density functional theories (TDDFT) and
-    second-order approximate coupled-cluster (CC2)
-    - Column 1: Molecule ID (gdb9 index) mapping to the .sdf file
-    - Columns 2-5: RI-CC2/def2TZVP
-    - Columns 6-9: LR-TDPBE0/def2SVP
-    - Columns 10-13: LR-TDPBE0/def2TZVP
-    - Columns 14-17: LR-TDCAM-B3LYP/def2TZVP
+    second-order approximate coupled-cluster (CC2).
+    The molecules conformations are relaxed geometries computed using
+    the DFT B3LYP with basis set 6-31G(2df,p).
+    For more information about the sampling, check QM9 dataset.
+
+    Usage:
+    ```python
+    from openqdc.datasets import QM8
+    dataset = QM8()
+    ```
+
+    References:
+        https://arxiv.org/pdf/1504.01966
 
     """
 
@@ -334,4 +372,16 @@ class QM9(QMX):
         "WB97X-D:aug-cc-pvtz",
         "WB97X-D:def2-svp",
         "WB97X-D:def2-tzvp",
+    ]
+
+    __energy_methods__ = [
+        PotentialMethod.NONE,  # "wb97x/6-31g(d)"
+        PotentialMethod.NONE,
+        PotentialMethod.NONE,
+        PotentialMethod.NONE,
+        PotentialMethod.NONE,
+        PotentialMethod.NONE,
+        PotentialMethod.NONE,
+        PotentialMethod.NONE,
+        PotentialMethod.NONE,
     ]
