@@ -20,11 +20,19 @@ We provide support of energies through "physical" and "regression" normalization
 OpenQDC through this normalization, provide a way to transform the potential energy to atomization energy by subtracting isolated atom energies `e0`
 physically interpretable and extensivity-conserving normalization method. Alternatively, we pre-335
 compute the average contribution of each atom species to potential energy via linear or ridge336
-regression, centering the distribution at 0 and providing uncertainty estimation for the computed337
-values. Predicted atomic energies can also be scaled to approximate a standard normal distribution
+regression, centering the distribution at 0 and providing uncertainty estimation for the computed
+values. Predicted atomic energies can also be scaled to approximate a standard normal distribution.
 
 ### Physical Normalization
 
+`e0` energies are calculated for each atom in the dataset at the appropriate level of theory and then subtracted from
+the potential energy to obtain the atomization energy. This normalization method is physically interpretable and
+only remove the atom energy contribution from the potential energy.
 
 
 ### Regression Normalization
+
+`e0` energies are calculated for each atom in the dataset from fitting a regression model to the potential energy.
+The `e0` energies are then subtracted from the potential energy to obtain the atomization energy. This normalization
+provides uncertainty estimation for the computed values and remove part of the interatomic energy contribution from the potential energy.
+The resulting formation energy is centered at 0.
