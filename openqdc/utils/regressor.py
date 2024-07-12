@@ -7,8 +7,6 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 
-from openqdc.datasets.base import BaseDataset
-
 
 def non_nan_idxs(array):
     """
@@ -119,7 +117,7 @@ class Regressor:
         self._post_init()
 
     @classmethod
-    def from_openqdc_dataset(cls, dataset: BaseDataset, *args, **kwargs) -> "Regressor":
+    def from_openqdc_dataset(cls, dataset, *args, **kwargs) -> "Regressor":
         """
         Initialize the regressor object from an openqdc dataset. This is the default method.
         *args and and **kwargs are passed to the __init__ method and depends on the specific regressor.
