@@ -101,7 +101,31 @@ def format_geometry_and_entries(geometries, energies, subset):
 
 
 class SCANWaterClusters(BaseDataset):
-    """https://chemrxiv.org/engage/chemrxiv/article-details/662aaff021291e5d1db7d8ec"""
+    """
+    The SCAN Water Clusters dataset contains conformations of
+    neutral water clusters containing up to 20 monomers, charged water clusters,
+    and alkali- and halide-water clusters. This dataset consists of our data sets of water clusters:
+    the benchmark energy and geometry database (BEGDB) neutral water cluster subset; the WATER2723 set of 14
+    neutral, 5 protonated, 7 deprotonated, and one auto-ionized water cluster; and two sets of
+    ion-water clusters M...(H2O)n, where M = Li+, Na+, K+, F−, Cl−, or Br−.
+    Water clusters were obtained from  10 nanosecond gas-phase molecular dynamics
+    simulations using AMBER 9 and optimized to obtain
+    lowest energy isomers were determined using MP2/aug-cc-pVDZ//MP2/6-31G* Gibbs free energies.
+
+
+    Chemical Species:
+        [H, O, Li, Na, K, F, Cl, Br]
+
+    Usage:
+    ```python
+    from openqdc.datasets import SCANWaterClusters
+    dataset = SCANWaterClusters()
+    ```
+
+    References:
+        https://chemrxiv.org/engage/chemrxiv/article-details/662aaff021291e5d1db7d8ec\n
+        https://github.com/esoteric-ephemera/water_cluster_density_errors
+    """
 
     __name__ = "scanwaterclusters"
 

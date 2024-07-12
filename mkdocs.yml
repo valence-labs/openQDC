@@ -17,10 +17,12 @@ nav:
   - Usage: usage.md
   - CLI: cli.md
   - Available Datasets: datasets.md
+  - QM methods: e0s_and_qm.md
   - Tutorials:
     - Really hard example: tutorials/usage.ipynb
   - API:
     - e0 and QM methods: API/methods.md
+    - e0 regression: API/regressor.md
     - Datasets:
       - Potential Energy:
         - Alchemy : API/datasets/alchemy.md
@@ -63,13 +65,12 @@ nav:
 
 theme:
   name: material
-  custom_dir: docs/_overrides
-  #palette:
-  #  primary: purple
-  #  accent: purple
+  #custom_dir: docs/_overrides
   features:
     - navigation.tabs
     #- navigation.expand
+  #favicon: assets/qdc_logo.png
+  logo: assets/qdc_logo.png
 
 
 extra_css:

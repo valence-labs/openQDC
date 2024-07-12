@@ -1,20 +1,20 @@
 :root {
-    --datamol-primary: #ad069c;
-    --datamol-secondary: #343a40;
+    --openqdc-primary: ##201342;
+    --openqdc-secondary: #4A1E7E;
 
     /* Primary color shades */
-    --md-primary-fg-color: var(--datamol-primary);
-    --md-primary-fg-color--light: var(--datamol-primary);
-    --md-primary-fg-color--dark: var(--datamol-primary);
-    --md-primary-bg-color: var(--datamol-secondary);
-    --md-primary-bg-color--light: var(--datamol-secondary);
-    --md-text-link-color: var(--datamol-secondary);
+    --md-primary-fg-color: var(--openqdc-primary);
+    --md-primary-fg-color--light: var(--openqdc-primary);
+    --md-primary-fg-color--dark: var(--openqdc-primary);
+    --md-primary-bg-color: var(--openqdc-secondary);
+    --md-primary-bg-color--light: var(--openqdc-secondary);
+    --md-text-link-color: var(--openqdc-secondary);
 
     /* Accent color shades */
-    --md-accent-fg-color: var(--datamol-secondary);
-    --md-accent-fg-color--transparent: var(--datamol-secondary);
-    --md-accent-bg-color: var(--datamol-secondary);
-    --md-accent-bg-color--light: var(--datamol-secondary);
+    --md-accent-fg-color: var(--openqdc-secondary);
+    --md-accent-fg-color--transparent: var(--openqdc-secondary);
+    --md-accent-bg-color: var(--openqdc-secondary);
+    --md-accent-bg-color--light: var(--openqdc-secondary);
   }
 
   :root>* {
@@ -23,24 +23,24 @@
     --md-code-fg-color: hsla(200, 18%, 26%, 1);
 
     /* Footer */
-    --md-footer-bg-color: var(--datamol-primary);
+    --md-footer-bg-color: var(--openqdc-primary);
     /* --md-footer-bg-color--dark: hsla(0, 0%, 0%, 0.32); */
-    --md-footer-fg-color: var(--datamol-secondary);
-    --md-footer-fg-color--light: var(--datamol-secondary);
-    --md-footer-fg-color--lighter: var(--datamol-secondary);
+    --md-footer-fg-color: var(--openqdc-secondary);
+    --md-footer-fg-color--light: var(--openqdc-secondary);
+    --md-footer-fg-color--lighter: var(--openqdc-secondary);
 
   }
 
   .md-header {
-    background-image: linear-gradient(to right, #ad069c, #470b41);
+    background-image: linear-gradient(to right, #131036, #4A1E7E);
   }
 
   .md-footer {
-    background-image: linear-gradient(to right, #ad069c, #470b41);
+    background-image: linear-gradient(to right, #131036, #4A1E7E);
   }
 
   .md-tabs {
-    background-image: linear-gradient(to right, #F4F6F9, #e9bde4);
+    background-image: linear-gradient(to right, #F4F6F9, #b39bce);
   }
 
   .md-header__topic {
