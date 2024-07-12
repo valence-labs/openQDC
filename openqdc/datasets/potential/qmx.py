@@ -310,7 +310,6 @@ class QM8(QMX):
 
     References:
         https://arxiv.org/pdf/1504.01966
-
     """
 
     __name__ = "qm8"
@@ -360,6 +359,22 @@ class QM8(QMX):
 
 
 class QM9(QMX):
+    """
+    QM7b is a dataset constructed containing 134k molecules from subsets of the GDB-17 database,
+    containing up to 9 “heavy” atoms. All molecular properties are calculated at B3LUP/6-31G(2df,p)
+    level of quantum chemistry. For each of the 134k molecules, equilibrium geometries are computed
+    by relaxing geometries with quantum mechanical method B3LYP.
+
+    Usage:
+    ```python
+    from openqdc.datasets import QM9
+    dataset = QM9()
+    ```
+
+    Reference:
+        https://www.nature.com/articles/sdata201422
+    """
+
     __links__ = {"qm9.hdf5.gz": "https://zenodo.org/record/3588339/files/155.hdf5.gz?download=1"}
     __name__ = "qm9"
     energy_target_names = [

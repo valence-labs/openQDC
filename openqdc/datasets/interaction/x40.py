@@ -8,16 +8,21 @@ from openqdc.methods import InteractionMethod
 
 class X40(YamlDataset):
     """
-    X40 interaction dataset of 40 dimer pairs as
-    introduced in the following paper:
+    X40 interaction dataset of 40 noncovalent complexes of organic halides, halohydrides, and halogen molecules
+    where the halogens participate in various interaction types such as electrostatic interactions, london
+    dispersion, hydrogen bonds, halogen bonding, halogen-pi interactions and stacking of halogenated aromatic
+    molecules. For each complex 10 geometries are generated resulting in 400 geometries in the dataset. The geometries
+    are optimized using the MP2 level of theory with cc-pVTZ basis set whereas the interaction energies are
+    computed with CCSD(T)/CBS level of theory.
 
-    Benchmark Calculations of Noncovalent Interactions of Halogenated Molecules
-    Jan Řezáč, Kevin E. Riley, and Pavel Hobza
-    Journal of Chemical Theory and Computation 2012 8 (11), 4285-4292
-    DOI: 10.1021/ct300647k
+    Usage:
+    ```python
+    from openqdc.datasets import X40
+    dataset = X40()
+    ```
 
-    Dataset retrieved and processed from:
-    http://cuby4.molecular.cz/dataset_x40.html
+    Reference:
+        https://pubs.acs.org/doi/10.1021/ct300647k
     """
 
     __name__ = "x40"
