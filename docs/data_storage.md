@@ -1,4 +1,4 @@
-## Dataset structure 
+## Dataset structure
 
 For a dataset with N geometries, M atoms across all geometries, ne energy labels,
 and nf force labels, we use zarr or memory-mapped arrays of various sizes:
