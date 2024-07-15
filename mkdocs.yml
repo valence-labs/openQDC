@@ -14,16 +14,17 @@ strict: false
 
 nav:
   - Overview: index.md
-  - Usage: usage.md
-  - CLI: cli.md
+  - Usage:
+    - Base usage : usage.md
+    - CLI: cli.md
   - Available Datasets: datasets.md
-  - QM methods: e0s_and_qm.md
+  - QM methods: normalization_e0s.md
   - Data structure: data_storage.md
   - Tutorials:
     - Really hard example: tutorials/usage.ipynb
   - API:
-    - e0 and QM methods: API/methods.md
-    - e0 regression: API/regressor.md
+    - QM methods: API/methods.md
+    - Normalization regressor: API/regressor.md
     - Datasets:
       - Potential Energy:
         - Alchemy : API/datasets/alchemy.md
