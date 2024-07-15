@@ -588,6 +588,10 @@ class BaseDataset(DatasetPropertyMixIn):
         for i in range(len(self)):
             yield func(i)
 
+    def __iter__(self):
+        for idxs in range(len(self)):
+            yield self[idxs]
+
     def get_statistics(self, return_none: bool = True):
         """
         Get the converted statistics of the dataset.

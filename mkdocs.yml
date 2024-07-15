@@ -18,6 +18,7 @@ nav:
   - CLI: cli.md
   - Available Datasets: datasets.md
   - QM methods: e0s_and_qm.md
+  - Data structure: data_storage.md
   - Tutorials:
     - Really hard example: tutorials/usage.ipynb
   - API:

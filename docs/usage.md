@@ -15,7 +15,26 @@ Or if you want to directly import a specific dataset:
 ```python
 from openqdc as Spice
 # Spice dataset with distance unit in angstrom instead of bohr
-dataset = Spice(distance_unit="ang")
+dataset = Spice(distance_unit="ang",
+                array_format = "jax"
+)
+dataset[0] # dict of jax array
+```
+
+Or if you prefer handling `ase.Atoms` objects:
+
+```python
+dataset.get_ase_atoms(0)
+```
+
+## Iterators
+
+OpenQDC provides a simple way to get the data as iterators:
+
+```python
+for data in dataset.as_iter(atoms=True):
+    print(data) # Atoms object
+    break
 ```
 
 ## Lazy loading
