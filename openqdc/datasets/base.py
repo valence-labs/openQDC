@@ -12,7 +12,6 @@ from loguru import logger
 from sklearn.utils import Bunch
 from tqdm import tqdm
 
-from openqdc.datasets.dataset_structure import MemMapDataset, ZarrDataset
 from openqdc.datasets.energies import AtomEnergies
 from openqdc.datasets.properties import DatasetPropertyMixIn
 from openqdc.datasets.statistics import (
@@ -22,6 +21,7 @@ from openqdc.datasets.statistics import (
     StatisticManager,
     TotalEnergyStats,
 )
+from openqdc.datasets.structure import MemMapDataset, ZarrDataset
 from openqdc.utils.constants import MAX_CHARGE, NB_ATOMIC_FEATURES
 from openqdc.utils.descriptors import get_descriptor
 from openqdc.utils.exceptions import (
