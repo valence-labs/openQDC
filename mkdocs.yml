@@ -25,6 +25,8 @@ nav:
   - API:
     - QM methods: API/methods.md
     - Normalization regressor: API/regressor.md
+    - Main class: API/basedataset.md
+    - Format loading: API/formats.md
     - Datasets:
       - Potential Energy:
         - Alchemy : API/datasets/alchemy.md
