@@ -1,4 +1,4 @@
-site_name: "Open Quantum Data Commons (openQDC)"
+site_name: "OpenQDC"
 site_description: "I don't know... Something about data and Quantum stuff I guess :D"
 repo_url: "https://github.com/OpenDrugDiscovery/openQDC"
 repo_name: "openQDC"
@@ -61,8 +61,9 @@ nav:
         - Splinter : API/datasets/splinter.md
     - Units: API/units.md
     - Utils: API/utils.md
-  - Contribute: contribute.md
-  - Add a dataset: dataset_upload.md
+  - Contribute:
+    - Mantaining: contribute.md
+    - Add a dataset: dataset_upload.md
   - License: licensing.md
 
 theme:

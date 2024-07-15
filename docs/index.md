@@ -61,4 +61,4 @@ Please cite OpenQDC if you use it in your research: [![DOI](zenodo_badge)](zenod
 
 ## Compatibilities
 
-OpenQDC is compatible with Python >= 3.8 and is tested on Linux, MacOS.
+OpenQDC is compatible with Python >= 3.8 and is tested on Linux, MacOS and Windows.
