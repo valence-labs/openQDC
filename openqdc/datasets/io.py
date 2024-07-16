@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Callable, List, Optional
+from typing import Callable, Dict, List, Optional
 
 import datamol as dm
 import numpy as np
@@ -91,7 +91,7 @@ class FromFileDataset(BaseDataset, ABC):
         """
         raise NotImplementedError
 
-    def read_raw_entries(self) -> List[dict]:
+    def read_raw_entries(self) -> List[Dict]:
         """
         Process the files and return a list of data objects.
         """

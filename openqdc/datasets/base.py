@@ -106,7 +106,7 @@ class BaseDataset(DatasetPropertyMixIn):
         recompute_statistics: bool = False,
         transform: Optional[Callable] = None,
         read_as_zarr: bool = False,
-        regressor_kwargs: dict = {
+        regressor_kwargs: Dict = {
             "solver_type": "linear",
             "sub_sample": None,
             "stride": 1,
@@ -377,7 +377,7 @@ class BaseDataset(DatasetPropertyMixIn):
         """
         raise NotImplementedError
 
-    def collate_list(self, list_entries: List[Dict]) -> dict:
+    def collate_list(self, list_entries: List[Dict]) -> Dict:
         """
         Collate a list of entries into a single dictionary.
 
@@ -399,7 +399,7 @@ class BaseDataset(DatasetPropertyMixIn):
         return res
 
     def save_preprocess(
-        self, data_dict: dict[str, np.ndarray], upload: bool = False, overwrite: bool = True, as_zarr: bool = False
+        self, data_dict: Dict[str, np.ndarray], upload: bool = False, overwrite: bool = True, as_zarr: bool = False
     ):
         """
         Save the preprocessed data to the cache directory and optionally upload it to the remote storage.
@@ -662,7 +662,7 @@ class BaseDataset(DatasetPropertyMixIn):
         for idxs in range(len(self)):
             yield self[idxs]
 
-    def get_statistics(self, return_none: bool = True) -> dict:
+    def get_statistics(self, return_none: bool = True) -> Dict:
         """
         Get the converted statistics of the dataset.
 

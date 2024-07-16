@@ -2,7 +2,7 @@ import pickle as pkl
 from abc import ABC, abstractmethod
 from os import PathLike
 from os.path import join as p_join
-from typing import Callable, List, Optional, Union
+from typing import Callable, Dict, List, Optional, Union
 
 import numpy as np
 import zarr
@@ -51,9 +51,9 @@ class GeneralStructure(ABC):
         self,
         preprocess_path: Union[str, PathLike],
         data_keys: List[str],
-        data_dict: dict[str, np.ndarray],
+        data_dict: Dict[str, np.ndarray],
         extra_data_keys: List[str],
-        extra_data_types: dict[str, type],
+        extra_data_types: Dict[str, type],
     ) -> List[str]:
         """
         Save the preprocessed data to the cache directory and optionally upload it to the remote storage.
@@ -71,7 +71,7 @@ class GeneralStructure(ABC):
     @abstractmethod
     def load_extra_files(
         self,
-        data: dict[str, np.ndarray],
+        data: Dict[str, np.ndarray],
         preprocess_path: Union[str, PathLike],
         data_keys: List[str],
         pkl_data_keys: List[str],
@@ -107,8 +107,8 @@ class GeneralStructure(ABC):
         self,
         preprocess_path: Union[str, PathLike],
         data_keys: List[str],
-        data_types: dict[str, np.dtype],
-        data_shapes: dict[str, tuple[int, int]],
+        data_types: Dict[str, np.dtype],
+        data_shapes: Dict[str, tuple[int, int]],
         extra_data_keys: List[str],
         overwrite: bool,
     ):
