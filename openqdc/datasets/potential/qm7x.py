@@ -52,7 +52,7 @@ class QM7X(BaseDataset):
     ```
 
     References:
-        https://arxiv.org/abs/2006.15139
+        https://arxiv.org/abs/2006.15139\n
         https://zenodo.org/records/4288677
     """
 

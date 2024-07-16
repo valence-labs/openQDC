@@ -52,7 +52,7 @@ class OrbnetDenali(BaseDataset):
     ```
 
     References:
-        https://arxiv.org/abs/2107.00299
+        https://arxiv.org/abs/2107.00299\n
         https://figshare.com/articles/dataset/OrbNet_Denali_Training_Data/14883867
     """
 

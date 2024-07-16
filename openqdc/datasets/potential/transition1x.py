@@ -50,8 +50,8 @@ class Transition1X(BaseDataset):
     ```
 
     References:
-    - https://www.nature.com/articles/s41597-022-01870-w
-    - https://gitlab.com/matschreiner/Transition1x
+    - https://www.nature.com/articles/s41597-022-01870-w\n
+    - https://gitlab.com/matschreiner/Transition1x\n
     """
 
     __name__ = "transition1x"

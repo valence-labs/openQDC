@@ -79,7 +79,7 @@ class Molecule3D(BaseDataset):
     ```
 
     References:
-        https://arxiv.org/abs/2110.01717
+        https://arxiv.org/abs/2110.01717\n
         https://github.com/divelab/MoleculeX
     """
 

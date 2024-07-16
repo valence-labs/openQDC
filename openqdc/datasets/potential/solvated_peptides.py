@@ -19,7 +19,7 @@ class SolvatedPeptides(BaseDataset):
     ```
 
     References:
-        https://doi.org/10.1021/acs.jctc.9b00181
+        https://doi.org/10.1021/acs.jctc.9b00181\n
         https://zenodo.org/records/2605372
     """
 

@@ -264,7 +264,7 @@ class DESS66(DES370K):
     ```
 
     Reference:
-        https://www.nature.com/articles/s41597-021-00833-x
+        https://www.nature.com/articles/s41597-021-00833-x\n
         S66: https://pubs.acs.org/doi/10.1021/ct2002946
     """
 

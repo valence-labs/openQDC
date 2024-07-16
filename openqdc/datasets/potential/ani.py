@@ -111,7 +111,7 @@ class ANI1X(ANI1):
     ```
 
     References:
-        https://doi.org/10.1063/1.5023802
+        https://doi.org/10.1063/1.5023802\n
         https://github.com/aiqm/ANI1x_datasets
     """
 
@@ -169,7 +169,7 @@ class ANI1CCX(ANI1):
     ```
 
     References:
-        https://doi.org/10.1038/s41467-019-10827-4
+        https://doi.org/10.1038/s41467-019-10827-4\n
         https://github.com/aiqm/ANI1x_datasets
     """
 
@@ -213,7 +213,7 @@ class ANI1CCX_V2(ANI1CCX):
     ```
 
     References:
-        https://doi.org/10.1038/s41467-019-10827-4
+        https://doi.org/10.1038/s41467-019-10827-4\n
         https://github.com/aiqm/ANI1x_datasets
     """
 
