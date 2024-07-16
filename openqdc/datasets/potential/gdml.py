@@ -8,6 +8,11 @@ from openqdc.utils import read_qc_archive_h5
 class GDML(BaseDataset):
     """
     Gradient Domain Machine Learning (GDML) is a dataset consisting of samples from ab initio
+    molecular dynamics (AIMD) trajectories at a resolution of 0.5fs. The dataset consists of, Benzene
+    (627000 conformations), Uracil (133000 conformations), Naptalene (326000 conformations), Aspirin
+    (211000 conformations) Salicylic Acid (320000 conformations), Malonaldehyde (993000 conformations),
+    Ethanol (555000 conformations) and Toluene (100000 conformations). Energy and force labels for
+    each conformation are computed using the PBE + vdW-TS electronic structure method.
     molecular dynamics (AIMD) trajectories.
 
     The dataset consists of the following trajectories:
@@ -20,7 +25,7 @@ class GDML(BaseDataset):
         Ethanol: 555000 samples\n
         Toluene: 100000 samples\n
 
-    Usage
+    Usage:
     ```python
     from openqdc.datasets import GDML
     dataset = GDML()

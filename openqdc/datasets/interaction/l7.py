@@ -7,15 +7,18 @@ from ._utils import YamlDataset
 
 class L7(YamlDataset):
     """
-    The L7 interaction energy dataset as described in:
+    The L7 interaction energy dataset consists of 7 dispersion stabilized non-covalent complexes with
+    energies labelled using semi-empirical and quantum mechanical methods. The intial geometries are
+    taken from crystal X-ray data and optimized with a DFT method specific to the complex.
 
-    Accuracy of Quantum Chemical Methods for Large Noncovalent Complexes
-    Robert Sedlak, Tomasz Janowski, Michal Pitoňák, Jan Řezáč, Peter Pulay, and Pavel Hobza
-    Journal of Chemical Theory and Computation 2013 9 (8), 3364-3374
-    DOI: 10.1021/ct400036b
+    Usage:
+    ```python
+    from openqdc.datasets import L7
+    dataset = L7()
+    ```
 
-    Data was downloaded and extracted from:
-    http://cuby4.molecular.cz/dataset_l7.html
+    Reference:
+        https://pubs.acs.org/doi/10.1021/ct400036b
     """
 
     __name__ = "l7"

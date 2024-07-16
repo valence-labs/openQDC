@@ -40,6 +40,22 @@ def create_path(filename, root):
 
 
 class MD22(RevMD17):
+    """
+    MD22 consists of molecular dynamics (MD) trajectories of four major classes of biomolecules and supramolecules,
+    ranging from a small peptide with 42 atoms to a double-walled nanotube with 370 atoms. The simulation trajectories
+    are sampled at 400K and 500K with a resolution of 1fs. Potential energy and forces are computed using the PBE+MBD
+    level of theory.
+
+    Usage:
+    ```python
+    from openqdc.datasets import MD22
+    dataset = MD22()
+    ```
+
+    Reference:
+        https://arxiv.org/abs/2209.14865
+    """
+
     __name__ = "md22"
     __links__ = {
         f"{x}.npz": f"http://www.quantum-machine.org/gdml/repo/datasets/md22_{x}.npz"

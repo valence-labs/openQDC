@@ -84,20 +84,19 @@ def read_xyz(fname, subset):
 
 class Metcalf(BaseInteractionDataset):
     """
-    Hydrogen-bonded dimers of NMA with 126 molecules as described in:
+    Metcalf is a dataset consisting of 126 hydrogen-bonded dimers involving N-methylacetamide (NMA) with 14,744 to
+    156,704 geometries/configurations for each complex. The geometries are optimized using the RI-MP2 method and
+    the cc-pVTZ basis set. SAPT(0) calculations are performed for computing interaction energies and the various
+    components.
 
-    Approaches for machine learning intermolecular interaction energies and
-    application to energy components from symmetry adapted perturbation theory.
-    Derek P. Metcalf, Alexios Koutsoukas, Steven A. Spronk, Brian L. Claus,
-    Deborah A. Loughney, Stephen R. Johnson, Daniel L. Cheney, C. David Sherrill;
-    J. Chem. Phys. 21 February 2020; 152 (7): 074103.
-    https://doi.org/10.1063/1.5142636
+    Usage:
+    ```python
+    from openqdc.datasets import Metcalf
+    dataset = Metcalf()
+    ```
 
-    Further details:
-    "Hydrogen-bonded dimers involving N-methylacetamide (NMA) and 126 molecules
-    (46 donors and 80 acceptors; Figs. 2 and 3) were used. Optimized geometries
-    for the 126 individual monomers were obtained and paired with NMA in broad
-    arrays of spatial configurations to generate thousands of complexes for training.
+    Reference:
+        https://doi.org/10.1063/1.5142636
     """
 
     __name__ = "metcalf"

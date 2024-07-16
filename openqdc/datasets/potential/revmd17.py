@@ -54,23 +54,27 @@ def create_path(filename, root):
 
 class RevMD17(BaseDataset):
     """
-    - Benzene: 627000 samples
-    - Uracil: 133000 samples
-    - Naptalene: 326000 samples
-    - Aspirin: 211000 samples
-    - Salicylic Acid: 320000 samples
-    - Malonaldehyde: 993000 samples
-    - Ethanol: 555000 samples
-    - Toluene: 100000 samples
+    Revised MD (RevMD17) improves upon the MD17 dataset by removing all the numerical noise present in the original
+    dataset. The data is generated from an ab-initio molecular dynamics (AIMD) simulation where forces and energies
+    are computed at the PBE/def2-SVP level of theory using very tigh SCF convergence and very dense DFT integration
+    grid. The dataset contains the following molecules:
+        Benzene: 627000 samples\n
+        Uracil: 133000 samples\n
+        Naptalene: 326000 samples\n
+        Aspirin: 211000 samples\n
+        Salicylic Acid: 320000 samples\n
+        Malonaldehyde: 993000 samples\n
+        Ethanol: 555000 samples\n
+        Toluene: 100000 samples\n
 
-    Usage
+    Usage:
     ```python
     from openqdc.datasets import RevMD17
     dataset = RevMD17()
     ```
 
     References:
-    - https://arxiv.org/abs/2007.09593
+        https://arxiv.org/abs/2007.09593
     """
 
     __name__ = "revmd17"

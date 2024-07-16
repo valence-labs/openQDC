@@ -40,7 +40,21 @@ def read_npz_entry(raw_path):
 
 # graphs is smiles
 class VQM24(BaseDataset):
-    """https://arxiv.org/abs/2405.05961"""
+    """
+    Vector-QM24 (VQM24) dataset consists of small organic and inorganic molecules with quantum mechanical
+    properties calculated at wB97x-D3//cc-pVDZ level of theory. This leads to 258,242 unique constitutional
+    isomers and 577,705 conformers of varying stoichiometries. Geometries are generated using GFN2-xTB, and
+    relaxed with DFT method wB97x-D3/cc-pVDZ. The energy values are calculated with DFT method wB97x-D3/cc-pVDZ.
+
+    Usage:
+    ```python
+    from openqdc.datasets import VQM24
+    dataset = VQM24()
+    ```
+
+    Reference:
+        https://arxiv.org/abs/2405.05961
+    """
 
     __name__ = "vqm24"
 

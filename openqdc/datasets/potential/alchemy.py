@@ -45,8 +45,24 @@ def read_mol(file, energy):
 
 class Alchemy(BaseDataset):
     """
-    https://alchemy.tencent.com/
-    https://arxiv.org/abs/1906.09427
+    Alchemy comprises of 119,487 organic molecules with up to 14 heavy atoms, sampled from the GDB MedChem database.
+    Molecular properties are calculated using PySCF's implementation of the DFT Kohn-Sham method at the B3LYP level
+    with the basis set 6-31G(2df,p). The equilibrium geometry is optimized in three passes. First, OpenBabel is used
+    to parse SMILES string and build the Cartesian coordinates with MMFF94 force field optimization. Second, HF/STO3G
+    is used to generate the preliminary geometry. Third, for the final pass of geometry relaxation, the
+    B3LYP/6-31G(2df,p) model with the density fittting approximation for electron repulsion integrals is used. The
+    auxillary basis cc-pVDZ-jkfit is employed in density fitting to build the Coulomb matrix and the HF exchange
+    matrix.
+
+    Usage:
+    ```python
+    from openqdc.datasets import Alchemy
+    dataset = Alchemy()
+    ```
+
+    Reference:
+        https://arxiv.org/abs/1906.09427
+        https://alchemy.tencent.com/        
     """
 
     __name__ = "alchemy"
