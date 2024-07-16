@@ -35,7 +35,7 @@ class FileSystem:
     public_endpoint: Optional[AbstractFileSystem] = None
     private_endpoint: Optional[AbstractFileSystem] = None
     local_endpoint: AbstractFileSystem = LocalFileSystem()
-    endpoint_url = "https://874f02b9d981bd6c279e979c0d91c4b4.r2.cloudflarestorage.com"
+    endpoint_url = "https://storage.openqdc.org"  # "https://874f02b9d981bd6c279e979c0d91c4b4.r2.cloudflarestorage.com"
 
     def __init__(self):
         load_dotenv()  # load environment variables from .env
@@ -89,19 +89,29 @@ class FileSystem:
         """
         if endpoint == "private":
             # return fsspec.filesystem("gs")
-            return fsspec.filesystem("s3", key=self.KEY, secret=self.SECRET, endpoint_url=self.endpoint_url)
-        elif endpoint == "public":
-            return (
-                fsspec.filesystem(
-                    "s3",
-                    key="a046308c078b0134c9e261aa91f63ab2",
-                    secret="d5b32f241ad8ee8d0a3173cd51b4f36d6869f168b21acef75f244a81dc10e1fb",
-                    endpoint_url=self.endpoint_url,
-                )
-                if os.environ.get("OPENQDC_DOWNLOAD_API") is None
-                else fsspec.filesystem("https")
+            return fsspec.filesystem(
+                "s3",
+                key=self.KEY,
+                secret=self.SECRET,
+                endpoint_url="https://874f02b9d981bd6c279e979c0d91c4b4.r2.cloudflarestorage.com",
             )
-            # return fsspec.filesystem("https")
+        elif endpoint == "public":
+            return fsspec.filesystem("https")
+            # return fsspec.filesystem(
+            #    "s3",
+            #    **ioqdc.request_s3fs_config()
+            # )
+            # return (
+            #    fsspec.filesystem(
+            #        "s3",
+            #        key="a046308c078b0134c9e261aa91f63ab2",
+            #        secret="d5b32f241ad8ee8d0a3173cd51b4f36d6869f168b21acef75f244a81dc10e1fb",
+            #        endpoint_url=self.endpoint_url,
+            #    )
+            #    if os.environ.get("OPENQDC_DOWNLOAD_API") is None
+            #    else
+            #    fsspec.filesystem("https")
+            # )
         else:
             return self.local_endpoint
 
