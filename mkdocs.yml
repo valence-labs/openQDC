@@ -10,7 +10,7 @@ use_directory_urls: false
 docs_dir: "docs"
 
 # Fail on warnings to detect issues with types and docstring
-strict: false
+strict: true
 
 nav:
   - Overview: index.md

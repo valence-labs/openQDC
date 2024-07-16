@@ -1,7 +1,11 @@
 """The BaseDataset defining shared functionality between all datasets."""
 
 import os
-from collections import Iterable
+
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 from functools import partial
 from itertools import compress
 from os.path import join as p_join
@@ -102,7 +106,7 @@ class BaseDataset(DatasetPropertyMixIn):
         recompute_statistics: bool = False,
         transform: Optional[Callable] = None,
         read_as_zarr: bool = False,
-        regressor_kwargs={
+        regressor_kwargs: dict = {
             "solver_type": "linear",
             "sub_sample": None,
             "stride": 1,
@@ -394,7 +398,9 @@ class BaseDataset(DatasetPropertyMixIn):
 
         return res
 
-    def save_preprocess(self, data_dict, upload=False, overwrite=True, as_zarr: bool = False):
+    def save_preprocess(
+        self, data_dict: dict[str, np.ndarray], upload: bool = False, overwrite: bool = True, as_zarr: bool = False
+    ):
         """
         Save the preprocessed data to the cache directory and optionally upload it to the remote storage.
 
@@ -448,7 +454,7 @@ class BaseDataset(DatasetPropertyMixIn):
         else:
             return x
 
-    def is_preprocessed(self):
+    def is_preprocessed(self) -> bool:
         """
         Check if the dataset is preprocessed and available online or locally.
 
@@ -511,7 +517,7 @@ class BaseDataset(DatasetPropertyMixIn):
         local_path = p_join(self.preprocess_path, "props.pkl" if not as_zarr else "metadata.zip")
         push_remote(local_path, overwrite=overwrite)
 
-    def save_xyz(self, idx: int, energy_method: int = 0, path: Optional[str] = None, ext=True):
+    def save_xyz(self, idx: int, energy_method: int = 0, path: Optional[str] = None, ext: bool = True):
         """
         Save a single entry at index idx as an extxyz file.
 
@@ -548,7 +554,7 @@ class BaseDataset(DatasetPropertyMixIn):
             ):
                 write_extxyz(f, atoms, append=True)
 
-    def get_ase_atoms(self, idx: int, energy_method: int = 0, ext=True) -> Atoms:
+    def get_ase_atoms(self, idx: int, energy_method: int = 0, ext: bool = True) -> Atoms:
         """
         Get the ASE atoms object for the entry at index idx.
 

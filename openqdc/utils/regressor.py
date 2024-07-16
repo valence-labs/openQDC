@@ -79,8 +79,8 @@ class Regressor:
         stride: int = 1,
         subsample: Optional[Union[float, int]] = None,
         remove_nan: bool = True,
-        *args,
-        **kwargs,
+        *args: any,
+        **kwargs: any,
     ):
         """
         Regressor class for preparing and solving regression problem for isolated atom energies.
@@ -117,7 +117,7 @@ class Regressor:
         self._post_init()
 
     @classmethod
-    def from_openqdc_dataset(cls, dataset, *args, **kwargs) -> "Regressor":
+    def from_openqdc_dataset(cls, dataset: any, *args: any, **kwargs: any) -> "Regressor":
         """
         Initialize the regressor object from an openqdc dataset. This is the default method.
         *args and and **kwargs are passed to the __init__ method and depends on the specific regressor.

@@ -63,9 +63,8 @@ class GeneralStructure(ABC):
             preprocess_path:  path to the preprocessed data file
             data_keys:        list of keys to load from the data file
             data_dict:        dictionary of data to save
-            data_shapes:      dictionary of shapes for each key
             extra_data_keys:  list of keys to load from the extra data file
-            overwrite:        whether to overwrite the local cache
+            extra_data_types: dictionary of data types for each key
         """
         raise NotImplementedError
 
@@ -87,7 +86,6 @@ class GeneralStructure(ABC):
             preprocess_path:  path to the preprocessed data file
             data_keys:    list of keys to load from the data file
             pkl_data_keys:   list of keys to load from the extra files
-            extra_data_keys:  list of keys to load from the extra data file
             overwrite:   whether to overwrite the local cache
         """
         raise NotImplementedError
@@ -97,7 +95,7 @@ class GeneralStructure(ABC):
         Join a path and a filename and add the correct extension.
 
         Parameters:
-            Path:  the path to join
+            path:  the path to join
             filename:  the filename to join
 
         Returns:
