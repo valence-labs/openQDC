@@ -53,6 +53,10 @@ class WaterClusters(BaseDataset):
     clusters of sizes n = 3 - 30. The cluster structures are derived and labeled with
     the TTM2.1-F ab-initio based interaction potential for water.
     It contains approximately 4.5 mil. structures.
+    Sampling was done with the Monte Carlo Temperature Basin Paving (MCTBP) method.
+
+    Chemical Species:
+        ["H", "O"]
 
     Usage:
     ```python
@@ -61,8 +65,8 @@ class WaterClusters(BaseDataset):
     ```
 
     References:
-    - https://doi.org/10.1063/1.5128378
-    - https://sites.uw.edu/wdbase/database-of-water-clusters/
+        https://doi.org/10.1063/1.5128378\n
+        https://sites.uw.edu/wdbase/database-of-water-clusters/\n
     """
 
     __name__ = "waterclusters3_30"

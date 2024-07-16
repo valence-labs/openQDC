@@ -1,3 +1,7 @@
 # QM Methods
 
-::: openqdc.methods
+::: openqdc.methods.enums
+
+# Isolated Atom Energies
+
+::: openqdc.methods.atom_energies

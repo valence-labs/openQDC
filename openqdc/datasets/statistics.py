@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from copy import deepcopy
 from dataclasses import asdict, dataclass
 from os.path import join as p_join
-from typing import Callable, Optional
+from typing import Callable, Dict, Optional
 
 import numpy as np
 from loguru import logger
@@ -77,7 +77,7 @@ class StatisticManager:
         ]
 
     @property
-    def state(self) -> dict:
+    def state(self) -> Dict:
         """
         Return the dictionary state of the manager
         """
@@ -253,7 +253,7 @@ class AbstractStatsCalculator(ABC):
             logger.warning(f"Statistics for {str(self)} not found. Computing...")
             return False
 
-    def _setup_deps(self, state: dict) -> None:
+    def _setup_deps(self, state: Dict) -> None:
         """
         Check if the dependencies of calculators are satisfied
         from the state object and set the attributes of the calculator
@@ -265,7 +265,7 @@ class AbstractStatsCalculator(ABC):
             for dep in self.state_dependency:
                 setattr(self, dep, state[dep])
 
-    def write_state(self, update: dict) -> None:
+    def write_state(self, update: Dict) -> None:
         """
         Write/update the state dictionary with the update dictionary
 
@@ -274,7 +274,7 @@ class AbstractStatsCalculator(ABC):
         """
         self.state.update(update)
 
-    def run(self, state: dict) -> None:
+    def run(self, state: Dict) -> None:
         """
         Main method to run the calculator.
         Setup the dependencies from the state dictionary

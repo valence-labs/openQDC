@@ -1,41 +1,92 @@
-site_name: "Open Quantum Data Commons (openQDC)"
+site_name: "OpenQDC"
 site_description: "I don't know... Something about data and Quantum stuff I guess :D"
-site_url: "https://github.com/OpenDrugDiscovery/openQDC"
 repo_url: "https://github.com/OpenDrugDiscovery/openQDC"
 repo_name: "openQDC"
 copyright: Copyright 2023 Valence Labs
 
+site_url: "https://github.com/OpenDrugDiscovery/openQDC"
 remote_branch: "privpage"
 use_directory_urls: false
 docs_dir: "docs"
 
+# Fail on warnings to detect issues with types and docstring
+strict: true
+
 nav:
   - Overview: index.md
+  - Usage:
+    - Base usage : usage.md
+    - CLI: cli.md
   - Available Datasets: datasets.md
-  #- Tutorials:
-  #  #- Really hard example: tutorials/usage.ipynb
+  - QM methods: normalization_e0s.md
+  - Data structure: data_storage.md
+  - Tutorials:
+    - Really hard example: tutorials/usage.ipynb
   - API:
-    - Datasets: API/available_datasets.md
-    - Isolated Atoms Energies: API/isolated_atom_energies.md
+    - QM methods: API/methods.md
+    - Normalization regressor: API/regressor.md
+    - Main class: API/basedataset.md
+    - Format loading: API/formats.md
+    - Datasets:
+      - Potential Energy:
+        - Alchemy : API/datasets/alchemy.md
+        - ANI : API/datasets/ani.md
+        - Spice : API/datasets/spice.md
+        - GEOM : API/datasets/geom.md
+        - Qmugs : API/datasets/qmugs.md
+        - ISO_17 : API/datasets/iso_17.md
+        - Comp6 : API/datasets/comp6.md
+        - GDML : API/datasets/gdml.md
+        - Molecule3D : API/datasets/molecule3d.md
+        - Orbnet Denali : API/datasets/orbnet_denali.md
+        - SN2 RXN : API/datasets/sn2_rxn.md
+        - QM7X : API/datasets/qm7x.md
+        - QM1B : API/datasets/qm1b.md
+        - NablaDFT : API/datasets/nabladft.md
+        - Solvated Peptides : API/datasets/solvated_peptides.md
+        - Waterclusters3_30 : API/datasets/waterclusters3_30.md
+        - SCAN Waterclusters : API/datasets/waterclusters.md
+        - TMQM : API/datasets/tmqm.md
+        - PCQM : API/datasets/pcqm.md
+        - RevMD17 : API/datasets/revmd17.md
+        - MD22 : API/datasets/md22.md
+        - Transition1X : API/datasets/transition1x.md
+        - MultixcQM9 : API/datasets/multixcqm9.md
+        - QMX : API/datasets/qmx.md
+        - Protein Fragments : API/datasets/proteinfragments.md
+        - VQM24 : API/datasets/vqm24.md
+      - Interaction Energy:
+        - DES : API/datasets/des.md
+        - L7 : API/datasets/l7.md
+        - X40 : API/datasets/x40.md
+        - Metcalf : API/datasets/metcalf.md
+        - Splinter : API/datasets/splinter.md
     - Units: API/units.md
+    - Utils: API/utils.md
+  - Contribute:
+    - Mantaining: contribute.md
+    - Add a dataset: dataset_upload.md
+  - License: licensing.md
+
 theme:
   name: material
-  custom_dir: docs/_overrides
-  palette:
-    primary: teal
-    accent: purple
+  #custom_dir: docs/_overrides
   features:
     - navigation.tabs
-    - navigation.expand
+    #- navigation.expand
+  #favicon: assets/qdc_logo.png
+  logo: assets/qdc_logo.png
 
 
 extra_css:
   - css/custom.css
+  - css/custom-openqdc.css
 
 extra_javascript:
   - javascripts/config.js
   - https://polyfill.io/v3/polyfill.min.js?features=es6
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+  #- https://unpkg.com/mermaid@10.9.0/dist/mermaid.min.js
 
 markdown_extensions:
   - admonition
@@ -55,11 +106,14 @@ markdown_extensions:
   - toc:
       permalink: true
 
+watch:
+  - openqdc/
+
 plugins:
   - search
   - mkdocstrings:
-      watch:
-        - openqdc/
+      #watch:
+      #  - openqdc/
       handlers:
         python:
           setup_commands:
@@ -71,9 +125,11 @@ plugins:
           rendering:
             show_root_heading: yes
             heading_level: 3
-            show_if_no_docstring: true
-          options:
-            docstring_style : google
+            show_if_no_docstring: false
   - mkdocs-jupyter:
       execute: False
       # kernel_name: python3
+
+extra:
+  version:
+    provider: mike

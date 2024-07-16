@@ -181,7 +181,7 @@ def load_xyz(path):
     return MolFromXYZFile(path)
 
 
-def dict_to_atoms(d: dict, ext: bool = False, energy_method: int = 0) -> Atoms:
+def dict_to_atoms(d: Dict, ext: bool = False, energy_method: int = 0) -> Atoms:
     """
     Converts dictionary to ase atoms object
 

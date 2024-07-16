@@ -1,18 +1,23 @@
 """The BaseDataset defining shared functionality between all datasets."""
 
 import os
+
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 from functools import partial
 from itertools import compress
 from os.path import join as p_join
 from typing import Callable, Dict, List, Optional, Union
 
 import numpy as np
+from ase import Atoms
 from ase.io.extxyz import write_extxyz
 from loguru import logger
 from sklearn.utils import Bunch
 from tqdm import tqdm
 
-from openqdc.datasets.dataset_structure import MemMapDataset, ZarrDataset
 from openqdc.datasets.energies import AtomEnergies
 from openqdc.datasets.properties import DatasetPropertyMixIn
 from openqdc.datasets.statistics import (
@@ -22,6 +27,7 @@ from openqdc.datasets.statistics import (
     StatisticManager,
     TotalEnergyStats,
 )
+from openqdc.datasets.structure import MemMapDataset, ZarrDataset
 from openqdc.utils.constants import MAX_CHARGE, NB_ATOMIC_FEATURES
 from openqdc.utils.descriptors import get_descriptor
 from openqdc.utils.exceptions import (
@@ -100,7 +106,7 @@ class BaseDataset(DatasetPropertyMixIn):
         recompute_statistics: bool = False,
         transform: Optional[Callable] = None,
         read_as_zarr: bool = False,
-        regressor_kwargs={
+        regressor_kwargs: Dict = {
             "solver_type": "linear",
             "sub_sample": None,
             "stride": 1,
@@ -108,29 +114,28 @@ class BaseDataset(DatasetPropertyMixIn):
     ) -> None:
         """
 
-        Parameters
-        ----------
-        energy_unit
-            Energy unit to convert dataset to. Supported units: ["kcal/mol", "kj/mol", "hartree", "ev"]
-        distance_unit
-            Distance unit to convert dataset to. Supported units: ["ang", "nm", "bohr"]
-        array_format
-            Format to return arrays in. Supported formats: ["numpy", "torch", "jax"]
-        energy_type
-            Type of isolated atom energy to use for the dataset. Default: "formation"
-            Supported types: ["formation", "regression", "null", None]
-        overwrite_local_cache
-            Whether to overwrite the locally cached dataset.
-        cache_dir
-            Cache directory location. Defaults to "~/.cache/openqdc"
-        recompute_statistics
-            Whether to recompute the statistics of the dataset.
-        transform, optional
-            transformation to apply to the __getitem__ calls
-        regressor_kwargs
-            Dictionary of keyword arguments to pass to the regressor.
-            Default: {"solver_type": "linear", "sub_sample": None, "stride": 1}
-            solver_type can be one of ["linear", "ridge"]
+        Parameters:
+            energy_unit:
+                Energy unit to convert dataset to. Supported units: ["kcal/mol", "kj/mol", "hartree", "ev"]
+            distance_unit:
+                Distance unit to convert dataset to. Supported units: ["ang", "nm", "bohr"]
+            array_format:
+                Format to return arrays in. Supported formats: ["numpy", "torch", "jax"]
+            energy_type:
+                Type of isolated atom energy to use for the dataset. Default: "formation"
+                Supported types: ["formation", "regression", "null", None]
+            overwrite_local_cache:
+                Whether to overwrite the locally cached dataset.
+            cache_dir:
+                Cache directory location. Defaults to "~/.cache/openqdc"
+            recompute_statistics:
+                Whether to recompute the statistics of the dataset.
+            transform:
+                transformation to apply to the __getitem__ calls
+            regressor_kwargs:
+                Dictionary of keyword arguments to pass to the regressor.
+                Default: {"solver_type": "linear", "sub_sample": None, "stride": 1}
+                solver_type can be one of ["linear", "ridge"]
         """
         set_cache_dir(cache_dir)
         # self._init_lambda_fn()
@@ -339,6 +344,10 @@ class BaseDataset(DatasetPropertyMixIn):
     def set_energy_unit(self, value: str):
         """
         Set a new energy unit for the dataset.
+
+        Parameters:
+            value:
+                New energy unit to set.
         """
         # old_unit = self.energy_unit
         # self.__energy_unit__ = value
@@ -348,6 +357,10 @@ class BaseDataset(DatasetPropertyMixIn):
     def set_distance_unit(self, value: str):
         """
         Set a new distance unit for the dataset.
+
+        Parameters:
+            value:
+                New distance unit to set.
         """
         # old_unit = self.distance_unit
         # self.__distance_unit__ = value
@@ -359,9 +372,22 @@ class BaseDataset(DatasetPropertyMixIn):
         self.array_format = format
 
     def read_raw_entries(self):
+        """
+        Preprocess the raw (aka from the fetched source) into a list of dictionaries.
+        """
         raise NotImplementedError
 
-    def collate_list(self, list_entries: List[Dict]):
+    def collate_list(self, list_entries: List[Dict]) -> Dict:
+        """
+        Collate a list of entries into a single dictionary.
+
+        Parameters:
+            list_entries:
+                List of dictionaries containing the entries to collate.
+
+        Returns:
+            Dictionary containing the collated entries.
+        """
         # concatenate entries
         res = {key: np.concatenate([r[key] for r in list_entries if r is not None], axis=0) for key in list_entries[0]}
 
@@ -372,16 +398,20 @@ class BaseDataset(DatasetPropertyMixIn):
 
         return res
 
-    def save_preprocess(self, data_dict, upload=False, overwrite=True, as_zarr: bool = False):
+    def save_preprocess(
+        self, data_dict: Dict[str, np.ndarray], upload: bool = False, overwrite: bool = True, as_zarr: bool = False
+    ):
         """
         Save the preprocessed data to the cache directory and optionally upload it to the remote storage.
-        data_dict : dict
-            Dictionary containing the preprocessed data.
-        upload : bool, Defult: False
-            Whether to upload the preprocessed data to the remote storage or only saving it locally.
-        overwrite : bool, Default: False
-            Whether to overwrite the preprocessed data if it already exists.
-            Only used if upload is True. Cache is always overwritten locally.
+
+        Parameters:
+            data_dict:
+                Dictionary containing the preprocessed data.
+            upload:
+                Whether to upload the preprocessed data to the remote storage or only saving it locally.
+            overwrite:
+                Whether to overwrite the preprocessed data if it already exists.
+                Only used if upload is True. Cache is always overwritten locally.
         """
         # save memmaps
         logger.info("Preprocessing data and saving it to cache.")
@@ -424,9 +454,12 @@ class BaseDataset(DatasetPropertyMixIn):
         else:
             return x
 
-    def is_preprocessed(self):
+    def is_preprocessed(self) -> bool:
         """
         Check if the dataset is preprocessed and available online or locally.
+
+        Returns:
+            True if the dataset is available remotely or locally, False otherwise.
         """
         predicats = [
             copy_exists(p_join(self.preprocess_path, self.dataset_wrapper.add_extension(f"{key}")))
@@ -435,9 +468,12 @@ class BaseDataset(DatasetPropertyMixIn):
         predicats += [copy_exists(p_join(self.preprocess_path, file)) for file in self.dataset_wrapper._extra_files]
         return all(predicats)
 
-    def is_cached(self):
+    def is_cached(self) -> bool:
         """
         Check if the dataset is cached locally.
+
+        Returns:
+            True if the dataset is cached locally, False otherwise.
         """
         predicats = [
             os.path.exists(p_join(self.preprocess_path, self.dataset_wrapper.add_extension(f"{key}")))
@@ -449,11 +485,15 @@ class BaseDataset(DatasetPropertyMixIn):
     def preprocess(self, upload: bool = False, overwrite: bool = True, as_zarr: bool = True):
         """
         Preprocess the dataset and save it.
-        upload : bool, Defult: False
-            Whether to upload the preprocessed data to the remote storage or only saving it locally.
-        overwrite : bool, Default: False
-            Whether to overwrite the preprocessed data if it already exists.
-            Only used if upload is True. Cache is always overwritten locally.
+
+        Parameters:
+            upload:
+                Whether to upload the preprocessed data to the remote storage or only saving it locally.
+            overwrite:
+                hether to overwrite the preprocessed data if it already exists.
+                Only used if upload is True. Cache is always overwritten locally.
+            as_zarr:
+                Whether to save the data as zarr files
         """
         if overwrite or not self.is_preprocessed():
             entries = self.read_raw_entries()
@@ -462,7 +502,14 @@ class BaseDataset(DatasetPropertyMixIn):
 
     def upload(self, overwrite: bool = False, as_zarr: bool = False):
         """
-        Upload the preprocessed data to the remote storage.
+        Upload the preprocessed data to the remote storage. Must be called after preprocess and
+        need to have write privileges.
+
+        Parameters:
+            overwrite:
+                Whether to overwrite the remote data if it already exists
+            as_zarr:
+                Whether to upload the data as zarr files
         """
         for key in self.data_keys:
             local_path = p_join(self.preprocess_path, f"{key}.mmap" if not as_zarr else f"{key}.zip")
@@ -470,9 +517,19 @@ class BaseDataset(DatasetPropertyMixIn):
         local_path = p_join(self.preprocess_path, "props.pkl" if not as_zarr else "metadata.zip")
         push_remote(local_path, overwrite=overwrite)
 
-    def save_xyz(self, idx: int, energy_method: int = 0, path: Optional[str] = None, ext=True):
+    def save_xyz(self, idx: int, energy_method: int = 0, path: Optional[str] = None, ext: bool = True):
         """
-        Save the entry at index idx as an extxyz file.
+        Save a single entry at index idx as an extxyz file.
+
+        Parameters:
+            idx:
+                Index of the entry
+            energy_method:
+                Index of the energy method to use
+            path:
+                Path to save the xyz file. If None, the current working directory is used.
+            ext:
+                Whether to include additional informations like forces and other metadatas (extxyz format)
         """
         if path is None:
             path = os.getcwd()
@@ -482,6 +539,12 @@ class BaseDataset(DatasetPropertyMixIn):
     def to_xyz(self, energy_method: int = 0, path: Optional[str] = None):
         """
         Save dataset as single xyz file (extended xyz format).
+
+        Parameters:
+            energy_method:
+                Index of the energy method to use
+            path:
+                Path to save the xyz file
         """
         with open(p_join(path if path else os.getcwd(), f"{self.__name__}.xyz"), "w") as f:
             for atoms in tqdm(
@@ -491,16 +554,20 @@ class BaseDataset(DatasetPropertyMixIn):
             ):
                 write_extxyz(f, atoms, append=True)
 
-    def get_ase_atoms(self, idx: int, energy_method: int = 0, ext=True):
+    def get_ase_atoms(self, idx: int, energy_method: int = 0, ext: bool = True) -> Atoms:
         """
         Get the ASE atoms object for the entry at index idx.
 
-        Parameters
-        ----------
-        idx : int
-            Index of the entry.
-        ext : bool, optional
-            Whether to include additional informations
+        Parameters:
+            idx:
+                Index of the entry.
+            energy_method:
+                Index of the energy method to use
+            ext:
+                Whether to include additional informations
+
+        Returns:
+            ASE atoms object
         """
         entry = self[idx]
         at = dict_to_atoms(entry, ext=ext, energy_method=energy_method)
@@ -533,24 +600,23 @@ class BaseDataset(DatasetPropertyMixIn):
         """
         Compute the descriptors for the dataset.
 
-        Parameters
-        ----------
-        descriptor_name : str
-            Name of the descriptor to use. Supported descriptors are ["soap"]
-        chemical_species : Optional[List[str]], optional
-            List of chemical species to use for the descriptor computation, by default None.
-            If None, the chemical species of the dataset are used.
-        n_samples : Optional[Union[List[int],int, float]], optional
-            Number of samples to use for the computation, by default None. If None, all the dataset is used.
-            If a list of integers is provided, the descriptors are computed for each of the specified idx of samples.
-        progress : bool, optional
-            Whether to show a progress bar, by default True.
-        **descriptor_kwargs : dict
-            Keyword arguments to pass to the descriptor instantiation of the model.
+        Parameters:
+            descriptor_name:
+                Name of the descriptor to use. Supported descriptors are ["soap"]
+            chemical_species:
+                List of chemical species to use for the descriptor computation, by default None.
+                If None, the chemical species of the dataset are used.
+            n_samples:
+                Number of samples to use for the computation, by default None.
+                If None, all the dataset is used.
+                If a list of integers is provided, the descriptors are computed for
+                each of the specified idx of samples.
+            progress:
+                Whether to show a progress bar, by default True.
+            **descriptor_kwargs : dict
+                Keyword arguments to pass to the descriptor instantiation of the model.
 
-        Returns
-        -------
-        Dict[str, np.ndarray]
+        Returns:
             Dictionary containing the following keys:
                 - values : np.ndarray of shape (N, M) containing the descriptors for the dataset
                 - idxs : np.ndarray of shape (N,) containing the indices of the samples used
@@ -573,14 +639,18 @@ class BaseDataset(DatasetPropertyMixIn):
         datum["idxs"] = idxs
         return datum
 
-    def as_iter(self, atoms: bool = False, energy_method: int = 0):
+    def as_iter(self, atoms: bool = False, energy_method: int = 0) -> Iterable:
         """
         Return the dataset as an iterator.
 
-        Parameters
-        ----------
-        atoms : bool, optional
-            Whether to return the items as ASE atoms object, by default False
+        Parameters:
+            atoms:
+                Whether to return the items as ASE atoms object, by default False
+            energy_method:
+                Index of the energy method to use
+
+        Returns:
+            Iterator of the dataset
         """
 
         func = partial(self.get_ase_atoms, energy_method=energy_method) if atoms else self.__getitem__
@@ -588,12 +658,21 @@ class BaseDataset(DatasetPropertyMixIn):
         for i in range(len(self)):
             yield func(i)
 
-    def get_statistics(self, return_none: bool = True):
+    def __iter__(self):
+        for idxs in range(len(self)):
+            yield self[idxs]
+
+    def get_statistics(self, return_none: bool = True) -> Dict:
         """
         Get the converted statistics of the dataset.
-        return_none : bool, optional
-            Whether to return None if the statistics for the forces are not available, by default True
-            Otherwise, the statistics for the forces are set to 0.0
+
+        Parameters:
+            return_none :
+                Whether to return None if the statistics for the forces are not available, by default True
+                Otherwise, the statistics for the forces are set to 0.0
+
+        Returns:
+            Dictionary containing the statistics of the dataset
         """
         selected_stats = self.statistics.get_results()
         if len(selected_stats) == 0:

@@ -1,7 +1,8 @@
 import pickle as pkl
 from abc import ABC, abstractmethod
+from os import PathLike
 from os.path import join as p_join
-from typing import Callable, List, Optional
+from typing import Callable, Dict, List, Optional, Union
 
 import numpy as np
 import zarr
@@ -26,24 +27,102 @@ class GeneralStructure(ABC):
     def load_fn(self) -> Callable:
         """
         Function to use for loading the data.
+        Must be implemented by the child class.
+
+        Returns:
+            the function to use for loading the data
         """
         raise NotImplementedError
 
-    def add_extension(self, filename):
+    def add_extension(self, filename: str) -> str:
+        """
+        Add the correct extension to a filename
+
+        Parameters:
+            filename:  the filename to add the extension to
+
+        Returns:
+            the filename with the extension
+        """
         return filename + self.ext
 
     @abstractmethod
-    def save_preprocess(self, preprocess_path, data_keys, data_dict, extra_data_keys, extra_data_types) -> List[str]:
+    def save_preprocess(
+        self,
+        preprocess_path: Union[str, PathLike],
+        data_keys: List[str],
+        data_dict: Dict[str, np.ndarray],
+        extra_data_keys: List[str],
+        extra_data_types: Dict[str, type],
+    ) -> List[str]:
+        """
+        Save the preprocessed data to the cache directory and optionally upload it to the remote storage.
+        Must be implemented by the child class.
+
+        Parameters:
+            preprocess_path:  path to the preprocessed data file
+            data_keys:        list of keys to load from the data file
+            data_dict:        dictionary of data to save
+            extra_data_keys:  list of keys to load from the extra data file
+            extra_data_types: dictionary of data types for each key
+        """
         raise NotImplementedError
 
     @abstractmethod
-    def load_extra_files(self, data, preprocess_path, data_keys, pkl_data_keys, overwrite):
+    def load_extra_files(
+        self,
+        data: Dict[str, np.ndarray],
+        preprocess_path: Union[str, PathLike],
+        data_keys: List[str],
+        pkl_data_keys: List[str],
+        overwrite: bool,
+    ):
+        """
+        Load extra files required to define other types of data.
+        Must be implemented by the child class.
+
+        Parameters:
+            data:  dictionary of data to load
+            preprocess_path:  path to the preprocessed data file
+            data_keys:    list of keys to load from the data file
+            pkl_data_keys:   list of keys to load from the extra files
+            overwrite:   whether to overwrite the local cache
+        """
         raise NotImplementedError
 
-    def join_and_ext(self, path, filename):
+    def join_and_ext(self, path: Union[str, PathLike], filename: str) -> Union[str, PathLike]:
+        """
+        Join a path and a filename and add the correct extension.
+
+        Parameters:
+            path:  the path to join
+            filename:  the filename to join
+
+        Returns:
+            the joined path with the correct extension
+        """
         return p_join(path, self.add_extension(filename))
 
-    def load_data(self, preprocess_path, data_keys, data_types, data_shapes, extra_data_keys, overwrite):
+    def load_data(
+        self,
+        preprocess_path: Union[str, PathLike],
+        data_keys: List[str],
+        data_types: Dict[str, np.dtype],
+        data_shapes: Dict[str, tuple[int, int]],
+        extra_data_keys: List[str],
+        overwrite: bool,
+    ):
+        """
+        Main method to load the data from a filetype structure like memmap or zarr.
+
+        Parameters:
+            preprocess_path:  path to the preprocessed data file
+            data_keys:        list of keys to load from the data file
+            data_types:       dictionary of data types for each key
+            data_shapes:      dictionary of shapes for each key
+            extra_data_keys:  list of keys to load from the extra data file
+            overwrite:        whether to overwrite the local cache
+        """
         data = {}
         for key in data_keys:
             filename = self.join_and_ext(preprocess_path, key)
@@ -55,7 +134,16 @@ class GeneralStructure(ABC):
         data = self.load_extra_files(data, preprocess_path, data_keys, extra_data_keys, overwrite)
         return data
 
-    def unpack(self, data):
+    def unpack(self, data: any) -> any:
+        """
+        Unpack the data from the loaded file.
+
+        Parameters:
+            data:  the data to unpack
+
+        Returns:
+            the unpacked data
+        """
         return data
 
 
@@ -72,11 +160,6 @@ class MemMapDataset(GeneralStructure):
         return np.memmap
 
     def save_preprocess(self, preprocess_path, data_keys, data_dict, extra_data_keys, extra_data_types) -> List[str]:
-        """
-        Save the preprocessed data to the cache directory and optionally upload it to the remote storage.
-        data_dict : dict
-            Dictionary containing the preprocessed data.
-        """
         local_paths = []
         for key in data_keys:
             local_path = self.join_and_ext(preprocess_path, key)
