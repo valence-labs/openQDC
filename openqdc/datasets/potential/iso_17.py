@@ -21,10 +21,10 @@ class ISO17(BaseDataset):
     ```
 
     References:
-        https://arxiv.org/abs/1706.08566
-        https://arxiv.org/abs/1609.08259
-        https://www.nature.com/articles/sdata201422
-        https://pubmed.ncbi.nlm.nih.gov/10062328/
+        https://arxiv.org/abs/1706.08566\n
+        https://arxiv.org/abs/1609.08259\n
+        https://www.nature.com/articles/sdata201422\n
+        https://pubmed.ncbi.nlm.nih.gov/10062328/\n
         https://pubmed.ncbi.nlm.nih.gov/19257665/
     """
 

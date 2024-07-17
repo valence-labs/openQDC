@@ -1,6 +1,6 @@
 import ast
 import pkgutil
-from typing import Tuple
+from typing import Dict, Tuple
 
 import numpy as np
 from loguru import logger
@@ -18,7 +18,7 @@ atom_energy_collection = ast.literal_eval(pkgutil.get_data(__name__, "atom_energ
 atom_energy_collection = {k.lower(): v for k, v in atom_energy_collection.items()}
 
 
-def to_e_matrix(atom_energies: dict) -> np.ndarray:
+def to_e_matrix(atom_energies: Dict) -> np.ndarray:
     """
     Get the matrix of isolated atom energies for a dict of non-null values calculates
 

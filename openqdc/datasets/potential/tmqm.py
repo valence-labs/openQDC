@@ -59,7 +59,7 @@ class TMQM(BaseDataset):
     ```
 
     References:
-        https://pubs.acs.org/doi/10.1021/acs.jcim.0c01041
+        https://pubs.acs.org/doi/10.1021/acs.jcim.0c01041\n
         https://github.com/bbskjelstad/tmqm
     """
 

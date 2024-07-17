@@ -54,7 +54,7 @@ class Spice(BaseDataset):
     ```
 
     References:
-        https://arxiv.org/abs/2209.10702
+        https://arxiv.org/abs/2209.10702\n
         https://github.com/openmm/spice-dataset
     """
 
@@ -112,7 +112,7 @@ class SpiceV2(Spice):
     ```
 
     References:
-        https://github.com/openmm/spice-dataset/releases/tag/2.0.0
+        https://github.com/openmm/spice-dataset/releases/tag/2.0.0\n
         https://github.com/openmm/spice-dataset
     """
 
@@ -164,7 +164,7 @@ class SpiceVL2(SpiceV2):
     ```
 
     References:
-        https://github.com/openmm/spice-dataset/releases/tag/2.0.0
+        https://github.com/openmm/spice-dataset/releases/tag/2.0.0\n
         https://github.com/openmm/spice-dataset
     """
 

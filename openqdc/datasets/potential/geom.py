@@ -74,8 +74,8 @@ class GEOM(BaseDataset):
     ```
 
     References:
-        https://www.nature.com/articles/s41597-022-01288-4
-        https://github.com/learningmatter-mit/geom
+        https://www.nature.com/articles/s41597-022-01288-4\n
+        https://github.com/learningmatter-mit/geom\n
         CREST Software: https://pubs.rsc.org/en/content/articlelanding/2020/cp/c9cp06869d
     """
 

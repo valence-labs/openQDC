@@ -79,8 +79,8 @@ class Regressor:
         stride: int = 1,
         subsample: Optional[Union[float, int]] = None,
         remove_nan: bool = True,
-        *args,
-        **kwargs,
+        *args: any,
+        **kwargs: any,
     ):
         """
         Regressor class for preparing and solving regression problem for isolated atom energies.
@@ -117,7 +117,7 @@ class Regressor:
         self._post_init()
 
     @classmethod
-    def from_openqdc_dataset(cls, dataset, *args, **kwargs) -> "Regressor":
+    def from_openqdc_dataset(cls, dataset: any, *args: any, **kwargs: any) -> "Regressor":
         """
         Initialize the regressor object from an openqdc dataset. This is the default method.
         *args and and **kwargs are passed to the __init__ method and depends on the specific regressor.
@@ -158,12 +158,11 @@ class Regressor:
         self.update_hparams({"idxs": idxs})
 
     def _get_solver(self):
-        if self.solver_type == "linear":
+        try:
+            return AVAILABLE_SOLVERS[self.solver_type]()
+        except KeyError:
+            logger.warning(f"Unknown solver type {self.solver_type}, defaulting to linear regression.")
             return LinearSolver()
-        elif self.solver_type == "ridge":
-            return RidgeSolver()
-        logger.warning(f"Unknown solver type {self.solver_type}, defaulting to linear regression.")
-        return LinearSolver()
 
     def _prepare_inputs(self) -> Tuple[np.ndarray, np.ndarray]:
         logger.info("Preparing inputs for regression.")
@@ -222,7 +221,7 @@ class LinearSolver(Solver):
         No Uncertainty associated as it is quite small.
     """
 
-    _regr_str = "LinearRegression"
+    _regr_str = "linear"
 
     @staticmethod
     def solve(X, y):
@@ -236,7 +235,7 @@ class RidgeSolver(Solver):
     Ridge regression solver.
     """
 
-    _regr_str = "RidgeRegression"
+    _regr_str = "ridge"
 
     @staticmethod
     def solve(X, y):
@@ -250,3 +249,10 @@ class RidgeSolver(Solver):
         cov = np.sqrt(sigma2 * np.einsum("ij,kj,kl,li->i", Ainv, X, X, Ainv))
         mean = mean + y_mean.reshape([-1])
         return mean, cov
+
+
+AVAILABLE_SOLVERS = {
+    cls._regr_str: cls
+    for str_name, cls in globals().items()
+    if isinstance(cls, type) and issubclass(cls, Solver) and str_name != "Solver"  # Exclude the base class
+}

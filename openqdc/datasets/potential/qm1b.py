@@ -91,7 +91,7 @@ class QM1B(BaseDataset):
     ```
 
     References:
-        https://arxiv.org/pdf/2311.01135
+        https://arxiv.org/pdf/2311.01135\n
         https://github.com/graphcore-research/qm1b-dataset/
     """
 

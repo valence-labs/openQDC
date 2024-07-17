@@ -65,7 +65,7 @@ class NablaDFT(BaseDataset):
     ```
 
     References:
-        https://pubs.rsc.org/en/content/articlelanding/2022/CP/D2CP03966D
+        https://pubs.rsc.org/en/content/articlelanding/2022/CP/D2CP03966D\n
         https://github.com/AIRI-Institute/nablaDFT
     """
 

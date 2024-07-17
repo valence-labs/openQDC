@@ -49,8 +49,8 @@ class QMugs(BaseDataset):
     ```
 
     References:
-        https://arxiv.org/abs/2107.00367
-        https://www.nature.com/articles/s41597-022-01390-7#ethics
+        https://arxiv.org/abs/2107.00367\n
+        https://www.nature.com/articles/s41597-022-01390-7#ethics\n
         https://www.research-collection.ethz.ch/handle/20.500.11850/482129
     """
 
