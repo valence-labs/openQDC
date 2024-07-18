@@ -5,8 +5,9 @@ OpenQDC is a python library to work with quantum datasets. It's a package aimed 
 - 🐍 Simple pythonic API
 - 🕹️  ML-Ready: all you manipulate are `torch.Tensor`,`jax.Array` or `numpy.Array`objects.
 - ⚛️ Quantum Ready: The quantum methods are checked and standardized to provide addictional values.
-- ✅ Standardize: The datasets are written in standard and performant formats with annotated metadata like units and labels.
+- ✅ Standardized: The datasets are written in standard and performant formats with annotated metadata like units and labels.
 - 🧠 Performance matters: read and write multiple formats (memmap, zarr, xyz, etc).
+- 📈 Data: have access to 1.5+ billion datapoints
 
 Visit our website at TOFILL <IDK>.
 
