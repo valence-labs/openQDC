@@ -3,7 +3,8 @@
 import json
 import os
 import pickle as pkl
-from os.path import join as p_join
+
+# from os.path import join as p_join
 from typing import Dict, List, Optional
 
 import fsspec
@@ -25,7 +26,8 @@ _OPENQDC_CACHE_DIR = (
 )
 
 _OPENQDC_DOWNLOAD_API = {
-    "s3": "https://storage.openqdc.org/v1",
+    "s3": "/openqdc/v1",
+    # "https" : "https://storage.openqdc.org/v1",
     "gs": "https://storage.googleapis.com/qmdata-public/openqdc",
 }
 
@@ -34,7 +36,7 @@ def set_cache_dir(d):
     r"""
     Optionally set the _OPENQDC_CACHE_DIR directory.
 
-    Args:ßß
+    Args:
         d (str): path to a local folder.
     """
     if d is None:
@@ -86,6 +88,7 @@ def pull_locally(local_path, overwrite=False):
     """
     Retrieve file from remote gs path or local cache
     """
+
     remote_path = local_path.replace(get_local_cache(), get_remote_cache())
     os.makedirs(os.path.dirname(local_path), exist_ok=True)
     if not os.path.exists(local_path) or overwrite:
@@ -96,7 +99,7 @@ def pull_locally(local_path, overwrite=False):
 def request_s3fs_config():
     import httpx
 
-    response = httpx.get(p_join(_OPENQDC_DOWNLOAD_API["s3"], "config.json"))
+    response = httpx.get("https://storage.openqdc.org/config.json")
     response.raise_for_status()
     config = response.json()
     return config
