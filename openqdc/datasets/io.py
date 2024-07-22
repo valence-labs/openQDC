@@ -30,6 +30,7 @@ class FromFileDataset(BaseDataset, ABC):
         array_format: Optional[str] = "numpy",
         level_of_theory: Optional[QmMethod] = None,
         transform: Optional[Callable] = None,
+        skip_statistics: bool = False,
         regressor_kwargs={
             "solver_type": "linear",
             "sub_sample": None,
@@ -67,6 +68,7 @@ class FromFileDataset(BaseDataset, ABC):
         self.recompute_statistics = True
         self.refit_e0s = True
         self.energy_type = energy_type
+        self.skip_statistics = skip_statistics
         self.__energy_unit__ = energy_unit
         self._original_unit = self.energy_unit
         self.__distance_unit__ = distance_unit

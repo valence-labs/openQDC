@@ -110,6 +110,15 @@ class PCQM_PM6(BaseDataset):
             res = None
         return res
 
+    @property
+    def data_types(self):
+        return {
+            "atomic_inputs": np.float32,
+            "position_idx_range": np.int32,
+            "energies": np.float32,
+            "forces": np.float32,
+        }
+
     def read_raw_entries(self):
         arxiv_paths = glob(p_join(self.root, f"{self.__energy_methods__[0]}", "*.pkl"))
         f = lambda x: self.collate_list(read_preprocessed_archive(x))

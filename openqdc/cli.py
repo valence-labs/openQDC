@@ -100,7 +100,7 @@ def download(
                 logger.info(f"{dataset} is already cached. Skipping download")
             else:
                 SANITIZED_AVAILABLE_DATASETS[dataset](
-                    overwrite_local_cache=True, cache_dir=cache_dir, read_as_zarr=as_zarr
+                    overwrite_local_cache=True, cache_dir=cache_dir, read_as_zarr=as_zarr, skip_statistics=True
                 )
 
 
@@ -232,7 +232,7 @@ def upload(
         if exist_dataset(dataset):
             logger.info(f"Uploading {SANITIZED_AVAILABLE_DATASETS[dataset].__name__}")
             try:
-                SANITIZED_AVAILABLE_DATASETS[dataset]().upload(overwrite=overwrite, as_zarr=as_zarr)
+                SANITIZED_AVAILABLE_DATASETS[dataset](skip_statistics=True).upload(overwrite=overwrite, as_zarr=as_zarr)
             except Exception as e:
                 logger.error(f"Error while uploading {dataset}. {e}. Did you preprocess the dataset first?")
                 raise e
@@ -276,9 +276,9 @@ def convert(
 
     for dataset in list(map(lambda x: x.lower().replace("_", ""), datasets)):
         if exist_dataset(dataset):
-            logger.info(f"Uploading {SANITIZED_AVAILABLE_DATASETS[dataset].__name__}")
+            logger.info(f"Converting {SANITIZED_AVAILABLE_DATASETS[dataset].__name__}")
             try:
-                ds = SANITIZED_AVAILABLE_DATASETS[dataset](overwrite_local_cache=download)
+                ds = SANITIZED_AVAILABLE_DATASETS[dataset](overwrite_local_cache=download, skip_statistics=True)
                 # os.makedirs(p_join(ds.root, "zips", ds.__name__), exist_ok=True)
 
                 pkl = load_pkl(p_join(ds.preprocess_path, "props.pkl"))
