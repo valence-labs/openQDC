@@ -10,6 +10,7 @@ authors = [{ name = "Nikhil Shenoy", email = "nikhilshenoy98@gmail.com" },
           { name = "Prudencio Tossou", email = "tossouprudencio@gmail.com" },
           { name = "Cristian Gabellini", email = "cris.gabellini@gmail.com" }]
 readme = "README.md"
+license = { text = "CC BY-NC 4.0" }
 requires-python = ">=3.8"
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -75,10 +76,10 @@ dev = [
 openqdc = "openqdc.cli:app"
 
 [project.urls]
-Website = "https://github.com/OpenDrugDiscovery"
-"Source Code" = "https://github.com/OpenDrugDiscovery/openQDC"
-"Bug Tracker" = "https://github.com/OpenDrugDiscovery/openQDC/issues"
-Documentation = "https://github.com/OpenDrugDiscovery/openQDC"
+Website = "https://openqdc.io"
+"Source Code" = "https://github.com/valence-labs/openQDC"
+"Bug Tracker" = "https://github.com/valence-labs/openQDC/issues"
+Documentation = "https://docs.openqdc.io"
 
 [tool.setuptools]
 include-package-data = true
