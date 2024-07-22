@@ -31,9 +31,14 @@ jobs:
         uses: mamba-org/setup-micromamba@v1
         with:
           environment-file: env.yml
-          environment-name: openqdc
+          environment-name: my_env
           cache-environment: true
           cache-downloads: true
+          create-args: >-
+            pip
+            semver
+            python-build
+            setuptools_scm
 
       - name: Check the version is valid semver
         run: |
@@ -84,6 +89,9 @@ jobs:
           # Tag the release
           git tag -a "${{ inputs.release-version }}" -m "Release version ${{ inputs.release-version }}"
 
+          # Checkout the git tag
+          git checkout "${{ inputs.release-version }}"
+
           # Push the modified changelogs
           git push origin main
 
@@ -114,45 +122,5 @@ jobs:
           git fetch origin gh-pages
 
           echo "Build and deploy the doc on ${{ inputs.release-version }}"
-          mike deploy --push --force stable
-          mike deploy --push --force ${{ inputs.release-version }}
-
-  build-installer-linux:
-    needs: [release]
-
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-
-    defaults:
-      run:
-        shell: bash -l {0}
-
-    steps:
-      - name: Checkout the code
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ inputs.release-version }}
-
-      - name: Setup mamba
-        uses: mamba-org/setup-micromamba@v1
-        with:
-          environment-file: env.yml
-          environment-name: openqdc
-          cache-environment: true
-          cache-downloads: true
-
-      - name: Build the wheel and sdist
-        run: python -m build --no-isolation
-
-      - name: Build standalone installer
-        run: |
-          export OPENQDC_CLIENT_CONSTRUCTOR_VERSION="${{ inputs.release-version }}"
-          bash ./scripts/build_installer.sh
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844
-        with:
-          tag_name: ${{ inputs.release-version }}
-          files: |
-            ./build/*.sh
-            ./build/*.sha256
+          mike deploy --push stable
+          mike deploy --push ${{ inputs.release-version }}
