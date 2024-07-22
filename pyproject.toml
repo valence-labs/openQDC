@@ -44,7 +44,10 @@ dependencies = [
   "ase" ,
   "gdown",
   "h5py >= 3.8.0" ,
-  "dscribe"
+  "dscribe",
+  "zarr",
+  "python-dotenv",
+  "s3fs",
 ]
 
 

@@ -74,13 +74,19 @@ class IDES(ABC):
 
 class DES370K(BaseInteractionDataset, IDES):
     """
-    DE Shaw Research interaction energy of over 370K
-    small molecule dimers as described in the paper:
+    DE Shaw 370K (DES370K) is a dataset of 3,691 distinct dimers with 370K unique geometries with interaction energies
+    computed at CCSD(T)/CBS level of theory. It consists of 392 closed-shell chemical species (both neutral molecules
+    and ions) including water and functional groups found in proteins. Dimer geometries are generated using
+    QM-based optimization with DF-LMP2/aVDZ level of theory and MD-based from condensed phase MD simulations.
 
-    Quantum chemical benchmark databases of gold-standard dimer interaction energies.
-    Donchev, A.G., Taube, A.G., Decolvenaere, E. et al.
-    Sci Data 8, 55 (2021).
-    https://doi.org/10.1038/s41597-021-00833-x
+    Usage:
+    ```python
+    from openqdc.datasets import DES370K
+    dataset = DES370K()
+    ```
+
+    Reference:
+        https://www.nature.com/articles/s41597-021-00833-x
     """
 
     __name__ = "des370k_interaction"
@@ -173,13 +179,18 @@ class DES370K(BaseInteractionDataset, IDES):
 
 class DES5M(DES370K):
     """
-    DE Shaw Research interaction energy calculations for
-    over 5M small molecule dimers as described in the paper:
+    DE Shaw 5M (DES5M) is a dataset of 3,691 distinct dimers with 5,000,000 unique geometries with interaction energies
+    computed using SNS-MP2, a machine learning approach. The unique geometries are generated similar to DES370K using
+    QM based optimization and MD simulations.
 
-    Quantum chemical benchmark databases of gold-standard dimer interaction energies.
-    Donchev, A.G., Taube, A.G., Decolvenaere, E. et al.
-    Sci Data 8, 55 (2021).
-    https://doi.org/10.1038/s41597-021-00833-x
+    Usage:
+    ```python
+    from openqdc.datasets import DES5M
+    dataset = DES5M()
+    ```
+
+    Reference:
+        https://www.nature.com/articles/s41597-021-00833-x
     """
 
     __name__ = "des5m_interaction"
@@ -242,18 +253,19 @@ class DES5M(DES370K):
 
 class DESS66(DES370K):
     """
-    DE Shaw Research interaction energy
-    estimates of all 66 conformers from
-    the original S66 dataset as described
-    in the paper:
+    DESS66 is a dataset consisting of 66 molecular complexes from the S66 dataset with CCSD(T)/CBS
+    dimer interaction energies with 1 equilibrium geometry giving 66 conformers in total.
+    The protocol for estimating energies is based on the DES370K paper.
 
-    Quantum chemical benchmark databases of gold-standard dimer interaction energies.
-    Donchev, A.G., Taube, A.G., Decolvenaere, E. et al.
-    Sci Data 8, 55 (2021).
-    https://doi.org/10.1038/s41597-021-00833-x
+    Usage:
+    ```python
+    from openqdc.datasets import DESS66
+    dataset = DESS66()
+    ```
 
-    Data was downloaded from Zenodo:
-    https://zenodo.org/records/5676284
+    Reference:
+        https://www.nature.com/articles/s41597-021-00833-x\n
+        S66: https://pubs.acs.org/doi/10.1021/ct2002946
     """
 
     __name__ = "des_s66"
@@ -266,19 +278,18 @@ class DESS66(DES370K):
 
 class DESS66x8(DESS66):
     """
-    DE Shaw Research interaction energy
-    estimates of all 528 conformers from
-    the original S66x8 dataset as described
-    in the paper:
+    DESS66x8 is a dataset consisting of 66 molecular complexes from the S66 dataset with CCSD(T)/CBS
+    dimer interaction energies with 1 equilibrium geometry and 8 geometries along the dissociation curve
+    giving 592 conformers in total. The protocol for estimating energies is based on the DES370K paper.
 
-    Quantum chemical benchmark databases of gold-standard dimer interaction energies.
-    Donchev, A.G., Taube, A.G., Decolvenaere, E. et al.
-    Sci Data 8, 55 (2021).
-    https://doi.org/10.1038/s41597-021-00833-x
+    Usage:
+    ```python
+    from openqdc.datasets import DESS66x8
+    dataset = DESS66x8()
+    ```
 
-    Data was downloaded from Zenodo:
-
-    https://zenodo.org/records/5676284
+    Reference:
+        https://www.nature.com/articles/s41597-021-00833-x
     """
 
     __name__ = "des_s66x8"

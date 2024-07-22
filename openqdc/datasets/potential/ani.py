@@ -39,19 +39,22 @@ def extract_ani2_entries(properties):
 
 class ANI1(BaseDataset):
     """
-    The ANI-1 dataset is a collection of 22 x 10^6 structural conformations from 57,000 distinct small
-    organic molecules with energy labels calculated using DFT. The molecules
-    contain 4 distinct atoms, C, N, O and H.
+    The ANI-1 dataset is a collection of 22 x 10^6 structural conformations from 57,000 distinct small organic
+    molecules. The molecules contain 4 distinct atoms, C, N, O and H. Electronic structure calculations use the
+    wB97x density functional and the 6-31G(d) basis set. For generating structures, smiles strings for molecules
+    are used for generating 3D conformations using RDKit. These 3D structures are then pre-optimized to a stationary
+    point using the MMFF94 force field. Finally, geometries are optimized until energy minima using the chosen DFT
+    level.
 
-    Usage
+    Usage:
     ```python
     from openqdc.datasets import ANI1
     dataset = ANI1()
     ```
 
     References:
-    - ANI-1: https://www.nature.com/articles/sdata2017193
-    - Github: https://github.com/aiqm/ANI1x_datasets
+        https://www.nature.com/articles/sdata2017193\n
+        https://github.com/aiqm/ANI1x_datasets
     """
 
     __name__ = "ani1"
@@ -79,9 +82,6 @@ class ANI1(BaseDataset):
         return dict(dataset_name="ani", links=self.__links__)
 
     def __smiles_converter__(self, x):
-        """util function to convert string to smiles: useful if the smiles is
-        encoded in a different format than its display format
-        """
         return "-".join(x.decode("ascii").split("-")[:-1])
 
     @property
@@ -96,20 +96,81 @@ class ANI1(BaseDataset):
         return samples
 
 
+class ANI1X(ANI1):
+    """
+    The ANI-1X dataset consists of ANI-1 molecules + some molecules added using active learning, which leads to
+    a total of 5,496,771 conformers with 63,865 unique molecules. Databases of molecules like GDB-11, ChEMBL,
+    generated amino acids and 2-amino acid peptides are used for sampling new molecules. One of the techniques
+    are used for sampling conformations, (1) molecular dynamics, (2) normal mode sampling, (3) dimer sampling and
+    (4) torsion sampling.
+
+    Usage:
+    ```python
+    from openqdc.datasets import ANI1X
+    dataset = ANI1X()
+    ```
+
+    References:
+        https://doi.org/10.1063/1.5023802\n
+        https://github.com/aiqm/ANI1x_datasets
+    """
+
+    __name__ = "ani1x"
+    __energy_unit__ = "hartree"
+    __distance_unit__ = "ang"
+    __forces_unit__ = "hartree/ang"
+
+    __energy_methods__ = [
+        PotentialMethod.NONE,  # "hf/cc-pvdz",
+        PotentialMethod.NONE,  # "hf/cc-pvqz",
+        PotentialMethod.NONE,  # "hf/cc-pvtz",
+        PotentialMethod.NONE,  # "mp2/cc-pvdz",
+        PotentialMethod.NONE,  # "mp2/cc-pvqz",
+        PotentialMethod.NONE,  # "mp2/cc-pvtz",
+        PotentialMethod.NONE,  # "wb97x/6-31g(d)",
+        PotentialMethod.NONE,  # "wb97x/cc-pvtz",
+    ]
+
+    energy_target_names = [
+        "HF:cc-pVDZ Total Energy",
+        "HF:cc-pVQZ Total Energy",
+        "HF:cc-pVTZ Total Energy",
+        "MP2:cc-pVDZ Correlation Energy",
+        "MP2:cc-pVQZ Correlation Energy",
+        "MP2:cc-pVTZ Correlation Energy",
+        "wB97x:6-31G(d) Total Energy",
+        "wB97x:def2-TZVPP Total Energy",
+    ]
+
+    force_target_names = [
+        "wB97x:6-31G(d) Atomic Forces",
+        "wB97x:def2-TZVPP Atomic Forces",
+    ]
+
+    __force_mask__ = [False, False, False, False, False, False, True, True]
+    __links__ = {"ani1ccx.hdf5.gz": "https://zenodo.org/record/4081692/files/293.hdf5.gz"}
+
+    def convert_forces(self, x):
+        return super().convert_forces(x) * 0.529177249  # correct the Dataset error
+
+    def __smiles_converter__(self, x):
+        return x
+
+
 class ANI1CCX(ANI1):
     """
-    ANI1-CCX is a dataset of 500k conformers subsampled from the 5.5M conformers of ANI-1X dataset. The selected
-    conformations are then labelled using a high accuracy CCSD(T)*/CBS method.
+    ANI1-CCX is a dataset of 500k conformers subsampled from the 5.5M conformers of ANI-1X dataset using active
+    learning. The conformations are labelled using a high accuracy CCSD(T)*/CBS method.
 
-    Usage
+    Usage:
     ```python
     from openqdc.datasets import ANI1CCX
     dataset = ANI1CCX()
     ```
 
     References:
-    - ANI-1ccx: https://doi.org/10.1038/s41467-019-10827-4
-    - Github: https://github.com/aiqm/ANI1x_datasets
+        https://doi.org/10.1038/s41467-019-10827-4\n
+        https://github.com/aiqm/ANI1x_datasets
     """
 
     __name__ = "ani1ccx"
@@ -140,68 +201,22 @@ class ANI1CCX(ANI1):
         return x
 
 
-class ANI1X(ANI1):
+class ANI1CCX_V2(ANI1CCX):
     """
-    The ANI-1X dataset consists of ANI-1 molecules + some molecules added using active learning, which leads to
-    a total of 5,496,771 conformers with 63,865 unique molecules.
+    ANI1CCX_V2 is an extension of the ANI1CCX dataset with additional PM6 and GFN2_xTB labels
+    for each conformation.
 
-    Usage
+    Usage:
     ```python
-    from openqdc.datasets import ANI1X
-    dataset = ANI1X()
+    from openqdc.datasets import ANI1CCX_V2
+    dataset = ANI1CCX_V2()
     ```
 
     References:
-    - ANI-1x: https://doi.org/10.1063/1.5023802
-    - Github: https://github.com/aiqm/ANI1x_datasets
+        https://doi.org/10.1038/s41467-019-10827-4\n
+        https://github.com/aiqm/ANI1x_datasets
     """
 
-    __name__ = "ani1x"
-    __energy_unit__ = "hartree"
-    __distance_unit__ = "ang"
-    __forces_unit__ = "hartree/ang"
-
-    __energy_methods__ = [
-        "hf/cc-pvdz",
-        "hf/cc-pvqz",
-        "hf/cc-pvtz",
-        "mp2/cc-pvdz",
-        "mp2/cc-pvqz",
-        "mp2/cc-pvtz",
-        "wb97x/6-31g(d)",
-        "wb97x/cc-pvtz",
-    ]
-
-    energy_target_names = [
-        "HF:cc-pVDZ Total Energy",
-        "HF:cc-pVQZ Total Energy",
-        "HF:cc-pVTZ Total Energy",
-        "MP2:cc-pVDZ Correlation Energy",
-        "MP2:cc-pVQZ Correlation Energy",
-        "MP2:cc-pVTZ Correlation Energy",
-        "wB97x:6-31G(d) Total Energy",
-        "wB97x:def2-TZVPP Total Energy",
-    ]
-
-    force_target_names = [
-        "wB97x:6-31G(d) Atomic Forces",
-        "wB97x:def2-TZVPP Atomic Forces",
-    ]
-
-    __force_mask__ = [False, False, False, False, False, False, True, True]
-    __links__ = {"ani1ccx.hdf5.gz": "https://zenodo.org/record/4081692/files/293.hdf5.gz"}
-
-    def convert_forces(self, x):
-        return super().convert_forces(x) * 0.529177249  # correct the Dataset error
-
-    def __smiles_converter__(self, x):
-        """util function to convert string to smiles: useful if the smiles is
-        encoded in a different format than its display format
-        """
-        return x
-
-
-class ANI1CCX_V2(ANI1CCX):
     __name__ = "ani1ccx_v2"
 
     __energy_methods__ = ANI1CCX.__energy_methods__ + [PotentialMethod.PM6, PotentialMethod.GFN2_XTB]
@@ -211,19 +226,20 @@ class ANI1CCX_V2(ANI1CCX):
 
 class ANI2X(ANI1):
     """
-    The ANI-2X dataset was constructed using active learning from modified versions of GDB-11, CheMBL,
-    and s66x8. It adds three new elements (F, Cl, S) resulting in 4.6 million conformers from 13k
-    chemical isomers, optimized using the LBFGS algorithm and labeled with ωB97X/6-31G*.
+    The ANI-2X dataset was constructed using active learning from modified versions of GDB-11, CheMBL, and s66x8.
+    It adds three new elements (F, Cl, S) resulting in 4.6 million conformers from 13k chemical isomers, optimized
+    using the LBFGS algorithm and labeled with ωB97X/6-31G*. The same sampling techniques as done in ANI-1X are
+    used for generating geometries.
 
-    Usage
+    Usage:
     ```python
-    from openqdc.datasets import ANI@X
+    from openqdc.datasets import ANI2X
     dataset = ANI2X()
     ```
 
     References:
-    - ANI-2x: https://doi.org/10.1021/acs.jctc.0c00121
-    - Github: https://github.com/aiqm/ANI1x_datasets
+        https://doi.org/10.1021/acs.jctc.0c00121
+        https://github.com/aiqm/ANI1x_datasets
     """
 
     __name__ = "ani2x"
@@ -258,9 +274,6 @@ class ANI2X(ANI1):
     }
 
     def __smiles_converter__(self, x):
-        """util function to convert string to smiles: useful if the smiles is
-        encoded in a different format than its display format
-        """
         return x
 
     def read_raw_entries(self):

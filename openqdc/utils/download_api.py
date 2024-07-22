@@ -14,7 +14,9 @@ import fsspec
 import gdown
 import requests
 import tqdm
-from aiohttp import ClientTimeout
+
+# from aiohttp import ClientTimeout
+from dotenv import load_dotenv
 from fsspec import AbstractFileSystem
 from fsspec.callbacks import TqdmCallback
 from fsspec.implementations.local import LocalFileSystem
@@ -27,25 +29,39 @@ import openqdc.utils.io as ioqdc
 @dataclass
 class FileSystem:
     """
-    A class to handle file system operations
+    A basic class to handle file system operations
     """
 
     public_endpoint: Optional[AbstractFileSystem] = None
     private_endpoint: Optional[AbstractFileSystem] = None
     local_endpoint: AbstractFileSystem = LocalFileSystem()
 
+    def __init__(self):
+        load_dotenv()  # load environment variables from .env
+        self.KEY = os.getenv("CLOUDFARE_KEY", None)
+        self.SECRET = os.getenv("CLOUDFARE_SECRET", None)
+
     @property
     def public(self):
+        """
+        Return the public remote filesystem with read permission
+        """
         self.connect()
         return self.public_endpoint
 
     @property
     def private(self):
+        """
+        Return the private remote filesystem with write permission
+        """
         self.connect()
         return self.private_endpoint
 
     @property
     def local(self):
+        """
+        Return the local filesystem
+        """
         return self.local_endpoint
 
     @property
@@ -57,23 +73,29 @@ class FileSystem:
 
     def connect(self):
         """
-        Attempt connection to the public and private endpoints
+        Attempt connection to the public and private remote endpoints
         """
         if not self.is_connected:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")  # No quota warning
                 self.public_endpoint = self.get_default_endpoint("public")
                 self.private_endpoint = self.get_default_endpoint("private")
-                self.public_endpoint.client_kwargs = {"timeout": ClientTimeout(total=3600, connect=1000)}
+                # self.public_endpoint.client_kwargs = {"timeout": ClientTimeout(total=3600, connect=1000)}
 
     def get_default_endpoint(self, endpoint: str) -> AbstractFileSystem:
         """
         Return a default endpoint for the given str [public, private]
         """
         if endpoint == "private":
-            return fsspec.filesystem("gs")
+            return fsspec.filesystem(
+                "s3",
+                key=self.KEY,
+                secret=self.SECRET,
+                endpoint_url=ioqdc.request_s3fs_config()["endpoint_url"],
+            )
         elif endpoint == "public":
-            return fsspec.filesystem("https")
+            # return fsspec.filesystem("https")
+            return fsspec.filesystem("s3", **ioqdc.request_s3fs_config())
         else:
             return self.local_endpoint
 

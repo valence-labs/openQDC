@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from copy import deepcopy
 from dataclasses import asdict, dataclass
 from os.path import join as p_join
-from typing import Optional
+from typing import Callable, Dict, Optional
 
 import numpy as np
 from loguru import logger
@@ -17,9 +17,15 @@ class StatisticsResults:
     """
 
     def to_dict(self):
+        """
+        Convert the class to a dictionary
+        """
         return asdict(self)
 
-    def transform(self, func):
+    def transform(self, func: Callable):
+        """
+        Apply a function to all the attributes of the class
+        """
         for k, v in self.to_dict().items():
             if v is not None:
                 setattr(self, k, func(v))
@@ -55,6 +61,14 @@ class StatisticManager:
     """
 
     def __init__(self, dataset, recompute: bool = False, *statistic_calculators: "AbstractStatsCalculator"):
+        """
+        dataset : openqdc.datasets.base.BaseDataset
+            The dataset object to compute the statistics
+        recompute : bool, default = False
+            Flag to recompute the statistics
+        *statistic_calculators :  AbstractStatsCalculator
+            statistic calculators to run
+        """
         self._state = {}
         self._results = {}
         self._statistic_calculators = [
@@ -63,7 +77,7 @@ class StatisticManager:
         ]
 
     @property
-    def state(self) -> dict:
+    def state(self) -> Dict:
         """
         Return the dictionary state of the manager
         """
@@ -120,7 +134,7 @@ class AbstractStatsCalculator(ABC):
     """
     Abstract class that defines the interface for all
     the calculators object and the methods to
-    compute the statistics
+    compute the statistics.
     """
 
     # State Dependencies of the calculator to skip part of the calculation
@@ -140,6 +154,28 @@ class AbstractStatsCalculator(ABC):
         atom_charges: Optional[np.ndarray] = None,
         forces: Optional[np.ndarray] = None,
     ):
+        """
+        name : str
+            Name of the dataset for saving and loading.
+        energy_type : str, default = None
+            Type of the energy for the computation of the statistics. Used for loading and saving.
+        force_recompute : bool, default = False
+            Flag to force the recomputation of the statistics
+        energies : np.ndarray, default = None
+            Energies of the dataset
+        n_atoms : np.ndarray, default = None
+            Number of atoms in the dataset
+        atom_species : np.ndarray, default = None
+            Atomic species of the dataset
+        position_idx_range : np.ndarray, default = None
+            Position index range of the dataset
+        e0_matrix : np.ndarray, default = None
+            Isolated atom energies matrix of the dataset
+        atom_charges : np.ndarray, default = None
+            Atomic charges of the dataset
+        forces : np.ndarray, default = None
+            Forces of the dataset
+        """
         self.name = name
         self.energy_type = energy_type
         self.force_recompute = force_recompute
@@ -149,6 +185,7 @@ class AbstractStatsCalculator(ABC):
         self.e0_matrix = e0_matrix
         self.n_atoms = n_atoms
         self.atom_species_charges_tuple = (atom_species, atom_charges)
+        self._root = p_join(get_local_cache(), self.name)
         if atom_species is not None and atom_charges is not None:
             # by value not reference
             self.atom_species_charges_tuple = np.concatenate((atom_species[:, None], atom_charges[:, None]), axis=-1)
@@ -159,7 +196,7 @@ class AbstractStatsCalculator(ABC):
 
     @property
     def preprocess_path(self):
-        path = p_join(self.root, "preprocessed", str(self) + ".pkl")
+        path = p_join(self.root, "statistics", self.name + f"_{str(self)}" + ".pkl")
         return path
 
     @property
@@ -167,14 +204,14 @@ class AbstractStatsCalculator(ABC):
         """
         Path to the dataset folder
         """
-        return p_join(get_local_cache(), self.name)
+        return self._root
 
     @classmethod
     def from_openqdc_dataset(cls, dataset, recompute: bool = False):
         """
-        Create a calculator object from a dataset object
+        Create a calculator object from a dataset object.
         """
-        return cls(
+        obj = cls(
             name=dataset.__name__,
             force_recompute=recompute,
             energy_type=dataset.energy_type,
@@ -186,6 +223,8 @@ class AbstractStatsCalculator(ABC):
             atom_charges=dataset.data["atomic_inputs"][:, 1].ravel(),
             e0_matrix=dataset.__isolated_atom_energies__,
         )
+        obj._root = dataset.root  # set to the dataset root in case of multiple datasets
+        return obj
 
     @abstractmethod
     def compute(self) -> StatisticsResults:
@@ -214,7 +253,7 @@ class AbstractStatsCalculator(ABC):
             logger.warning(f"Statistics for {str(self)} not found. Computing...")
             return False
 
-    def _setup_deps(self, state: dict) -> None:
+    def _setup_deps(self, state: Dict) -> None:
         """
         Check if the dependencies of calculators are satisfied
         from the state object and set the attributes of the calculator
@@ -226,7 +265,7 @@ class AbstractStatsCalculator(ABC):
             for dep in self.state_dependency:
                 setattr(self, dep, state[dep])
 
-    def write_state(self, update: dict) -> None:
+    def write_state(self, update: Dict) -> None:
         """
         Write/update the state dictionary with the update dictionary
 
@@ -235,7 +274,7 @@ class AbstractStatsCalculator(ABC):
         """
         self.state.update(update)
 
-    def run(self, state: dict) -> None:
+    def run(self, state: Dict) -> None:
         """
         Main method to run the calculator.
         Setup the dependencies from the state dictionary

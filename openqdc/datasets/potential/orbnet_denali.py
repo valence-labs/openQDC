@@ -36,10 +36,14 @@ def read_archive(mol_id, conf_dict, base_path, energy_target_names: List[str]) -
 
 class OrbnetDenali(BaseDataset):
     """
-    Orbnet Denali is a collection of 2.3 million conformers from 212,905 unique molecules. It performs
-    DFT (ωB97X-D3/def2-TZVP) calculations on molecules and geometries consisting of organic molecules
-    and chemistries, with protonation and tautomeric states, non-covalent interactions, common salts,
-    and counterions, spanning the most common elements in bio and organic chemistry.
+    Orbnet Denali is a collection of 2.3 million conformers from 212,905 unique molecules. Molecules include a range
+    of organic molecules with protonation and tautomeric states, non-covalent interactions, common salts, and
+    counterions, spanning the most common elements in bio and organic chemistry. Geometries are generated in 2 steps.
+    First, four energy-minimized conformations are generated for each molecule using the ENTOS BREEZE conformer
+    generator. Second, using the four energy-minimized conformers, non-equilibrium geometries are generated using
+    normal mode sampling at 300K or ab initio molecular dynamics (AIMD) for 200fs at 500K; using GFN1-xTB level of
+    theory. Energies are calculated using DFT method wB97X-D3/def2-TZVP and semi-empirical method GFN1-xTB level of
+    theory.
 
     Usage:
     ```python
@@ -48,8 +52,8 @@ class OrbnetDenali(BaseDataset):
     ```
 
     References:
-    - https://arxiv.org/pdf/2107.00299.pdf
-    - https://figshare.com/articles/dataset/OrbNet_Denali_Training_Data/14883867
+        https://arxiv.org/abs/2107.00299\n
+        https://figshare.com/articles/dataset/OrbNet_Denali_Training_Data/14883867
     """
 
     __name__ = "orbnet_denali"
@@ -74,13 +78,6 @@ class OrbnetDenali(BaseDataset):
             for mol_id, group in df.groupby("mol_id")
         }
 
-        # print(df.head())
-        # tmp = df.to_dict('index')
-        # for i, k in enumerate(tmp):
-        #     print(k, tmp[k])
-        #     if i > 10:
-        #         break
-        # exit()
         fn = lambda x: read_archive(x[0], x[1], self.root, self.energy_target_names)
         res = dm.parallelized(fn, list(labels.items()), scheduler="threads", n_jobs=-1, progress=True)
         samples = sum(res, [])

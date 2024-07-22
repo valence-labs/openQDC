@@ -7,19 +7,43 @@ from openqdc.utils import read_qc_archive_h5
 
 class COMP6(BaseDataset):
     """
-    COMP6 is a benchmark suite consisting of broad regions of bio-chemical and organic space
-    developed for testing the ANI-1x potential. It is curated from 6 benchmark sets:
-    S66x8, ANI Molecular Dynamics, GDB7to9, GDB10to13, DrugBank, and Tripeptides.
+    COMP6 is a benchmark suite consisting of broad regions of bio-chemical and organic space developed for testing the
+    ANI-1x potential. It is curated from 6 benchmark sets: S66x8, ANI-MD, GDB7to9, GDB10to13, DrugBank, and
+    Tripeptides. Energies and forces for all non-equilibrium molecular conformations are calculated using
+    the wB97x density functional with the 6-31G(d) basis set. The dataset also includes Hirshfield charges and
+    molecular dipoles.
 
-    Usage
+    Details of the benchmark sets are as follows:
+        S66x8: Consists of 66 dimeric systems involving hydrogen bonding, pi-pi stacking, London interactions and
+    mixed influence interactions.\n
+        ANI Molecular Dynamics (ANI-MD): Forces from the ANI-1x potential are used for running 1ns vacuum molecular
+    dynamics with a 0.25fs time step at 300K using the Langevin thermostat of 14 well-known drug molecules and 2 small
+    proteins. A random subsample of 128 frames from each 1ns trajectory is selected, and reference DFT single point
+    calculations are performed to calculate energies and forces.\n
+        GDB7to9: Consists of 1500 molecules where 500 per 7, 8 and 9 heavy atoms subsampled from the GDB-11 dataset.
+    The intial structure are randomly embedded into 3D space using RDKit and are optimized with tight convergence
+    criteria. Normal modes/force constants are computer using the reference DFT model. Finally, Diverse normal
+    mode sampling (DNMS) is carried out to generate non-equilibrium conformations.\n
+        GDB10to13: Consists of 3000 molecules where 500 molecules per 10 and 11 heavy atoms are subsampled from GDB-11
+    and 1000 molecules per 12 and 13 heavy atom are subsampled from GDB-13. Non-equilibrium conformations are
+    generated via DNMS.\n
+        Tripeptide: Consists of 248 random tripeptides. Structures are optimized similar to GDB7to9.\n
+        DrugBank: Consists of 837 molecules subsampled from the original DrugBank database of real drug molecules.
+    Structures are optimized similar to GDB7to9.
+
+    Usage:
     ```python
     from openqdc.datasets import COMP6
     dataset = COMP6()
     ```
 
     References:
-    - https://aip.scitation.org/doi/abs/10.1063/1.5023802
-    - Github: https://github.com/isayev/COMP6
+        https://aip.scitation.org/doi/abs/10.1063/1.5023802\n
+        https://github.com/isayev/COMP6\n
+        S66x8: https://pubs.rsc.org/en/content/articlehtml/2016/cp/c6cp00688d\n
+        GDB-11: https://pubmed.ncbi.nlm.nih.gov/15674983/\n
+        GDB-13: https://pubmed.ncbi.nlm.nih.gov/19505099/\n
+        DrugBank: https://pubs.acs.org/doi/10.1021/ja902302h
     """
 
     __name__ = "comp6"

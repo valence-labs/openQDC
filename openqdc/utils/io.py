@@ -3,6 +3,8 @@
 import json
 import os
 import pickle as pkl
+
+# from os.path import join as p_join
 from typing import Dict, List, Optional
 
 import fsspec
@@ -22,6 +24,12 @@ from openqdc.utils.molecule import z_to_formula
 _OPENQDC_CACHE_DIR = (
     "~/.cache/openqdc" if "OPENQDC_CACHE_DIR" not in os.environ else os.path.normpath(os.environ["OPENQDC_CACHE_DIR"])
 )
+
+_OPENQDC_DOWNLOAD_API = {
+    "s3": "/openqdc/v1",
+    # "https" : "https://storage.openqdc.org/v1",
+    "gs": "https://storage.googleapis.com/qmdata-public/openqdc",
+}
 
 
 def set_cache_dir(d):
@@ -54,9 +62,11 @@ def get_remote_cache(write_access=False) -> str:
     Returns the entry point based on the write access.
     """
     if write_access:
-        remote_cache = "gs://qmdata-public/openqdc"
+        remote_cache = "openqdc/v1"  # "gs://qmdata-public/openqdc"
+        # remote_cache = "gs://qmdata-public/openqdc"
     else:
-        remote_cache = "https://storage.googleapis.com/qmdata-public/openqdc"
+        remote_cache = _OPENQDC_DOWNLOAD_API.get(os.environ.get("OPENQDC_DOWNLOAD_API", "s3"))
+        # remote_cache = "https://storage.googleapis.com/qmdata-public/openqdc"
     return remote_cache
 
 
@@ -78,11 +88,21 @@ def pull_locally(local_path, overwrite=False):
     """
     Retrieve file from remote gs path or local cache
     """
+
     remote_path = local_path.replace(get_local_cache(), get_remote_cache())
     os.makedirs(os.path.dirname(local_path), exist_ok=True)
     if not os.path.exists(local_path) or overwrite:
         API.get_file(remote_path, local_path)
     return local_path
+
+
+def request_s3fs_config():
+    import httpx
+
+    response = httpx.get("https://storage.openqdc.org/config.json")
+    response.raise_for_status()
+    config = response.json()
+    return config
 
 
 def copy_exists(local_path):
@@ -150,8 +170,8 @@ def load_hdf5_file(hdf5_file_path: str):
 
     # inorder to enable multiprocessing:
     # https://github.com/fsspec/gcsfs/issues/379#issuecomment-839929801
-    fsspec.asyn.iothread[0] = None
-    fsspec.asyn.loop[0] = None
+    # fsspec.asyn.iothread[0] = None
+    # fsspec.asyn.loop[0] = None
 
     return file
 
@@ -177,7 +197,7 @@ def load_xyz(path):
     return MolFromXYZFile(path)
 
 
-def dict_to_atoms(d: dict, ext: bool = False, energy_method: int = 0) -> Atoms:
+def dict_to_atoms(d: Dict, ext: bool = False, energy_method: int = 0) -> Atoms:
     """
     Converts dictionary to ase atoms object
 

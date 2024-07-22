@@ -12,13 +12,18 @@ from openqdc.utils.constants import ATOM_TABLE
 
 class Splinter(BaseInteractionDataset):
     """
-    A dataset of over 1.7 million protein-ligand
-    interactions as described in the paper:
+    Splinter consists of 30,416A dimer pairs with over 1.5 million geometries. The geometries are generated
+    by quantum mechanical optimization with B3LYP-D3/aug-cc-pV(D+d)Z level of theory. The interaction energies
+    and the various components are computed using SAPT0/qug-cc-pV(D=d)Z method.
 
-    A quantum chemical interaction energy dataset for accurately modeling protein-ligand interactions.
-    Spronk, S.A., Glick, Z.L., Metcalf, D.P. et al.
-    Sci Data 10, 619 (2023).
-    https://doi.org/10.1038/s41597-023-02443-1
+    Usage:
+    ```python
+    from openqdc.datasets import Splinter
+    dataset = Splinter()
+    ```
+
+    Reference:
+        https://doi.org/10.1038/s41597-023-02443-1
     """
 
     __energy_unit__ = "kcal/mol"

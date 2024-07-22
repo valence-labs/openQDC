@@ -78,11 +78,11 @@ def extract_from_row(row, file_idx=None):
 
 class QM1B(BaseDataset):
     """
-    QM1B is a low-resolution DFT dataset generated using PySCF IPU.
-    It is composed of one billion training examples containing 9-11 heavy atoms.
-    It was created by taking 1.09M SMILES strings from the GDB-11 database and
-    computing molecular properties (e.g. HOMO-LUMO gap) for a set of up to 1000
-    conformers per molecule at the B3LYP/STO-3G level of theory.
+    QM1B is a dataset containing 1 billion conformations for 1.09M small molecules generated using a custom
+    PySCF library that incorporates hardware acceleration via IPUs. The molecules contain 9-11 heavy atoms and are
+    subsampled from the Generated Data Bank (GDB). For each molecule, 1000 geometries are generated using RDKit.
+    Electronic properties for each conformation are then calculated using the density functional B3LYP
+    and the basis set STO-3G.
 
     Usage:
     ```python
@@ -91,8 +91,8 @@ class QM1B(BaseDataset):
     ```
 
     References:
-    - https://arxiv.org/pdf/2311.01135
-    - https://github.com/graphcore-research/qm1b-dataset/
+        https://arxiv.org/pdf/2311.01135\n
+        https://github.com/graphcore-research/qm1b-dataset/
     """
 
     __name__ = "qm1b"
@@ -144,8 +144,7 @@ class QM1B(BaseDataset):
 
 class QM1B_SMALL(QM1B):
     """
-    QM1B_SMALL is a subset of the QM1B dataset containing a
-    maximum of 15 random conformers per molecule.
+    QM1B_SMALL is a subset of the QM1B dataset containing a maximum of 15 random conformers per molecule.
 
     Usage:
     ```python

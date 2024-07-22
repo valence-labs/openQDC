@@ -52,7 +52,11 @@ class NablaDFT(BaseDataset):
     """
     NablaDFT is a dataset constructed from a subset of the
     [Molecular Sets (MOSES) dataset](https://github.com/molecularsets/moses) consisting of 1 million molecules
-    with 5,340,152 unique conformations generated using ωB97X-D/def2-SVP level of theory.
+    with 5,340,152 unique conformations. Conformations for each molecule are generated in 2 steps. First, a set of
+    conformations are generated using RDKit. Second, using Butina Clustering Method on conformations, clusters that
+    cover 95% of the conformations are selected and the centroids of those clusters are selected as the final set.
+    This results in 1-62 conformations per molecule. For generating quantum properties, Kohn-Sham method at
+    wB97X-D/def2-XVP levels are used to generate the energy.
 
     Usage:
     ```python
@@ -61,8 +65,8 @@ class NablaDFT(BaseDataset):
     ```
 
     References:
-    - https://pubs.rsc.org/en/content/articlelanding/2022/CP/D2CP03966D
-    - https://github.com/AIRI-Institute/nablaDFT
+        https://pubs.rsc.org/en/content/articlelanding/2022/CP/D2CP03966D\n
+        https://github.com/AIRI-Institute/nablaDFT
     """
 
     __name__ = "nabladft"
@@ -75,6 +79,15 @@ class NablaDFT(BaseDataset):
     __distance_unit__ = "bohr"
     __forces_unit__ = "hartree/bohr"
     __links__ = {"nabladft.db": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/moses_db/dataset_full.db"}
+
+    @property
+    def data_types(self):
+        return {
+            "atomic_inputs": np.float32,
+            "position_idx_range": np.int32,
+            "energies": np.float32,
+            "forces": np.float32,
+        }
 
     @requires_package("nablaDFT")
     def read_raw_entries(self):
