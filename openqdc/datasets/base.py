@@ -105,6 +105,7 @@ class BaseDataset(DatasetPropertyMixIn):
         cache_dir: Optional[str] = None,
         recompute_statistics: bool = False,
         transform: Optional[Callable] = None,
+        skip_statistics: bool = False,
         read_as_zarr: bool = False,
         regressor_kwargs: Dict = {
             "solver_type": "linear",
@@ -147,6 +148,7 @@ class BaseDataset(DatasetPropertyMixIn):
         self.read_as_zarr = read_as_zarr
         self.energy_type = energy_type if energy_type is not None else "null"
         self.refit_e0s = recompute_statistics or overwrite_local_cache
+        self.skip_statistics = skip_statistics
         if not self.is_preprocessed():
             raise DatasetNotAvailableError(self.__name__)
         else:
@@ -184,7 +186,8 @@ class BaseDataset(DatasetPropertyMixIn):
     ) -> None:
         self._set_units(None, None)
         self._set_isolated_atom_energies()
-        self._precompute_statistics(overwrite_local_cache=overwrite_local_cache)
+        if not self.skip_statistics:
+            self._precompute_statistics(overwrite_local_cache=overwrite_local_cache)
         self._set_units(energy_unit, distance_unit)
         self._convert_data()
         self._set_isolated_atom_energies()

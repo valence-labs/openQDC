@@ -80,6 +80,15 @@ class NablaDFT(BaseDataset):
     __forces_unit__ = "hartree/bohr"
     __links__ = {"nabladft.db": "https://n-usr-31b1j.s3pd12.sbercloud.ru/b-usr-31b1j-qz9/data/moses_db/dataset_full.db"}
 
+    @property
+    def data_types(self):
+        return {
+            "atomic_inputs": np.float32,
+            "position_idx_range": np.int32,
+            "energies": np.float32,
+            "forces": np.float32,
+        }
+
     @requires_package("nablaDFT")
     def read_raw_entries(self):
         from nablaDFT.dataset import HamiltonianDatabase
