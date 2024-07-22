@@ -2,6 +2,8 @@
 
 Open Quantum Data Commons
 
+[![license](https://licensebuttons.net/l/by-nc/4.0/80x15.png)](https://github.com/valence-labs/openQDC/blob/main/LICENSE)
+
 ### Installing openQDC
 ```bash
 git clone git@github.com:OpenDrugDiscovery/openQDC.git
@@ -90,6 +92,21 @@ We also provide support for the following publicly available QM Noncovalent Inte
 | [Splinter](https://www.nature.com/articles/s41597-023-02443-1) |
 | [X40](https://pubs.acs.org/doi/10.1021/ct300647k) |
 | [L7](https://pubs.acs.org/doi/10.1021/ct400036b)  |
+
+# CI Status
+
+The CI runs tests and performs code quality checks for the following combinations:
+
+- The three major platforms: Windows, OSX and Linux.
+- The four latest Python versions.
+
+|                                         | `main`                                                                                                                                                                    |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Lib build & Testing                     | [![test](https://github.com/valence-labs/openQDC/actions/workflows/test.yml/badge.svg)](https://github.com/valence-labs/openQDC/actions/workflows/test.yml)                   |
+| Code Sanity (linting and type analysis) | [![code-check](https://github.com/valence-labs/openQDC/actions/workflows/code-check.yml/badge.svg)](https://github.com/valence-labs/openQDC//actions/workflows/code-check.yml) |
+| Documentation Build                     | [![doc](https://github.com/valence-labs/openQDC/actions/workflows/doc.yml/badge.svg)](https://github.com/valence-labs/openQDC/actions/workflows/doc.yml)      |
+| Pre-Commit                              | [![pre-commit](https://github.com/valence-labs/openQDC/actions/workflows/pre-commit-ci.yml/badge.svg)](https://github.com/valence-labs/openQDC/actions/workflows/pre-commit-ci.yml)    |
+
 
 # How to cite
 All data presented in the OpenQDC are already published in scientific journals, full reference to the respective paper is attached to each dataset class. When citing data obtained from OpenQDC, you should cite both the original paper(s) the data come from and our paper on OpenQDC itself. The reference is:

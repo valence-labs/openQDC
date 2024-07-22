@@ -71,6 +71,7 @@ class CORRECTION(StrEnum):
     D4 = "d4"  # Grimmes -D4 correction (we don t have any so feel free to not add this one)
     GCP = "gcp"  # Geometrical Counter-Poise Correction
     CP = "cp"  # Counter-Poise Correction
+    MBD = "mbd"  # Many-Body Dispersion Correction/vdw-TS correction
     VWN = "vwn"  #
     VWN5 = "vwn5"  #
     NONE = ""
@@ -119,6 +120,7 @@ class Functional(Enum):
     HCTH_407 = "hcth-407"
     HCTH_93 = "hcth-93"
     HF = "hf"
+    HF_R2SCAN_DC4 = "hf-r2scan-dc4"
     KCIS_MODIFIED = "kcis-modified"
     KCIS_ORIGINAL = "kcis-original"
     KMLYP_VWN5 = "kmlyp", CORRECTION.VWN5
@@ -153,23 +155,42 @@ class Functional(Enum):
     PBE_D = "pbe", CORRECTION.D
     PBE_D3_BJ = "pbe", CORRECTION.D3BJ
     PBE0 = "pbe0"
+    PBE0_MBD = "pbe0+mbd"
     PBESOL = "pbesol"
     PKZB = "pkzb"
     PKZBX_KCISCOR = "pkzbx-kciscor"
     PM6 = "pm6"
     PW91 = "pw91"
     QCISDT = "qcisd(t)"
+    R2_SCAN = "r2Scan"
+    R2_SCAN_HF = "r2Scan@hf"
+    R2_SCAN_R2_SCAN50 = "r2Scan@r2Scan50"
+    R2_SCAN50 = "r2Scan50"
+    R2_SCAN100 = "r2Scan100"
+    R2_SCAN10 = "r2Scan10"
+    R2_SCAN20 = "r2Scan20"
+    R2_SCAN25 = "r2Scan25"
+    R2_SCAN30 = "r2Scan30"
+    R2_SCAN40 = "r2Scan40"
+    R2_SCAN60 = "r2Scan60"
+    R2_SCAN70 = "r2Scan70"
+    R2_SCAN80 = "r2Scan80"
+    R2_SCAN90 = "r2Scan90"
     REVPBE = "revpbe"
     REVPBE_D3_BJ = "revpbe", CORRECTION.D3BJ
     REVTPSS = "revtpss"
     RGE2 = "rge2"
     RPBE = "rpbe"
     SAPT0 = "sapt0"
+    SCAN = "scan"
+    SCAN_HF = "scan@hf"
+    SCAN_R2SCAN50 = "scan@r2scan50"
     SSB_D = "ssb", CORRECTION.D
     SVWN = "svwn"
     TMGGA = "t-mgga"
     TAU_HCTH = "tau-hcth"
     TAU_HCTH_HYBRID = "tau-hcth-hybrid"
+    TCSSD_T = "tccsd(t)"
     TPSS = "tpss"
     TPSSD = "tpss", CORRECTION.D
     TPSSH = "tpssh"
@@ -296,8 +317,11 @@ class PotentialMethod(QmMethod):  # SPLIT FOR INTERACTIO ENERGIES AND FIX MD1
     BP86_D_DZP = Functional.BP86_D, BasisSet.DZP
     BP86_D_SZ = Functional.BP86_D, BasisSet.SZ
     BP86_D_TZP = Functional.BP86_D, BasisSet.TZP
+    CCSD_T_CBS = Functional.CCSDT, BasisSet.CBS
+    CCSD_T_CC_PVTZ = Functional.CCSDT, BasisSet.CC_PVDZ
     CCSD_T_CC_PVDZ = Functional.CCSDT, BasisSet.CC_PVDZ
     CCSD_CC_PVDZ = Functional.CCSD, BasisSet.CC_PVDZ
+
     DFT3B = Functional.DFT3B, BasisSet.NONE
     DSD_BLYP_D3_BJ_DEF2_TZVP = Functional.DSD_BLYP_D3_BJ, BasisSet.DEF2_TZVP
     FT97_DZP = Functional.FT97, BasisSet.DZP
@@ -318,6 +342,18 @@ class PotentialMethod(QmMethod):  # SPLIT FOR INTERACTIO ENERGIES AND FIX MD1
     HCTH_93_SZ = Functional.HCTH_93, BasisSet.SZ
     HCTH_93_TZP = Functional.HCTH_93, BasisSet.TZP
     HF_DEF2_TZVP = Functional.HF, BasisSet.DEF2_TZVP
+    HF_CC_PVDZ = (
+        Functional.HF,
+        BasisSet.CC_PVDZ,
+    )
+    HF_CC_PVQZ = (
+        Functional.HF,
+        BasisSet.CC_PVQZ,
+    )
+    HF_CC_PVTZ = (
+        Functional.HF,
+        BasisSet.CC_PVTZ,
+    )
     KCIS_MODIFIED_DZP = Functional.KCIS_MODIFIED, BasisSet.DZP
     KCIS_MODIFIED_SZ = Functional.KCIS_MODIFIED, BasisSet.SZ
     KCIS_MODIFIED_TZP = Functional.KCIS_MODIFIED, BasisSet.TZP
@@ -351,6 +387,9 @@ class PotentialMethod(QmMethod):  # SPLIT FOR INTERACTIO ENERGIES AND FIX MD1
     M06_DZP = Functional.M06, BasisSet.DZP
     M06_SZ = Functional.M06, BasisSet.SZ
     M06_TZP = Functional.M06, BasisSet.TZP
+    MP2_CC_PVDZ = Functional.MP2, BasisSet.CC_PVDZ
+    MP2_CC_PVQZ = Functional.MP2, BasisSet.CC_PVQZ
+    MP2_CC_PVTZ = Functional.MP2, BasisSet.CC_PVTZ
     MPBE_DZP = Functional.MPBE, BasisSet.DZP
     MPBE_SZ = Functional.MPBE, BasisSet.SZ
     MPBE_TZP = Functional.MPBE, BasisSet.TZP
@@ -408,6 +447,7 @@ class PotentialMethod(QmMethod):  # SPLIT FOR INTERACTIO ENERGIES AND FIX MD1
     PBE0_DEF2_TZVP = Functional.PBE0, BasisSet.DEF2_TZVP
     PBE0_SZ = Functional.PBE0, BasisSet.SZ
     PBE0_TZP = Functional.PBE0, BasisSet.TZP
+    PBE0_MBD_DEF2_TZVPP = Functional.PBE0_MBD, BasisSet.DEF2_TZVPPD
     PBESOL_DZP = Functional.PBESOL, BasisSet.DZP
     PBESOL_SZ = Functional.PBESOL, BasisSet.SZ
     PBESOL_TZP = Functional.PBESOL, BasisSet.TZP
@@ -447,6 +487,7 @@ class PotentialMethod(QmMethod):  # SPLIT FOR INTERACTIO ENERGIES AND FIX MD1
     TAU_HCTH_DZP = Functional.TAU_HCTH, BasisSet.DZP
     TAU_HCTH_SZ = Functional.TAU_HCTH, BasisSet.SZ
     TAU_HCTH_TZP = Functional.TAU_HCTH, BasisSet.TZP
+    TCSSD_T_CC_PVDZ = Functional.TCSSD_T, BasisSet.CC_PVDZ
     TPSSD_DZP = Functional.TPSSD, BasisSet.DZP
     TPSSD_SZ = Functional.TPSSD, BasisSet.SZ
     TPSSD_TZP = Functional.TPSSD, BasisSet.TZP
@@ -470,7 +511,9 @@ class PotentialMethod(QmMethod):  # SPLIT FOR INTERACTIO ENERGIES AND FIX MD1
     WB97M_D3BJ_DEF2_TZVPPD = Functional.WB97M_D3BJ, BasisSet.DEF2_TZVPPD
     WB97X_D_DEF2_SVP = Functional.WB97X_D, BasisSet.DEF2_SVP
     WB97X_D3_DEF2_TZVP = Functional.WB97X_D3, BasisSet.DEF2_TZVP
+    WB97X_D3_CC_PVDZ = Functional.WB97X_D3, BasisSet.CC_PVDZ
     WB97X_6_31G_D = Functional.WB97X, BasisSet.GSTAR
+    WB97X_CC_PVTZ = Functional.WB97X, BasisSet.CC_PVTZ
     X3LYP_VWN5_DZP = Functional.X3LYP_VWN5, BasisSet.DZP
     X3LYP_VWN5_SZ = Functional.X3LYP_VWN5, BasisSet.SZ
     X3LYP_VWN5_TZP = Functional.X3LYP_VWN5, BasisSet.TZP

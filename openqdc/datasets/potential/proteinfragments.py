@@ -120,13 +120,13 @@ class ProteinFragments(BaseDataset):
     __name__ = "proteinfragments"
     # PBE0/def2-TZVPP+MBD
     __energy_methods__ = [
-        PotentialMethod.WB97X_6_31G_D,  # "wb97x/6-31g(d)"
+        PotentialMethod.PBE0_MBD_DEF2_TZVPP,
     ]
 
     energy_target_names = [
-        "ωB97x:6-31G(d) Energy",
+        "PBE0+MBD/def2-TZVPP",
     ]
-    # PBE0/def2-TZVPP+MBD
+
     __energy_unit__ = "ev"
     __distance_unit__ = "ang"
     __forces_unit__ = "ev/ang"
