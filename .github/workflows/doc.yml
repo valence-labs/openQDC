@@ -9,25 +9,24 @@ concurrency:
   group: doc-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: write
-
 jobs:
   doc:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
     defaults:
       run:
         shell: bash -l {0}
 
     steps:
       - name: Checkout the code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup mamba
         uses: mamba-org/setup-micromamba@v1
         with:
           environment-file: env.yml
-          environment-name: openqdc
+          environment-name: my_env
           cache-environment: true
           cache-downloads: true
 
