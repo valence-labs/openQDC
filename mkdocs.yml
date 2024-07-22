@@ -1,11 +1,11 @@
 site_name: "OpenQDC"
 site_description: "I don't know... Something about data and Quantum stuff I guess :D"
-repo_url: "https://github.com/OpenDrugDiscovery/openQDC"
+repo_url: "https://github.com/valence-labs/openQDC"
 repo_name: "openQDC"
 copyright: Copyright 2023 Valence Labs
 
-site_url: "https://github.com/OpenDrugDiscovery/openQDC"
-remote_branch: "privpage"
+site_url: "https://github.com/valence-labs/openQDC"
+remote_branch: "gh-pages"
 use_directory_urls: false
 docs_dir: "docs"
 
