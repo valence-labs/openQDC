@@ -60,7 +60,7 @@ class ANI1(BaseDataset):
     __name__ = "ani1"
 
     __energy_methods__ = [
-        PotentialMethod.WB97X_6_31G_D,  # "wb97x/6-31g(d)"
+        PotentialMethod.WB97X_6_31G_D,
     ]
 
     energy_target_names = [
@@ -121,14 +121,14 @@ class ANI1X(ANI1):
     __forces_unit__ = "hartree/ang"
 
     __energy_methods__ = [
-        PotentialMethod.NONE,  # "hf/cc-pvdz",
-        PotentialMethod.NONE,  # "hf/cc-pvqz",
-        PotentialMethod.NONE,  # "hf/cc-pvtz",
-        PotentialMethod.NONE,  # "mp2/cc-pvdz",
-        PotentialMethod.NONE,  # "mp2/cc-pvqz",
-        PotentialMethod.NONE,  # "mp2/cc-pvtz",
-        PotentialMethod.NONE,  # "wb97x/6-31g(d)",
-        PotentialMethod.NONE,  # "wb97x/cc-pvtz",
+        PotentialMethod.HF_CC_PVDZ,
+        PotentialMethod.HF_CC_PVQZ,
+        PotentialMethod.HF_CC_PVTZ,
+        PotentialMethod.MP2_CC_PVDZ,
+        PotentialMethod.MP2_CC_PVQZ,
+        PotentialMethod.MP2_CC_PVTZ,
+        PotentialMethod.WB97X_6_31G_D,
+        PotentialMethod.WB97X_CC_PVTZ,
     ]
 
     energy_target_names = [
@@ -179,10 +179,10 @@ class ANI1CCX(ANI1):
     __forces_unit__ = "hartree/ang"
 
     __energy_methods__ = [
-        PotentialMethod.NONE,  # "ccsd(t)/cbs",
-        PotentialMethod.NONE,  # "ccsd(t)/cc-pvdz",
-        PotentialMethod.NONE,  # "ccsd(t)/cc-pvtz",
-        PotentialMethod.NONE,  # "tccsd(t)/cc-pvdz",
+        PotentialMethod.CCSD_T_CBS,  # "ccsd(t)/cbs",
+        PotentialMethod.CCSD_T_CC_PVDZ,  # "ccsd(t)/cc-pvdz",
+        PotentialMethod.CCSD_T_CC_PVTZ,  # "ccsd(t)/cc-pvtz",
+        PotentialMethod.TCSSD_T_CC_PVDZ,  # "tccsd(t)/cc-pvdz",
     ]
 
     energy_target_names = [

@@ -1,8 +1,8 @@
 site_name: "OpenQDC"
-site_description: "I don't know... Something about data and Quantum stuff I guess :D"
+site_description: "Harness the power of quantum chemistry in one line of code."
 repo_url: "https://github.com/valence-labs/openQDC"
 repo_name: "openQDC"
-copyright: Copyright 2023 Valence Labs
+copyright: Copyright 2024 Valence Labs
 
 site_url: "https://github.com/valence-labs/openQDC"
 remote_branch: "gh-pages"
