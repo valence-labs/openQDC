@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from copy import deepcopy
 from dataclasses import asdict, dataclass
 from os.path import join as p_join
-from typing import Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional
 
 import numpy as np
 from loguru import logger
@@ -16,15 +16,22 @@ class StatisticsResults:
     to provide general methods.
     """
 
-    def to_dict(self):
+    def to_dict(self) -> Dict:
         """
         Convert the class to a dictionary
+
+        Returns:
+            Dictionary representation of the class
         """
         return asdict(self)
 
     def transform(self, func: Callable):
         """
         Apply a function to all the attributes of the class
+
+        Parameters:
+            func:
+                Function to apply to the attributes
         """
         for k, v in self.to_dict().items():
             if v is not None:
@@ -56,18 +63,19 @@ class ForceStatistics(StatisticsResults):
 
 class StatisticManager:
     """
-    Manager class to share the state between all
+    Manager class that automatically handle the shared state between
     the statistic calculators
     """
 
-    def __init__(self, dataset, recompute: bool = False, *statistic_calculators: "AbstractStatsCalculator"):
+    def __init__(self, dataset: Any, recompute: bool = False, *statistic_calculators: "AbstractStatsCalculator"):
         """
-        dataset : openqdc.datasets.base.BaseDataset
-            The dataset object to compute the statistics
-        recompute : bool, default = False
-            Flag to recompute the statistics
-        *statistic_calculators :  AbstractStatsCalculator
-            statistic calculators to run
+        Parameters:
+            dataset : openqdc.datasets.base.BaseDataset
+                The dataset object to compute the statistics
+            recompute:
+                Flag to recompute the statistics
+            *statistic_calculators:
+                List of statistic calculators to run
         """
         self._state = {}
         self._results = {}
@@ -80,6 +88,9 @@ class StatisticManager:
     def state(self) -> Dict:
         """
         Return the dictionary state of the manager
+
+        Returns:
+            State of the StatisticManager
         """
         return self._state
 
@@ -95,25 +106,40 @@ class StatisticManager:
         """
         self._results = {}
 
-    def get_state(self, key: Optional[str] = None):
+    def get_state(self, key: Optional[str] = None) -> Optional[Any]:
         """
-        key : str, default = None
         Return the value of the key in the state dictionary
+
+        Parameters:
+            key: str, default = None
+        Returns:
+            the value of the key in the state dictionary
             or the whole state dictionary if key is None
         """
         if key is None:
             return self._state
         return self._state.get(key, None)
 
-    def has_state(self, key: str):
+    def has_state(self, key: str) -> bool:
         """
         Check is state has key
+
+        Parameters:
+            key:
+                Key to check in the state dictionary
+
+        Returns:
+            True if the key is in the state dictionary
         """
         return key in self._state
 
     def get_results(self, as_dict: bool = False):
         """
         Aggregate results from all the calculators
+
+        Parameters:
+            as_dict:
+                Flag to return the results as a dictionary
         """
         results = deepcopy(self._results)
         if as_dict:
@@ -155,26 +181,27 @@ class AbstractStatsCalculator(ABC):
         forces: Optional[np.ndarray] = None,
     ):
         """
-        name : str
-            Name of the dataset for saving and loading.
-        energy_type : str, default = None
-            Type of the energy for the computation of the statistics. Used for loading and saving.
-        force_recompute : bool, default = False
-            Flag to force the recomputation of the statistics
-        energies : np.ndarray, default = None
-            Energies of the dataset
-        n_atoms : np.ndarray, default = None
-            Number of atoms in the dataset
-        atom_species : np.ndarray, default = None
-            Atomic species of the dataset
-        position_idx_range : np.ndarray, default = None
-            Position index range of the dataset
-        e0_matrix : np.ndarray, default = None
-            Isolated atom energies matrix of the dataset
-        atom_charges : np.ndarray, default = None
-            Atomic charges of the dataset
-        forces : np.ndarray, default = None
-            Forces of the dataset
+        Parameters:
+            name :
+                Name of the dataset for saving and loading.
+            energy_type :
+                Type of the energy for the computation of the statistics. Used for loading and saving.
+            force_recompute :
+                Flag to force the recomputation of the statistics
+            energies : n
+                Energies of the dataset
+            n_atoms :
+                Number of atoms in the dataset
+            atom_species :
+                Atomic species of the dataset
+            position_idx_range : n
+                Position index range of the dataset
+            e0_matrix :
+                Isolated atom energies matrix of the dataset
+            atom_charges :
+                Atomic charges of the dataset
+            forces :
+                Forces of the dataset
         """
         self.name = name
         self.energy_type = energy_type

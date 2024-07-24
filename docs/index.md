@@ -9,17 +9,17 @@ OpenQDC is a python library to work with quantum datasets. It's a package aimed 
 - 🧠 Performance matters: read and write multiple formats (memmap, zarr, xyz, etc).
 - 📈 Data: have access to 1.5+ billion datapoints
 
-Visit our website at TOFILL <IDK>.
+Visit our website at https://openqdc.io .
 
 ## Installation
 
 Use mamba:
 
 ```bash
-mamba install -c conda-forge openqdc
+conda install -c conda-forge openqdc
 ```
 
-_**Tips:** You can replace `mamba` by `conda`._
+_**Tips:** You can replace `conda` by `mamba`._
 
 _**Note:** We highly recommend using a [Conda Python distribution](https://github.com/conda-forge/miniforge) to install OpenQDC. The package is also pip installable if you need it: `pip install openqdc`._
 
@@ -58,7 +58,7 @@ dataset.calculate_descriptors(
 
 ## How to cite
 
-Please cite OpenQDC if you use it in your research: [![DOI](zenodo_badge)](zenodo_link).
+Please cite OpenQDC if you use it in your research: [![Pending Publication](Pending Publication)](Pending Publication).
 
 ## Compatibilities
 

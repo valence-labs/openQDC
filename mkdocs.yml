@@ -25,7 +25,11 @@ nav:
   - API:
     - QM methods: API/methods.md
     - Normalization regressor: API/regressor.md
-    - Main class: API/basedataset.md
+    - Main classes:
+      - BaseDataset: API/basedataset.md
+      - Available Properties: API/properties.md
+      - e0 Dispatcher: API/e0_dispatcher.md
+      - Statistics: API/statistics.md
     - Format loading: API/formats.md
     - Datasets:
       - Potential Energy:
