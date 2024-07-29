@@ -224,7 +224,6 @@ class QmMethod(Enum):
         raise NotImplementedError()
 
 
-@unique
 class PotentialMethod(QmMethod):  # SPLIT FOR INTERACTIO ENERGIES AND FIX MD1
     B1LYP_VWN5_DZP = Functional.B1LYP_VWN5, BasisSet.DZP
     B1LYP_VWN5_SZ = Functional.B1LYP_VWN5, BasisSet.SZ
@@ -501,7 +500,6 @@ class PotentialMethod(QmMethod):  # SPLIT FOR INTERACTIO ENERGIES AND FIX MD1
         return energies
 
 
-@unique
 class InteractionMethod(QmMethod):
     CCSD_T_NN = Functional.CCSDT, BasisSet.NN
     CCSD_T_CBS = Functional.CCSDT, BasisSet.CBS

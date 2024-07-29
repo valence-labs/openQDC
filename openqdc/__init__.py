@@ -31,6 +31,7 @@ _lazy_imports_obj = {
     "COMP6": "openqdc.datasets.potential.comp6",
     "GDML": "openqdc.datasets.potential.gdml",
     "Molecule3D": "openqdc.datasets.potential.molecule3d",
+    "MACEOFF": "openqdc.datasets.potential.maceoff",
     "OrbnetDenali": "openqdc.datasets.potential.orbnet_denali",
     "SN2RXN": "openqdc.datasets.potential.sn2_rxn",
     "QM7X": "openqdc.datasets.potential.qm7x",
@@ -122,6 +123,7 @@ if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
     from .datasets.potential.gdml import GDML
     from .datasets.potential.geom import GEOM
     from .datasets.potential.iso_17 import ISO17
+    from .datasets.potential.maceoff import MACEOFF
     from .datasets.potential.md22 import MD22
     from .datasets.potential.molecule3d import Molecule3D
     from .datasets.potential.multixcqm9 import MultixcQM9, MultixcQM9_V2
