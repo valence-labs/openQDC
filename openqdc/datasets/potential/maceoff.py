@@ -63,9 +63,7 @@ def build_data_object(data, split):
         name=np.array([smiles]),
         subset=np.array([subset]),
         energies=np.array([[energy]], dtype=np.float64),
-        forces=np.array(forces, dtype=np.float32).reshape(
-            -1, 3, 1
-        ),  # forces -ve of energy gradient but the -1.0 is done in the convert_forces method
+        forces=np.array(forces, dtype=np.float32).reshape(-1, 3, 1),
         atomic_inputs=np.concatenate((x, np.array(positions)), axis=-1, dtype=np.float32).reshape(-1, 5),
         n_atoms=np.array([x.shape[0]], dtype=np.int32),
         split=np.array([split]),
@@ -74,6 +72,34 @@ def build_data_object(data, split):
 
 
 class MACEOFF(BaseDataset):
+    """
+    MACEOFF dataset core of the dataset consist in the Spice V1 dataset.
+    95% of the data are used for training and validation under the "train" split,
+    and 5% for testing. The dataset uses the Spice level of theory
+    ωB97M-D3(BJ)/def2-TZVPPD as implemented in the PSI4 software.
+    MACEOFF uses a subset of SPICE that contains the ten chemical elements
+    H, C, N, O, F, P, S, Cl, Br, and I, and has a neutral formal charge.
+    MACEOFF doesn't contain ion pairs. To facilitate the learning of intramolecular
+    non-bonded interactions, MACEOFF dataset contains larger 50–90 atom molecules
+    randomly selected from the QMugs dataset.
+    MACEOFF contains a number of water clusters carved out of molecular dynamics simulations
+    of liquid water, with sizes of up to 50 water molecules and part of the
+    COMP6 tripeptide geometry dataset.
+
+    Usage:
+    ```python
+    from openqdc.datasets import MACEOFF
+    dataset = MACEOFF()
+    ```
+
+    Species:
+        [H, C, N, O, F, P, S, Cl, Br, I]
+
+    References:
+        https://arxiv.org/pdf/2312.15211\n
+        https://doi.org/10.17863/CAM.107498
+    """
+
     __name__ = "maceoff"
 
     __energy_methods__ = [PotentialMethod.WB97M_D3BJ_DEF2_TZVPPD]
