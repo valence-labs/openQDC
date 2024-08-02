@@ -21,6 +21,7 @@ _lazy_imports_obj = {
     "ANI1CCX_V2": "openqdc.datasets.potential.ani",
     "ANI1X": "openqdc.datasets.potential.ani",
     "ANI2X": "openqdc.datasets.potential.ani",
+    "BPA": "openqdc.datasets.potential.bpa",
     "Spice": "openqdc.datasets.potential.spice",
     "SpiceV2": "openqdc.datasets.potential.spice",
     "SpiceVL2": "openqdc.datasets.potential.spice",
@@ -117,6 +118,7 @@ if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
     # POTENTIAL
     from .datasets.potential.alchemy import Alchemy
     from .datasets.potential.ani import ANI1, ANI1CCX, ANI1CCX_V2, ANI1X, ANI2X
+    from .datasets.potential.bpa import BPA
     from .datasets.potential.comp6 import COMP6
     from .datasets.potential.dummy import Dummy, PredefinedDataset
     from .datasets.potential.gdml import GDML
