@@ -1,4 +1,5 @@
 import re
+from functools import partial
 from os.path import join as p_join
 
 import datamol as dm
@@ -52,7 +53,7 @@ def parse_mace_xyz(xyzpath):
                 yield energy, numbers, positions, forces, smiles, subset
 
 
-def build_data_object(data):
+def build_data_object(data, split):
     energy, numbers, positions, forces, smiles, subset = data
     if smiles == "":
         x = np.concatenate((np.array(numbers)[:, None], np.zeros((len(numbers), 1))), axis=-1)
@@ -67,6 +68,7 @@ def build_data_object(data):
         ),  # forces -ve of energy gradient but the -1.0 is done in the convert_forces method
         atomic_inputs=np.concatenate((x, np.array(positions)), axis=-1, dtype=np.float32).reshape(-1, 5),
         n_atoms=np.array([x.shape[0]], dtype=np.int32),
+        split=np.array([split]),
     )
     return res
 
@@ -84,12 +86,22 @@ class MACEOFF(BaseDataset):
     force_target_names = ["dft_total_gradient"]
 
     __links__ = {
-        "train_large_neut_no_bad_clean.tar.gz": "https://api.repository.cam.ac.uk/server/api/core/bitstreams/b185b5ab-91cf-489a-9302-63bfac42824a/content"  # noqa: E501
+        "train_large_neut_no_bad_clean.tar.gz": "https://api.repository.cam.ac.uk/server/api/core/bitstreams/b185b5ab-91cf-489a-9302-63bfac42824a/content",  # noqa: E501
+        "test_large_neut_all.tar.gz": "https://api.repository.cam.ac.uk/server/api/core/bitstreams/cb8351dd-f09c-413f-921c-67a702a7f0c5/content",  # noqa: E501
     }
 
     def read_raw_entries(self):
-        filepath = p_join(self.root, "train_large_neut_no_bad_clean.xyz")
-        xyzpath = p_join(self.root, filepath)
-        structure_iterator = parse_mace_xyz(xyzpath)
-        res = dm.utils.parallelized(build_data_object, structure_iterator)
-        return res
+        entries = []
+        for filename in self.__links__:
+            filename = filename.split(".")[0]
+            xyzpath = p_join(self.root, f"{filename}.xyz")
+            split = filename.split("_")[0]
+            structure_iterator = parse_mace_xyz(xyzpath)
+            func = partial(build_data_object, split=split)
+            entries.extend(dm.utils.parallelized(func, structure_iterator))
+        return entries
+
+    def __getitem__(self, idx):
+        data = super().__getitem__(idx)
+        data.__setattr__("split", self._convert_array(self.data["split"][idx]))
+        return data
