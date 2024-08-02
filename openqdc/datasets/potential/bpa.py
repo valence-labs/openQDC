@@ -11,10 +11,11 @@ def read_bpa_record(subset: str, atoms: Atoms) -> Dict[str, Any]:
     return dict(
         name=np.array([str(atoms.symbols)]),
         subset=subset,
-        energies=np.array([atoms.get_potential_energy()], dtype=np.float32),
+        energies=np.array([atoms.get_potential_energy()], dtype=np.float64),
         forces=atoms.get_forces().reshape(-1, 3, 1).astype(np.float32),
         atomic_inputs=np.column_stack((atoms.numbers, atoms.get_initial_charges(), atoms.positions)).astype(np.float32),
         n_atoms=np.array([len(atoms)], dtype=np.int32),
+        split = np.array([subset.item().split("_")[0]])
     )
 
 
@@ -59,3 +60,8 @@ class BPA(BaseDataset):
                 all_records.append(read_bpa_record(subset, atoms))
 
         return all_records
+    
+    def __getitem__(self, idx):
+        data = super().__getitem__(idx)
+        data.__setattr__("split", self._convert_array(self.data["split"][idx]))
+        return data
