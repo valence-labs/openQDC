@@ -154,7 +154,7 @@ class ANI1X(ANI1):
         return super().convert_forces(x) * 0.529177249  # correct the Dataset error
 
     def __smiles_converter__(self, x):
-        return x
+        return "-".join(x.decode("ascii").split("-")[:-1])
 
 
 class ANI1CCX(ANI1):
@@ -195,10 +195,7 @@ class ANI1CCX(ANI1):
     __links__ = {"ani1x.hdf5.gz": "https://zenodo.org/record/4081694/files/292.hdf5.gz"}
 
     def __smiles_converter__(self, x):
-        """util function to convert string to smiles: useful if the smiles is
-        encoded in a different format than its display format
-        """
-        return x
+        return x.decode("ascii")
 
 
 class ANI1CCX_V2(ANI1CCX):

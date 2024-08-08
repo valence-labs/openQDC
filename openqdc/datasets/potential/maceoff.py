@@ -14,7 +14,7 @@ from openqdc.utils.molecule import get_atomic_number_and_charge
 def parse_mace_xyz(xyzpath):
     energy_re = re.compile(r"energy=(\S+)")
     smiles_re = re.compile(r"smiles=(\S+)")
-    subset_re = re.compile(r"config_type=(\S+)")
+    subset_re = re.compile(r"config_type=([^;]+)\ MACE_energy")
     with open(xyzpath, "r") as f:
         n_atoms = None
         counter = 0
