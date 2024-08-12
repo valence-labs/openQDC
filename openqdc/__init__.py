@@ -27,6 +27,7 @@ _lazy_imports_obj = {
     "GEOM": "openqdc.datasets.potential.geom",
     "QMugs": "openqdc.datasets.potential.qmugs",
     "QMugs_V2": "openqdc.datasets.potential.qmugs",
+    "QMugs_Consistency" : "openqdc.datasets.potential.qmugs",
     "ISO17": "openqdc.datasets.potential.iso_17",
     "COMP6": "openqdc.datasets.potential.comp6",
     "GDML": "openqdc.datasets.potential.gdml",
@@ -133,7 +134,7 @@ if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
     from .datasets.potential.proteinfragments import MDDataset, ProteinFragments
     from .datasets.potential.qm1b import QM1B, QM1B_SMALL
     from .datasets.potential.qm7x import QM7X, QM7X_V2
-    from .datasets.potential.qmugs import QMugs, QMugs_V2
+    from .datasets.potential.qmugs import QMugs, QMugs_V2, QMugs_Consistency
     from .datasets.potential.qmx import QM7, QM8, QM9, QM7b
     from .datasets.potential.revmd17 import RevMD17
     from .datasets.potential.sn2_rxn import SN2RXN

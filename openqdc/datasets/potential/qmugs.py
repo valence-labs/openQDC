@@ -92,3 +92,51 @@ class QMugs_V2(QMugs):
     __energy_methods__ = QMugs.__energy_methods__ + [PotentialMethod.PM6]
     energy_target_names = QMugs.energy_target_names + ["PM6"]
     __force_mask__ = QMugs.__force_mask__ + [False]
+    
+    
+class QMugs_Consistency(QMugs_V2):
+    """
+    QMugs_V2 is an extension of the QMugs dataset containing PM6 labels for each of the 4.2M geometries.
+
+    Usage:
+    ```python
+    from openqdc.datasets import QMugs_V2
+    dataset = QMugs_V2()
+    ```
+    """
+
+    __name__ = "qmugs_consistency" #"qmugs_v2"
+    __energy_methods__ = QMugs.__energy_methods__ + [PotentialMethod.PM6]
+    energy_target_names = QMugs.energy_target_names + ["PM6"]
+    __force_mask__ = QMugs.__force_mask__ + [False]
+    
+    def _post_init(
+        self,
+        overwrite_local_cache = False,
+        energy_unit = None,
+        distance_unit = None,
+    ) -> None:
+        self.make_just_HF_LF()
+        self._set_units(None, None)
+        self._set_isolated_atom_energies()
+        self._set_units(energy_unit, distance_unit)
+        self._convert_data()
+        
+        if not self.skip_statistics:
+            self._precompute_statistics(overwrite_local_cache=overwrite_local_cache)
+        self._set_isolated_atom_energies()
+        
+    def make_just_HF_LF(self):
+        self.__energy_methods__ = QMugs.__energy_methods__ + [PotentialMethod.GAP]
+        self.energy_target_names = QMugs.energy_target_names + ["GAP"]
+        self.__force_mask__ = QMugs.__force_mask__ 
+        self.data["energies"] = np.array(self.data["energies"])
+        self.data["energies"][:, 2] = self.data["energies"][:,0] - self.data["energies"][:,1]
+        
+        #delattr(self, "_e0s_dispatcher")
+    
+    def __getitem__(self, idx):
+        data = super().__getitem__(idx)
+        data["formation_energies"][2] = data["formation_energies"][0] - data["formation_energies"][1]
+        data["per_atom_formation_energies"][2] = data["per_atom_formation_energies"][0] - data["per_atom_formation_energies"][1]
+        return data

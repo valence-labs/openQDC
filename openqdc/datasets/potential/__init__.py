@@ -15,7 +15,7 @@ from .pcqm import PCQM_B3LYP, PCQM_PM6
 from .proteinfragments import MDDataset, ProteinFragments
 from .qm1b import QM1B, QM1B_SMALL
 from .qm7x import QM7X, QM7X_V2
-from .qmugs import QMugs, QMugs_V2
+from .qmugs import QMugs, QMugs_V2, QMugs_Consistency
 from .qmx import QM7, QM8, QM9, QM7b
 from .revmd17 import RevMD17
 from .sn2_rxn import SN2RXN
@@ -48,6 +48,7 @@ AVAILABLE_POTENTIAL_DATASETS = {
     "QM7X_V2": QM7X_V2,
     "QMugs": QMugs,
     "QMugs_V2": QMugs_V2,
+    "QMugs_Consistency" : QMugs_Consistency,
     "QM1B": QM1B,
     "QM1B_SMALL": QM1B_SMALL,
     "QM7": QM7,

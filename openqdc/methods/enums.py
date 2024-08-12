@@ -77,6 +77,7 @@ class CORRECTION(StrEnum):
 
 
 class Functional(Enum):
+    GAP = "gap"
     B1LYP_VWN5 = "b1lyp", CORRECTION.VWN5
     B1PW91_VWN5 = "b1pw91", CORRECTION.VWN5
     B3LYP = "b3lyp"
@@ -225,6 +226,7 @@ class QmMethod(Enum):
 
 
 class PotentialMethod(QmMethod):  # SPLIT FOR INTERACTIO ENERGIES AND FIX MD1
+    GAP = Functional.GAP, BasisSet.NONE
     B1LYP_VWN5_DZP = Functional.B1LYP_VWN5, BasisSet.DZP
     B1LYP_VWN5_SZ = Functional.B1LYP_VWN5, BasisSet.SZ
     B1LYP_VWN5_TZP = Functional.B1LYP_VWN5, BasisSet.TZP
