@@ -1,10 +1,12 @@
 from .alchemy import Alchemy
 from .ani import ANI1, ANI1CCX, ANI1CCX_V2, ANI1X, ANI2X
+from .bpa import BPA
 from .comp6 import COMP6
 from .dummy import Dummy, PredefinedDataset
 from .gdml import GDML
 from .geom import GEOM
 from .iso_17 import ISO17
+from .maceoff import MACEOFF
 from .md22 import MD22
 from .molecule3d import Molecule3D
 from .multixcqm9 import MultixcQM9, MultixcQM9_V2
@@ -33,11 +35,13 @@ AVAILABLE_POTENTIAL_DATASETS = {
     "ANI1CCX_V2": ANI1CCX_V2,
     "ANI1X": ANI1X,
     "ANI2X": ANI2X,
+    "BPA": BPA,
     "COMP6": COMP6,
     "GDML": GDML,
     "GEOM": GEOM,
     "ISO17": ISO17,
     "Molecule3D": Molecule3D,
+    "MACEOFF": MACEOFF,
     "NablaDFT": NablaDFT,
     "OrbnetDenali": OrbnetDenali,
     "PCQM_B3LYP": PCQM_B3LYP,
