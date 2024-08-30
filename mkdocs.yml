@@ -33,9 +33,11 @@ nav:
     - Format loading: API/formats.md
     - Datasets:
       - Potential Energy:
+        - 3BPA: API/datasets/3bpa.md
         - Alchemy : API/datasets/alchemy.md
         - ANI : API/datasets/ani.md
         - Spice : API/datasets/spice.md
+        - MaceOFF: API/datasets/maceoff.md
         - GEOM : API/datasets/geom.md
         - Qmugs : API/datasets/qmugs.md
         - ISO_17 : API/datasets/iso_17.md
