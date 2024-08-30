@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.31">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.33">
     
     
       
@@ -1041,21 +1041,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="ANI1CCX">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#openqdc.datasets.potential.ani.ANI1CCX.__smiles_converter__" class="md-nav__link">
-    <span class="md-ellipsis">
-      __smiles_converter__
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -1970,21 +1955,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="ANI1CCX">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#openqdc.datasets.potential.ani.ANI1CCX.__smiles_converter__" class="md-nav__link">
-    <span class="md-ellipsis">
-      __smiles_converter__
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -2292,10 +2262,7 @@ learning. The conformations are labelled using a high accuracy CCSD(T)*/CBS meth
 <span class="normal">195</span>
 <span class="normal">196</span>
 <span class="normal">197</span>
-<span class="normal">198</span>
-<span class="normal">199</span>
-<span class="normal">200</span>
-<span class="normal">201</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ANI1CCX</span><span class="p">(</span><span class="n">ANI1</span><span class="p">):</span>
+<span class="normal">198</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ANI1CCX</span><span class="p">(</span><span class="n">ANI1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    ANI1-CCX is a dataset of 500k conformers subsampled from the 5.5M conformers of ANI-1X dataset using active</span>
 <span class="sd">    learning. The conformations are labelled using a high accuracy CCSD(T)*/CBS method.</span>
@@ -2333,10 +2300,7 @@ learning. The conformations are labelled using a high accuracy CCSD(T)*/CBS meth
     <span class="n">__links__</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ani1x.hdf5.gz&quot;</span><span class="p">:</span> <span class="s2">&quot;https://zenodo.org/record/4081694/files/292.hdf5.gz&quot;</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">__smiles_converter__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;util function to convert string to smiles: useful if the smiles is</span>
-<span class="sd">        encoded in a different format than its display format</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">x</span>
+        <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -2351,37 +2315,6 @@ learning. The conformations are labelled using a high accuracy CCSD(T)*/CBS meth
 
 
 
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="openqdc.datasets.potential.ani.ANI1CCX.__smiles_converter__" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">__smiles_converter__</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></code>
-
-<a href="#openqdc.datasets.potential.ani.ANI1CCX.__smiles_converter__" class="headerlink" title="Permanent link">&para;</a></h3>
-
-
-    <div class="doc doc-contents ">
-
-      <p>util function to convert string to smiles: useful if the smiles is
-encoded in a different format than its display format</p>
-
-            <details class="quote">
-              <summary>Source code in <code>openqdc/datasets/potential/ani.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">197</span>
-<span class="normal">198</span>
-<span class="normal">199</span>
-<span class="normal">200</span>
-<span class="normal">201</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">__smiles_converter__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;util function to convert string to smiles: useful if the smiles is</span>
-<span class="sd">    encoded in a different format than its display format</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">x</span>
-</code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
-</div>
 
 
 
@@ -2422,7 +2355,10 @@ for each conformation.</p>
 </details>
               <details class="quote">
                 <summary>Source code in <code>openqdc/datasets/potential/ani.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">204</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
 <span class="normal">205</span>
 <span class="normal">206</span>
 <span class="normal">207</span>
@@ -2439,10 +2375,7 @@ for each conformation.</p>
 <span class="normal">218</span>
 <span class="normal">219</span>
 <span class="normal">220</span>
-<span class="normal">221</span>
-<span class="normal">222</span>
-<span class="normal">223</span>
-<span class="normal">224</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ANI1CCX_V2</span><span class="p">(</span><span class="n">ANI1CCX</span><span class="p">):</span>
+<span class="normal">221</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ANI1CCX_V2</span><span class="p">(</span><span class="n">ANI1CCX</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    ANI1CCX_V2 is an extension of the ANI1CCX dataset with additional PM6 and GFN2_xTB labels</span>
 <span class="sd">    for each conformation.</span>
@@ -2636,7 +2569,7 @@ are used for sampling conformations, (1) molecular dynamics, (2) normal mode sam
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">convert_forces</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.529177249</span>  <span class="c1"># correct the Dataset error</span>
 
     <span class="k">def</span> <span class="nf">__smiles_converter__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">x</span>
+        <span class="k">return</span> <span class="s2">&quot;-&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -2693,7 +2626,10 @@ used for generating geometries.</p>
 </details>
               <details class="quote">
                 <summary>Source code in <code>openqdc/datasets/potential/ani.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">227</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
 <span class="normal">228</span>
 <span class="normal">229</span>
 <span class="normal">230</span>
@@ -2747,10 +2683,7 @@ used for generating geometries.</p>
 <span class="normal">278</span>
 <span class="normal">279</span>
 <span class="normal">280</span>
-<span class="normal">281</span>
-<span class="normal">282</span>
-<span class="normal">283</span>
-<span class="normal">284</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ANI2X</span><span class="p">(</span><span class="n">ANI1</span><span class="p">):</span>
+<span class="normal">281</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ANI2X</span><span class="p">(</span><span class="n">ANI1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The ANI-2X dataset was constructed using active learning from modified versions of GDB-11, CheMBL, and s66x8.</span>
 <span class="sd">    It adds three new elements (F, Cl, S) resulting in 4.6 million conformers from 13k chemical isomers, optimized</span>
@@ -2934,7 +2867,7 @@ used for generating geometries.</p>
     <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.fe8b6f2b.min.js"></script>
+      <script src="../../assets/javascripts/bundle.af256bd8.min.js"></script>
       
         <script src="../../javascripts/config.js"></script>
       
