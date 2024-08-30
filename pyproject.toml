@@ -49,6 +49,7 @@ dependencies = [
   "zarr",
   "python-dotenv",
   "s3fs",
+  "httpx",
 ]
 
 

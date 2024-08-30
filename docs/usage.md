@@ -37,6 +37,14 @@ for data in dataset.as_iter(atoms=True):
     break
 ```
 
+or if you want to just iterate over the data:
+
+```python
+for data in dataset:
+    print(data) # dict of arrays
+    break
+```
+
 ## Lazy loading
 
 OpenQDC uses lazy loading to dynamically expose all its API without imposing a long import time during `import openqdc as qdc`. In case of trouble you can always disable lazy loading by setting the environment variable `OPENQDC_DISABLE_LAZY_LOADING` to `1`.

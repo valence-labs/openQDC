@@ -237,7 +237,13 @@ class BaseDataset(DatasetPropertyMixIn):
         return list(compress(self.energy_methods, self.force_mask))
 
     @property
-    def e0s_dispatcher(self):
+    def e0s_dispatcher(self) -> AtomEnergies:
+        """
+        Property to get the object that dispatched the isolated atom energies of the QM methods.
+
+        Returns:
+            Object wrapping the isolated atom energies of the QM methods.
+        """
         if not hasattr(self, "_e0s_dispatcher"):
             # Automatically fetch/compute formation or regression energies
             self._e0s_dispatcher = AtomEnergies(self, **self.regressor_kwargs)

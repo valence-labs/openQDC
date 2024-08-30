@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from os.path import join as p_join
-from typing import Dict, Union
+from typing import Any, Dict, Optional, Tuple, Union
 
 import numpy as np
 from loguru import logger
@@ -14,22 +14,24 @@ from openqdc.utils.regressor import Regressor
 POSSIBLE_ENERGIES = ["formation", "regression", "null"]
 
 
-def dispatch_factory(data, **kwargs) -> "IsolatedEnergyInterface":
+def dispatch_factory(data: Any, **kwargs: Dict) -> "IsolatedEnergyInterface":
     """
     Factory function that select the correct
     energy class for the fetching/calculation
     of isolated atom energies.
 
-    Parameters
-    ----------
-    data : openqdc.datasets.Dataset
-        Dataset object that contains the information
-        about the isolated atom energies. Info will be passed
-        by references
-    kwargs : dict
-        Additional arguments that will be passed to the
-        selected energy class. Mostly used for regression
-        to pass the regressor_kwargs.
+    Parameters:
+        data : openqdc.datasets.Dataset
+            Dataset object that contains the information
+            about the isolated atom energies. Info will be passed
+            by references
+        kwargs : dict
+            Additional arguments that will be passed to the
+            selected energy class. Mostly used for regression
+            to pass the regressor_kwargs.
+
+    Returns:
+        Initialized IsolatedEnergyInterface-like object
     """
     if data.energy_type == "formation":
         return PhysicalEnergy(data, **kwargs)
@@ -100,26 +102,16 @@ class AtomEnergies:
     """
 
     def __init__(self, data, **kwargs) -> None:
-        """
-        Parameters
-        ----------
-        data : openqdc.datasets.Dataset
-            Dataset object that contains the information
-            about the isolated atom energies. Info will be passed
-            by references
-        kwargs : dict
-            Additional arguments that will be passed to the
-            selected energy class. Mostly used for regression
-            to pass the regressor_kwargs.
-        """
-
         self.atom_energies = data.energy_type
         self.factory = dispatch_factory(data, **kwargs)
 
     @property
     def e0s_matrix(self) -> np.ndarray:
         """
-        Returns the isolated atom energies matrixes
+        Return the isolated atom energies dictionary
+
+        Returns:
+            Matrix Array with the isolated atom energies
         """
         return self.factory.e0_matrix
 
@@ -127,6 +119,9 @@ class AtomEnergies:
     def e0s_dict(self) -> Dict[AtomSpecies, AtomEnergy]:
         """
         Return the isolated atom energies dictionary
+
+        Returns:
+            Dictionary with the isolated atom energies
         """
         return self.factory.e0_dict
 
@@ -142,10 +137,18 @@ class AtomEnergies:
         Item can be written as tuple(Symbol, charge),
         tuple(Chemical number, charge). If no charge is passed,
         it will be automatically set to 0.
+
         Examples:
-            AtomEnergies[6], AtomEnergies[6,1],
-            AtomEnergies["C",1], AtomEnergies[(6,1)]
+            AtomEnergies[6], AtomEnergies[6,1], \n
+            AtomEnergies["C",1], AtomEnergies[(6,1)], \n
             AtomEnergies[("C,1)]
+
+        Parameters:
+            item:
+                AtomSpecies object or tuple with the atom symbol and charge
+
+        Returns:
+            AtomEnergy object with the isolated atom energy
         """
         try:
             atom, charge = item[0], item[1]
@@ -168,16 +171,15 @@ class IsolatedEnergyInterface(ABC):
 
     def __init__(self, data, **kwargs):
         """
-        Parameters
-        ----------
-        data : openqdc.datasets.Dataset
-            Dataset object that contains the information
-            about the isolated atom energies. Info will be passed
-            by references
-        kwargs : dict
-            Additional arguments that will be passed to the
-            selected energy class. Mostly used for regression
-            to pass the regressor_kwargs.
+        Parameters:
+            data : openqdc.datasets.Dataset
+                Dataset object that contains the information
+                about the isolated atom energies. Info will be passed
+                by references
+            kwargs : dict
+                Additional arguments that will be passed to the
+                selected energy class. Mostly used for regression
+                to pass the regressor_kwargs.
         """
         self._e0_matrixs = []
         self._e0_dict = None
@@ -204,6 +206,9 @@ class IsolatedEnergyInterface(ABC):
     def e0_matrix(self) -> np.ndarray:
         """
         Return the isolated atom energies matrixes
+
+        Returns:
+            Matrix Array with the isolated atom energies
         """
         return np.array(self._e0_matrixs)
 
@@ -211,6 +216,9 @@ class IsolatedEnergyInterface(ABC):
     def e0_dict(self) -> Dict:
         """
         Return the isolated atom energies dict
+
+        Returns:
+            Dictionary with the isolated atom energies
         """
 
         return self._e0s_dict
@@ -276,11 +284,15 @@ class RegressionEnergy(IsolatedEnergyInterface):
             self._set_lin_atom_species_dict(E0s, cov)
         self._set_linear_e0s()
 
-    def _compute_regression_e0s(self):
+    def _compute_regression_e0s(self) -> Tuple[np.ndarray, Optional[np.ndarray]]:
         """
         Try to compute the regressed isolated atom energies.
         raise an error if the regression fails.
         return the regressed isolated atom energies and the uncertainty values.
+
+        Returns:
+            Tuple with the regressed isolated atom energies and the uncertainty values of the regression
+            if available.
         """
         try:
             E0s, cov = self.regressor.solve()
@@ -305,7 +317,7 @@ class RegressionEnergy(IsolatedEnergyInterface):
     def _set_linear_e0s(self) -> None:
         """
         Transform the e0s dictionary into the correct e0s
-        matrix format
+        matrix format.
         """
         new_e0s = [np.zeros((max(self.data.numbers) + 1, MAX_CHARGE_NUMBER)) for _ in range(len(self))]
         for z, e0 in self._e0s_dict.items():

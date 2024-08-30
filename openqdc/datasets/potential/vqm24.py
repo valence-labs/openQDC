@@ -59,11 +59,11 @@ class VQM24(BaseDataset):
     __name__ = "vqm24"
 
     __energy_methods__ = [
-        PotentialMethod.WB97X_6_31G_D,  # "wb97x/6-31g(d)"
+        PotentialMethod.WB97X_D3_CC_PVDZ,  # "wB97x-D3/cc-pVDZ."
     ]
 
     energy_target_names = [
-        "ωB97x:6-31G(d) Energy",
+        "wB97x-D3/cc-pVDZ",
     ]
     # ωB97X-D3/cc-pVDZ
     __energy_unit__ = "hartree"
