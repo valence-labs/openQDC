@@ -91,6 +91,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://github.com/valence-labs/openQDC/main/API/datasets/3bpa.html</loc>
+         <lastmod>2024-08-30</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://github.com/valence-labs/openQDC/main/API/datasets/alchemy.html</loc>
          <lastmod>2024-08-30</lastmod>
          <changefreq>daily</changefreq>
@@ -127,6 +132,11 @@
     </url>
     <url>
          <loc>https://github.com/valence-labs/openQDC/main/API/datasets/l7.html</loc>
+         <lastmod>2024-08-30</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://github.com/valence-labs/openQDC/main/API/datasets/maceoff.html</loc>
          <lastmod>2024-08-30</lastmod>
          <changefreq>daily</changefreq>
     </url>
