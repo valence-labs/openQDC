@@ -173,3 +173,25 @@ class SpiceVL2(SpiceV2):
     __energy_methods__ = SpiceV2.__energy_methods__ + [PotentialMethod.GFN2_XTB, PotentialMethod.PM6]
     energy_target_names = SpiceV2.energy_target_names + ["GFN2," "PM6"]
     __force_mask__ = SpiceV2.__force_mask__ + [False, False]
+
+
+class SpiceVL2IDle(SpiceV2):
+    """
+    SpiceVL2 is an extension of the SpiceV2 dataset with additional semi-empirical GFN2-xTB.
+
+    Usage:
+    ```python
+    from openqdc.datasets import SpiceVL2IDle
+    dataset = SpiceVL2IDle()
+    ```
+
+    References:
+        https://github.com/openmm/spice-dataset/releases/tag/2.0.0\n
+        https://github.com/openmm/spice-dataset
+    """
+
+    __name__ = "spice_vl2_idle"
+
+    __energy_methods__ = SpiceV2.__energy_methods__ + [PotentialMethod.GFN2_XTB]
+    energy_target_names = SpiceV2.energy_target_names + ["GFN2"]
+    __force_mask__ = SpiceV2.__force_mask__ + [True]

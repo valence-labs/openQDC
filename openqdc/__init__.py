@@ -24,6 +24,7 @@ _lazy_imports_obj = {
     "Spice": "openqdc.datasets.potential.spice",
     "SpiceV2": "openqdc.datasets.potential.spice",
     "SpiceVL2": "openqdc.datasets.potential.spice",
+    "SpiceVL2IDle": "openqdc.datasets.potential.spice",
     "GEOM": "openqdc.datasets.potential.geom",
     "QMugs": "openqdc.datasets.potential.qmugs",
     "QMugs_V2": "openqdc.datasets.potential.qmugs",
@@ -136,7 +137,7 @@ if TYPE_CHECKING or os.environ.get("OPENQDC_DISABLE_LAZY_LOADING", "0") == "1":
     from .datasets.potential.revmd17 import RevMD17
     from .datasets.potential.sn2_rxn import SN2RXN
     from .datasets.potential.solvated_peptides import SolvatedPeptides
-    from .datasets.potential.spice import Spice, SpiceV2, SpiceVL2
+    from .datasets.potential.spice import Spice, SpiceV2, SpiceVL2, SpiceVL2IDle
     from .datasets.potential.tmqm import TMQM
     from .datasets.potential.transition1x import Transition1X
     from .datasets.potential.vqm24 import VQM24

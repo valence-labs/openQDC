@@ -19,7 +19,7 @@ from .qmx import QM7, QM8, QM9, QM7b
 from .revmd17 import RevMD17
 from .sn2_rxn import SN2RXN
 from .solvated_peptides import SolvatedPeptides
-from .spice import Spice, SpiceV2, SpiceVL2
+from .spice import Spice, SpiceV2, SpiceVL2, SpiceVL2IDle
 from .tmqm import TMQM
 from .transition1x import Transition1X
 from .vqm24 import VQM24
@@ -57,6 +57,7 @@ AVAILABLE_POTENTIAL_DATASETS = {
     "Spice": Spice,
     "SpiceV2": SpiceV2,
     "SpiceVL2": SpiceVL2,
+    "SpiceVL2IDle": SpiceVL2IDle,
     "TMQM": TMQM,
     "Transition1X": Transition1X,
     "WaterClusters": WaterClusters,
