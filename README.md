@@ -18,17 +18,7 @@
 
 [![license](https://licensebuttons.net/l/by-nc/4.0/80x15.png)](https://github.com/valence-labs/openQDC/blob/main/LICENSE)
 
-The OpenQDC Python library makes it easy to work with all of the quantum datasets in the hub.
-It’s a package that aims to provide a simple and efficient way to download, load, and utilize various datasets. You can download datasets with just one line of code. 
-
-- 🐍 A simple pythonic API: The simplicity of the Python interface ensures ease of use, making it perfect for quick prototyping.
-- 🕹️ ML-Ready: all you manipulate are torch.Tensor, jax.Array or numpy.Array objects.
-- ⚛️ Quantum ready: The quantum methods used by the datasets are checked and standardized to provide additional values, useful normalization, and different statistics.
-- ✅ Standardized: The datasets are written in standard and performant formats with annotated metadata like units and labels.
-- 🧠 Performance matters: read and write multiple formats (memmap, zarr, xyz, etc).
-- 📈 Data: have access to 1.5+ billion data points
-- 👩‍🔧 Open source & extensible: OpenQDC and all its files and datasets are open source, and you can add your own dataset and share with the community in just a few minutes
-
+OpenQDC is an open-source hub of ML-ready quantum datasets. It contains 40+ quantum mechanics (QM) datasets, covering 1.5 billion geometrics across 70 atom species and 250+ QM methods that are curated and consolidated into a single, accessible hub. All of the datasets are available for download through just one line of code.
 
 ### Installing OpenQDC 
 
