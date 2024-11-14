@@ -91,6 +91,6 @@ The CI runs tests and performs code quality checks for the following combination
 
 # How to cite
 
-All data presented in the OpenQDC are already published in scientific journals, full reference to the respective paper is attached to each dataset class. When citing data obtained from OpenQDC, you should cite both the original paper(s) the data come from and our paper on OpenQDC itself. The reference is:
+All data presented in the OpenQDC are already published in scientific journals, full reference to the respective paper is attached to each dataset class. When citing data obtained from OpenQDC, you should cite both the original paper(s) the data come from and our paper on OpenQDC itself. 
 
-ADD REF HERE LATER
+Stay tuned for the release of the paper
